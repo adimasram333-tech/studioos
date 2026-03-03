@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Create Quotation - StudioOS</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body { background: radial-gradient(circle at top, #1e293b, #0f172a); }
@@ -114,6 +118,9 @@ class="glass rounded-2xl p-6 hidden"></div>
 <!-- PDF Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+<!-- IMPORTANT SCRIPT ORDER -->
+<script src="js/storage.js"></script>
+<script src="js/packages.js"></script>
 <script src="js/quotation.js"></script>
 
 </body>
