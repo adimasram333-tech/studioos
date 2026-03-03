@@ -59,26 +59,40 @@ select option {
 
 <select id="packageSelect" class="w-full p-3 rounded-xl">
   <option value="">Select Package</option>
-  <option>Custom Package</option>
-  <option>Silver</option>
-  <option>Gold</option>
-  <option>Platinum</option>
+  <option value="Custom Package">Custom Package</option>
+  <option value="Silver">Silver</option>
+  <option value="Gold">Gold</option>
+  <option value="Platinum">Platinum</option>
 </select>
 
 <!-- Deliverables -->
 <div class="border-t border-white/20 pt-4 space-y-2">
 <h2 class="font-semibold text-lg">Deliverables</h2>
 
-<label><input type="checkbox" id="softCopy"> All Raw Soft Copy</label>
-<label><input type="checkbox" id="traditionalVideo"> Traditional Video (Full Event)</label>
-<label><input type="checkbox" id="cinematicHighlight"> Cinematic Highlight</label>
+<label class="block">
+<input type="checkbox" id="softCopy"> All Raw Soft Copy
+</label>
 
-<label><input type="checkbox" id="printedAlbum"> Printed Album</label>
+<label class="block">
+<input type="checkbox" id="traditionalVideo"> Traditional Video (Full Event)
+</label>
+
+<label class="block">
+<input type="checkbox" id="cinematicHighlight"> Cinematic Highlight
+</label>
+
+<label class="block">
+<input type="checkbox" id="printedAlbum"> Printed Album
+</label>
+
 <input id="albumSheets" type="number"
 placeholder="Album Sheet Count"
 class="w-full p-2 rounded-xl hidden">
 
-<label><input type="checkbox" id="freeGift"> Free Gift</label>
+<label class="block">
+<input type="checkbox" id="freeGift"> Free Gift
+</label>
+
 <input id="giftName" type="text"
 placeholder="Gift Name"
 class="w-full p-2 rounded-xl hidden">
@@ -105,6 +119,8 @@ Preview Quote
 </div>
 </div>
 
+<!-- IMPORTANT: JS always at bottom -->
 <script src="js/quotation.js"></script>
+
 </body>
 </html>
