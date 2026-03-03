@@ -1,149 +1,62 @@
-// ===============================
-// StudioOS Proposal Engine v2
-// A4 Structured Web Proposal
-// ===============================
+document.addEventListener("DOMContentLoaded", async function () {
 
-// ---- GET ID FROM URL ----
-const params = new URLSearchParams(window.location.search);
-const id = parseInt(params.get("id"));
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get("id");
 
-// ---- LOAD QUOTATION ----
-const quotation = DataService.getQuotationById(id);
+  if (!id) return;
 
-if (!quotation) {
-    document.querySelector(".page").innerHTML =
-        "<h2 style='text-align:center;'>Proposal not found.</h2>";
-} else {
+  const data = await getQuotationById(id);
 
-    // ===== BASIC INFO =====
-    document.getElementById("clientName").innerText = quotation.client;
-    document.getElementById("eventDate").innerText =
-        formatDate(quotation.start) + " to " + formatDate(quotation.end);
+  if (!data) return;
 
-    renderStatus();
-    renderServices();
-    renderDeliverables();
-    renderActionArea();
-}
+  document.getElementById("clientName").innerText = data.client_name;
+  document.getElementById("eventDate").innerText = data.event_date;
+  document.getElementById("total").innerText = data.total;
+  document.getElementById("advance").innerText = data.advance;
+  document.getElementById("balance").innerText = data.balance;
 
+  /* Status Badge */
 
-// =====================================
-// STATUS BADGE
-// =====================================
-function renderStatus() {
+  const statusArea = document.getElementById("statusArea");
 
-    const statusArea = document.getElementById("statusArea");
+  let badgeClass = "sent";
+  if (data.status === "accepted") badgeClass = "accepted";
+  if (data.status === "confirmed") badgeClass = "confirmed";
 
-    let badgeClass = "sent";
-    if (quotation.status === "Accepted") badgeClass = "accepted";
-    if (quotation.status === "Confirmed") badgeClass = "confirmed";
+  statusArea.innerHTML = `
+    <div class="status-badge ${badgeClass}">
+      ${data.status.toUpperCase()}
+    </div>
+  `;
 
-    statusArea.innerHTML = `
-        <div class="status-badge ${badgeClass}">
-            Status: ${quotation.status}
-        </div>
-    `;
-}
+  /* Action Button */
 
+  const actionArea = document.getElementById("actionArea");
 
-// =====================================
-// SERVICES TABLE RENDER
-// =====================================
-function renderServices() {
+  if (data.status !== "confirmed") {
 
-    const table = document.getElementById("servicesTable");
-
-    // Expecting quotation.services as text lines
-    const lines = quotation.services.split("\n").filter(l => l.trim() !== "");
-
-    let html = `
-        <tr>
-            <th>Service</th>
-            <th>Details</th>
-        </tr>
+    actionArea.innerHTML = `
+      <button id="confirmBtn">Confirm Booking</button>
     `;
 
-    lines.forEach(line => {
-        html += `
-            <tr>
-                <td>${line}</td>
-                <td>-</td>
-            </tr>
-        `;
+    document.getElementById("confirmBtn").addEventListener("click", async () => {
+
+      if (parseFloat(data.advance) <= 0) {
+        alert("Advance payment required before confirmation.");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("quotations")
+        .update({ status: "confirmed" })
+        .eq("id", id);
+
+      if (!error) {
+        location.reload();
+      }
+
     });
 
-    table.innerHTML = html;
-}
+  }
 
-
-// =====================================
-// DELIVERABLES RENDER
-// =====================================
-function renderDeliverables() {
-
-    const list = document.getElementById("deliverablesList");
-
-    list.innerHTML = quotation.deliverables
-        .map(item => `<li style="margin-bottom:8px;">✓ ${item}</li>`)
-        .join("");
-
-    // Investment values
-    document.getElementById("total").innerText = quotation.total;
-    document.getElementById("advance").innerText = quotation.advance;
-    document.getElementById("balance").innerText = quotation.balance;
-}
-
-
-// =====================================
-// ACTION AREA (ACCEPT LOGIC)
-// =====================================
-function renderActionArea() {
-
-    const actionArea = document.getElementById("actionArea");
-
-    if (quotation.status === "Sent") {
-        actionArea.innerHTML = `
-            <button onclick="acceptProposal()">
-                Accept Proposal
-            </button>
-        `;
-    }
-
-    if (quotation.status === "Accepted") {
-        actionArea.innerHTML = `
-            <p style="margin-top:20px; color:#a67c00;">
-                Proposal accepted. Waiting for advance payment to confirm booking.
-            </p>
-        `;
-    }
-
-    if (quotation.status === "Confirmed") {
-        actionArea.innerHTML = `
-            <p style="margin-top:20px; color:green;">
-                Booking Confirmed. Thank you!
-            </p>
-        `;
-    }
-}
-
-
-// =====================================
-// ACCEPT FUNCTION
-// =====================================
-function acceptProposal() {
-    DataService.updateQuotation(id, { status: "Accepted" });
-    location.reload();
-}
-
-
-// =====================================
-// DATE FORMATTER
-// =====================================
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-    });
-}
+});
