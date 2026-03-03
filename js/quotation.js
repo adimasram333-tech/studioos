@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-  const packageSelect = document.getElementById("packageSelect");
   const totalInput = document.getElementById("totalAmount");
   const advanceInput = document.getElementById("advanceAmount");
   const balanceInput = document.getElementById("balanceAmount");
@@ -15,34 +14,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const endDate = document.getElementById("eventEndDate");
   const eventDaysDisplay = document.getElementById("eventDaysDisplay");
 
-  /* ===== Default Packages ===== */
-
-  const defaultPackages = [
-    { name: "Silver", price: 25000 },
-    { name: "Gold", price: 40000 },
-    { name: "Platinum", price: 60000 }
-  ];
-
-  defaultPackages.forEach(pkg => {
-    const option = document.createElement("option");
-    option.value = pkg.name;
-    option.textContent = `${pkg.name} - ₹${pkg.price}`;
-    option.dataset.price = pkg.price;
-    packageSelect.appendChild(option);
-  });
-
-  /* ===== Package Change ===== */
-
-  packageSelect.addEventListener("change", function () {
-    const selected = packageSelect.options[packageSelect.selectedIndex];
-    const price = selected.dataset.price;
-
-    if (price) {
-      totalInput.value = price;
-      calculateBalance();
-    }
-  });
-
   /* ===== Balance Calculation ===== */
 
   function calculateBalance() {
@@ -52,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   advanceInput.addEventListener("input", calculateBalance);
+  totalInput.addEventListener("input", calculateBalance);
 
   /* ===== Event Days ===== */
 
@@ -76,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
   startDate.addEventListener("change", calculateEventDays);
   endDate.addEventListener("change", calculateEventDays);
 
-  /* ===== Show / Hide Fields ===== */
+  /* ===== Show / Hide ===== */
 
   albumCheckbox.addEventListener("change", function () {
     albumSheets.classList.toggle("hidden", !this.checked);
