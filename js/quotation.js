@@ -1,29 +1,21 @@
-// js/quotation.js
-
 document.addEventListener("DOMContentLoaded", function () {
 
   const packageSelect = document.getElementById("packageSelect");
   const totalInput = document.getElementById("totalAmount");
   const advanceInput = document.getElementById("advanceAmount");
   const balanceInput = document.getElementById("balanceAmount");
-  const previewBtn = document.getElementById("previewBtn");
+
+  const albumCheckbox = document.getElementById("printedAlbum");
+  const albumSheets = document.getElementById("albumSheets");
+
+  const giftCheckbox = document.getElementById("freeGift");
+  const giftName = document.getElementById("giftName");
 
   const startDate = document.getElementById("eventStartDate");
   const endDate = document.getElementById("eventEndDate");
   const eventDaysDisplay = document.getElementById("eventDaysDisplay");
 
-  /* ================================
-     SAFETY CHECK (Prevent JS crash)
-  ================================= */
-
-  if (!packageSelect || !previewBtn) {
-    console.error("Required elements not found in quotation page.");
-    return;
-  }
-
-  /* ================================
-     LOAD DEFAULT PACKAGES
-  ================================= */
+  /* ===== Default Packages ===== */
 
   const defaultPackages = [
     { name: "Silver", price: 25000 },
@@ -31,55 +23,37 @@ document.addEventListener("DOMContentLoaded", function () {
     { name: "Platinum", price: 60000 }
   ];
 
-  // Prevent duplicate loading
-  if (packageSelect.options.length <= 2) {
-    defaultPackages.forEach(pkg => {
-      const option = document.createElement("option");
-      option.value = pkg.name;
-      option.textContent = `${pkg.name} - ₹${pkg.price}`;
-      option.dataset.price = pkg.price;
-      packageSelect.appendChild(option);
-    });
-  }
+  defaultPackages.forEach(pkg => {
+    const option = document.createElement("option");
+    option.value = pkg.name;
+    option.textContent = `${pkg.name} - ₹${pkg.price}`;
+    option.dataset.price = pkg.price;
+    packageSelect.appendChild(option);
+  });
 
-  /* ================================
-     PACKAGE CHANGE
-  ================================= */
+  /* ===== Package Change ===== */
 
   packageSelect.addEventListener("change", function () {
-    const selectedOption =
-      packageSelect.options[packageSelect.selectedIndex];
-
-    const price = selectedOption.dataset.price;
+    const selected = packageSelect.options[packageSelect.selectedIndex];
+    const price = selected.dataset.price;
 
     if (price) {
       totalInput.value = price;
       calculateBalance();
-    } else {
-      totalInput.value = "";
-      calculateBalance();
     }
   });
 
-  /* ================================
-     BALANCE CALCULATION
-  ================================= */
-
-  advanceInput.addEventListener("input", calculateBalance);
-  totalInput.addEventListener("input", calculateBalance);
+  /* ===== Balance Calculation ===== */
 
   function calculateBalance() {
     const total = parseFloat(totalInput.value) || 0;
     const advance = parseFloat(advanceInput.value) || 0;
-
-    const balance = total - advance;
-
-    balanceInput.value = balance >= 0 ? balance : 0;
+    balanceInput.value = total - advance;
   }
 
-  /* ================================
-     EVENT DAYS CALCULATION
-  ================================= */
+  advanceInput.addEventListener("input", calculateBalance);
+
+  /* ===== Event Days ===== */
 
   function calculateEventDays() {
     if (startDate.value && endDate.value) {
@@ -87,44 +61,29 @@ document.addEventListener("DOMContentLoaded", function () {
       const end = new Date(endDate.value);
 
       if (end < start) {
-        eventDaysDisplay.innerText = "End date must be after start date";
+        eventDaysDisplay.innerText = "Invalid date range";
         return;
       }
 
-      const diffTime = end - start;
       const diffDays =
-        diffTime / (1000 * 60 * 60 * 24) + 1;
+        (end - start) / (1000 * 60 * 60 * 24) + 1;
 
       eventDaysDisplay.innerText =
         `Total Event Days: ${diffDays} Day(s)`;
-    } else {
-      eventDaysDisplay.innerText = "";
     }
   }
 
-  if (startDate && endDate) {
-    startDate.addEventListener("change", calculateEventDays);
-    endDate.addEventListener("change", calculateEventDays);
-  }
+  startDate.addEventListener("change", calculateEventDays);
+  endDate.addEventListener("change", calculateEventDays);
 
-  /* ================================
-     PREVIEW BUTTON
-  ================================= */
+  /* ===== Show / Hide Fields ===== */
 
-  previewBtn.addEventListener("click", function () {
+  albumCheckbox.addEventListener("change", function () {
+    albumSheets.classList.toggle("hidden", !this.checked);
+  });
 
-    const clientName =
-      document.getElementById("clientName").value.trim();
-
-    const phone =
-      document.getElementById("clientPhone").value.trim();
-
-    if (!clientName || !phone) {
-      alert("Please fill required fields");
-      return;
-    }
-
-    alert("Quotation Preview Ready ✅");
+  giftCheckbox.addEventListener("change", function () {
+    giftName.classList.toggle("hidden", !this.checked);
   });
 
 });
