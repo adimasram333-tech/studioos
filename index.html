@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudioOS</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body {
+  background: radial-gradient(circle at top, #1e293b, #0f172a);
+}
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.blur-dashboard {
+  filter: blur(6px);
+  pointer-events: none;
+}
+</style>
+</head>
+
+<body class="text-white min-h-screen p-4 relative">
+
+<div id="dashboard" class="max-w-md mx-auto">
+
+<!-- TOP BAR -->
+<div class="glass rounded-2xl p-4 flex justify-between items-center mb-6">
+  <div>
+    <h1 id="studioDisplay" class="text-xl font-bold">StudioOS</h1>
+    <p class="text-gray-400 text-xs">Photography Business System</p>
+  </div>
+  <a id="setupBtn"
+     href="profile.html"
+     class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm transition">
+     Setup
+  </a>
+</div>
+
+<!-- STATS -->
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="glass rounded-2xl p-4">
+<p class="text-gray-400 text-sm">Total Bookings</p>
+<h2 id="totalBookings" class="text-2xl font-bold">0</h2>
+</div>
+
+<div class="glass rounded-2xl p-4">
+<p class="text-gray-400 text-sm">Pending Payments</p>
+<h2 id="pendingPayments" class="text-2xl font-bold">₹0</h2>
+</div>
+</div>
+
+<!-- NAVIGATION -->
+<div class="space-y-4">
+
+<div class="glass rounded-2xl p-4 cursor-pointer hover:scale-105 transition">
+📄 Quotations
+</div>
+
+<div class="glass rounded-2xl p-4 cursor-pointer hover:scale-105 transition">
+🧾 Invoices
+</div>
+
+<div class="glass rounded-2xl p-4 cursor-pointer hover:scale-105 transition">
+📦 Packages
+</div>
+
+<div class="glass rounded-2xl p-4 cursor-pointer hover:scale-105 transition">
+📅 Events
+</div>
+
+</div>
+
+</div>
+
+<!-- SETUP OVERLAY -->
+<div id="setupOverlay"
+     class="hidden absolute inset-0 flex items-center justify-center bg-black/60">
+
+  <div class="glass rounded-2xl p-8 text-center max-w-sm">
+    <h2 class="text-xl font-bold mb-4">Complete Studio Setup</h2>
+    <p class="text-gray-400 text-sm mb-6">
+      Please setup your studio profile before using StudioOS.
+    </p>
+    <a href="profile.html"
+       class="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-xl transition">
+       Setup Now
+    </a>
+  </div>
+
+</div>
+
+<script src="js/storage.js"></script>
+
+<script>
+function checkSetup() {
+  const profile = JSON.parse(localStorage.getItem("studioProfile"));
+  const dashboard = document.getElementById("dashboard");
+  const overlay = document.getElementById("setupOverlay");
+  const btn = document.getElementById("setupBtn");
+  const title = document.getElementById("studioDisplay");
+
+  if (!profile || !profile.studioName) {
+    dashboard.classList.add("blur-dashboard");
+    overlay.classList.remove("hidden");
+    btn.innerText = "Complete Setup";
+  } else {
+    title.innerText = profile.studioName;
+    btn.innerText = "Studio Settings";
+  }
+}
+
+checkSetup();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wedding Photography Proposal</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+    background:#e9e9e9;
+    margin:0;
+    font-family:'Inter', sans-serif;
+}
+
+.page{
+    width:210mm;
+    min-height:297mm;
+    background:white;
+    margin:40px auto;
+    padding:60px;
+    box-shadow:0 8px 40px rgba(0,0,0,0.08);
+    position:relative;
+}
+
+h1,h2,h3{
+    font-family:'Playfair Display', serif;
+    margin:0;
+}
+
+.hero{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.hero h1{
+    font-size:32px;
+    letter-spacing:1px;
+}
+
+.gold-line{
+    height:4px;
+    width:80px;
+    background:#C6A348;
+    margin:20px auto;
+}
+
+.info-block{
+    margin-bottom:40px;
+    line-height:1.8;
+}
+
+.section{
+    margin-bottom:50px;
+}
+
+.section h2{
+    font-size:20px;
+    margin-bottom:15px;
+    border-bottom:1px solid #eee;
+    padding-bottom:8px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+}
+
+th, td{
+    padding:10px;
+    border-bottom:1px solid #f0f0f0;
+    text-align:left;
+}
+
+th{
+    font-weight:600;
+}
+
+.investment{
+    border:2px solid #C6A348;
+    padding:25px;
+    background:#faf7ef;
+}
+
+.status-badge{
+    padding:6px 14px;
+    font-size:12px;
+    border-radius:20px;
+    display:inline-block;
+    margin-top:10px;
+}
+
+.sent{ background:#f0f0f0; }
+.accepted{ background:#fff3cd; }
+.confirmed{ background:#d4edda; }
+
+.terms{
+    font-size:13px;
+    line-height:1.7;
+    color:#555;
+}
+
+button{
+    padding:14px 28px;
+    background:#C6A348;
+    border:none;
+    color:white;
+    cursor:pointer;
+    margin-top:20px;
+    font-size:14px;
+}
+
+button:hover{
+    background:#b79232;
+}
+
+.signature{
+    margin-top:70px;
+    font-size:14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="hero">
+    <h1>Wedding Photography Proposal</h1>
+    <div class="gold-line"></div>
+    <p>StudioOS Photography</p>
+    <div id="statusArea"></div>
+</div>
+
+<div class="info-block">
+    <p><strong>Prepared For:</strong> <span id="clientName"></span></p>
+    <p><strong>Event Date:</strong> <span id="eventDate"></span></p>
+</div>
+
+<div class="section">
+    <h2>Services & Coverage</h2>
+    <table id="servicesTable"></table>
+</div>
+
+<div class="section">
+    <h2>Deliverables</h2>
+    <ul id="deliverablesList"></ul>
+</div>
+
+<div class="section investment">
+    <h2>Investment Summary</h2>
+    <table>
+        <tr><td>Total</td><td>₹ <span id="total"></span></td></tr>
+        <tr><td>Advance Required</td><td>₹ <span id="advance"></span></td></tr>
+        <tr><td>Balance</td><td>₹ <span id="balance"></span></td></tr>
+    </table>
+</div>
+
+<div class="section terms">
+    <h2>Booking Terms</h2>
+    <p>
+    Booking will be confirmed only after receipt of the agreed advance payment.
+    Dates remain open until advance is received.
+    Remaining balance must be cleared before final delivery.
+    </p>
+</div>
+
+<div id="actionArea"></div>
+
+<div class="signature">
+Thank you for trusting StudioOS Photography with your special celebration.  
+We look forward to capturing your memories with excellence and dedication.
+<br><br>
+Authorized Signature
+</div>
+
+</div>
+
+<script src="js/dataService.js"></script>
+<script src="js/proposal.js"></script>
+
+</body>
+</html>

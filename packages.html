@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Packages - StudioOS</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body {
+  background: radial-gradient(circle at top, #1e293b, #0f172a);
+}
+.glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+input, select {
+  background: rgba(255,255,255,0.08);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+select option {
+  background-color: #1e293b;
+  color: white;
+}
+</style>
+</head>
+
+<body class="text-white min-h-screen p-4">
+
+<div class="max-w-md mx-auto">
+
+<a href="index.html" class="text-sm text-gray-400">← Back</a>
+
+<h1 class="text-2xl font-bold mt-4 mb-6">Package Engine</h1>
+
+<div class="glass rounded-2xl p-6 space-y-4 mb-6">
+
+<select id="packageType" class="w-full p-3 rounded-xl">
+  <option value="">Select Package Type</option>
+  <option value="Silver">Silver</option>
+  <option value="Gold">Gold</option>
+  <option value="Platinum">Platinum</option>
+  <option value="Custom">Custom</option>
+</select>
+
+<input id="customPackageName" class="w-full p-3 rounded-xl hidden"
+       placeholder="Enter Custom Package Name" />
+
+<input id="packagePrice" type="number" class="w-full p-3 rounded-xl"
+       placeholder="Package Price ₹" />
+
+<!-- SERVICE BUILDER WITH DAY COUNT -->
+<div class="space-y-2">
+
+  <div class="flex gap-2 flex-wrap">
+
+    <select id="serviceSelect" class="flex-1 p-2 rounded-xl">
+      <option value="">Select Service</option>
+      <option>Photographer (Traditional)</option>
+      <option>Photographer (Candid)</option>
+      <option>Videographer (Traditional)</option>
+      <option>Cinematic Videographer</option>
+      <option>Drone</option>
+      <option>LED Screen Wall</option>
+      <option>Assistant</option>
+    </select>
+
+    <input id="serviceQty" type="number" min="1" value="1"
+           class="w-16 p-2 rounded-xl text-center" placeholder="Qty" />
+
+    <input id="serviceDays" type="number" min="1" value="1"
+           class="w-16 p-2 rounded-xl text-center" placeholder="Days" />
+
+    <button id="addServiceBtn"
+      class="bg-indigo-600 px-4 rounded-xl">
+      Add
+    </button>
+
+  </div>
+
+  <div id="servicesContainer" class="space-y-2"></div>
+
+</div>
+
+<button id="savePackage"
+class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl font-semibold transition">
+Save Package
+</button>
+
+</div>
+
+<div id="packageList" class="space-y-4"></div>
+
+</div>
+
+<script src="js/packages.js"></script>
+
+</body>
+</html>

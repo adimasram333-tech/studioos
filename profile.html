@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Profile - StudioOS</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body {
+  background: radial-gradient(circle at top, #1e293b, #0f172a);
+}
+.glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+input {
+  background: rgba(255,255,255,0.08);
+}
+</style>
+</head>
+
+<body class="text-white min-h-screen p-4">
+
+<div class="max-w-md mx-auto">
+
+<a href="index.html" class="text-sm text-gray-400">← Back</a>
+
+<h1 class="text-2xl font-bold mb-6 mt-4">Studio Profile</h1>
+
+<div class="glass rounded-2xl p-6 space-y-4">
+
+<input id="studioName" class="w-full p-3 rounded-xl" placeholder="Studio Name" />
+<input id="ownerName" class="w-full p-3 rounded-xl" placeholder="Photographer Name" />
+<input id="phone" class="w-full p-3 rounded-xl" placeholder="Phone Number" />
+<input id="upi" class="w-full p-3 rounded-xl" placeholder="UPI ID (example@upi)" />
+<input id="address" class="w-full p-3 rounded-xl" placeholder="Studio Address" />
+<input id="gst" class="w-full p-3 rounded-xl" placeholder="GST (Optional)" />
+
+<button id="saveBtn"
+class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl font-semibold transition">
+Save Profile
+</button>
+
+</div>
+
+</div>
+
+<script>
+document.getElementById("saveBtn").addEventListener("click", function(){
+
+  const profile = {
+    studioName: document.getElementById("studioName").value.trim(),
+    ownerName: document.getElementById("ownerName").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    upi: document.getElementById("upi").value.trim(),
+    address: document.getElementById("address").value.trim(),
+    gst: document.getElementById("gst").value.trim()
+  };
+
+  if(!profile.studioName){
+    alert("Studio Name is required");
+    return;
+  }
+
+  localStorage.setItem("studioProfile", JSON.stringify(profile));
+
+  window.location.href = "index.html";
+
+});
+
+function loadProfile() {
+  const profile = JSON.parse(localStorage.getItem("studioProfile"));
+
+  if(profile){
+    document.getElementById("studioName").value = profile.studioName || "";
+    document.getElementById("ownerName").value = profile.ownerName || "";
+    document.getElementById("phone").value = profile.phone || "";
+    document.getElementById("upi").value = profile.upi || "";
+    document.getElementById("address").value = profile.address || "";
+    document.getElementById("gst").value = profile.gst || "";
+  }
+}
+
+loadProfile();
+</script>
+
+</body>
+</html>
