@@ -6,16 +6,22 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (!id) return;
 
   const data = await getQuotationById(id);
-
   if (!data) return;
+
+  /* -----------------------
+     BASIC INFO
+  ----------------------- */
 
   document.getElementById("clientName").innerText = data.client_name;
   document.getElementById("eventDate").innerText = data.event_date;
+
   document.getElementById("total").innerText = data.total;
   document.getElementById("advance").innerText = data.advance;
   document.getElementById("balance").innerText = data.balance;
 
-  /* Status Badge */
+  /* -----------------------
+     STATUS BADGE
+  ----------------------- */
 
   const statusArea = document.getElementById("statusArea");
 
@@ -29,7 +35,60 @@ document.addEventListener("DOMContentLoaded", async function () {
     </div>
   `;
 
-  /* Action Button */
+  /* -----------------------
+     SERVICES TABLE
+  ----------------------- */
+
+  const services = JSON.parse(localStorage.getItem("selectedServices")) || [];
+  const servicesTable = document.getElementById("servicesTable");
+
+  if (services.length > 0) {
+
+    let html = `
+      <tr>
+        <th>Service</th>
+        <th>Team</th>
+        <th>Days</th>
+      </tr>
+    `;
+
+    services.forEach(service => {
+
+      html += `
+        <tr>
+          <td>${service.name}</td>
+          <td>${service.qty}</td>
+          <td>${service.days}</td>
+        </tr>
+      `;
+
+    });
+
+    servicesTable.innerHTML = html;
+  }
+
+  /* -----------------------
+     DELIVERABLES LIST
+  ----------------------- */
+
+  const deliverables = JSON.parse(localStorage.getItem("selectedDeliverables")) || [];
+  const deliverablesList = document.getElementById("deliverablesList");
+
+  if (deliverables.length > 0) {
+
+    let html = "";
+
+    deliverables.forEach(item => {
+      html += `<li>${item}</li>`;
+    });
+
+    deliverablesList.innerHTML = html;
+
+  }
+
+  /* -----------------------
+     ACTION BUTTON
+  ----------------------- */
 
   const actionArea = document.getElementById("actionArea");
 
