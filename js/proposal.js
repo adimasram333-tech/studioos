@@ -6,11 +6,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (!id) return;
 
   const data = await getQuotationById(id);
+
   if (!data) return;
 
-  /* -----------------------
-     BASIC INFO
-  ----------------------- */
+  /* BASIC INFO */
 
   document.getElementById("clientName").innerText = data.client_name;
   document.getElementById("eventDate").innerText = data.event_date;
@@ -19,13 +18,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("advance").innerText = data.advance;
   document.getElementById("balance").innerText = data.balance;
 
-  /* -----------------------
-     STATUS BADGE
-  ----------------------- */
+
+  /* STATUS BADGE */
 
   const statusArea = document.getElementById("statusArea");
 
   let badgeClass = "sent";
+
   if (data.status === "accepted") badgeClass = "accepted";
   if (data.status === "confirmed") badgeClass = "confirmed";
 
@@ -35,60 +34,44 @@ document.addEventListener("DOMContentLoaded", async function () {
     </div>
   `;
 
-  /* -----------------------
-     SERVICES TABLE
-  ----------------------- */
 
-  const services = JSON.parse(localStorage.getItem("selectedServices")) || [];
+  /* SERVICES TABLE */
+
   const servicesTable = document.getElementById("servicesTable");
 
-  if (services.length > 0) {
+  servicesTable.innerHTML = `
+    <tr>
+      <th>Service</th>
+      <th>Details</th>
+    </tr>
 
-    let html = `
-      <tr>
-        <th>Service</th>
-        <th>Team</th>
-        <th>Days</th>
-      </tr>
-    `;
+    <tr>
+      <td>Package</td>
+      <td>${data.package}</td>
+    </tr>
+  `;
 
-    services.forEach(service => {
 
-      html += `
-        <tr>
-          <td>${service.name}</td>
-          <td>${service.qty}</td>
-          <td>${service.days}</td>
-        </tr>
-      `;
+  /* DELIVERABLES */
 
-    });
-
-    servicesTable.innerHTML = html;
-  }
-
-  /* -----------------------
-     DELIVERABLES LIST
-  ----------------------- */
-
-  const deliverables = JSON.parse(localStorage.getItem("selectedDeliverables")) || [];
   const deliverablesList = document.getElementById("deliverablesList");
 
-  if (deliverables.length > 0) {
+  let deliverablesHTML = "";
 
-    let html = "";
+  if (data.deliverables) {
 
-    deliverables.forEach(item => {
-      html += `<li>${item}</li>`;
+    const items = JSON.parse(data.deliverables);
+
+    items.forEach(item => {
+      deliverablesHTML += `<li>${item}</li>`;
     });
-
-    deliverablesList.innerHTML = html;
 
   }
 
-  /* -----------------------
-     ACTION BUTTON
-  ----------------------- */
+  deliverablesList.innerHTML = deliverablesHTML;
+
+
+  /* ACTION BUTTON */
 
   const actionArea = document.getElementById("actionArea");
 
@@ -101,8 +84,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     document.getElementById("confirmBtn").addEventListener("click", async () => {
 
       if (parseFloat(data.advance) <= 0) {
+
         alert("Advance payment required before confirmation.");
         return;
+
       }
 
       const { error } = await supabase
@@ -111,7 +96,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         .eq("id", id);
 
       if (!error) {
+
         location.reload();
+
       }
 
     });
