@@ -1,124 +1,69 @@
-document.addEventListener("DOMContentLoaded", function () {
-
-const printedAlbum = document.getElementById("printedAlbum");
-const albumSheets = document.getElementById("albumSheets");
-
-const freeGift = document.getElementById("freeGift");
-const giftName = document.getElementById("giftName");
-
-const total = document.getElementById("totalAmount");
-const advance = document.getElementById("advanceAmount");
-const balance = document.getElementById("balanceAmount");
-
-const previewBtn = document.getElementById("previewBtn");
-
-
-/* Album input toggle */
-
-printedAlbum.addEventListener("change", function () {
-
-albumSheets.classList.toggle("hidden", !this.checked);
-
-});
-
-
-/* Gift input toggle */
-
-freeGift.addEventListener("change", function () {
-
-giftName.classList.toggle("hidden", !this.checked);
-
-});
-
-
-/* Balance calculation */
-
-advance.addEventListener("input", function () {
-
-const totalVal = parseFloat(total.value) || 0;
-const advVal = parseFloat(advance.value) || 0;
-
-balance.value = totalVal - advVal;
-
-});
-
-
-/* Preview Quote */
-
-previewBtn.addEventListener("click", async function () {
-
-const client = document.getElementById("clientName").value;
-const phone = document.getElementById("clientPhone").value;
-const eventDate = document.getElementById("eventStartDate").value;
-const packageName = document.getElementById("packageSelect").value;
-
-const totalAmount = total.value;
-const advanceAmount = advance.value;
-const balanceAmount = balance.value;
-
-
-/* Deliverables */
-
-let deliverables = [];
-
-if (document.getElementById("softCopy").checked)
-deliverables.push("All Raw Soft Copy");
-
-if (document.getElementById("traditionalVideo").checked)
-deliverables.push("Traditional Video");
-
-if (document.getElementById("cinematicHighlight").checked)
-deliverables.push("Cinematic Highlight");
-
-if (document.getElementById("printedAlbum").checked) {
-
-const sheets = albumSheets.value || "";
-deliverables.push("Printed Album " + sheets + " Sheets");
-
-}
-
-if (document.getElementById("freeGift").checked) {
-
-const gift = giftName.value || "";
-deliverables.push("Free Gift: " + gift);
-
+const packagePrices = {
+silver:50000,
+gold:80000,
+platinum:120000
 }
 
 
-if (!client || !phone) {
-
-alert("Fill required fields");
-return;
-
-}
+const packageSelect = document.getElementById("packageSelect")
+const totalInput = document.getElementById("totalAmount")
 
 
-const quotationData = {
+packageSelect.addEventListener("change",()=>{
 
-client_name: client,
-phone: phone,
-event_date: eventDate,
-package: packageName,
-deliverables: JSON.stringify(deliverables),
-total: totalAmount,
-advance: advanceAmount,
-balance: balanceAmount,
-status: "sent"
+const price = packagePrices[packageSelect.value]
 
-};
+if(price){
 
-
-/* Save quotation */
-
-const saved = await saveQuotation(quotationData);
-
-if (saved && saved.id) {
-
-window.location.href =
-`proposal.html?id=${saved.id}`;
+totalInput.value = price
 
 }
 
-});
+})
 
-});
+
+const advanceInput = document.getElementById("advanceAmount")
+const balanceInput = document.getElementById("balanceAmount")
+
+
+advanceInput.addEventListener("input",()=>{
+
+const total = parseFloat(totalInput.value) || 0
+const advance = parseFloat(advanceInput.value) || 0
+
+balanceInput.value = total - advance
+
+})
+
+
+document.getElementById("previewBtn").addEventListener("click",async()=>{
+
+const data = {
+
+client_name:document.getElementById("clientName").value,
+
+phone:document.getElementById("clientPhone").value,
+
+event_date:document.getElementById("startDate").value,
+
+package:packageSelect.value,
+
+total:totalInput.value,
+
+advance:advanceInput.value,
+
+balance:balanceInput.value,
+
+status:"sent"
+
+}
+
+const result = await saveQuotation(data)
+
+if(result){
+
+window.location.href = `proposal.html?id=${result.id}`
+
+}
+
+})
