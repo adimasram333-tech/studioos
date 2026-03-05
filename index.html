@@ -8,8 +8,6 @@
 
 <title>StudioOS</title>
 
-<link rel="icon" href="favicon.ico">
-
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
@@ -38,9 +36,6 @@ pointer-events:none;
 
 <div id="dashboard" class="max-w-md mx-auto">
 
-
-<!-- TOP BAR -->
-
 <div class="glass rounded-2xl p-4 flex justify-between items-center mb-6">
 
 <div>
@@ -51,16 +46,13 @@ pointer-events:none;
 <a
 id="setupBtn"
 href="profile.html"
-class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm transition"
+class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm"
 >
 Setup
 </a>
 
 </div>
 
-
-
-<!-- STATS -->
 
 <div class="grid grid-cols-2 gap-4 mb-6">
 
@@ -77,36 +69,25 @@ Setup
 </div>
 
 
-
-<!-- NAVIGATION -->
-
 <div class="space-y-4">
 
-<a
-href="quotation.html"
-class="block glass rounded-2xl p-4 hover:scale-105 transition"
->
+<a href="quotation.html"
+class="block glass rounded-2xl p-4 hover:scale-105 transition">
 📄 Quotations
 </a>
 
-<a
-href="invoices.html"
-class="block glass rounded-2xl p-4 hover:scale-105 transition"
->
+<a href="invoices.html"
+class="block glass rounded-2xl p-4 hover:scale-105 transition">
 🧾 Invoices
 </a>
 
-<a
-href="packages.html"
-class="block glass rounded-2xl p-4 hover:scale-105 transition"
->
+<a href="packages.html"
+class="block glass rounded-2xl p-4 hover:scale-105 transition">
 📦 Packages
 </a>
 
-<a
-href="events.html"
-class="block glass rounded-2xl p-4 hover:scale-105 transition"
->
+<a href="events.html"
+class="block glass rounded-2xl p-4 hover:scale-105 transition">
 📅 Events
 </a>
 
@@ -114,9 +95,6 @@ class="block glass rounded-2xl p-4 hover:scale-105 transition"
 
 </div>
 
-
-
-<!-- SETUP OVERLAY -->
 
 <div
 id="setupOverlay"
@@ -135,8 +113,7 @@ Please setup your studio profile before using StudioOS.
 
 <a
 href="profile.html"
-class="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-xl transition"
->
+class="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-xl">
 Setup Now
 </a>
 
@@ -146,51 +123,47 @@ Setup Now
 
 
 
-<!-- IMPORTANT SCRIPTS -->
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/storage.js"></script>
-
 
 
 <script>
 
 function checkSetup(){
 
-const profile = JSON.parse(localStorage.getItem("studioProfile"));
+const profile = JSON.parse(localStorage.getItem("studioProfile"))
 
-const dashboard = document.getElementById("dashboard");
+const dashboard = document.getElementById("dashboard")
 
-const overlay = document.getElementById("setupOverlay");
+const overlay = document.getElementById("setupOverlay")
 
-const btn = document.getElementById("setupBtn");
+const btn = document.getElementById("setupBtn")
 
-const title = document.getElementById("studioDisplay");
+const title = document.getElementById("studioDisplay")
 
 
 if(!profile || !profile.studioName){
 
-dashboard.classList.add("blur-dashboard");
+dashboard.classList.add("blur-dashboard")
 
-overlay.classList.remove("hidden");
+overlay.classList.remove("hidden")
 
-btn.innerText="Complete Setup";
+btn.innerText="Complete Setup"
 
 }else{
 
-title.innerText=profile.studioName;
+title.innerText=profile.studioName
 
-btn.innerText="Studio Settings";
-
-}
+btn.innerText="Studio Settings"
 
 }
 
-checkSetup();
+}
+
+checkSetup()
 
 </script>
-
 
 </body>
 </html>
