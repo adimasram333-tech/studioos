@@ -1,29 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Create Quotation - StudioOS</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body { background: radial-gradient(circle at top, #1e293b, #0f172a); }
-.glass {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255,255,255,0.1);
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
 }
-input, select {
-  background: rgba(255,255,255,0.08);
-  color: white;
-  border: 1px solid rgba(255,255,255,0.15);
+
+.glass{
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(15px);
+border:1px solid rgba(255,255,255,0.1);
 }
-select option {
-  background-color: #0f172a;
-  color: white;
+
+input,select{
+background:rgba(255,255,255,0.08);
+color:white;
+border:1px solid rgba(255,255,255,0.15);
 }
+
+select option{
+background:#0f172a;
+color:white;
+}
+
 </style>
+
 </head>
 
 <body class="text-white min-h-screen p-4">
@@ -31,97 +42,115 @@ select option {
 <div class="max-w-md mx-auto">
 
 <a href="index.html" class="text-sm text-gray-400">← Back</a>
-<h1 class="text-2xl font-bold mt-4 mb-6">Create Quotation</h1>
+
+<h1 class="text-2xl font-bold mt-4 mb-6">
+Create Quotation
+</h1>
 
 <div class="glass rounded-2xl p-6 space-y-4">
 
-<input id="clientName" class="w-full p-3 rounded-xl" placeholder="Client Name" />
-<input id="clientPhone" class="w-full p-3 rounded-xl" placeholder="Client Phone" />
+<input id="clientName" class="w-full p-3 rounded-xl" placeholder="Client Name">
 
-<!-- Event Category -->
+<input id="clientPhone" class="w-full p-3 rounded-xl" placeholder="Client Phone">
+
 <select id="eventCategory" class="w-full p-3 rounded-xl">
-  <option value="">Select Event Category</option>
-  <option>Engagement</option>
-  <option>Wedding</option>
-  <option>Prewedding</option>
-  <option>Reception</option>
-  <option>Birthday</option>
-  <option>Babyshower</option>
-  <option>Other Event</option>
+<option value="">Select Event Category</option>
+<option>Engagement</option>
+<option>Wedding</option>
+<option>Prewedding</option>
+<option>Reception</option>
+<option>Birthday</option>
+<option>Babyshower</option>
+<option>Other Event</option>
 </select>
 
 <div class="grid grid-cols-2 gap-2">
-  <input id="eventStartDate" type="date" class="w-full p-3 rounded-xl" />
-  <input id="eventEndDate" type="date" class="w-full p-3 rounded-xl" />
+
+<input id="eventStartDate" type="date" class="p-3 rounded-xl">
+
+<input id="eventEndDate" type="date" class="p-3 rounded-xl">
+
 </div>
 
 <p id="eventDaysDisplay" class="text-sm text-gray-400"></p>
 
 <select id="packageSelect" class="w-full p-3 rounded-xl">
-  <option value="">Select Package</option>
-  <option value="Custom Package">Custom Package</option>
-  <option value="Silver">Silver</option>
-  <option value="Gold">Gold</option>
-  <option value="Platinum">Platinum</option>
+<option value="">Select Package</option>
 </select>
 
-<!-- Deliverables -->
+<div id="packageDetails" class="text-sm text-gray-300"></div>
+
 <div class="border-t border-white/20 pt-4 space-y-2">
+
 <h2 class="font-semibold text-lg">Deliverables</h2>
 
-<label class="block">
-<input type="checkbox" id="softCopy"> All Raw Soft Copy
+<label>
+<input type="checkbox" id="softCopy">
+All Raw Soft Copy
 </label>
 
-<label class="block">
-<input type="checkbox" id="traditionalVideo"> Traditional Video (Full Event)
+<label>
+<input type="checkbox" id="traditionalVideo">
+Traditional Video (Full Event)
 </label>
 
-<label class="block">
-<input type="checkbox" id="cinematicHighlight"> Cinematic Highlight
+<label>
+<input type="checkbox" id="cinematicHighlight">
+Cinematic Highlight
 </label>
 
-<label class="block">
-<input type="checkbox" id="printedAlbum"> Printed Album
+<label>
+<input type="checkbox" id="printedAlbum">
+Printed Album
 </label>
 
-<input id="albumSheets" type="number"
+<input id="albumSheets"
+type="number"
 placeholder="Album Sheet Count"
 class="w-full p-2 rounded-xl hidden">
 
-<label class="block">
-<input type="checkbox" id="freeGift"> Free Gift
+<label>
+<input type="checkbox" id="freeGift">
+Free Gift
 </label>
 
-<input id="giftName" type="text"
+<input id="giftName"
+type="text"
 placeholder="Gift Name"
 class="w-full p-2 rounded-xl hidden">
+
 </div>
 
-<input id="totalAmount" type="number"
+<input id="totalAmount"
+type="number"
 class="w-full p-3 rounded-xl"
-placeholder="Total ₹" />
+placeholder="Total ₹">
 
-<input id="advanceAmount" type="number"
+<input id="advanceAmount"
+type="number"
 class="w-full p-3 rounded-xl"
-placeholder="Advance ₹" />
+placeholder="Advance ₹">
 
-<input id="balanceAmount" type="number"
+<input id="balanceAmount"
+type="number"
 class="w-full p-3 rounded-xl"
 placeholder="Balance ₹"
-readonly />
+readonly>
 
 <button id="previewBtn"
 class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl font-semibold">
+
 Preview Quote
+
 </button>
 
 </div>
+
 </div>
 
-<!-- IMPORTANT: JS always at bottom -->
 <script src="js/storage.js"></script>
 <script src="js/packages.js"></script>
 <script src="js/quotation.js"></script>
+
 </body>
 </html>
