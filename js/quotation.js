@@ -14,31 +14,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const startDate = document.getElementById("eventStartDate");
   const endDate = document.getElementById("eventEndDate");
+
   const eventDaysDisplay = document.getElementById("eventDaysDisplay");
 
-  /* -------------------------
-     Album Sheet Toggle
-  -------------------------- */
+  printedAlbum.addEventListener("change", function () {
+    albumSheets.classList.toggle("hidden", !this.checked);
+  });
 
-  if (printedAlbum) {
-    printedAlbum.addEventListener("change", function () {
-      albumSheets.classList.toggle("hidden", !this.checked);
-    });
-  }
-
-  /* -------------------------
-     Free Gift Toggle
-  -------------------------- */
-
-  if (freeGift) {
-    freeGift.addEventListener("change", function () {
-      giftName.classList.toggle("hidden", !this.checked);
-    });
-  }
-
-  /* -------------------------
-     Balance Calculation
-  -------------------------- */
+  freeGift.addEventListener("change", function () {
+    giftName.classList.toggle("hidden", !this.checked);
+  });
 
   function calculateBalance() {
 
@@ -46,15 +31,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const advance = parseFloat(advanceInput.value) || 0;
 
     balanceInput.value = total - advance;
-
   }
 
-  totalInput.addEventListener("input", calculateBalance);
   advanceInput.addEventListener("input", calculateBalance);
-
-  /* -------------------------
-     Event Days Calculation
-  -------------------------- */
+  totalInput.addEventListener("input", calculateBalance);
 
   function calculateDays() {
 
@@ -67,18 +47,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (diff > 0) {
       eventDaysDisplay.innerText = `Total Event Days: ${diff} Day(s)`;
-    } else {
-      eventDaysDisplay.innerText = "";
     }
 
   }
 
   startDate.addEventListener("change", calculateDays);
   endDate.addEventListener("change", calculateDays);
-
-  /* -------------------------
-     Preview Button
-  -------------------------- */
 
   previewBtn.addEventListener("click", async function () {
 
@@ -97,6 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const quotationData = {
+
       client_name: clientName,
       phone: phone,
       event_date: eventDate,
@@ -105,6 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
       advance: advance,
       balance: balance,
       status: "sent"
+
     };
 
     const saved = await saveQuotation(quotationData);
@@ -112,10 +88,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (saved && saved.id) {
 
       window.location.href = `proposal.html?id=${saved.id}`;
-
-    } else {
-
-      alert("Error saving quotation");
 
     }
 
