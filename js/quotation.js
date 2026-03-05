@@ -1,96 +1,104 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded",function(){
 
-  const previewBtn = document.getElementById("previewBtn");
+const printedAlbum=document.getElementById("printedAlbum");
+const albumSheets=document.getElementById("albumSheets");
 
-  const printedAlbum = document.getElementById("printedAlbum");
-  const albumSheets = document.getElementById("albumSheets");
+const freeGift=document.getElementById("freeGift");
+const giftName=document.getElementById("giftName");
 
-  const freeGift = document.getElementById("freeGift");
-  const giftName = document.getElementById("giftName");
+const totalInput=document.getElementById("totalAmount");
+const advanceInput=document.getElementById("advanceAmount");
+const balanceInput=document.getElementById("balanceAmount");
 
-  const totalInput = document.getElementById("totalAmount");
-  const advanceInput = document.getElementById("advanceAmount");
-  const balanceInput = document.getElementById("balanceAmount");
+const previewBtn=document.getElementById("previewBtn");
 
-  const startDate = document.getElementById("eventStartDate");
-  const endDate = document.getElementById("eventEndDate");
+const startDate=document.getElementById("eventStartDate");
+const endDate=document.getElementById("eventEndDate");
+const eventDaysDisplay=document.getElementById("eventDaysDisplay");
 
-  const eventDaysDisplay = document.getElementById("eventDaysDisplay");
+printedAlbum.addEventListener("change",function(){
 
-  printedAlbum.addEventListener("change", function () {
-    albumSheets.classList.toggle("hidden", !this.checked);
-  });
+albumSheets.classList.toggle("hidden",!this.checked);
 
-  freeGift.addEventListener("change", function () {
-    giftName.classList.toggle("hidden", !this.checked);
-  });
+});
 
-  function calculateBalance() {
+freeGift.addEventListener("change",function(){
 
-    const total = parseFloat(totalInput.value) || 0;
-    const advance = parseFloat(advanceInput.value) || 0;
+giftName.classList.toggle("hidden",!this.checked);
 
-    balanceInput.value = total - advance;
-  }
+});
 
-  advanceInput.addEventListener("input", calculateBalance);
-  totalInput.addEventListener("input", calculateBalance);
+function calculateBalance(){
 
-  function calculateDays() {
+const total=parseFloat(totalInput.value)||0;
+const advance=parseFloat(advanceInput.value)||0;
 
-    if (!startDate.value || !endDate.value) return;
+balanceInput.value=total-advance;
 
-    const start = new Date(startDate.value);
-    const end = new Date(endDate.value);
+}
 
-    const diff = (end - start) / (1000 * 60 * 60 * 24) + 1;
+totalInput.addEventListener("input",calculateBalance);
+advanceInput.addEventListener("input",calculateBalance);
 
-    if (diff > 0) {
-      eventDaysDisplay.innerText = `Total Event Days: ${diff} Day(s)`;
-    }
+function calculateDays(){
 
-  }
+if(!startDate.value||!endDate.value) return;
 
-  startDate.addEventListener("change", calculateDays);
-  endDate.addEventListener("change", calculateDays);
+const start=new Date(startDate.value);
+const end=new Date(endDate.value);
 
-  previewBtn.addEventListener("click", async function () {
+const diff=(end-start)/(1000*60*60*24)+1;
 
-    const clientName = document.getElementById("clientName").value;
-    const phone = document.getElementById("clientPhone").value;
-    const eventDate = startDate.value;
-    const packageName = document.getElementById("packageSelect").value;
+if(diff>0){
 
-    const total = totalInput.value;
-    const advance = advanceInput.value;
-    const balance = balanceInput.value;
+eventDaysDisplay.innerText=`Total Event Days: ${diff} Day(s)`;
 
-    if (!clientName || !phone) {
-      alert("Fill required fields");
-      return;
-    }
+}
 
-    const quotationData = {
+}
 
-      client_name: clientName,
-      phone: phone,
-      event_date: eventDate,
-      package: packageName,
-      total: total,
-      advance: advance,
-      balance: balance,
-      status: "sent"
+startDate.addEventListener("change",calculateDays);
+endDate.addEventListener("change",calculateDays);
 
-    };
+previewBtn.addEventListener("click",async function(){
 
-    const saved = await saveQuotation(quotationData);
+const clientName=document.getElementById("clientName").value;
+const phone=document.getElementById("clientPhone").value;
+const eventDate=startDate.value;
+const packageName=document.getElementById("packageSelect").value;
 
-    if (saved && saved.id) {
+const total=totalInput.value;
+const advance=advanceInput.value;
+const balance=balanceInput.value;
 
-      window.location.href = `proposal.html?id=${saved.id}`;
+if(!clientName||!phone){
 
-    }
+alert("Fill required fields");
+return;
 
-  });
+}
+
+const quotationData={
+
+client_name:clientName,
+phone:phone,
+event_date:eventDate,
+package:packageName,
+total:total,
+advance:advance,
+balance:balance,
+status:"sent"
+
+};
+
+const saved=await saveQuotation(quotationData);
+
+if(saved && saved.id){
+
+window.location.href=`proposal.html?id=${saved.id}`;
+
+}
+
+});
 
 });
