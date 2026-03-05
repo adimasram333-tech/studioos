@@ -76,30 +76,34 @@ Create Quotation
 
 <select id="packageSelect" class="w-full p-3 rounded-xl">
 <option value="">Select Package</option>
+<option>Custom Package</option>
+<option>Silver</option>
+<option>Gold</option>
+<option>Platinum</option>
 </select>
 
-<div id="packageDetails" class="text-sm text-gray-300"></div>
+<!-- Deliverables -->
 
-<div class="border-t border-white/20 pt-4 space-y-2">
+<div class="border-t border-white/20 pt-4 space-y-3">
 
 <h2 class="font-semibold text-lg">Deliverables</h2>
 
-<label>
+<label class="flex gap-2">
 <input type="checkbox" id="softCopy">
 All Raw Soft Copy
 </label>
 
-<label>
+<label class="flex gap-2">
 <input type="checkbox" id="traditionalVideo">
 Traditional Video (Full Event)
 </label>
 
-<label>
+<label class="flex gap-2">
 <input type="checkbox" id="cinematicHighlight">
 Cinematic Highlight
 </label>
 
-<label>
+<label class="flex gap-2">
 <input type="checkbox" id="printedAlbum">
 Printed Album
 </label>
@@ -109,7 +113,7 @@ type="number"
 placeholder="Album Sheet Count"
 class="w-full p-2 rounded-xl hidden">
 
-<label>
+<label class="flex gap-2">
 <input type="checkbox" id="freeGift">
 Free Gift
 </label>
@@ -149,7 +153,6 @@ Preview Quote
 </div>
 
 <script src="js/storage.js"></script>
-<script src="js/packages.js"></script>
 <script src="js/quotation.js"></script>
 
 </body>
