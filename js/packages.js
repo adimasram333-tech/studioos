@@ -1,109 +1,59 @@
-// js/packages.js
-
 document.addEventListener("DOMContentLoaded", function () {
 
-const packages = [
+  const packages = [
 
-{
-category:"Wedding",
-name:"Wedding Basic",
-price:80000,
+    {
+      name: "Custom Package",
+      price: "",
+      description: "Manual Pricing"
+    },
 
-services:[
-{name:"Photographer (Traditional)",qty:1,days:2},
-{name:"Videographer (Traditional)",qty:1,days:2},
-{name:"Assistant",qty:1,days:2}
-],
+    {
+      name: "Silver",
+      price: 40000,
+      description: "Basic Photography Coverage"
+    },
 
-deliverables:[
-"All Raw Soft Copy",
-"Traditional Video",
-"Printed Album"
-]
-},
+    {
+      name: "Gold",
+      price: 70000,
+      description: "Photography + Video"
+    },
 
-{
-category:"Wedding",
-name:"Wedding Premium",
-price:150000,
+    {
+      name: "Platinum",
+      price: 90000,
+      description: "Full Coverage + Cinematic"
+    }
 
-services:[
-{name:"Photographer (Traditional)",qty:1,days:3},
-{name:"Videographer (Traditional)",qty:1,days:3},
-{name:"Candid Photographer",qty:1,days:2},
-{name:"Cinematic Videographer",qty:1,days:2},
-{name:"Drone",qty:1,days:1}
-],
+  ];
 
-deliverables:[
-"All Raw Soft Copy",
-"Traditional Video",
-"Cinematic Highlight",
-"Printed Album"
-]
-},
+  const packageSelect = document.getElementById("packageSelect");
+  const packageDetails = document.getElementById("packageDetails");
+  const totalAmount = document.getElementById("totalAmount");
 
-{
-category:"Pre-Wedding",
-name:"Pre Wedding Shoot",
-price:40000,
+  packages.forEach(pkg => {
 
-services:[
-{name:"Candid Photographer",qty:1,days:1},
-{name:"Cinematic Videographer",qty:1,days:1}
-],
+    const option = document.createElement("option");
+    option.value = pkg.name;
+    option.textContent = pkg.name;
 
-deliverables:[
-"All Raw Soft Copy",
-"Cinematic Highlight"
-]
-},
+    packageSelect.appendChild(option);
 
-{
-category:"Birthday",
-name:"Birthday Event",
-price:25000,
+  });
 
-services:[
-{name:"Photographer (Traditional)",qty:1,days:1}
-],
+  packageSelect.addEventListener("change", function () {
 
-deliverables:[
-"All Raw Soft Copy"
-]
-}
+    const selected = packages.find(p => p.name === this.value);
 
-];
+    if (!selected) return;
 
-const packageSelect = document.getElementById("packageSelect");
-const packageDetails = document.getElementById("packageDetails");
-const totalAmount = document.getElementById("totalAmount");
+    packageDetails.innerText = selected.description;
 
-if(!packageSelect) return;
+    if (selected.price) {
+      totalAmount.value = selected.price;
+    }
 
-packages.forEach(pkg=>{
-
-const option=document.createElement("option");
-option.value=pkg.name;
-option.textContent=pkg.name;
-
-packageSelect.appendChild(option);
-
-});
-
-packageSelect.addEventListener("change",function(){
-
-const selected=packages.find(p=>p.name===this.value);
-
-if(!selected) return;
-
-packageDetails.innerHTML=`Default Price: ₹${selected.price}`;
-
-totalAmount.value=selected.price;
-
-localStorage.setItem("selectedServices",JSON.stringify(selected.services));
-localStorage.setItem("selectedDeliverables",JSON.stringify(selected.deliverables));
-
-});
+  });
 
 });
