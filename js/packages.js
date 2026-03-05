@@ -1,61 +1,43 @@
-const packages = [
+// PACKAGE DATA
 
-{
-name:"Custom Package",
-price:"",
-description:"Custom quotation"
+const packages = {
+
+silver: {
+name: "Silver",
+price: 50000
 },
 
-{
-name:"Silver",
-price:40000,
-description:"1 Photographer + Traditional Video"
+gold: {
+name: "Gold",
+price: 80000
 },
 
-{
-name:"Gold",
-price:70000,
-description:"1 Photographer + 1 Videographer + Album"
-},
-
-{
-name:"Platinum",
-price:120000,
-description:"Full Wedding Coverage + Cinematic + Album"
+platinum: {
+name: "Platinum",
+price: 120000
 }
 
-];
+};
 
-document.addEventListener("DOMContentLoaded",function(){
 
-const packageSelect=document.getElementById("packageSelect");
-const packageDetails=document.getElementById("packageDetails");
-const totalAmount=document.getElementById("totalAmount");
+// PACKAGE SELECT
 
-packages.forEach(pkg=>{
+const packageSelect = document.getElementById("packageSelect");
+const totalInput = document.getElementById("totalAmount");
 
-const option=document.createElement("option");
-option.value=pkg.name;
-option.textContent=pkg.name;
 
-packageSelect.appendChild(option);
+if(packageSelect && totalInput){
 
-});
+packageSelect.addEventListener("change", function(){
 
-packageSelect.addEventListener("change",function(){
+const selected = this.value;
 
-const selected=packages.find(p=>p.name===this.value);
+if(packages[selected]){
 
-if(selected){
-
-packageDetails.innerText=selected.description;
-
-if(selected.price!==""){
-totalAmount.value=selected.price;
-}
+totalInput.value = packages[selected].price;
 
 }
 
 });
 
-});
+}
