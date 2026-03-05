@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Create Quotation - StudioOS</title>
+<title>Create Quotation</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -16,21 +16,10 @@ body{
 background: radial-gradient(circle at top,#1e293b,#0f172a);
 }
 
-.card{
+.glass{
 background: rgba(255,255,255,0.05);
-backdrop-filter: blur(20px);
+backdrop-filter: blur(15px);
 border:1px solid rgba(255,255,255,0.1);
-}
-
-input,select{
-background: rgba(255,255,255,0.08);
-border:1px solid rgba(255,255,255,0.15);
-color:white;
-}
-
-select option{
-background:#0f172a;
-color:white;
 }
 
 </style>
@@ -38,132 +27,92 @@ color:white;
 </head>
 
 
-<body class="text-white min-h-screen p-6">
+<body class="text-white min-h-screen flex justify-center items-center">
 
-<div class="max-w-md mx-auto">
+<div class="glass p-8 rounded-2xl w-[420px]">
 
-<a href="index.html" class="text-sm text-gray-400">← Back</a>
+<a href="index.html" class="text-gray-400 text-sm">← Back</a>
 
-<h1 class="text-2xl font-bold mt-4 mb-6">
-Create Quotation
-</h1>
+<h1 class="text-xl font-bold mt-2 mb-6">Create Quotation</h1>
 
 
-<div class="card p-6 rounded-2xl space-y-4">
+<input id="clientName"
+class="w-full mb-3 p-3 rounded-xl bg-slate-800"
+placeholder="Client Name">
 
-<input id="clientName" class="w-full p-3 rounded-xl" placeholder="Client Name">
+<input id="clientPhone"
+class="w-full mb-3 p-3 rounded-xl bg-slate-800"
+placeholder="Client Phone">
 
-<input id="clientPhone" class="w-full p-3 rounded-xl" placeholder="Client Phone">
 
+<select id="eventCategory"
+class="w-full mb-3 p-3 rounded-xl bg-slate-800">
 
-<select id="eventCategory" class="w-full p-3 rounded-xl">
 <option value="">Select Event Category</option>
+
 <option>Wedding</option>
 <option>Pre Wedding</option>
 <option>Engagement</option>
-<option>Reception</option>
 <option>Birthday</option>
-<option>Baby Shower</option>
-<option>Other Event</option>
+<option>Other</option>
+
 </select>
 
 
-<div class="grid grid-cols-2 gap-2">
+<div class="flex gap-2 mb-3">
 
-<input id="eventStartDate" type="date" class="p-3 rounded-xl">
+<input id="startDate"
+type="date"
+class="w-full p-3 rounded-xl bg-slate-800">
 
-<input id="eventEndDate" type="date" class="p-3 rounded-xl">
+<input id="endDate"
+type="date"
+class="w-full p-3 rounded-xl bg-slate-800">
 
 </div>
 
 
-<select id="packageSelect" class="w-full p-3 rounded-xl">
+<select id="packageSelect"
+class="w-full mb-4 p-3 rounded-xl bg-slate-800">
 
 <option value="">Select Package</option>
 
-<option>Silver</option>
-<option>Gold</option>
-<option>Platinum</option>
-<option>Custom Package</option>
+<option value="silver">Silver</option>
+<option value="gold">Gold</option>
+<option value="platinum">Platinum</option>
 
 </select>
 
 
-<!-- DELIVERABLES -->
+<p class="font-semibold mb-2">Deliverables</p>
 
-<div class="border-t border-white/20 pt-4 space-y-2">
+<div class="grid grid-cols-2 gap-2 mb-4 text-sm">
 
-<h2 class="font-semibold text-lg">Deliverables</h2>
-
-<label>
-<input type="checkbox" id="softCopy">
-All Raw Soft Copy
-</label>
-
-<label>
-<input type="checkbox" id="traditionalVideo">
-Traditional Video (Full Event)
-</label>
-
-<label>
-<input type="checkbox" id="cinematicHighlight">
-Cinematic Highlight
-</label>
-
-<label>
-<input type="checkbox" id="printedAlbum">
-Printed Album
-</label>
-
-<input
-id="albumSheets"
-type="number"
-placeholder="Album Sheets"
-class="w-full p-2 rounded-xl hidden"
->
-
-<label>
-<input type="checkbox" id="freeGift">
-Free Gift
-</label>
-
-<input
-id="giftName"
-type="text"
-placeholder="Gift Name"
-class="w-full p-2 rounded-xl hidden"
->
+<label><input type="checkbox" value="Raw Soft Copy"> Raw Soft Copy</label>
+<label><input type="checkbox" value="Traditional Video"> Traditional Video</label>
+<label><input type="checkbox" value="Cinematic Highlight"> Cinematic Highlight</label>
+<label><input type="checkbox" value="Printed Album"> Printed Album</label>
+<label><input type="checkbox" value="Free Gift"> Free Gift</label>
 
 </div>
 
 
-<input
-id="totalAmount"
-type="number"
-placeholder="Total ₹"
-class="w-full p-3 rounded-xl"
->
+<input id="totalAmount"
+class="w-full mb-3 p-3 rounded-xl bg-slate-800"
+placeholder="Total ₹">
 
-<input
-id="advanceAmount"
-type="number"
-placeholder="Advance ₹"
-class="w-full p-3 rounded-xl"
->
+<input id="advanceAmount"
+class="w-full mb-3 p-3 rounded-xl bg-slate-800"
+placeholder="Advance ₹">
 
-<input
-id="balanceAmount"
-type="number"
+<input id="balanceAmount"
+class="w-full mb-4 p-3 rounded-xl bg-slate-800"
 placeholder="Balance ₹"
-class="w-full p-3 rounded-xl"
-readonly
->
+readonly>
 
 
-<button
-id="previewBtn"
-class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl font-semibold"
->
+<button id="previewBtn"
+class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl">
 
 Preview Quote
 
@@ -172,10 +121,6 @@ Preview Quote
 
 </div>
 
-</div>
-
-
-<!-- IMPORTANT SCRIPT ORDER -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -184,41 +129,6 @@ Preview Quote
 <script src="js/packages.js"></script>
 
 <script src="js/quotation.js"></script>
-
-
-<script>
-
-/* SHOW ALBUM INPUT */
-
-document.getElementById("printedAlbum").addEventListener("change",function(){
-
-document.getElementById("albumSheets").classList.toggle("hidden",!this.checked)
-
-})
-
-
-/* SHOW GIFT INPUT */
-
-document.getElementById("freeGift").addEventListener("change",function(){
-
-document.getElementById("giftName").classList.toggle("hidden",!this.checked)
-
-})
-
-
-/* BALANCE CALCULATION */
-
-document.getElementById("advanceAmount").addEventListener("input",function(){
-
-let total=parseFloat(document.getElementById("totalAmount").value)||0
-let advance=parseFloat(this.value)||0
-
-document.getElementById("balanceAmount").value=total-advance
-
-})
-
-</script>
-
 
 </body>
 </html>
