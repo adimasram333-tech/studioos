@@ -13,19 +13,19 @@
 <style>
 
 body{
-background: radial-gradient(circle at top, #1e293b, #0f172a);
+background: radial-gradient(circle at top,#1e293b,#0f172a);
 }
 
-.glass{
+.card{
 background: rgba(255,255,255,0.05);
-backdrop-filter: blur(15px);
+backdrop-filter: blur(20px);
 border:1px solid rgba(255,255,255,0.1);
 }
 
 input,select{
 background: rgba(255,255,255,0.08);
-color:white;
 border:1px solid rgba(255,255,255,0.15);
+color:white;
 }
 
 select option{
@@ -37,7 +37,8 @@ color:white;
 
 </head>
 
-<body class="text-white min-h-screen p-4">
+
+<body class="text-white min-h-screen p-6">
 
 <div class="max-w-md mx-auto">
 
@@ -47,22 +48,25 @@ color:white;
 Create Quotation
 </h1>
 
-<div class="glass rounded-2xl p-6 space-y-4">
+
+<div class="card p-6 rounded-2xl space-y-4">
 
 <input id="clientName" class="w-full p-3 rounded-xl" placeholder="Client Name">
 
 <input id="clientPhone" class="w-full p-3 rounded-xl" placeholder="Client Phone">
 
+
 <select id="eventCategory" class="w-full p-3 rounded-xl">
 <option value="">Select Event Category</option>
-<option>Engagement</option>
 <option>Wedding</option>
-<option>Prewedding</option>
+<option>Pre Wedding</option>
+<option>Engagement</option>
 <option>Reception</option>
 <option>Birthday</option>
-<option>Babyshower</option>
+<option>Baby Shower</option>
 <option>Other Event</option>
 </select>
+
 
 <div class="grid grid-cols-2 gap-2">
 
@@ -72,24 +76,24 @@ Create Quotation
 
 </div>
 
+
 <select id="packageSelect" class="w-full p-3 rounded-xl">
 
 <option value="">Select Package</option>
 
-<option>Custom Package</option>
 <option>Silver</option>
 <option>Gold</option>
 <option>Platinum</option>
+<option>Custom Package</option>
 
 </select>
 
-<!-- Deliverables -->
+
+<!-- DELIVERABLES -->
 
 <div class="border-t border-white/20 pt-4 space-y-2">
 
-<h2 class="font-semibold text-lg">
-Deliverables
-</h2>
+<h2 class="font-semibold text-lg">Deliverables</h2>
 
 <label>
 <input type="checkbox" id="softCopy">
@@ -114,7 +118,7 @@ Printed Album
 <input
 id="albumSheets"
 type="number"
-placeholder="Album Sheet Count"
+placeholder="Album Sheets"
 class="w-full p-2 rounded-xl hidden"
 >
 
@@ -131,6 +135,7 @@ class="w-full p-2 rounded-xl hidden"
 >
 
 </div>
+
 
 <input
 id="totalAmount"
@@ -154,6 +159,7 @@ class="w-full p-3 rounded-xl"
 readonly
 >
 
+
 <button
 id="previewBtn"
 class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl font-semibold"
@@ -163,12 +169,13 @@ Preview Quote
 
 </button>
 
-</div>
 
 </div>
 
+</div>
 
-<!-- SCRIPTS (IMPORTANT ORDER) -->
+
+<!-- IMPORTANT SCRIPT ORDER -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -179,6 +186,39 @@ Preview Quote
 <script src="js/quotation.js"></script>
 
 
-</body>
+<script>
 
+/* SHOW ALBUM INPUT */
+
+document.getElementById("printedAlbum").addEventListener("change",function(){
+
+document.getElementById("albumSheets").classList.toggle("hidden",!this.checked)
+
+})
+
+
+/* SHOW GIFT INPUT */
+
+document.getElementById("freeGift").addEventListener("change",function(){
+
+document.getElementById("giftName").classList.toggle("hidden",!this.checked)
+
+})
+
+
+/* BALANCE CALCULATION */
+
+document.getElementById("advanceAmount").addEventListener("input",function(){
+
+let total=parseFloat(document.getElementById("totalAmount").value)||0
+let advance=parseFloat(this.value)||0
+
+document.getElementById("balanceAmount").value=total-advance
+
+})
+
+</script>
+
+
+</body>
 </html>
