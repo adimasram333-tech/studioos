@@ -2,21 +2,35 @@ const data = JSON.parse(localStorage.getItem("quotationData"))
 
 if(data){
 
-document.getElementById("clientName").innerText = data.clientName
+document.getElementById("clientName").innerText =
+data.clientName || "-"
 
-document.getElementById("eventDate").innerText =
-data.startDate + "  to  " + data.endDate
 
-document.getElementById("total").innerText = data.total
+// EVENT DATE RANGE
 
-document.getElementById("advance").innerText = data.advance
+const dateText =
 
-document.getElementById("balance").innerText = data.balance
+(data.startDate || "-") +
+"  to  " +
+(data.endDate || "-")
+
+document.getElementById("eventDate").innerText = dateText
+
+
+document.getElementById("total").innerText =
+data.total || "-"
+
+document.getElementById("advance").innerText =
+data.advance || "-"
+
+document.getElementById("balance").innerText =
+data.balance || "-"
 
 }
 
 
-// studio name
+
+// STUDIO NAME
 
 const profile = JSON.parse(localStorage.getItem("studioProfile"))
 
