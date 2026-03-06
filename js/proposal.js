@@ -1,108 +1,23 @@
-document.addEventListener("DOMContentLoaded", async function () {
+const data = JSON.parse(localStorage.getItem("quotationData"))
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const id = urlParams.get("id");
+if(data){
 
-  if (!id) return;
+document.getElementById("clientName").innerText = data.clientName
 
-  const data = await getQuotationById(id);
+document.getElementById("eventDate").innerText = data.eventDate
 
-  if (!data) return;
+document.getElementById("total").innerText = data.total
 
-  /* BASIC INFO */
+document.getElementById("advance").innerText = data.advance
 
-  document.getElementById("clientName").innerText = data.client_name;
-  document.getElementById("eventDate").innerText = data.event_date;
+document.getElementById("balance").innerText = data.balance
 
-  document.getElementById("total").innerText = data.total;
-  document.getElementById("advance").innerText = data.advance;
-  document.getElementById("balance").innerText = data.balance;
+}
 
 
-  /* STATUS BADGE */
+// studio name
 
-  const statusArea = document.getElementById("statusArea");
+const profile = JSON.parse(localStorage.getItem("studioProfile"))
 
-  let badgeClass = "sent";
-
-  if (data.status === "accepted") badgeClass = "accepted";
-  if (data.status === "confirmed") badgeClass = "confirmed";
-
-  statusArea.innerHTML = `
-    <div class="status-badge ${badgeClass}">
-      ${data.status.toUpperCase()}
-    </div>
-  `;
-
-
-  /* SERVICES TABLE */
-
-  const servicesTable = document.getElementById("servicesTable");
-
-  servicesTable.innerHTML = `
-    <tr>
-      <th>Service</th>
-      <th>Details</th>
-    </tr>
-
-    <tr>
-      <td>Package</td>
-      <td>${data.package}</td>
-    </tr>
-  `;
-
-
-  /* DELIVERABLES */
-
-  const deliverablesList = document.getElementById("deliverablesList");
-
-  let deliverablesHTML = "";
-
-  if (data.deliverables) {
-
-    const items = JSON.parse(data.deliverables);
-
-    items.forEach(item => {
-      deliverablesHTML += `<li>${item}</li>`;
-    });
-
-  }
-
-  deliverablesList.innerHTML = deliverablesHTML;
-
-
-  /* ACTION BUTTON */
-
-  const actionArea = document.getElementById("actionArea");
-
-  if (data.status !== "confirmed") {
-
-    actionArea.innerHTML = `
-      <button id="confirmBtn">Confirm Booking</button>
-    `;
-
-    document.getElementById("confirmBtn").addEventListener("click", async () => {
-
-      if (parseFloat(data.advance) <= 0) {
-
-        alert("Advance payment required before confirmation.");
-        return;
-
-      }
-
-      const { error } = await supabase
-        .from("quotations")
-        .update({ status: "confirmed" })
-        .eq("id", id);
-
-      if (!error) {
-
-        location.reload();
-
-      }
-
-    });
-
-  }
-
-});
+document.getElementById("studioName").innerText =
+profile?.studioName || "Your Studio"
