@@ -99,24 +99,28 @@ margin-top:6px;
 
 
 <label class="deliverable">
-<input type="checkbox"> Raw Soft Copy
+<input type="checkbox" id="rawCheck">
+Raw Soft Copy
 </label>
 
 <label class="deliverable">
-<input type="checkbox"> Traditional Video (Full Event)
+<input type="checkbox" id="traditionalCheck">
+Traditional Video (Full Event)
 </label>
 
 <label class="deliverable">
-<input type="checkbox"> Cinematic Highlight
+<input type="checkbox" id="cinematicCheck">
+Cinematic Highlight
 </label>
 
 
 <label class="deliverable">
-<input type="checkbox" id="albumCheck"> Printed Album
+<input type="checkbox" id="albumCheck">
+Printed Album
 </label>
 
 <input
-id="albumPages"
+id="albumPagesInput"
 type="number"
 placeholder="Album Pages"
 class="input hidden"
@@ -124,11 +128,12 @@ class="input hidden"
 
 
 <label class="deliverable">
-<input type="checkbox" id="giftCheck"> Free Gift
+<input type="checkbox" id="giftCheck">
+Free Gift
 </label>
 
 <input
-id="giftName"
+id="giftInput"
 type="text"
 placeholder="Gift Name"
 class="input hidden"
