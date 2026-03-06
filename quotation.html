@@ -27,6 +27,8 @@ padding:10px;
 border-radius:10px;
 background:#374151;
 margin-bottom:8px;
+color:white;
+border:1px solid rgba(255,255,255,0.1);
 }
 
 .deliverable{
@@ -44,10 +46,26 @@ gap:8px;
 
 .serviceRow span{
 width:150px;
+font-size:14px;
 }
 
-.serviceRow input{
-width:70px;
+.serviceInput{
+width:60px;
+padding:6px;
+border-radius:6px;
+background:#1f2937;
+border:1px solid rgba(255,255,255,0.2);
+text-align:center;
+color:white;
+}
+
+.serviceHeader{
+display:flex;
+justify-content:flex-end;
+gap:28px;
+font-size:12px;
+color:#9ca3af;
+margin-bottom:6px;
 }
 
 </style>
@@ -56,7 +74,7 @@ width:70px;
 
 <body class="text-white min-h-screen flex items-center justify-center p-6">
 
-<div class="glass p-6 rounded-2xl w-[450px]">
+<div class="glass p-6 rounded-2xl w-[460px]">
 
 <a href="index.html" class="text-sm text-gray-400">← Back</a>
 
@@ -115,81 +133,58 @@ width:70px;
 
 <h3 class="font-semibold mb-2">Services & Coverage</h3>
 
+<div class="serviceHeader">
+<span>Qty</span>
+<span>Days</span>
+</div>
+
 
 <div class="serviceRow">
-
 <span>Candid Photographer</span>
-
-<input id="candidQty" type="number" min="0" value="0">
-
-<input id="candidDays" type="number" min="0" value="0">
-
+<input id="candidQty" type="number" min="0" value="0" class="serviceInput">
+<input id="candidDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
 
 <div class="serviceRow">
-
 <span>Traditional Photographer</span>
-
-<input id="traditionalPhotoQty" type="number" min="0" value="0">
-
-<input id="traditionalPhotoDays" type="number" min="0" value="0">
-
+<input id="traditionalPhotoQty" type="number" min="0" value="0" class="serviceInput">
+<input id="traditionalPhotoDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
 
 <div class="serviceRow">
-
 <span>Traditional Videographer</span>
-
-<input id="traditionalVideoQty" type="number" min="0" value="0">
-
-<input id="traditionalVideoDays" type="number" min="0" value="0">
-
+<input id="traditionalVideoQty" type="number" min="0" value="0" class="serviceInput">
+<input id="traditionalVideoDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
 
 <div class="serviceRow">
-
 <span>Cinematographer</span>
-
-<input id="cinemaQty" type="number" min="0" value="0">
-
-<input id="cinemaDays" type="number" min="0" value="0">
-
+<input id="cinemaQty" type="number" min="0" value="0" class="serviceInput">
+<input id="cinemaDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
 
 <div class="serviceRow">
-
 <span>Drone</span>
-
-<input id="droneQty" type="number" min="0" value="0">
-
-<input id="droneDays" type="number" min="0" value="0">
-
+<input id="droneQty" type="number" min="0" value="0" class="serviceInput">
+<input id="droneDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
 
 <div class="serviceRow">
-
 <span>LED Screen Wall</span>
-
-<input id="ledQty" type="number" min="0" value="0">
-
-<input id="ledDays" type="number" min="0" value="0">
-
+<input id="ledQty" type="number" min="0" value="0" class="serviceInput">
+<input id="ledDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
 
 <div class="serviceRow">
-
 <span>Assistant</span>
-
-<input id="assistantQty" type="number" min="0" value="0">
-
-<input id="assistantDays" type="number" min="0" value="0">
-
+<input id="assistantQty" type="number" min="0" value="0" class="serviceInput">
+<input id="assistantDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
 
@@ -202,38 +197,26 @@ width:70px;
 
 
 <label class="deliverable">
-
 <input type="checkbox" id="rawCheck">
-
 Raw Soft Copy
-
 </label>
 
 
 <label class="deliverable">
-
 <input type="checkbox" id="traditionalCheck">
-
 Traditional Video (Full Event)
-
 </label>
 
 
 <label class="deliverable">
-
 <input type="checkbox" id="cinematicCheck">
-
 Cinematic Highlight
-
 </label>
 
 
 <label class="deliverable">
-
 <input type="checkbox" id="albumCheck">
-
 Printed Album
-
 </label>
 
 
@@ -246,11 +229,8 @@ class="input hidden"
 
 
 <label class="deliverable">
-
 <input type="checkbox" id="giftCheck">
-
 Free Gift
-
 </label>
 
 
@@ -273,7 +253,6 @@ class="input hidden"
 
 
 <button id="previewBtn"
-
 class="w-full bg-indigo-600 p-3 rounded-xl mt-2">
 
 Preview Quote
