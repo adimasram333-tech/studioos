@@ -41,18 +41,17 @@ margin-top:6px;
 .serviceRow{
 display:flex;
 align-items:center;
-justify-content:space-between;
 margin-bottom:10px;
-gap:8px;
+gap:10px;
 }
 
 .serviceRow span{
-width:150px;
+width:160px;
 font-size:14px;
 }
 
 .serviceInput{
-width:60px;
+width:55px;
 height:32px;
 background:#1f2937;
 border:1px solid rgba(255,255,255,0.2);
@@ -62,7 +61,7 @@ text-align:center;
 outline:none;
 }
 
-/* REMOVE WHITE DEFAULT STYLE */
+/* REMOVE WHITE STYLE */
 
 .serviceInput::-webkit-outer-spin-button,
 .serviceInput::-webkit-inner-spin-button{
@@ -80,13 +79,24 @@ color:white;
 border-color:#6366f1;
 }
 
+/* HEADER ALIGNMENT */
+
 .serviceHeader{
 display:flex;
-justify-content:flex-end;
-gap:28px;
+align-items:center;
+gap:10px;
+margin-bottom:6px;
+}
+
+.serviceHeader .blank{
+width:160px;
+}
+
+.serviceHeader span{
+width:55px;
+text-align:center;
 font-size:12px;
 color:#9ca3af;
-margin-bottom:6px;
 }
 
 </style>
@@ -136,6 +146,7 @@ margin-bottom:6px;
 <h3 class="font-semibold mb-2">Services & Coverage</h3>
 
 <div class="serviceHeader">
+<div class="blank"></div>
 <span>Qty</span>
 <span>Days</span>
 </div>
