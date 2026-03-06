@@ -33,7 +33,9 @@ balanceInput.value = total - advance
 
 }
 
+if(advanceInput){
 advanceInput.addEventListener("input",calculateBalance)
+}
 
 
 // =============================
@@ -92,7 +94,11 @@ giftInput.classList.add("hidden")
 // PREVIEW QUOTE
 // =============================
 
-document.getElementById("previewBtn").addEventListener("click",function(){
+const previewBtn = document.getElementById("previewBtn")
+
+if(previewBtn){
+
+previewBtn.addEventListener("click",function(){
 
 const data = {
 
@@ -114,47 +120,30 @@ balance: balanceInput.value,
 
 
 // =============================
-// SERVICES (Qty + Days)
+// SERVICES
 // =============================
 
 candidQty: document.getElementById("candidQty").value,
 candidDays: document.getElementById("candidDays").value,
 
-traditionalPhotoQty:
-document.getElementById("traditionalPhotoQty").value,
+traditionalPhotoQty: document.getElementById("traditionalPhotoQty").value,
+traditionalPhotoDays: document.getElementById("traditionalPhotoDays").value,
 
-traditionalPhotoDays:
-document.getElementById("traditionalPhotoDays").value,
+traditionalVideoQty: document.getElementById("traditionalVideoQty").value,
+traditionalVideoDays: document.getElementById("traditionalVideoDays").value,
 
-traditionalVideoQty:
-document.getElementById("traditionalVideoQty").value,
+cinemaQty: document.getElementById("cinemaQty").value,
+cinemaDays: document.getElementById("cinemaDays").value,
 
-traditionalVideoDays:
-document.getElementById("traditionalVideoDays").value,
+droneQty: document.getElementById("droneQty").value,
+droneDays: document.getElementById("droneDays").value,
 
-cinemaQty:
-document.getElementById("cinemaQty").value,
+ledQty: document.getElementById("ledQty").value,
+ledDays: document.getElementById("ledDays").value,
 
-cinemaDays:
-document.getElementById("cinemaDays").value,
+assistantQty: document.getElementById("assistantQty").value,
+assistantDays: document.getElementById("assistantDays").value,
 
-droneQty:
-document.getElementById("droneQty").value,
-
-droneDays:
-document.getElementById("droneDays").value,
-
-ledQty:
-document.getElementById("ledQty").value,
-
-ledDays:
-document.getElementById("ledDays").value,
-
-assistantQty:
-document.getElementById("assistantQty").value,
-
-assistantDays:
-document.getElementById("assistantDays").value,
 
 
 // =============================
@@ -188,3 +177,5 @@ localStorage.setItem("quotationData", JSON.stringify(data))
 window.location.href="proposal.html"
 
 })
+
+}
