@@ -23,12 +23,19 @@ document.getElementById("advance").innerText =
 document.getElementById("balance").innerText =
 "₹ " + (data.balance || "0") + " /-"
 
+
+// ======================
 // SERVICES
+// ======================
+
 document.getElementById("candidQty").innerText =
 (data.candidQty || 0) + " × " + (data.candidDays || 0) + " Days"
 
 document.getElementById("traditionalPhotoQty").innerText =
 (data.traditionalPhotoQty || 0) + " × " + (data.traditionalPhotoDays || 0) + " Days"
+
+document.getElementById("traditionalVideoQty").innerText =
+(data.traditionalVideoQty || 0) + " × " + (data.traditionalVideoDays || 0) + " Days"
 
 document.getElementById("cinemaQty").innerText =
 (data.cinemaQty || 0) + " × " + (data.cinemaDays || 0) + " Days"
@@ -42,11 +49,10 @@ document.getElementById("ledQty").innerText =
 document.getElementById("assistantQty").innerText =
 (data.assistantQty || 0) + " × " + (data.assistantDays || 0) + " Days"
 
-document.getElementById("traditionalVideoQty").innerText =
-(data.traditionalVideoQty || 0) + " × " + (data.traditionalVideoDays || 0) + " Days"
 
-
+// ======================
 // DELIVERABLES
+// ======================
 
 const list = document.getElementById("deliverablesList")
 
@@ -70,14 +76,25 @@ list.innerHTML += "<li>Complimentary Gift : " + (data.giftName || "-") + "</li>"
 }
 
 
+
 // ======================
-// STUDIO NAME
+// STUDIO PROFILE
 // ======================
 
 const profile = JSON.parse(localStorage.getItem("studioProfile"))
 
+if(profile){
+
 document.getElementById("studioName").innerText =
-profile?.studioName || "Your Studio"
+profile.studioName || "Your Studio"
+
+if(document.getElementById("studioPhone")){
+document.getElementById("studioPhone").innerText =
+profile.phone || "-"
+}
+
+}
+
 
 
 // ======================
@@ -87,16 +104,26 @@ profile?.studioName || "Your Studio"
 function sendWhatsApp(){
 
 const data = JSON.parse(localStorage.getItem("quotationData"))
+const profile = JSON.parse(localStorage.getItem("studioProfile"))
 
 if(!data) return
 
 const phone = data.clientPhone || ""
+
+const photographerName =
+profile?.studioName || "Our Studio"
+
+const photographerPhone =
+profile?.phone || ""
 
 const message =
 "Hello " + data.clientName +
 "%0A%0AHere is your photography proposal." +
 "%0A%0AEvent Date: " + data.startDate + " to " + data.endDate +
 "%0A%0ATotal Investment: ₹" + data.total +
+"%0A%0AFor booking contact:" +
+"%0A" + photographerName +
+"%0APhone: " + photographerPhone +
 "%0A%0AThank you."
 
 const url =
