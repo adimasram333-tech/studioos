@@ -29,6 +29,11 @@ background:#374151;
 margin-bottom:10px;
 }
 
+.deliverable{
+display:block;
+margin-top:6px;
+}
+
 </style>
 
 </head>
@@ -45,17 +50,27 @@ margin-bottom:10px;
 
 <input id="clientPhone" class="input" placeholder="Client Phone">
 
+
+<!-- EVENT CATEGORY -->
+
 <select id="eventCategory" class="input">
 
 <option value="">Select Event Category</option>
+
 <option>Wedding</option>
 <option>Pre Wedding</option>
 <option>Engagement</option>
 <option>Haldi</option>
+<option>Mehndi</option>
+<option>Sangeet</option>
+<option>Reception</option>
 <option>Birthday</option>
-<option>Corporate</option>
+<option>Maternity</option>
+<option>Corporate Event</option>
+<option>Other</option>
 
 </select>
+
 
 <div class="flex gap-2">
 
@@ -63,6 +78,9 @@ margin-bottom:10px;
 <input id="endDate" type="date" class="input">
 
 </div>
+
+
+<!-- PACKAGE -->
 
 <select id="packageSelect" class="input">
 
@@ -73,47 +91,59 @@ margin-bottom:10px;
 
 </select>
 
+
 <hr class="my-3 border-gray-600">
+
 
 <h3 class="font-semibold mb-2">Deliverables</h3>
 
-<label>
-<input type="checkbox" value="Raw Photos"> Raw Soft Copy
+
+<label class="deliverable">
+<input type="checkbox"> Raw Soft Copy
 </label>
 
-<label>
-<input type="checkbox" value="Traditional Video"> Traditional Video
+<label class="deliverable">
+<input type="checkbox"> Traditional Video (Full Event)
 </label>
 
-<label>
-<input type="checkbox" value="Cinematic Highlight"> Cinematic Highlight
+<label class="deliverable">
+<input type="checkbox"> Cinematic Highlight
 </label>
 
-<label>
+
+<label class="deliverable">
 <input type="checkbox" id="albumCheck"> Printed Album
 </label>
 
-<input id="albumPages"
+<input
+id="albumPages"
 type="number"
 placeholder="Album Pages"
-class="input">
+class="input hidden"
+>
 
-<label>
+
+<label class="deliverable">
 <input type="checkbox" id="giftCheck"> Free Gift
 </label>
 
-<input id="giftName"
+<input
+id="giftName"
 type="text"
 placeholder="Gift Name"
-class="input">
+class="input hidden"
+>
+
 
 <hr class="my-3 border-gray-600">
+
 
 <input id="totalAmount" class="input" placeholder="Total ₹">
 
 <input id="advanceAmount" class="input" placeholder="Advance ₹">
 
 <input id="balanceAmount" class="input" placeholder="Balance ₹" readonly>
+
 
 <button id="previewBtn"
 class="w-full bg-indigo-600 p-3 rounded-xl mt-2">
