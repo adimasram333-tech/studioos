@@ -23,10 +23,10 @@ border:1px solid rgba(255,255,255,0.1);
 
 .input{
 width:100%;
-padding:12px;
+padding:10px;
 border-radius:10px;
 background:#374151;
-margin-bottom:10px;
+margin-bottom:8px;
 }
 
 .deliverable{
@@ -36,9 +36,14 @@ margin-top:6px;
 
 .serviceRow{
 display:flex;
-justify-content:space-between;
 align-items:center;
-margin-bottom:8px;
+justify-content:space-between;
+margin-bottom:10px;
+gap:8px;
+}
+
+.serviceRow span{
+width:150px;
 }
 
 .serviceRow input{
@@ -51,7 +56,7 @@ width:70px;
 
 <body class="text-white min-h-screen flex items-center justify-center p-6">
 
-<div class="glass p-6 rounded-2xl w-[420px]">
+<div class="glass p-6 rounded-2xl w-[450px]">
 
 <a href="index.html" class="text-sm text-gray-400">← Back</a>
 
@@ -60,6 +65,7 @@ width:70px;
 <input id="clientName" class="input" placeholder="Client Name">
 
 <input id="clientPhone" class="input" placeholder="Client Phone">
+
 
 <!-- EVENT CATEGORY -->
 
@@ -81,12 +87,14 @@ width:70px;
 
 </select>
 
+
 <div class="flex gap-2">
 
 <input id="startDate" type="date" class="input">
 <input id="endDate" type="date" class="input">
 
 </div>
+
 
 <!-- PACKAGE -->
 
@@ -99,62 +107,135 @@ width:70px;
 
 </select>
 
+
 <hr class="my-3 border-gray-600">
+
 
 <!-- SERVICES -->
 
 <h3 class="font-semibold mb-2">Services & Coverage</h3>
 
+
 <div class="serviceRow">
+
 <span>Candid Photographer</span>
-<input id="candidQty" type="number" min="0" value="0" class="input">
+
+<input id="candidQty" type="number" min="0" value="0">
+
+<input id="candidDays" type="number" min="0" value="0">
+
 </div>
 
+
 <div class="serviceRow">
+
 <span>Traditional Photographer</span>
-<input id="traditionalPhotoQty" type="number" min="0" value="0" class="input">
+
+<input id="traditionalPhotoQty" type="number" min="0" value="0">
+
+<input id="traditionalPhotoDays" type="number" min="0" value="0">
+
 </div>
 
+
 <div class="serviceRow">
+
+<span>Traditional Videographer</span>
+
+<input id="traditionalVideoQty" type="number" min="0" value="0">
+
+<input id="traditionalVideoDays" type="number" min="0" value="0">
+
+</div>
+
+
+<div class="serviceRow">
+
 <span>Cinematographer</span>
-<input id="cinemaQty" type="number" min="0" value="0" class="input">
+
+<input id="cinemaQty" type="number" min="0" value="0">
+
+<input id="cinemaDays" type="number" min="0" value="0">
+
 </div>
 
+
 <div class="serviceRow">
+
 <span>Drone</span>
-<input id="droneQty" type="number" min="0" value="0" class="input">
+
+<input id="droneQty" type="number" min="0" value="0">
+
+<input id="droneDays" type="number" min="0" value="0">
+
 </div>
 
+
 <div class="serviceRow">
-<span>Event Days</span>
-<input id="daysQty" type="number" min="1" value="1" class="input">
+
+<span>LED Screen Wall</span>
+
+<input id="ledQty" type="number" min="0" value="0">
+
+<input id="ledDays" type="number" min="0" value="0">
+
 </div>
+
+
+<div class="serviceRow">
+
+<span>Assistant</span>
+
+<input id="assistantQty" type="number" min="0" value="0">
+
+<input id="assistantDays" type="number" min="0" value="0">
+
+</div>
+
 
 <hr class="my-3 border-gray-600">
+
 
 <!-- DELIVERABLES -->
 
 <h3 class="font-semibold mb-2">Deliverables</h3>
 
+
 <label class="deliverable">
+
 <input type="checkbox" id="rawCheck">
+
 Raw Soft Copy
+
 </label>
 
+
 <label class="deliverable">
+
 <input type="checkbox" id="traditionalCheck">
+
 Traditional Video (Full Event)
+
 </label>
 
+
 <label class="deliverable">
+
 <input type="checkbox" id="cinematicCheck">
+
 Cinematic Highlight
+
 </label>
 
+
 <label class="deliverable">
+
 <input type="checkbox" id="albumCheck">
+
 Printed Album
+
 </label>
+
 
 <input
 id="albumPagesInput"
@@ -163,10 +244,15 @@ placeholder="Album Pages"
 class="input hidden"
 />
 
+
 <label class="deliverable">
+
 <input type="checkbox" id="giftCheck">
+
 Free Gift
+
 </label>
+
 
 <input
 id="giftInput"
@@ -175,7 +261,9 @@ placeholder="Gift Name"
 class="input hidden"
 />
 
+
 <hr class="my-3 border-gray-600">
+
 
 <input id="totalAmount" class="input" placeholder="Total ₹">
 
@@ -183,7 +271,9 @@ class="input hidden"
 
 <input id="balanceAmount" class="input" placeholder="Balance ₹" readonly>
 
+
 <button id="previewBtn"
+
 class="w-full bg-indigo-600 p-3 rounded-xl mt-2">
 
 Preview Quote
@@ -191,6 +281,7 @@ Preview Quote
 </button>
 
 </div>
+
 
 <script src="js/quotation.js"></script>
 
