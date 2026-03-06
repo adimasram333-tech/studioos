@@ -1,4 +1,6 @@
-// PACKAGE PRICE
+// =============================
+// PACKAGE PRICE AUTO
+// =============================
 
 const packageSelect = document.getElementById("packageSelect")
 const totalInput = document.getElementById("totalAmount")
@@ -18,7 +20,9 @@ calculateBalance()
 }
 
 
-// BALANCE
+// =============================
+// BALANCE CALCULATION
+// =============================
 
 function calculateBalance(){
 
@@ -32,7 +36,9 @@ balanceInput.value = total - advance
 advanceInput.addEventListener("input",calculateBalance)
 
 
-// ALBUM INPUT
+// =============================
+// ALBUM INPUT TOGGLE
+// =============================
 
 const albumCheck = document.getElementById("albumCheck")
 const albumPagesInput = document.getElementById("albumPagesInput")
@@ -56,7 +62,9 @@ albumPagesInput.classList.add("hidden")
 }
 
 
-// GIFT INPUT
+// =============================
+// GIFT INPUT TOGGLE
+// =============================
 
 const giftCheck = document.getElementById("giftCheck")
 const giftInput = document.getElementById("giftInput")
@@ -80,38 +88,78 @@ giftInput.classList.add("hidden")
 }
 
 
-// PREVIEW
+// =============================
+// PREVIEW QUOTE
+// =============================
 
 document.getElementById("previewBtn").addEventListener("click",function(){
 
 const data = {
 
-clientName:document.getElementById("clientName").value,
+clientName: document.getElementById("clientName").value,
 
-startDate:document.getElementById("startDate").value,
+clientPhone: document.getElementById("clientPhone").value,
 
-endDate:document.getElementById("endDate").value,
+eventCategory: document.getElementById("eventCategory").value,
 
-total:totalInput.value,
+startDate: document.getElementById("startDate").value,
 
-advance:advanceInput.value,
+endDate: document.getElementById("endDate").value,
 
-balance:balanceInput.value,
+total: totalInput.value,
+
+advance: advanceInput.value,
+
+balance: balanceInput.value,
 
 
-raw:document.getElementById("rawCheck").checked,
-traditional:document.getElementById("traditionalCheck").checked,
-cinematic:document.getElementById("cinematicCheck").checked,
+// =============================
+// SERVICES
+// =============================
 
-album:albumCheck.checked,
-albumPages:albumPagesInput.value,
+candidQty: document.getElementById("candidQty").value,
 
-gift:giftCheck.checked,
-giftName:giftInput.value
+traditionalPhotoQty:
+document.getElementById("traditionalPhotoQty").value,
+
+cinemaQty:
+document.getElementById("cinemaQty").value,
+
+droneQty:
+document.getElementById("droneQty").value,
+
+daysQty:
+document.getElementById("daysQty").value,
+
+
+
+// =============================
+// DELIVERABLES
+// =============================
+
+raw: document.getElementById("rawCheck").checked,
+
+traditional: document.getElementById("traditionalCheck").checked,
+
+cinematic: document.getElementById("cinematicCheck").checked,
+
+album: albumCheck.checked,
+
+albumPages: albumPagesInput.value,
+
+gift: giftCheck.checked,
+
+giftName: giftInput.value
 
 }
 
-localStorage.setItem("quotationData",JSON.stringify(data))
+
+// SAVE DATA
+
+localStorage.setItem("quotationData", JSON.stringify(data))
+
+
+// OPEN PROPOSAL
 
 window.location.href="proposal.html"
 
