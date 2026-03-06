@@ -4,7 +4,8 @@ if(data){
 
 document.getElementById("clientName").innerText = data.clientName
 
-document.getElementById("eventDate").innerText = data.eventDate
+document.getElementById("eventDate").innerText =
+data.startDate + "  to  " + data.endDate
 
 document.getElementById("total").innerText = data.total
 
