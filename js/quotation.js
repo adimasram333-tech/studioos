@@ -1,69 +1,42 @@
-const packagePrices = {
-silver:50000,
-gold:80000,
-platinum:120000
-}
-
-
 const packageSelect = document.getElementById("packageSelect")
 const totalInput = document.getElementById("totalAmount")
-
-
-packageSelect.addEventListener("change",()=>{
-
-const price = packagePrices[packageSelect.value]
-
-if(price){
-
-totalInput.value = price
-
-}
-
-})
-
-
 const advanceInput = document.getElementById("advanceAmount")
 const balanceInput = document.getElementById("balanceAmount")
 
+packageSelect.addEventListener("change",function(){
 
-advanceInput.addEventListener("input",()=>{
+totalInput.value = this.value
+
+calculateBalance()
+
+})
+
+advanceInput.addEventListener("input",calculateBalance)
+
+function calculateBalance(){
 
 const total = parseFloat(totalInput.value) || 0
 const advance = parseFloat(advanceInput.value) || 0
 
 balanceInput.value = total - advance
 
-})
+}
 
+document.getElementById("previewBtn").addEventListener("click",function(){
 
-document.getElementById("previewBtn").addEventListener("click",async()=>{
+const quotation = {
 
-const data = {
+clientName: document.getElementById("clientName").value,
+eventDate: document.getElementById("startDate").value,
 
-client_name:document.getElementById("clientName").value,
-
-phone:document.getElementById("clientPhone").value,
-
-event_date:document.getElementById("startDate").value,
-
-package:packageSelect.value,
-
-total:totalInput.value,
-
-advance:advanceInput.value,
-
-balance:balanceInput.value,
-
-status:"sent"
+total: totalInput.value,
+advance: advanceInput.value,
+balance: balanceInput.value
 
 }
 
-const result = await saveQuotation(data)
+localStorage.setItem("quotationData",JSON.stringify(quotation))
 
-if(result){
-
-window.location.href = `proposal.html?id=${result.id}`
-
-}
+window.location.href="proposal.html"
 
 })
