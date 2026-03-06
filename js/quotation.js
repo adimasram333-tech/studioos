@@ -1,17 +1,26 @@
 // =============================
+// SAFE ELEMENT GETTER
+// =============================
+
+function get(id){
+return document.getElementById(id)
+}
+
+
+// =============================
 // PACKAGE PRICE AUTO
 // =============================
 
-const packageSelect = document.getElementById("packageSelect")
-const totalInput = document.getElementById("totalAmount")
-const advanceInput = document.getElementById("advanceAmount")
-const balanceInput = document.getElementById("balanceAmount")
+const packageSelect = get("packageSelect")
+const totalInput = get("totalAmount")
+const advanceInput = get("advanceAmount")
+const balanceInput = get("balanceAmount")
 
-if(packageSelect){
+if(packageSelect && totalInput){
 
 packageSelect.addEventListener("change",function(){
 
-totalInput.value = this.value
+totalInput.value = this.value || ""
 
 calculateBalance()
 
@@ -25,6 +34,8 @@ calculateBalance()
 // =============================
 
 function calculateBalance(){
+
+if(!totalInput || !advanceInput || !balanceInput) return
 
 const total = parseFloat(totalInput.value) || 0
 const advance = parseFloat(advanceInput.value) || 0
@@ -42,21 +53,17 @@ advanceInput.addEventListener("input",calculateBalance)
 // ALBUM INPUT TOGGLE
 // =============================
 
-const albumCheck = document.getElementById("albumCheck")
-const albumPagesInput = document.getElementById("albumPagesInput")
+const albumCheck = get("albumCheck")
+const albumPagesInput = get("albumPagesInput")
 
-if(albumCheck){
+if(albumCheck && albumPagesInput){
 
 albumCheck.addEventListener("change",function(){
 
 if(this.checked){
-
 albumPagesInput.classList.remove("hidden")
-
 }else{
-
 albumPagesInput.classList.add("hidden")
-
 }
 
 })
@@ -68,21 +75,17 @@ albumPagesInput.classList.add("hidden")
 // GIFT INPUT TOGGLE
 // =============================
 
-const giftCheck = document.getElementById("giftCheck")
-const giftInput = document.getElementById("giftInput")
+const giftCheck = get("giftCheck")
+const giftInput = get("giftInput")
 
-if(giftCheck){
+if(giftCheck && giftInput){
 
 giftCheck.addEventListener("change",function(){
 
 if(this.checked){
-
 giftInput.classList.remove("hidden")
-
 }else{
-
 giftInput.classList.add("hidden")
-
 }
 
 })
@@ -94,7 +97,7 @@ giftInput.classList.add("hidden")
 // PREVIEW QUOTE
 // =============================
 
-const previewBtn = document.getElementById("previewBtn")
+const previewBtn = get("previewBtn")
 
 if(previewBtn){
 
@@ -102,79 +105,73 @@ previewBtn.addEventListener("click",function(){
 
 const data = {
 
-clientName: document.getElementById("clientName").value,
+clientName: get("clientName")?.value || "",
+clientPhone: get("clientPhone")?.value || "",
+eventCategory: get("eventCategory")?.value || "",
 
-clientPhone: document.getElementById("clientPhone").value,
+startDate: get("startDate")?.value || "",
+endDate: get("endDate")?.value || "",
 
-eventCategory: document.getElementById("eventCategory").value,
-
-startDate: document.getElementById("startDate").value,
-
-endDate: document.getElementById("endDate").value,
-
-total: totalInput.value,
-
-advance: advanceInput.value,
-
-balance: balanceInput.value,
+total: totalInput?.value || "",
+advance: advanceInput?.value || "",
+balance: balanceInput?.value || "",
 
 
 // =============================
 // SERVICES
 // =============================
 
-candidQty: document.getElementById("candidQty").value,
-candidDays: document.getElementById("candidDays").value,
+candidQty: get("candidQty")?.value || "0",
+candidDays: get("candidDays")?.value || "0",
 
-traditionalPhotoQty: document.getElementById("traditionalPhotoQty").value,
-traditionalPhotoDays: document.getElementById("traditionalPhotoDays").value,
+traditionalPhotoQty: get("traditionalPhotoQty")?.value || "0",
+traditionalPhotoDays: get("traditionalPhotoDays")?.value || "0",
 
-traditionalVideoQty: document.getElementById("traditionalVideoQty").value,
-traditionalVideoDays: document.getElementById("traditionalVideoDays").value,
+traditionalVideoQty: get("traditionalVideoQty")?.value || "0",
+traditionalVideoDays: get("traditionalVideoDays")?.value || "0",
 
-cinemaQty: document.getElementById("cinemaQty").value,
-cinemaDays: document.getElementById("cinemaDays").value,
+cinemaQty: get("cinemaQty")?.value || "0",
+cinemaDays: get("cinemaDays")?.value || "0",
 
-droneQty: document.getElementById("droneQty").value,
-droneDays: document.getElementById("droneDays").value,
+droneQty: get("droneQty")?.value || "0",
+droneDays: get("droneDays")?.value || "0",
 
-ledQty: document.getElementById("ledQty").value,
-ledDays: document.getElementById("ledDays").value,
+ledQty: get("ledQty")?.value || "0",
+ledDays: get("ledDays")?.value || "0",
 
-assistantQty: document.getElementById("assistantQty").value,
-assistantDays: document.getElementById("assistantDays").value,
-
+assistantQty: get("assistantQty")?.value || "0",
+assistantDays: get("assistantDays")?.value || "0",
 
 
 // =============================
 // DELIVERABLES
 // =============================
 
-raw: document.getElementById("rawCheck").checked,
+raw: get("rawCheck")?.checked || false,
+traditional: get("traditionalCheck")?.checked || false,
+cinematic: get("cinematicCheck")?.checked || false,
 
-traditional: document.getElementById("traditionalCheck").checked,
+album: albumCheck?.checked || false,
+albumPages: albumPagesInput?.value || "",
 
-cinematic: document.getElementById("cinematicCheck").checked,
-
-album: albumCheck.checked,
-
-albumPages: albumPagesInput.value,
-
-gift: giftCheck.checked,
-
-giftName: giftInput.value
+gift: giftCheck?.checked || false,
+giftName: giftInput?.value || ""
 
 }
 
 
+// =============================
 // SAVE DATA
+// =============================
 
 localStorage.setItem("quotationData", JSON.stringify(data))
 
 
+// =============================
 // OPEN PROPOSAL
+// =============================
 
-window.location.href="proposal.html"
+window.location.href = "proposal.html"
 
 })
 
