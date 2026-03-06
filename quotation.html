@@ -36,6 +36,8 @@ display:block;
 margin-top:6px;
 }
 
+/* SERVICES */
+
 .serviceRow{
 display:flex;
 align-items:center;
@@ -51,12 +53,31 @@ font-size:14px;
 
 .serviceInput{
 width:60px;
-padding:6px;
-border-radius:6px;
+height:32px;
 background:#1f2937;
 border:1px solid rgba(255,255,255,0.2);
-text-align:center;
+border-radius:6px;
 color:white;
+text-align:center;
+outline:none;
+}
+
+/* REMOVE WHITE DEFAULT STYLE */
+
+.serviceInput::-webkit-outer-spin-button,
+.serviceInput::-webkit-inner-spin-button{
+-webkit-appearance:none;
+margin:0;
+}
+
+.serviceInput[type=number]{
+-moz-appearance:textfield;
+background:#1f2937;
+color:white;
+}
+
+.serviceInput:focus{
+border-color:#6366f1;
 }
 
 .serviceHeader{
@@ -81,16 +102,10 @@ margin-bottom:6px;
 <h1 class="text-xl font-bold mt-2 mb-6">Create Quotation</h1>
 
 <input id="clientName" class="input" placeholder="Client Name">
-
 <input id="clientPhone" class="input" placeholder="Client Phone">
 
-
-<!-- EVENT CATEGORY -->
-
 <select id="eventCategory" class="input">
-
 <option value="">Select Event Category</option>
-
 <option>Wedding</option>
 <option>Pre Wedding</option>
 <option>Engagement</option>
@@ -102,34 +117,21 @@ margin-bottom:6px;
 <option>Maternity</option>
 <option>Corporate Event</option>
 <option>Other</option>
-
 </select>
 
-
 <div class="flex gap-2">
-
 <input id="startDate" type="date" class="input">
 <input id="endDate" type="date" class="input">
-
 </div>
 
-
-<!-- PACKAGE -->
-
 <select id="packageSelect" class="input">
-
 <option value="">Select Package</option>
 <option value="50000">Silver</option>
 <option value="80000">Gold</option>
 <option value="120000">Platinum</option>
-
 </select>
 
-
 <hr class="my-3 border-gray-600">
-
-
-<!-- SERVICES -->
 
 <h3 class="font-semibold mb-2">Services & Coverage</h3>
 
@@ -138,13 +140,11 @@ margin-bottom:6px;
 <span>Days</span>
 </div>
 
-
 <div class="serviceRow">
 <span>Candid Photographer</span>
 <input id="candidQty" type="number" min="0" value="0" class="serviceInput">
 <input id="candidDays" type="number" min="0" value="0" class="serviceInput">
 </div>
-
 
 <div class="serviceRow">
 <span>Traditional Photographer</span>
@@ -152,13 +152,11 @@ margin-bottom:6px;
 <input id="traditionalPhotoDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
-
 <div class="serviceRow">
 <span>Traditional Videographer</span>
 <input id="traditionalVideoQty" type="number" min="0" value="0" class="serviceInput">
 <input id="traditionalVideoDays" type="number" min="0" value="0" class="serviceInput">
 </div>
-
 
 <div class="serviceRow">
 <span>Cinematographer</span>
@@ -166,13 +164,11 @@ margin-bottom:6px;
 <input id="cinemaDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
-
 <div class="serviceRow">
 <span>Drone</span>
 <input id="droneQty" type="number" min="0" value="0" class="serviceInput">
 <input id="droneDays" type="number" min="0" value="0" class="serviceInput">
 </div>
-
 
 <div class="serviceRow">
 <span>LED Screen Wall</span>
@@ -180,87 +176,57 @@ margin-bottom:6px;
 <input id="ledDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
-
 <div class="serviceRow">
 <span>Assistant</span>
 <input id="assistantQty" type="number" min="0" value="0" class="serviceInput">
 <input id="assistantDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
-
 <hr class="my-3 border-gray-600">
 
-
-<!-- DELIVERABLES -->
-
 <h3 class="font-semibold mb-2">Deliverables</h3>
-
 
 <label class="deliverable">
 <input type="checkbox" id="rawCheck">
 Raw Soft Copy
 </label>
 
-
 <label class="deliverable">
 <input type="checkbox" id="traditionalCheck">
 Traditional Video (Full Event)
 </label>
-
 
 <label class="deliverable">
 <input type="checkbox" id="cinematicCheck">
 Cinematic Highlight
 </label>
 
-
 <label class="deliverable">
 <input type="checkbox" id="albumCheck">
 Printed Album
 </label>
 
-
-<input
-id="albumPagesInput"
-type="number"
-placeholder="Album Pages"
-class="input hidden"
-/>
-
+<input id="albumPagesInput" type="number" placeholder="Album Pages" class="input hidden">
 
 <label class="deliverable">
 <input type="checkbox" id="giftCheck">
 Free Gift
 </label>
 
-
-<input
-id="giftInput"
-type="text"
-placeholder="Gift Name"
-class="input hidden"
-/>
-
+<input id="giftInput" type="text" placeholder="Gift Name" class="input hidden">
 
 <hr class="my-3 border-gray-600">
 
-
 <input id="totalAmount" class="input" placeholder="Total ₹">
-
 <input id="advanceAmount" class="input" placeholder="Advance ₹">
-
 <input id="balanceAmount" class="input" placeholder="Balance ₹" readonly>
-
 
 <button id="previewBtn"
 class="w-full bg-indigo-600 p-3 rounded-xl mt-2">
-
 Preview Quote
-
 </button>
 
 </div>
-
 
 <script src="js/quotation.js"></script>
 
