@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -9,6 +10,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
+
 body{
 background: radial-gradient(circle at top,#1e293b,#0f172a);
 }
@@ -18,53 +20,51 @@ background: rgba(255,255,255,0.05);
 backdrop-filter: blur(12px);
 border:1px solid rgba(255,255,255,0.1);
 }
+
+.input{
+width:100%;
+padding:12px;
+border-radius:10px;
+background:#374151;
+margin-bottom:10px;
+}
+
 </style>
+
 </head>
 
 <body class="text-white min-h-screen flex items-center justify-center p-6">
 
-<div class="glass w-full max-w-md p-6 rounded-2xl">
+<div class="glass p-6 rounded-2xl w-[420px]">
 
-<a href="index.html" class="text-sm text-gray-400 mb-4 block">← Back</a>
+<a href="index.html" class="text-sm text-gray-400">← Back</a>
 
-<h1 class="text-2xl font-bold mb-6">Create Quotation</h1>
+<h1 class="text-xl font-bold mt-2 mb-6">Create Quotation</h1>
 
-<!-- CLIENT -->
-<input id="clientName"
-class="w-full mb-3 p-3 rounded-xl bg-gray-700"
-placeholder="Client Name">
+<input id="clientName" class="input" placeholder="Client Name">
 
-<input id="clientPhone"
-class="w-full mb-3 p-3 rounded-xl bg-gray-700"
-placeholder="Client Phone">
+<input id="clientPhone" class="input" placeholder="Client Phone">
 
-<!-- EVENT CATEGORY -->
-<select id="eventCategory"
-class="w-full mb-3 p-3 rounded-xl bg-gray-700">
+<select id="eventCategory" class="input">
 
 <option value="">Select Event Category</option>
 <option>Wedding</option>
 <option>Pre Wedding</option>
+<option>Engagement</option>
+<option>Haldi</option>
 <option>Birthday</option>
+<option>Corporate</option>
 
 </select>
 
-<!-- DATE -->
-<div class="flex gap-2 mb-3">
+<div class="flex gap-2">
 
-<input id="startDate"
-type="date"
-class="w-full p-3 rounded-xl bg-gray-700">
-
-<input id="endDate"
-type="date"
-class="w-full p-3 rounded-xl bg-gray-700">
+<input id="startDate" type="date" class="input">
+<input id="endDate" type="date" class="input">
 
 </div>
 
-<!-- PACKAGE -->
-<select id="packageSelect"
-class="w-full mb-4 p-3 rounded-xl bg-gray-700">
+<select id="packageSelect" class="input">
 
 <option value="">Select Package</option>
 <option value="50000">Silver</option>
@@ -73,41 +73,50 @@ class="w-full mb-4 p-3 rounded-xl bg-gray-700">
 
 </select>
 
-<!-- DELIVERABLES -->
+<hr class="my-3 border-gray-600">
 
-<p class="mb-2 font-semibold">Deliverables</p>
+<h3 class="font-semibold mb-2">Deliverables</h3>
 
-<div class="flex flex-wrap gap-3 text-sm mb-4">
+<label>
+<input type="checkbox" value="Raw Photos"> Raw Soft Copy
+</label>
 
-<label><input type="checkbox" value="All Raw Soft Copy"> All Raw Soft Copy</label>
+<label>
+<input type="checkbox" value="Traditional Video"> Traditional Video
+</label>
 
-<label><input type="checkbox" value="Traditional Video"> Traditional Video</label>
+<label>
+<input type="checkbox" value="Cinematic Highlight"> Cinematic Highlight
+</label>
 
-<label><input type="checkbox" value="Cinematic Highlight"> Cinematic Highlight</label>
+<label>
+<input type="checkbox" id="albumCheck"> Printed Album
+</label>
 
-<label><input type="checkbox" value="Printed Album"> Printed Album</label>
+<input id="albumPages"
+type="number"
+placeholder="Album Pages"
+class="input">
 
-<label><input type="checkbox" value="Free Gift"> Free Gift</label>
+<label>
+<input type="checkbox" id="giftCheck"> Free Gift
+</label>
 
-</div>
+<input id="giftName"
+type="text"
+placeholder="Gift Name"
+class="input">
 
-<!-- PRICE -->
+<hr class="my-3 border-gray-600">
 
-<input id="totalAmount"
-class="w-full mb-3 p-3 rounded-xl bg-gray-700"
-placeholder="Total ₹">
+<input id="totalAmount" class="input" placeholder="Total ₹">
 
-<input id="advanceAmount"
-class="w-full mb-3 p-3 rounded-xl bg-gray-700"
-placeholder="Advance ₹">
+<input id="advanceAmount" class="input" placeholder="Advance ₹">
 
-<input id="balanceAmount"
-class="w-full mb-4 p-3 rounded-xl bg-gray-700"
-placeholder="Balance ₹"
-readonly>
+<input id="balanceAmount" class="input" placeholder="Balance ₹" readonly>
 
 <button id="previewBtn"
-class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl">
+class="w-full bg-indigo-600 p-3 rounded-xl mt-2">
 
 Preview Quote
 
@@ -115,63 +124,8 @@ Preview Quote
 
 </div>
 
-<script>
 
-const packageSelect = document.getElementById("packageSelect")
-const totalInput = document.getElementById("totalAmount")
-const advanceInput = document.getElementById("advanceAmount")
-const balanceInput = document.getElementById("balanceAmount")
-
-// PACKAGE AUTO PRICE
-
-packageSelect.addEventListener("change",function(){
-
-totalInput.value = this.value
-
-calculateBalance()
-
-})
-
-// BALANCE CALC
-
-advanceInput.addEventListener("input",calculateBalance)
-
-function calculateBalance(){
-
-let total = parseFloat(totalInput.value) || 0
-let advance = parseFloat(advanceInput.value) || 0
-
-balanceInput.value = total - advance
-
-}
-
-// PREVIEW
-
-document.getElementById("previewBtn").addEventListener("click",function(){
-
-const name = document.getElementById("clientName").value
-const date = document.getElementById("startDate").value
-
-const total = totalInput.value
-const advance = advanceInput.value
-const balance = balanceInput.value
-
-localStorage.setItem("quotationPreview",
-JSON.stringify({
-
-client:name,
-date:date,
-total:total,
-advance:advance,
-balance:balance
-
-}))
-
-window.location.href="proposal.html"
-
-})
-
-</script>
+<script src="js/quotation.js"></script>
 
 </body>
 </html>
