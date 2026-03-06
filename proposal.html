@@ -10,6 +10,9 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 
+<!-- PDF LIBRARY -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <style>
 
 body{
@@ -113,6 +116,17 @@ border-radius:6px;
 cursor:pointer;
 }
 
+.pdfBtn{
+margin-top:10px;
+background:#2563eb;
+color:white;
+border:none;
+padding:12px 20px;
+font-size:14px;
+border-radius:6px;
+cursor:pointer;
+}
+
 .whatsappBox{
 text-align:center;
 margin-top:30px;
@@ -125,13 +139,13 @@ margin-top:30px;
 
 <body>
 
-<div class="page">
+<div class="page" id="proposalPage">
 
 <div class="hero">
 
 <h1>Wedding Photography Proposal</h1>
 
-<p id="studioName">Aditya Masram Photography</p>
+<p id="studioName">Your Studio</p>
 
 </div>
 
@@ -236,12 +250,18 @@ margin-top:30px;
 </div>
 
 
-<!-- WhatsApp Button -->
+<!-- ACTION BUTTONS -->
 
 <div class="whatsappBox">
 
 <button class="whatsappBtn" onclick="sendWhatsApp()">
 Send Proposal on WhatsApp
+</button>
+
+<br>
+
+<button class="pdfBtn" onclick="downloadPDF()">
+Download Proposal PDF
 </button>
 
 </div>
