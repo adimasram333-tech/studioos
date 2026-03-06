@@ -34,6 +34,17 @@ display:block;
 margin-top:6px;
 }
 
+.serviceRow{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:8px;
+}
+
+.serviceRow input{
+width:70px;
+}
+
 </style>
 
 </head>
@@ -49,7 +60,6 @@ margin-top:6px;
 <input id="clientName" class="input" placeholder="Client Name">
 
 <input id="clientPhone" class="input" placeholder="Client Phone">
-
 
 <!-- EVENT CATEGORY -->
 
@@ -71,14 +81,12 @@ margin-top:6px;
 
 </select>
 
-
 <div class="flex gap-2">
 
 <input id="startDate" type="date" class="input">
 <input id="endDate" type="date" class="input">
 
 </div>
-
 
 <!-- PACKAGE -->
 
@@ -91,12 +99,42 @@ margin-top:6px;
 
 </select>
 
+<hr class="my-3 border-gray-600">
+
+<!-- SERVICES -->
+
+<h3 class="font-semibold mb-2">Services & Coverage</h3>
+
+<div class="serviceRow">
+<span>Candid Photographer</span>
+<input id="candidQty" type="number" min="0" value="0" class="input">
+</div>
+
+<div class="serviceRow">
+<span>Traditional Photographer</span>
+<input id="traditionalPhotoQty" type="number" min="0" value="0" class="input">
+</div>
+
+<div class="serviceRow">
+<span>Cinematographer</span>
+<input id="cinemaQty" type="number" min="0" value="0" class="input">
+</div>
+
+<div class="serviceRow">
+<span>Drone</span>
+<input id="droneQty" type="number" min="0" value="0" class="input">
+</div>
+
+<div class="serviceRow">
+<span>Event Days</span>
+<input id="daysQty" type="number" min="1" value="1" class="input">
+</div>
 
 <hr class="my-3 border-gray-600">
 
+<!-- DELIVERABLES -->
 
 <h3 class="font-semibold mb-2">Deliverables</h3>
-
 
 <label class="deliverable">
 <input type="checkbox" id="rawCheck">
@@ -113,7 +151,6 @@ Traditional Video (Full Event)
 Cinematic Highlight
 </label>
 
-
 <label class="deliverable">
 <input type="checkbox" id="albumCheck">
 Printed Album
@@ -124,8 +161,7 @@ id="albumPagesInput"
 type="number"
 placeholder="Album Pages"
 class="input hidden"
->
-
+/>
 
 <label class="deliverable">
 <input type="checkbox" id="giftCheck">
@@ -137,18 +173,15 @@ id="giftInput"
 type="text"
 placeholder="Gift Name"
 class="input hidden"
->
-
+/>
 
 <hr class="my-3 border-gray-600">
-
 
 <input id="totalAmount" class="input" placeholder="Total ₹">
 
 <input id="advanceAmount" class="input" placeholder="Advance ₹">
 
 <input id="balanceAmount" class="input" placeholder="Balance ₹" readonly>
-
 
 <button id="previewBtn"
 class="w-full bg-indigo-600 p-3 rounded-xl mt-2">
@@ -158,7 +191,6 @@ Preview Quote
 </button>
 
 </div>
-
 
 <script src="js/quotation.js"></script>
 
