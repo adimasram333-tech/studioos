@@ -101,13 +101,37 @@ const previewBtn = get("previewBtn")
 
 if(previewBtn){
 
-previewBtn.addEventListener("click",function(){
+previewBtn.addEventListener("click", async function(){
 
 const data = {
 
+client_name: get("clientName")?.value || "",
+phone: get("clientPhone")?.value || "",
+
+event_start: get("startDate")?.value || "",
+event_end: get("endDate")?.value || "",
+
+total: totalInput?.value || "",
+advance: advanceInput?.value || "",
+balance: balanceInput?.value || ""
+
+}
+
+
+// =============================
+// SAVE IN SUPABASE
+// =============================
+
+const saved = await saveQuotation(data)
+
+if(saved && saved.id){
+
+// SAVE OTHER DATA LOCAL (services etc)
+
+const extraData = {
+
 clientName: get("clientName")?.value || "",
 clientPhone: get("clientPhone")?.value || "",
-eventCategory: get("eventCategory")?.value || "",
 
 startDate: get("startDate")?.value || "",
 endDate: get("endDate")?.value || "",
@@ -117,9 +141,7 @@ advance: advanceInput?.value || "",
 balance: balanceInput?.value || "",
 
 
-// =============================
 // SERVICES
-// =============================
 
 candidQty: get("candidQty")?.value || "0",
 candidDays: get("candidDays")?.value || "0",
@@ -143,9 +165,7 @@ assistantQty: get("assistantQty")?.value || "0",
 assistantDays: get("assistantDays")?.value || "0",
 
 
-// =============================
 // DELIVERABLES
-// =============================
 
 raw: get("rawCheck")?.checked || false,
 traditional: get("traditionalCheck")?.checked || false,
@@ -160,18 +180,22 @@ giftName: giftInput?.value || ""
 }
 
 
-// =============================
-// SAVE DATA
-// =============================
+// SAVE LOCAL FOR PROPOSAL PAGE
 
-localStorage.setItem("quotationData", JSON.stringify(data))
+localStorage.setItem("quotationData", JSON.stringify(extraData))
 
 
 // =============================
-// OPEN PROPOSAL
+// OPEN PROPOSAL WITH ID
 // =============================
 
-window.location.href = "proposal.html"
+window.location.href = "proposal.html?id=" + saved.id
+
+}else{
+
+alert("Error saving quotation")
+
+}
 
 })
 
