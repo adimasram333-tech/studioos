@@ -14,6 +14,7 @@ document.getElementById("eventDate").innerText =
 (data.startDate || "-") + " to " + (data.endDate || "-")
 
 
+
 // ======================
 // MONEY FORMAT
 // ======================
@@ -28,24 +29,32 @@ document.getElementById("balance").innerText =
 "₹ " + (data.balance || "0") + " /-"
 
 
+
 // ======================
 // SERVICES TABLE
 // ======================
 
 document.getElementById("candidQty").innerText =
-data.candidQty || "0"
+(data.candidQty || 0) + " × " + (data.candidDays || 0) + " Days"
 
 document.getElementById("traditionalPhotoQty").innerText =
-data.traditionalPhotoQty || "0"
+(data.traditionalPhotoQty || 0) + " × " + (data.traditionalPhotoDays || 0) + " Days"
 
 document.getElementById("cinemaQty").innerText =
-data.cinemaQty || "0"
+(data.cinemaQty || 0) + " × " + (data.cinemaDays || 0) + " Days"
 
 document.getElementById("droneQty").innerText =
-data.droneQty || "0"
+(data.droneQty || 0) + " × " + (data.droneDays || 0) + " Days"
 
-document.getElementById("daysQty").innerText =
-data.daysQty || "1"
+document.getElementById("ledQty").innerText =
+(data.ledQty || 0) + " × " + (data.ledDays || 0) + " Days"
+
+document.getElementById("assistantQty").innerText =
+(data.assistantQty || 0) + " × " + (data.assistantDays || 0) + " Days"
+
+document.getElementById("traditionalVideoQty").innerText =
+(data.traditionalVideoQty || 0) + " × " + (data.traditionalVideoDays || 0) + " Days"
+
 
 
 // ======================
@@ -53,6 +62,7 @@ data.daysQty || "1"
 // ======================
 
 const list = document.getElementById("deliverablesList")
+
 list.innerHTML = ""
 
 if(data.raw)
