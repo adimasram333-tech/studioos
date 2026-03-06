@@ -1,3 +1,7 @@
+// ======================
+// LOAD DATA
+// ======================
+
 const data = JSON.parse(localStorage.getItem("quotationData"))
 
 if(data){
@@ -8,7 +12,6 @@ if(data){
 
 document.getElementById("clientName").innerText =
 data.clientName || "-"
-
 
 document.getElementById("eventDate").innerText =
 (data.startDate || "-") + " to " + (data.endDate || "-")
@@ -90,5 +93,4 @@ list.innerHTML += "<li>Complimentary Gift : " + (data.giftName || "-") + "</li>"
 
 const profile = JSON.parse(localStorage.getItem("studioProfile"))
 
-document.getElementById("studioName").innerText =
-profile?.studioName || "Your Studio"
+document.getElementById
