@@ -31,15 +31,23 @@ color:white;
 border:1px solid rgba(255,255,255,0.1);
 }
 
+.deliverable{
+display:block;
+margin-top:6px;
+}
+
+/* SERVICES */
+
 .serviceRow{
 display:flex;
 align-items:center;
+margin-bottom:10px;
 gap:10px;
-margin-bottom:8px;
 }
 
 .serviceRow span{
-width:170px;
+width:160px;
+font-size:14px;
 }
 
 .serviceInput{
@@ -50,6 +58,45 @@ border:1px solid rgba(255,255,255,0.2);
 border-radius:6px;
 color:white;
 text-align:center;
+outline:none;
+}
+
+/* REMOVE WHITE STYLE */
+
+.serviceInput::-webkit-outer-spin-button,
+.serviceInput::-webkit-inner-spin-button{
+-webkit-appearance:none;
+margin:0;
+}
+
+.serviceInput[type=number]{
+-moz-appearance:textfield;
+background:#1f2937;
+color:white;
+}
+
+.serviceInput:focus{
+border-color:#6366f1;
+}
+
+/* HEADER ALIGNMENT */
+
+.serviceHeader{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:6px;
+}
+
+.serviceHeader .blank{
+width:160px;
+}
+
+.serviceHeader span{
+width:55px;
+text-align:center;
+font-size:12px;
+color:#9ca3af;
 }
 
 </style>
@@ -98,23 +145,86 @@ text-align:center;
 
 <h3 class="font-semibold mb-2">Services & Coverage</h3>
 
+<div class="serviceHeader">
+<div class="blank"></div>
+<span>Qty</span>
+<span>Days</span>
+</div>
+
 <div class="serviceRow">
 <span>Candid Photographer</span>
-<input id="candidQty" type="number" value="0" class="serviceInput">
-<input id="candidDays" type="number" value="0" class="serviceInput">
+<input id="candidQty" type="number" min="0" value="0" class="serviceInput">
+<input id="candidDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
 <div class="serviceRow">
 <span>Traditional Photographer</span>
-<input id="traditionalPhotoQty" type="number" value="0" class="serviceInput">
-<input id="traditionalPhotoDays" type="number" value="0" class="serviceInput">
+<input id="traditionalPhotoQty" type="number" min="0" value="0" class="serviceInput">
+<input id="traditionalPhotoDays" type="number" min="0" value="0" class="serviceInput">
+</div>
+
+<div class="serviceRow">
+<span>Traditional Videographer</span>
+<input id="traditionalVideoQty" type="number" min="0" value="0" class="serviceInput">
+<input id="traditionalVideoDays" type="number" min="0" value="0" class="serviceInput">
 </div>
 
 <div class="serviceRow">
 <span>Cinematographer</span>
-<input id="cinemaQty" type="number" value="0" class="serviceInput">
-<input id="cinemaDays" type="number" value="0" class="serviceInput">
+<input id="cinemaQty" type="number" min="0" value="0" class="serviceInput">
+<input id="cinemaDays" type="number" min="0" value="0" class="serviceInput">
 </div>
+
+<div class="serviceRow">
+<span>Drone</span>
+<input id="droneQty" type="number" min="0" value="0" class="serviceInput">
+<input id="droneDays" type="number" min="0" value="0" class="serviceInput">
+</div>
+
+<div class="serviceRow">
+<span>LED Screen Wall</span>
+<input id="ledQty" type="number" min="0" value="0" class="serviceInput">
+<input id="ledDays" type="number" min="0" value="0" class="serviceInput">
+</div>
+
+<div class="serviceRow">
+<span>Assistant</span>
+<input id="assistantQty" type="number" min="0" value="0" class="serviceInput">
+<input id="assistantDays" type="number" min="0" value="0" class="serviceInput">
+</div>
+
+<hr class="my-3 border-gray-600">
+
+<h3 class="font-semibold mb-2">Deliverables</h3>
+
+<label class="deliverable">
+<input type="checkbox" id="rawCheck">
+Raw Soft Copy
+</label>
+
+<label class="deliverable">
+<input type="checkbox" id="traditionalCheck">
+Traditional Video (Full Event)
+</label>
+
+<label class="deliverable">
+<input type="checkbox" id="cinematicCheck">
+Cinematic Highlight
+</label>
+
+<label class="deliverable">
+<input type="checkbox" id="albumCheck">
+Printed Album
+</label>
+
+<input id="albumPagesInput" type="number" placeholder="Album Pages" class="input hidden">
+
+<label class="deliverable">
+<input type="checkbox" id="giftCheck">
+Free Gift
+</label>
+
+<input id="giftInput" type="text" placeholder="Gift Name" class="input hidden">
 
 <hr class="my-3 border-gray-600">
 
