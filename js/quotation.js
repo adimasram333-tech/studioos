@@ -114,23 +114,47 @@ balance: balanceInput.value,
 
 
 // =============================
-// SERVICES
+// SERVICES (Qty + Days)
 // =============================
 
 candidQty: document.getElementById("candidQty").value,
+candidDays: document.getElementById("candidDays").value,
 
 traditionalPhotoQty:
 document.getElementById("traditionalPhotoQty").value,
 
+traditionalPhotoDays:
+document.getElementById("traditionalPhotoDays").value,
+
+traditionalVideoQty:
+document.getElementById("traditionalVideoQty").value,
+
+traditionalVideoDays:
+document.getElementById("traditionalVideoDays").value,
+
 cinemaQty:
 document.getElementById("cinemaQty").value,
+
+cinemaDays:
+document.getElementById("cinemaDays").value,
 
 droneQty:
 document.getElementById("droneQty").value,
 
-daysQty:
-document.getElementById("daysQty").value,
+droneDays:
+document.getElementById("droneDays").value,
 
+ledQty:
+document.getElementById("ledQty").value,
+
+ledDays:
+document.getElementById("ledDays").value,
+
+assistantQty:
+document.getElementById("assistantQty").value,
+
+assistantDays:
+document.getElementById("assistantDays").value,
 
 
 // =============================
