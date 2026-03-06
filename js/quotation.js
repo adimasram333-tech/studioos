@@ -1,24 +1,24 @@
-// PACKAGE PRICE AUTO LOAD
+// PACKAGE PRICE
 
 const packageSelect = document.getElementById("packageSelect")
 const totalInput = document.getElementById("totalAmount")
 const advanceInput = document.getElementById("advanceAmount")
 const balanceInput = document.getElementById("balanceAmount")
 
-packageSelect.addEventListener("change", function(){
+if(packageSelect){
 
-const price = this.value
+packageSelect.addEventListener("change",function(){
 
-totalInput.value = price
+totalInput.value = this.value
 
 calculateBalance()
 
 })
 
+}
 
-// BALANCE CALCULATION
 
-advanceInput.addEventListener("input", calculateBalance)
+// BALANCE
 
 function calculateBalance(){
 
@@ -29,101 +29,89 @@ balanceInput.value = total - advance
 
 }
 
+advanceInput.addEventListener("input",calculateBalance)
 
 
-// PRINTED ALBUM INPUT
+// ALBUM INPUT
 
 const albumCheck = document.getElementById("albumCheck")
-const albumInput = document.getElementById("albumPagesInput")
+const albumPagesInput = document.getElementById("albumPagesInput")
+
+if(albumCheck){
 
 albumCheck.addEventListener("change",function(){
 
 if(this.checked){
 
-albumInput.style.display = "block"
+albumPagesInput.classList.remove("hidden")
 
 }else{
 
-albumInput.style.display = "none"
+albumPagesInput.classList.add("hidden")
 
 }
 
 })
 
+}
 
 
-// FREE GIFT INPUT
+// GIFT INPUT
 
 const giftCheck = document.getElementById("giftCheck")
 const giftInput = document.getElementById("giftInput")
+
+if(giftCheck){
 
 giftCheck.addEventListener("change",function(){
 
 if(this.checked){
 
-giftInput.style.display = "block"
+giftInput.classList.remove("hidden")
 
 }else{
 
-giftInput.style.display = "none"
+giftInput.classList.add("hidden")
 
 }
 
 })
 
+}
 
 
-
-// PREVIEW BUTTON
+// PREVIEW
 
 document.getElementById("previewBtn").addEventListener("click",function(){
 
 const data = {
 
-clientName:
-document.getElementById("clientName").value,
+clientName:document.getElementById("clientName").value,
 
-startDate:
-document.getElementById("startDate").value,
+startDate:document.getElementById("startDate").value,
 
-endDate:
-document.getElementById("endDate").value,
+endDate:document.getElementById("endDate").value,
 
-total:
-document.getElementById("totalAmount").value,
+total:totalInput.value,
 
-advance:
-document.getElementById("advanceAmount").value,
+advance:advanceInput.value,
 
-balance:
-document.getElementById("balanceAmount").value,
+balance:balanceInput.value,
 
-// DELIVERABLES
 
-raw:
-document.getElementById("rawCheck").checked,
+raw:document.getElementById("rawCheck").checked,
+traditional:document.getElementById("traditionalCheck").checked,
+cinematic:document.getElementById("cinematicCheck").checked,
 
-traditional:
-document.getElementById("traditionalCheck").checked,
+album:albumCheck.checked,
+albumPages:albumPagesInput.value,
 
-cinematic:
-document.getElementById("cinematicCheck").checked,
-
-album:
-document.getElementById("albumCheck").checked,
-
-albumPages:
-document.getElementById("albumPagesInput").value,
-
-gift:
-document.getElementById("giftCheck").checked,
-
-giftName:
-document.getElementById("giftInput").value
+gift:giftCheck.checked,
+giftName:giftInput.value
 
 }
 
-localStorage.setItem("quotationData", JSON.stringify(data))
+localStorage.setItem("quotationData",JSON.stringify(data))
 
 window.location.href="proposal.html"
 
