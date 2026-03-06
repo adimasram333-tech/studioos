@@ -1,21 +1,16 @@
 const packageSelect = document.getElementById("packageSelect")
 
 const totalInput = document.getElementById("totalAmount")
-
 const advanceInput = document.getElementById("advanceAmount")
-
 const balanceInput = document.getElementById("balanceAmount")
 
 const albumCheck = document.getElementById("albumCheck")
-
 const albumPages = document.getElementById("albumPages")
 
 const giftCheck = document.getElementById("giftCheck")
-
 const giftName = document.getElementById("giftName")
 
-
-// PACKAGE PRICE AUTO
+// PACKAGE PRICE
 
 packageSelect.addEventListener("change",function(){
 
@@ -25,8 +20,7 @@ calculateBalance()
 
 })
 
-
-// BALANCE CALC
+// BALANCE
 
 advanceInput.addEventListener("input",calculateBalance)
 
@@ -40,7 +34,7 @@ balanceInput.value = total - advance
 }
 
 
-// ALBUM INPUT SHOW
+// ALBUM INPUT
 
 albumCheck.addEventListener("change",function(){
 
@@ -57,7 +51,7 @@ albumPages.classList.add("hidden")
 })
 
 
-// GIFT INPUT SHOW
+// GIFT INPUT
 
 giftCheck.addEventListener("change",function(){
 
@@ -74,22 +68,28 @@ giftName.classList.add("hidden")
 })
 
 
-// PREVIEW
+
+// PREVIEW BUTTON
 
 document.getElementById("previewBtn").addEventListener("click",function(){
 
-const quotation = {
+const data = {
 
 clientName: document.getElementById("clientName").value,
-eventDate: document.getElementById("startDate").value,
+
+startDate: document.getElementById("startDate").value,
+
+endDate: document.getElementById("endDate").value,
 
 total: totalInput.value,
+
 advance: advanceInput.value,
+
 balance: balanceInput.value
 
 }
 
-localStorage.setItem("quotationData",JSON.stringify(quotation))
+localStorage.setItem("quotationData",JSON.stringify(data))
 
 window.location.href="proposal.html"
 
