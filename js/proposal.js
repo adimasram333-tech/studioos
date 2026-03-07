@@ -168,16 +168,19 @@ window.open(url,"_blank")
 
 
 // ======================
-// PDF DOWNLOAD (FINAL FIX)
+// PDF DOWNLOAD (FIXED)
 // ======================
 
 window.downloadPDF = function(){
 
 const element = document.getElementById("proposalPage")
 
+// remove shadow for pdf render
+element.style.boxShadow = "none"
+
 const opt = {
 
-margin:0,
+margin:10,
 
 filename:"photography-proposal.pdf",
 
@@ -188,14 +191,18 @@ quality:1
 
 html2canvas:{
 scale:3,
-useCORS:true,
-logging:false
+scrollY:0,
+useCORS:true
 },
 
 jsPDF:{
 unit:"mm",
 format:"a4",
 orientation:"portrait"
+},
+
+pagebreak:{
+mode:['avoid-all','css','legacy']
 }
 
 }
