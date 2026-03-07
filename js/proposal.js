@@ -142,22 +142,24 @@ list.innerHTML += "<li>Complimentary Gift : " + (deliverables.gift.name || "-") 
 window.sendWhatsApp = function(){
 
 const phone = data.phone || ""
-
 const proposalLink = window.location.href
 
 const message =
-"Hello " + data.client_name +
-"%0A%0AThank you for considering Aditya Masram Photography." +
-"%0A%0AYour wedding photography proposal is ready." +
-"%0A%0AView your proposal here:" +
-"%0A" + proposalLink +
-"%0A%0AFor booking or any questions please contact:" +
-"%0AAditya Masram Photography" +
-"%0APhone: 8087945135" +
-"%0A%0AWe look forward to capturing your beautiful moments."
+`Hello ${data.client_name}
+
+Thank you for considering Aditya Masram Photography.
+
+Your wedding photography proposal is ready.
+
+View proposal:
+${proposalLink}
+
+For booking contact:
+Aditya Masram Photography
+Phone: 8087945135`
 
 const url =
-"https://wa.me/91" + phone + "?text=" + message
+"https://wa.me/91" + phone + "?text=" + encodeURIComponent(message)
 
 window.open(url,"_blank")
 
@@ -166,7 +168,7 @@ window.open(url,"_blank")
 
 
 // ======================
-// PDF DOWNLOAD (FIXED)
+// PDF DOWNLOAD (FINAL FIX)
 // ======================
 
 window.downloadPDF = function(){
@@ -175,27 +177,38 @@ const element = document.getElementById("proposalPage")
 
 const opt = {
 
-margin: 0,
+margin:0,
 
-filename: "photography-proposal.pdf",
+filename:"photography-proposal.pdf",
 
-image: { type: "jpeg", quality: 1 },
+image:{
+type:"jpeg",
+quality:1
+},
 
-html2canvas: { scale: 2 },
+html2canvas:{
+scale:3,
+useCORS:true,
+logging:false
+},
 
-jsPDF: {
-unit: "mm",
-format: "a4",
-orientation: "portrait"
+jsPDF:{
+unit:"mm",
+format:"a4",
+orientation:"portrait"
 }
 
 }
 
-html2pdf().set(opt).from(element).save()
+html2pdf()
+.set(opt)
+.from(element)
+.save()
 
 }
 
 }
+
 
 
 // ======================
