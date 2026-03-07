@@ -8,17 +8,22 @@ const SUPABASE_ANON_KEY =
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE";
 
 
+// create client
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
+
+// expose globally (important for all pages)
+window.supabaseClient = supabaseClient;
+
 
 
 // ================================
 // SAVE QUOTATION
 // ================================
 
-async function saveQuotation(data){
+window.saveQuotation = async function(data){
 
   try{
 
@@ -42,14 +47,15 @@ async function saveQuotation(data){
 
   }
 
-}
+};
+
 
 
 // ================================
 // GET QUOTATION BY ID
 // ================================
 
-async function getQuotationById(id){
+window.getQuotationById = async function(id){
 
   try{
 
@@ -73,14 +79,15 @@ async function getQuotationById(id){
 
   }
 
-}
+};
+
 
 
 // ================================
 // GET ALL QUOTATIONS
 // ================================
 
-async function getAllQuotations(){
+window.getAllQuotations = async function(){
 
   try{
 
@@ -103,4 +110,4 @@ async function getAllQuotations(){
 
   }
 
-}
+};
