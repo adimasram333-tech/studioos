@@ -19,44 +19,64 @@ body{
 background:#f4f4f4;
 margin:0;
 font-family:'Inter',sans-serif;
+display:flex;
+justify-content:center;
 }
 
 
-/* ===== PDF SAFE PAGE ===== */
+/* ===== PAGE ===== */
 
 .page{
 width:794px;
-min-height:auto;
 background:white;
 margin:40px auto;
 box-shadow:0 10px 40px rgba(0,0,0,0.08);
+overflow:hidden;
 }
 
 
 /* ===== HERO ===== */
 
 .hero{
+width:100%;
 height:240px;
-background:url('https://images.unsplash.com/photo-1519741497674-611481863552') center/cover;
+background-image:url('https://images.unsplash.com/photo-1519741497674-611481863552');
+background-size:cover;
+background-position:center;
 display:flex;
 align-items:center;
 justify-content:center;
 flex-direction:column;
 color:white;
-background-blend-mode:darken;
-background-color:rgba(0,0,0,0.45);
 text-align:center;
+position:relative;
+}
+
+.hero::after{
+content:'';
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.45);
+}
+
+.hero h1,
+.hero p{
+position:relative;
+z-index:2;
 }
 
 .hero h1{
 font-family:'Playfair Display',serif;
-font-size:32px;
+font-size:36px;
 margin:0;
 }
 
 .hero p{
 margin-top:8px;
-font-size:15px;
+font-size:16px;
 }
 
 
@@ -160,6 +180,7 @@ margin-top:30px;
 
 body{
 background:white;
+display:block;
 }
 
 .page{
