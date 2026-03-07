@@ -10,13 +10,24 @@ if(params.get("id")){
 quotationId = params.get("id")
 }
 
-// support short link /p/uuid
+
+// ======================
+// SUPPORT SEO LINK
+// /p/ritesh-verma-c8ee1e47
+// ======================
+
 const pathParts = window.location.pathname.split("/")
 const lastPart = pathParts[pathParts.length - 1]
 
-if(!quotationId && lastPart.length > 8){
-quotationId = lastPart
+if(!quotationId && lastPart){
+
+const slugParts = lastPart.split("-")
+
+const shortId = slugParts[slugParts.length - 1]
+
+quotationId = shortId
 }
+
 
 
 // ======================
@@ -156,10 +167,12 @@ window.sendWhatsApp = function(){
 
 const phone = data.phone || ""
 
-// short proposal link
+// SEO FRIENDLY LINK
 const proposalLink =
 window.location.origin +
 "/studioos/p/" +
+data.client_name.toLowerCase().replace(/\s+/g,"-") +
+"-" +
 quotationId
 
 const message =
