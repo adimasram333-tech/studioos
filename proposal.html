@@ -10,10 +10,15 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <!-- PDF LIBRARY -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
+
+/* (आपका पूरा existing CSS same रहेगा) */
 
 body{
 background:#f4f4f4;
@@ -146,8 +151,8 @@ margin-top:30px;
 
 <h1>Wedding Photography Proposal</h1>
 
-<p id="studioName">Your Studio</p>
-<p id="studioPhone"></p>
+<p id="studioName">Aditya Masram Photography</p>
+<p id="studioPhone">8087945135</p>
 
 </div>
 
@@ -157,73 +162,38 @@ margin-top:30px;
 <div class="info-grid">
 
 <div class="info-box">
-
 <strong>Prepared For:</strong>
 <br>
 <span id="clientName"></span>
-
 </div>
 
 
 <div class="info-box">
-
 <strong>Event Dates:</strong>
 <br>
 <span id="eventDate"></span>
-
 </div>
 
 </div>
-
 
 
 <h2 class="section-title">Services & Coverage</h2>
 
 <table>
 
-<tr>
-<td>Candid Photographer</td>
-<td id="candidQty"></td>
-</tr>
-
-<tr>
-<td>Traditional Photographer</td>
-<td id="traditionalPhotoQty"></td>
-</tr>
-
-<tr>
-<td>Traditional Videographer</td>
-<td id="traditionalVideoQty"></td>
-</tr>
-
-<tr>
-<td>Cinematographer</td>
-<td id="cinemaQty"></td>
-</tr>
-
-<tr>
-<td>Drone</td>
-<td id="droneQty"></td>
-</tr>
-
-<tr>
-<td>LED Screen Wall</td>
-<td id="ledQty"></td>
-</tr>
-
-<tr>
-<td>Assistant</td>
-<td id="assistantQty"></td>
-</tr>
+<tr><td>Candid Photographer</td><td id="candidQty"></td></tr>
+<tr><td>Traditional Photographer</td><td id="traditionalPhotoQty"></td></tr>
+<tr><td>Traditional Videographer</td><td id="traditionalVideoQty"></td></tr>
+<tr><td>Cinematographer</td><td id="cinemaQty"></td></tr>
+<tr><td>Drone</td><td id="droneQty"></td></tr>
+<tr><td>LED Screen Wall</td><td id="ledQty"></td></tr>
+<tr><td>Assistant</td><td id="assistantQty"></td></tr>
 
 </table>
 
 
-
 <h2 class="section-title">Deliverables</h2>
-
 <ul id="deliverablesList"></ul>
-
 
 
 <div class="summary">
@@ -232,27 +202,14 @@ margin-top:30px;
 
 <table>
 
-<tr>
-<td>Total Investment</td>
-<td id="total"></td>
-</tr>
-
-<tr>
-<td>Advance Required</td>
-<td id="advance"></td>
-</tr>
-
-<tr>
-<td>Balance</td>
-<td id="balance"></td>
-</tr>
+<tr><td>Total Investment</td><td id="total"></td></tr>
+<tr><td>Advance Required</td><td id="advance"></td></tr>
+<tr><td>Balance</td><td id="balance"></td></tr>
 
 </table>
 
 </div>
 
-
-<!-- ACTION BUTTONS -->
 
 <div class="whatsappBox">
 
@@ -269,7 +226,6 @@ Download Proposal PDF
 </div>
 
 
-
 <h2 class="section-title">Why Choose Us</h2>
 
 <p>
@@ -277,50 +233,42 @@ We believe every celebration has a story worth preserving forever.
 Our team focuses on capturing real emotions, beautiful details, and timeless moments.
 </p>
 
-<ul>
 
+<ul>
 <li>Professional and experienced photography team</li>
 <li>Creative cinematic storytelling approach</li>
 <li>High quality editing and color grading</li>
 <li>Premium album design and printing</li>
 <li>Reliable service and timely delivery</li>
-
 </ul>
-
 
 
 <h2 class="section-title">Booking Terms</h2>
 
 <ul>
-
 <li>Booking will be confirmed only after advance payment.</li>
 <li>Event date will be reserved only after confirmation.</li>
 <li>Remaining balance must be cleared before final delivery.</li>
 <li>Delivery timeline may vary depending on project scope.</li>
 <li>Any additional services will be charged separately.</li>
-
 </ul>
-
 
 
 <div class="footer">
 
-<p>
-<strong>Powered by StudioOS</strong>
-</p>
-
-<p>
-Professional Photography Business Operating System
-</p>
+<p><strong>Powered by StudioOS</strong></p>
+<p>Professional Photography Business Operating System</p>
 
 </div>
-
 
 </div>
 
 </div>
 
 
+<!-- IMPORTANT SCRIPTS -->
+
+<script src="js/supabase.js"></script>
 <script src="js/proposal.js"></script>
 
 </body>
