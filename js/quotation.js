@@ -103,16 +103,41 @@ if(previewBtn){
 
 previewBtn.addEventListener("click", async function(){
 
+
+// =============================
+// BASIC VALIDATION
+// =============================
+
+const clientName = get("clientName")?.value || ""
+const clientPhone = get("clientPhone")?.value || ""
+const startDate = get("startDate")?.value || ""
+
+if(!clientName){
+alert("Enter client name")
+return
+}
+
+if(!clientPhone){
+alert("Enter client phone")
+return
+}
+
+if(!startDate){
+alert("Select event date")
+return
+}
+
+
+// =============================
+// BUILD QUOTATION DATA
+// =============================
+
 const quotationData = {
 
-client_name: get("clientName")?.value || "",
-phone: get("clientPhone")?.value || "",
+client_name: clientName,
+phone: clientPhone,
 
-// =============================
-// EVENT DATES FIX
-// =============================
-
-event_date: get("startDate")?.value || "",
+event_date: startDate,
 end_date: get("endDate")?.value || "",
 
 package: packageSelect?.value || "",
@@ -131,38 +156,38 @@ status: "proposal",
 services: {
 
 candid: {
-qty: get("candidQty")?.value || 0,
-days: get("candidDays")?.value || 0
+qty: parseInt(get("candidQty")?.value || 0),
+days: parseInt(get("candidDays")?.value || 0)
 },
 
 traditional_photo: {
-qty: get("traditionalPhotoQty")?.value || 0,
-days: get("traditionalPhotoDays")?.value || 0
+qty: parseInt(get("traditionalPhotoQty")?.value || 0),
+days: parseInt(get("traditionalPhotoDays")?.value || 0)
 },
 
 traditional_video: {
-qty: get("traditionalVideoQty")?.value || 0,
-days: get("traditionalVideoDays")?.value || 0
+qty: parseInt(get("traditionalVideoQty")?.value || 0),
+days: parseInt(get("traditionalVideoDays")?.value || 0)
 },
 
 cinematographer: {
-qty: get("cinemaQty")?.value || 0,
-days: get("cinemaDays")?.value || 0
+qty: parseInt(get("cinemaQty")?.value || 0),
+days: parseInt(get("cinemaDays")?.value || 0)
 },
 
 drone: {
-qty: get("droneQty")?.value || 0,
-days: get("droneDays")?.value || 0
+qty: parseInt(get("droneQty")?.value || 0),
+days: parseInt(get("droneDays")?.value || 0)
 },
 
 led_wall: {
-qty: get("ledQty")?.value || 0,
-days: get("ledDays")?.value || 0
+qty: parseInt(get("ledQty")?.value || 0),
+days: parseInt(get("ledDays")?.value || 0)
 },
 
 assistant: {
-qty: get("assistantQty")?.value || 0,
-days: get("assistantDays")?.value || 0
+qty: parseInt(get("assistantQty")?.value || 0),
+days: parseInt(get("assistantDays")?.value || 0)
 }
 
 },
@@ -180,7 +205,7 @@ cinematic: get("cinematicCheck")?.checked || false,
 
 album: {
 enabled: albumCheck?.checked || false,
-pages: albumPagesInput?.value || ""
+pages: parseInt(albumPagesInput?.value || 0)
 },
 
 gift: {
@@ -211,7 +236,8 @@ return
 // REDIRECT TO PROPOSAL
 // =============================
 
-window.location.href = "proposal.html?id=" + saved.id
+window.location.href =
+"proposal.html?id=" + saved.id
 
 })
 
