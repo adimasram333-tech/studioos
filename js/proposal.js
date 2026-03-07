@@ -145,18 +145,19 @@ const phone = data.phone || ""
 const proposalLink = window.location.href
 
 const message =
-`Hello ${data.client_name}
-
-Thank you for considering Aditya Masram Photography.
+`Hello ${data.client_name},
 
 Your wedding photography proposal is ready.
 
-View proposal:
+View Proposal:
 ${proposalLink}
 
 For booking contact:
+
 Aditya Masram Photography
-Phone: 8087945135`
+📞 8087945135
+
+Thank you.`
 
 const url =
 "https://wa.me/91" + phone + "?text=" + encodeURIComponent(message)
@@ -168,21 +169,20 @@ window.open(url,"_blank")
 
 
 // ======================
-// PDF DOWNLOAD (CENTER FIX)
+// PDF DOWNLOAD
 // ======================
 
 window.downloadPDF = function(){
 
 const element = document.getElementById("proposalPage")
 
-// center layout fix
-element.style.margin = "0 auto"
-element.style.width = "794px"
+// remove shadow for pdf
 element.style.boxShadow = "none"
+element.style.margin = "0 auto"
 
 const opt = {
 
-margin:[10,10,10,10],
+margin:0,
 
 filename:"photography-proposal.pdf",
 
@@ -201,10 +201,6 @@ jsPDF:{
 unit:"mm",
 format:"a4",
 orientation:"portrait"
-},
-
-pagebreak:{
-mode:['avoid-all','css','legacy']
 }
 
 }
@@ -214,10 +210,14 @@ html2pdf()
 .from(element)
 .save()
 
-}
+// restore shadow after export
+setTimeout(()=>{
+element.style.boxShadow="0 10px 40px rgba(0,0,0,0.08)"
+},1000)
 
 }
 
+}
 
 
 // ======================
