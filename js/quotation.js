@@ -94,6 +94,26 @@ giftInput.classList.add("hidden")
 
 
 // =============================
+// SAVE QUOTATION FUNCTION
+// =============================
+
+function saveQuotationLocal(data){
+
+let quotations = JSON.parse(localStorage.getItem("quotations")) || []
+
+data.id = Date.now()
+data.status = "Draft"
+
+quotations.push(data)
+
+localStorage.setItem("quotations", JSON.stringify(quotations))
+
+return data
+
+}
+
+
+// =============================
 // PREVIEW QUOTE
 // =============================
 
@@ -101,34 +121,9 @@ const previewBtn = get("previewBtn")
 
 if(previewBtn){
 
-previewBtn.addEventListener("click", async function(){
+previewBtn.addEventListener("click",function(){
 
 const data = {
-
-client_name: get("clientName")?.value || "",
-phone: get("clientPhone")?.value || "",
-
-event_start: get("startDate")?.value || "",
-event_end: get("endDate")?.value || "",
-
-total: totalInput?.value || "",
-advance: advanceInput?.value || "",
-balance: balanceInput?.value || ""
-
-}
-
-
-// =============================
-// SAVE IN SUPABASE
-// =============================
-
-const saved = await saveQuotation(data)
-
-if(saved && saved.id){
-
-// SAVE OTHER DATA LOCAL (services etc)
-
-const extraData = {
 
 clientName: get("clientName")?.value || "",
 clientPhone: get("clientPhone")?.value || "",
@@ -180,22 +175,25 @@ giftName: giftInput?.value || ""
 }
 
 
-// SAVE LOCAL FOR PROPOSAL PAGE
+// =============================
+// SAVE QUOTATION
+// =============================
 
-localStorage.setItem("quotationData", JSON.stringify(extraData))
+const saved = saveQuotationLocal(data)
 
 
 // =============================
-// OPEN PROPOSAL WITH ID
+// SAVE FOR PROPOSAL PAGE
+// =============================
+
+localStorage.setItem("quotationData", JSON.stringify(data))
+
+
+// =============================
+// OPEN PROPOSAL
 // =============================
 
 window.location.href = "proposal.html?id=" + saved.id
-
-}else{
-
-alert("Error saving quotation")
-
-}
 
 })
 
