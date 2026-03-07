@@ -3,11 +3,14 @@
 // ================================
 
 const SUPABASE_URL = "https://gnnaaagvlrmdveqxicob.supabase.co";
-const SUPABASE_KEY = "sb_publishable_TnjoiedXWPbSjjqh2tmfsQ_kpiIMaND";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE";
+
 
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
-  SUPABASE_KEY
+  SUPABASE_ANON_KEY
 );
 
 
@@ -15,9 +18,9 @@ const supabaseClient = supabase.createClient(
 // SAVE QUOTATION
 // ================================
 
-async function saveQuotation(data) {
+async function saveQuotation(data){
 
-  try {
+  try{
 
     const { data: result, error } = await supabaseClient
       .from("quotations")
@@ -25,14 +28,14 @@ async function saveQuotation(data) {
       .select()
       .single();
 
-    if (error) {
-      console.error("Supabase Error:", error);
+    if(error){
+      console.error("Supabase Save Error:", error);
       return null;
     }
 
     return result;
 
-  } catch (err) {
+  }catch(err){
 
     console.error("Save quotation failed:", err);
     return null;
@@ -42,14 +45,13 @@ async function saveQuotation(data) {
 }
 
 
-
 // ================================
 // GET QUOTATION BY ID
 // ================================
 
-async function getQuotationById(id) {
+async function getQuotationById(id){
 
-  try {
+  try{
 
     const { data, error } = await supabaseClient
       .from("quotations")
@@ -57,14 +59,14 @@ async function getQuotationById(id) {
       .eq("id", id)
       .single();
 
-    if (error) {
+    if(error){
       console.error("Fetch quotation error:", error);
       return null;
     }
 
     return data;
 
-  } catch (err) {
+  }catch(err){
 
     console.error("Fetch quotation failed:", err);
     return null;
@@ -74,28 +76,27 @@ async function getQuotationById(id) {
 }
 
 
-
 // ================================
 // GET ALL QUOTATIONS
 // ================================
 
-async function getAllQuotations() {
+async function getAllQuotations(){
 
-  try {
+  try{
 
     const { data, error } = await supabaseClient
       .from("quotations")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending:false });
 
-    if (error) {
+    if(error){
       console.error("Fetch quotations error:", error);
       return [];
     }
 
     return data;
 
-  } catch (err) {
+  }catch(err){
 
     console.error("Fetch quotations failed:", err);
     return [];
