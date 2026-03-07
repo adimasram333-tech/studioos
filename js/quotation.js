@@ -162,11 +162,6 @@ balance: parseFloat(balanceInput?.value || 0),
 
 status: "proposal",
 
-
-// =============================
-// SERVICES JSON
-// =============================
-
 services: {
 
 candid: {
@@ -206,11 +201,6 @@ days: parseInt(get("assistantDays")?.value || 0)
 
 },
 
-
-// =============================
-// DELIVERABLES JSON
-// =============================
-
 deliverables: {
 
 raw: get("rawCheck")?.checked || false,
@@ -247,19 +237,35 @@ return
 
 
 // =============================
-// GENERATE SLUG
+// GENERATE SHORT ID
+// =============================
+
+const shortId = saved.id.substring(0,8)
+
+
+// =============================
+// UPDATE SHORT ID IN DATABASE
+// =============================
+
+await supabase
+.from("quotations")
+.update({ short_id: shortId })
+.eq("id", saved.id)
+
+
+// =============================
+// GENERATE CLIENT SLUG
 // =============================
 
 const slug = slugify(clientName)
 
 
 // =============================
-// REDIRECT TO PROPOSAL ROUTER
+// FINAL PROFESSIONAL LINK
 // =============================
 
-// GitHub Pages compatible
 window.location.href =
-"p/?id=" + saved.id
+"p/" + slug + "-" + shortId
 
 })
 
