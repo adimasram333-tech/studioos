@@ -168,19 +168,21 @@ window.open(url,"_blank")
 
 
 // ======================
-// PDF DOWNLOAD (FIXED)
+// PDF DOWNLOAD (CENTER FIX)
 // ======================
 
 window.downloadPDF = function(){
 
 const element = document.getElementById("proposalPage")
 
-// remove shadow for pdf render
+// center layout fix
+element.style.margin = "0 auto"
+element.style.width = "794px"
 element.style.boxShadow = "none"
 
 const opt = {
 
-margin:10,
+margin:[10,10,10,10],
 
 filename:"photography-proposal.pdf",
 
