@@ -1,13 +1,14 @@
 // ======================
-// GET QUOTATION ID FROM URL
+// GET QUOTATION ID
 // ======================
 
 const params = new URLSearchParams(window.location.search)
 const quotationId = params.get("id")
 
 
+
 // ======================
-// LOAD QUOTATION FROM SUPABASE
+// LOAD PROPOSAL
 // ======================
 
 async function loadProposal(){
@@ -29,6 +30,7 @@ return
 }
 
 
+
 // ======================
 // CLIENT INFO
 // ======================
@@ -38,6 +40,7 @@ data.client_name || "-"
 
 document.getElementById("eventDate").innerText =
 data.event_date || "-"
+
 
 
 // ======================
@@ -54,11 +57,22 @@ document.getElementById("balance").innerText =
 "₹ " + (data.balance || 0) + " /-"
 
 
+
 // ======================
 // SERVICES
 // ======================
 
-const services = data.services || {}
+let services = data.services || {}
+
+if(typeof services === "string"){
+
+try{
+services = JSON.parse(services)
+}catch(e){
+services = {}
+}
+
+}
 
 document.getElementById("candidQty").innerText =
 (services.candid?.qty || 0) + " × " + (services.candid?.days || 0) + " Days"
@@ -82,14 +96,25 @@ document.getElementById("assistantQty").innerText =
 (services.assistant?.qty || 0) + " × " + (services.assistant?.days || 0) + " Days"
 
 
+
 // ======================
 // DELIVERABLES
 // ======================
 
+let deliverables = data.deliverables || {}
+
+if(typeof deliverables === "string"){
+
+try{
+deliverables = JSON.parse(deliverables)
+}catch(e){
+deliverables = {}
+}
+
+}
+
 const list = document.getElementById("deliverablesList")
 list.innerHTML = ""
-
-const deliverables = data.deliverables || {}
 
 if(deliverables.raw)
 list.innerHTML += "<li>All Raw Soft Copy</li>"
@@ -105,6 +130,7 @@ list.innerHTML += "<li>Premium Printed Album (" + (deliverables.album.pages || 0
 
 if(deliverables.gift?.enabled)
 list.innerHTML += "<li>Complimentary Gift : " + (deliverables.gift.name || "-") + "</li>"
+
 
 
 // ======================
@@ -125,11 +151,26 @@ const message =
 const url =
 "https://wa.me/91" + phone + "?text=" + message
 
-window.open(url, "_blank")
+window.open(url,"_blank")
+
+}
+
+
+
+// ======================
+// PDF DOWNLOAD
+// ======================
+
+window.downloadPDF = function(){
+
+const element = document.getElementById("proposalPage")
+
+html2pdf().from(element).save("proposal.pdf")
 
 }
 
 }
+
 
 
 // ======================
