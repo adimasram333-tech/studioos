@@ -13,7 +13,7 @@ quotationId = params.get("id")
 
 // ======================
 // SUPPORT SEO LINK
-// /p/ritesh-verma-c8ee1e47
+// /p/ritesh-verma-UUID
 // ======================
 
 const pathParts = window.location.pathname.split("/")
@@ -23,11 +23,9 @@ if(!quotationId && lastPart){
 
 const slugParts = lastPart.split("-")
 
-const shortId = slugParts[slugParts.length - 1]
+quotationId = slugParts[slugParts.length - 1]
 
-quotationId = shortId
 }
-
 
 
 // ======================
@@ -72,7 +70,6 @@ eventDateText = data.event_date || "-"
 document.getElementById("eventDate").innerText = eventDateText
 
 
-
 // ======================
 // MONEY
 // ======================
@@ -85,7 +82,6 @@ document.getElementById("advance").innerText =
 
 document.getElementById("balance").innerText =
 "₹ " + (data.balance || 0) + " /-"
-
 
 
 // ======================
@@ -124,7 +120,6 @@ document.getElementById("assistantQty").innerText =
 (services.assistant?.qty || 0) + " × " + (services.assistant?.days || 0) + " Days"
 
 
-
 // ======================
 // DELIVERABLES
 // ======================
@@ -158,7 +153,6 @@ if(deliverables.gift?.enabled)
 list.innerHTML += "<li>Complimentary Gift : " + (deliverables.gift.name || "-") + "</li>"
 
 
-
 // ======================
 // WHATSAPP SHARE
 // ======================
@@ -167,25 +161,31 @@ window.sendWhatsApp = function(){
 
 const phone = data.phone || ""
 
-// SEO FRIENDLY LINK
+const slug =
+data.client_name
+.toLowerCase()
+.replace(/\s+/g,"-")
+.replace(/[^a-z0-9\-]/g,"")
+
 const proposalLink =
 window.location.origin +
 "/studioos/p/" +
-data.client_name.toLowerCase().replace(/\s+/g,"-") +
+slug +
 "-" +
 quotationId
 
 const message =
 `Hello ${data.client_name},
 
-Your photography proposal is ready.
+Your wedding photography proposal is ready.
 
 View your proposal:
 ${proposalLink}
 
 For booking contact:
+
 Aditya Masram Photography
-Phone: 8087945135
+📞 8087945135
 
 Powered by StudioOS`
 
@@ -195,7 +195,6 @@ const url =
 window.open(url,"_blank")
 
 }
-
 
 
 // ======================
