@@ -1,53 +1,85 @@
 // ======================
-// LOAD DATA
+// GET QUOTATION ID FROM URL
 // ======================
 
-const data = JSON.parse(localStorage.getItem("quotationData"))
+const params = new URLSearchParams(window.location.search)
+const quotationId = params.get("id")
 
-if(data){
 
+// ======================
+// LOAD QUOTATION FROM SUPABASE
+// ======================
+
+async function loadProposal(){
+
+if(!quotationId){
+
+alert("Invalid proposal link")
+return
+
+}
+
+const data = await getQuotationById(quotationId)
+
+if(!data){
+
+alert("Proposal not found")
+return
+
+}
+
+
+// ======================
 // CLIENT INFO
+// ======================
+
 document.getElementById("clientName").innerText =
-data.clientName || "-"
+data.client_name || "-"
 
 document.getElementById("eventDate").innerText =
-(data.startDate || "-") + " to " + (data.endDate || "-")
+data.event_date || "-"
 
+
+// ======================
 // MONEY
+// ======================
+
 document.getElementById("total").innerText =
-"₹ " + (data.total || "0") + " /-"
+"₹ " + (data.total || 0) + " /-"
 
 document.getElementById("advance").innerText =
-"₹ " + (data.advance || "0") + " /-"
+"₹ " + (data.advance || 0) + " /-"
 
 document.getElementById("balance").innerText =
-"₹ " + (data.balance || "0") + " /-"
+"₹ " + (data.balance || 0) + " /-"
 
 
 // ======================
 // SERVICES
 // ======================
 
+const services = data.services || {}
+
 document.getElementById("candidQty").innerText =
-(data.candidQty || 0) + " × " + (data.candidDays || 0) + " Days"
+(services.candid?.qty || 0) + " × " + (services.candid?.days || 0) + " Days"
 
 document.getElementById("traditionalPhotoQty").innerText =
-(data.traditionalPhotoQty || 0) + " × " + (data.traditionalPhotoDays || 0) + " Days"
+(services.traditional_photo?.qty || 0) + " × " + (services.traditional_photo?.days || 0) + " Days"
 
 document.getElementById("traditionalVideoQty").innerText =
-(data.traditionalVideoQty || 0) + " × " + (data.traditionalVideoDays || 0) + " Days"
+(services.traditional_video?.qty || 0) + " × " + (services.traditional_video?.days || 0) + " Days"
 
 document.getElementById("cinemaQty").innerText =
-(data.cinemaQty || 0) + " × " + (data.cinemaDays || 0) + " Days"
+(services.cinematographer?.qty || 0) + " × " + (services.cinematographer?.days || 0) + " Days"
 
 document.getElementById("droneQty").innerText =
-(data.droneQty || 0) + " × " + (data.droneDays || 0) + " Days"
+(services.drone?.qty || 0) + " × " + (services.drone?.days || 0) + " Days"
 
 document.getElementById("ledQty").innerText =
-(data.ledQty || 0) + " × " + (data.ledDays || 0) + " Days"
+(services.led_wall?.qty || 0) + " × " + (services.led_wall?.days || 0) + " Days"
 
 document.getElementById("assistantQty").innerText =
-(data.assistantQty || 0) + " × " + (data.assistantDays || 0) + " Days"
+(services.assistant?.qty || 0) + " × " + (services.assistant?.days || 0) + " Days"
 
 
 // ======================
@@ -55,75 +87,39 @@ document.getElementById("assistantQty").innerText =
 // ======================
 
 const list = document.getElementById("deliverablesList")
-
 list.innerHTML = ""
 
-if(data.raw)
+const deliverables = data.deliverables || {}
+
+if(deliverables.raw)
 list.innerHTML += "<li>All Raw Soft Copy</li>"
 
-if(data.traditional)
+if(deliverables.traditional_video)
 list.innerHTML += "<li>Traditional Full Event Video</li>"
 
-if(data.cinematic)
+if(deliverables.cinematic)
 list.innerHTML += "<li>Cinematic Highlight Film</li>"
 
-if(data.album)
-list.innerHTML += "<li>Premium Printed Album (" + (data.albumPages || "0") + " Pages)</li>"
+if(deliverables.album?.enabled)
+list.innerHTML += "<li>Premium Printed Album (" + (deliverables.album.pages || 0) + " Pages)</li>"
 
-if(data.gift)
-list.innerHTML += "<li>Complimentary Gift : " + (data.giftName || "-") + "</li>"
-
-}
-
-
-
-// ======================
-// STUDIO PROFILE
-// ======================
-
-const profile = JSON.parse(localStorage.getItem("studioProfile"))
-
-if(profile){
-
-document.getElementById("studioName").innerText =
-profile.studioName || "Your Studio"
-
-if(document.getElementById("studioPhone")){
-document.getElementById("studioPhone").innerText =
-profile.phone || "-"
-}
-
-}
-
+if(deliverables.gift?.enabled)
+list.innerHTML += "<li>Complimentary Gift : " + (deliverables.gift.name || "-") + "</li>"
 
 
 // ======================
 // WHATSAPP SHARE
 // ======================
 
-function sendWhatsApp(){
+window.sendWhatsApp = function(){
 
-const data = JSON.parse(localStorage.getItem("quotationData"))
-const profile = JSON.parse(localStorage.getItem("studioProfile"))
-
-if(!data) return
-
-const phone = data.clientPhone || ""
-
-const photographerName =
-profile?.studioName || "Our Studio"
-
-const photographerPhone =
-profile?.phone || ""
+const phone = data.phone || ""
 
 const message =
-"Hello " + data.clientName +
+"Hello " + data.client_name +
 "%0A%0AHere is your photography proposal." +
-"%0A%0AEvent Date: " + data.startDate + " to " + data.endDate +
+"%0A%0AEvent Date: " + data.event_date +
 "%0A%0ATotal Investment: ₹" + data.total +
-"%0A%0AFor booking contact:" +
-"%0A" + photographerName +
-"%0APhone: " + photographerPhone +
 "%0A%0AThank you."
 
 const url =
@@ -132,3 +128,12 @@ const url =
 window.open(url, "_blank")
 
 }
+
+}
+
+
+// ======================
+// INIT
+// ======================
+
+loadProposal()
