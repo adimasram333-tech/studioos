@@ -94,26 +94,6 @@ giftInput.classList.add("hidden")
 
 
 // =============================
-// SAVE QUOTATION FUNCTION
-// =============================
-
-function saveQuotationLocal(data){
-
-let quotations = JSON.parse(localStorage.getItem("quotations")) || []
-
-data.id = Date.now()
-data.status = "Draft"
-
-quotations.push(data)
-
-localStorage.setItem("quotations", JSON.stringify(quotations))
-
-return data
-
-}
-
-
-// =============================
 // PREVIEW QUOTE
 // =============================
 
@@ -121,76 +101,102 @@ const previewBtn = get("previewBtn")
 
 if(previewBtn){
 
-previewBtn.addEventListener("click",function(){
+previewBtn.addEventListener("click", async function(){
 
-const data = {
+const quotationData = {
 
-clientName: get("clientName")?.value || "",
-clientPhone: get("clientPhone")?.value || "",
+client_name: get("clientName")?.value || "",
+phone: get("clientPhone")?.value || "",
+event_date: get("startDate")?.value || "",
 
-startDate: get("startDate")?.value || "",
-endDate: get("endDate")?.value || "",
+package: packageSelect?.value || "",
 
-total: totalInput?.value || "",
-advance: advanceInput?.value || "",
-balance: balanceInput?.value || "",
+total: parseFloat(totalInput?.value || 0),
+advance: parseFloat(advanceInput?.value || 0),
+balance: parseFloat(balanceInput?.value || 0),
 
+status: "proposal",
 
-// SERVICES
+// SERVICES JSON
 
-candidQty: get("candidQty")?.value || "0",
-candidDays: get("candidDays")?.value || "0",
+services: {
 
-traditionalPhotoQty: get("traditionalPhotoQty")?.value || "0",
-traditionalPhotoDays: get("traditionalPhotoDays")?.value || "0",
+candid: {
+qty: get("candidQty")?.value || 0,
+days: get("candidDays")?.value || 0
+},
 
-traditionalVideoQty: get("traditionalVideoQty")?.value || "0",
-traditionalVideoDays: get("traditionalVideoDays")?.value || "0",
+traditional_photo: {
+qty: get("traditionalPhotoQty")?.value || 0,
+days: get("traditionalPhotoDays")?.value || 0
+},
 
-cinemaQty: get("cinemaQty")?.value || "0",
-cinemaDays: get("cinemaDays")?.value || "0",
+traditional_video: {
+qty: get("traditionalVideoQty")?.value || 0,
+days: get("traditionalVideoDays")?.value || 0
+},
 
-droneQty: get("droneQty")?.value || "0",
-droneDays: get("droneDays")?.value || "0",
+cinematographer: {
+qty: get("cinemaQty")?.value || 0,
+days: get("cinemaDays")?.value || 0
+},
 
-ledQty: get("ledQty")?.value || "0",
-ledDays: get("ledDays")?.value || "0",
+drone: {
+qty: get("droneQty")?.value || 0,
+days: get("droneDays")?.value || 0
+},
 
-assistantQty: get("assistantQty")?.value || "0",
-assistantDays: get("assistantDays")?.value || "0",
+led_wall: {
+qty: get("ledQty")?.value || 0,
+days: get("ledDays")?.value || 0
+},
 
+assistant: {
+qty: get("assistantQty")?.value || 0,
+days: get("assistantDays")?.value || 0
+}
 
-// DELIVERABLES
+},
+
+// DELIVERABLES JSON
+
+deliverables: {
 
 raw: get("rawCheck")?.checked || false,
-traditional: get("traditionalCheck")?.checked || false,
+traditional_video: get("traditionalCheck")?.checked || false,
 cinematic: get("cinematicCheck")?.checked || false,
 
-album: albumCheck?.checked || false,
-albumPages: albumPagesInput?.value || "",
+album: {
+enabled: albumCheck?.checked || false,
+pages: albumPagesInput?.value || ""
+},
 
-gift: giftCheck?.checked || false,
-giftName: giftInput?.value || ""
+gift: {
+enabled: giftCheck?.checked || false,
+name: giftInput?.value || ""
+}
+
+}
 
 }
 
 
 // =============================
-// SAVE QUOTATION
+// SAVE TO SUPABASE
 // =============================
 
-const saved = saveQuotationLocal(data)
+const saved = await saveQuotation(quotationData)
+
+if(!saved){
+
+alert("Error saving quotation")
+return
+
+}
 
 
 // =============================
-// SAVE FOR PROPOSAL PAGE
-// =============================
-
-localStorage.setItem("quotationData", JSON.stringify(data))
-
-
-// =============================
-// OPEN PROPOSAL
+// REDIRECT TO PROPOSAL
 // =============================
 
 window.location.href = "proposal.html?id=" + saved.id
