@@ -13,8 +13,10 @@ quotationId = params.get("id")
 
 // ======================
 // SUPPORT SEO LINK
-// /p/client-name-UUID
+// /p/client-name-shortid
 // ======================
+
+let shortId = null
 
 if(!quotationId){
 
@@ -24,7 +26,7 @@ const lastPart = pathParts[pathParts.length - 1]
 if(lastPart && lastPart.includes("-")){
 
 const slugParts = lastPart.split("-")
-quotationId = slugParts[slugParts.length - 1]
+shortId = slugParts[slugParts.length - 1]
 
 }
 
@@ -37,12 +39,36 @@ quotationId = slugParts[slugParts.length - 1]
 
 async function loadProposal(){
 
-if(!quotationId){
-alert("Invalid proposal link")
-return
+let data = null
+
+// ======================
+// LOAD BY FULL ID
+// ======================
+
+if(quotationId){
+data = await getQuotationById(quotationId)
 }
 
-const data = await getQuotationById(quotationId)
+
+// ======================
+// LOAD BY SHORT ID
+// ======================
+
+if(!data && shortId){
+
+const { data: row, error } = await supabase
+.from("quotations")
+.select("*")
+.eq("short_id", shortId)
+.single()
+
+if(!error){
+data = row
+quotationId = row.id
+}
+
+}
+
 
 if(!data){
 alert("Proposal not found")
@@ -157,6 +183,23 @@ list.innerHTML += "<li>Complimentary Gift : " + (deliverables.gift.name || "-") 
 
 
 // ======================
+// GENERATE SHORT LINK
+// ======================
+
+const slug =
+data.client_name
+.toLowerCase()
+.replace(/\s+/g,"-")
+
+const shortLink =
+window.location.origin +
+"/studioos/p/" +
+slug +
+"-" +
+(data.short_id || quotationId.substring(0,8))
+
+
+// ======================
 // WHATSAPP SHARE
 // ======================
 
@@ -164,18 +207,13 @@ window.sendWhatsApp = function(){
 
 const phone = data.phone || ""
 
-const proposalLink =
-window.location.origin +
-"/studioos/p/?id=" +
-quotationId
-
 const message =
 `Hello ${data.client_name},
 
 Your wedding photography proposal is ready.
 
 View your proposal:
-${proposalLink}
+${shortLink}
 
 For booking contact:
 
