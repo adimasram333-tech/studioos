@@ -12,13 +12,15 @@ return document.getElementById(id)
 // =============================
 
 function slugify(text){
+
 return text
 .toString()
 .toLowerCase()
 .trim()
 .replace(/\s+/g,"-")
-.replace(/[^\w\-]+/g,"")
+.replace(/[^a-z0-9\-]/g,"")
 .replace(/\-\-+/g,"-")
+
 }
 
 
@@ -118,26 +120,33 @@ if(previewBtn){
 
 previewBtn.addEventListener("click", async function(){
 
+// prevent double click
+previewBtn.disabled = true
+
+
 // =============================
 // BASIC VALIDATION
 // =============================
 
-const clientName = get("clientName")?.value || ""
-const clientPhone = get("clientPhone")?.value || ""
+const clientName = get("clientName")?.value.trim() || ""
+const clientPhone = get("clientPhone")?.value.trim() || ""
 const startDate = get("startDate")?.value || ""
 
 if(!clientName){
 alert("Enter client name")
+previewBtn.disabled = false
 return
 }
 
 if(!clientPhone){
 alert("Enter client phone")
+previewBtn.disabled = false
 return
 }
 
 if(!startDate){
 alert("Select event date")
+previewBtn.disabled = false
 return
 }
 
@@ -231,6 +240,7 @@ const saved = await saveQuotation(quotationData)
 if(!saved){
 
 alert("Error saving quotation")
+previewBtn.disabled = false
 return
 
 }
