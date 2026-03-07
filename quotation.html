@@ -105,8 +105,13 @@ color:#9ca3af;
 
 <h1 class="text-xl font-bold mt-2 mb-6">Create Quotation</h1>
 
-<input id="clientName" class="input" placeholder="Client Name">
-<input id="clientPhone" class="input" placeholder="Client Phone">
+<input id="clientName" class="input" placeholder="Client Name" required>
+
+<input id="clientPhone"
+type="tel"
+class="input"
+placeholder="Client Phone"
+required>
 
 <select id="eventCategory" class="input">
 <option value="">Select Event Category</option>
@@ -124,7 +129,7 @@ color:#9ca3af;
 </select>
 
 <div class="flex gap-2">
-<input id="startDate" type="date" class="input">
+<input id="startDate" type="date" class="input" required>
 <input id="endDate" type="date" class="input">
 </div>
 
@@ -207,19 +212,37 @@ color:#9ca3af;
 <input type="checkbox" id="albumCheck"> Printed Album
 </label>
 
-<input id="albumPagesInput" type="number" placeholder="Album Pages" class="input hidden">
+<input id="albumPagesInput"
+type="number"
+placeholder="Album Pages"
+class="input hidden">
 
 <label class="deliverable">
 <input type="checkbox" id="giftCheck"> Free Gift
 </label>
 
-<input id="giftInput" type="text" placeholder="Gift Name" class="input hidden">
+<input id="giftInput"
+type="text"
+placeholder="Gift Name"
+class="input hidden">
 
 <hr class="my-3 border-gray-600">
 
-<input id="totalAmount" class="input" placeholder="Total ₹">
-<input id="advanceAmount" class="input" placeholder="Advance ₹">
-<input id="balanceAmount" class="input" placeholder="Balance ₹" readonly>
+<input id="totalAmount"
+type="number"
+class="input"
+placeholder="Total ₹">
+
+<input id="advanceAmount"
+type="number"
+class="input"
+placeholder="Advance ₹">
+
+<input id="balanceAmount"
+type="number"
+class="input"
+placeholder="Balance ₹"
+readonly>
 
 <button id="previewBtn"
 class="w-full bg-indigo-600 p-3 rounded-xl mt-2 hover:bg-indigo-500 transition">
