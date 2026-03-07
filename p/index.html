@@ -20,6 +20,7 @@
 
 let shortId = null
 
+
 // =============================
 // GET ID FROM QUERY (?id=)
 // =============================
@@ -88,8 +89,9 @@ const fullId = data.id
 // REDIRECT TO PROPOSAL
 // =============================
 
-window.location.href =
-"/studioos/proposal.html?id=" + fullId
+window.location.replace(
+"../proposal.html?id=" + fullId
+)
 
 
 }catch(err){
