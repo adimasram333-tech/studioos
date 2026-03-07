@@ -4,24 +4,53 @@
 <head>
 
 <meta charset="UTF-8">
-
 <title>Loading Proposal...</title>
 
 <script>
 
-const path = window.location.pathname
+// =============================
+// GET ID FROM QUERY (?id=)
+// =============================
 
+const params = new URLSearchParams(window.location.search)
+
+let quotationId = params.get("id")
+
+
+// =============================
+// SUPPORT SEO LINK
+// /p/client-name-UUID
+// =============================
+
+if(!quotationId){
+
+const path = window.location.pathname
 const parts = path.split("/")
 
 const slug = parts[parts.length - 1]
 
-// extract UUID
-const id = slug.substring(slug.lastIndexOf("-") + 1)
+if(slug && slug.includes("-")){
 
-if(id){
+quotationId =
+slug.substring(slug.lastIndexOf("-") + 1)
+
+}
+
+}
+
+
+// =============================
+// REDIRECT TO PROPOSAL
+// =============================
+
+if(quotationId){
 
 window.location.href =
-"/studioos/proposal.html?id=" + id
+"/studioos/proposal.html?id=" + quotationId
+
+}else{
+
+document.body.innerHTML = "Invalid proposal link"
 
 }
 
