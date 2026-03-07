@@ -6,7 +6,6 @@ const params = new URLSearchParams(window.location.search)
 const quotationId = params.get("id")
 
 
-
 // ======================
 // LOAD PROPOSAL
 // ======================
@@ -38,8 +37,24 @@ return
 document.getElementById("clientName").innerText =
 data.client_name || "-"
 
-document.getElementById("eventDate").innerText =
-data.event_date || "-"
+
+// ======================
+// EVENT DATE FIX
+// ======================
+
+let eventDateText = "-"
+
+if(data.event_date && data.end_date){
+
+eventDateText = data.event_date + " → " + data.end_date
+
+}else{
+
+eventDateText = data.event_date || "-"
+
+}
+
+document.getElementById("eventDate").innerText = eventDateText
 
 
 
@@ -141,12 +156,16 @@ window.sendWhatsApp = function(){
 
 const phone = data.phone || ""
 
+const proposalLink = window.location.href
+
 const message =
 "Hello " + data.client_name +
 "%0A%0AHere is your photography proposal." +
-"%0A%0AEvent Date: " + data.event_date +
-"%0A%0ATotal Investment: ₹" + data.total +
-"%0A%0AThank you."
+"%0A%0AView Proposal:" +
+"%0A" + proposalLink +
+"%0A%0AFor booking contact:" +
+"%0AAditya Masram Photography" +
+"%0APhone: 8087945135"
 
 const url =
 "https://wa.me/91" + phone + "?text=" + message
@@ -170,7 +189,6 @@ html2pdf().from(element).save("proposal.pdf")
 }
 
 }
-
 
 
 // ======================
