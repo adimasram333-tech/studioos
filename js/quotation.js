@@ -8,6 +8,21 @@ return document.getElementById(id)
 
 
 // =============================
+// SLUG GENERATOR
+// =============================
+
+function slugify(text){
+return text
+.toString()
+.toLowerCase()
+.trim()
+.replace(/\s+/g,"-")
+.replace(/[^\w\-]+/g,"")
+.replace(/\-\-+/g,"-")
+}
+
+
+// =============================
 // PACKAGE PRICE AUTO
 // =============================
 
@@ -233,11 +248,15 @@ return
 
 
 // =============================
-// REDIRECT TO PROPOSAL
+// SEO FRIENDLY LINK
 // =============================
 
+const slug = slugify(clientName)
+
+const shortId = saved.id.substring(0,8)
+
 window.location.href =
-"proposal.html?id=" + saved.id
+"p/" + slug + "-" + shortId
 
 })
 
