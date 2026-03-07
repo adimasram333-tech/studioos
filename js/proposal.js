@@ -2,8 +2,21 @@
 // GET QUOTATION ID
 // ======================
 
+let quotationId = null
+
 const params = new URLSearchParams(window.location.search)
-const quotationId = params.get("id")
+
+if(params.get("id")){
+quotationId = params.get("id")
+}
+
+// support short link /p/uuid
+const pathParts = window.location.pathname.split("/")
+const lastPart = pathParts[pathParts.length - 1]
+
+if(!quotationId && lastPart.length > 8){
+quotationId = lastPart
+}
 
 
 // ======================
@@ -136,7 +149,7 @@ list.innerHTML += "<li>Complimentary Gift : " + (deliverables.gift.name || "-") 
 
 
 // ======================
-// WHATSAPP SHARE (FIXED)
+// WHATSAPP SHARE
 // ======================
 
 window.sendWhatsApp = function(){
@@ -144,11 +157,9 @@ window.sendWhatsApp = function(){
 const phone = data.phone || ""
 
 // short proposal link
-const shortId = quotationId.substring(0,8)
-
 const proposalLink =
 window.location.origin +
-"/studioos/proposal.html?id=" +
+"/studioos/p/" +
 quotationId
 
 const message =
