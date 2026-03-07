@@ -13,17 +13,20 @@ quotationId = params.get("id")
 
 // ======================
 // SUPPORT SEO LINK
-// /p/ritesh-verma-UUID
+// /p/client-name-UUID
 // ======================
+
+if(!quotationId){
 
 const pathParts = window.location.pathname.split("/")
 const lastPart = pathParts[pathParts.length - 1]
 
-if(!quotationId && lastPart){
+if(lastPart && lastPart.includes("-")){
 
 const slugParts = lastPart.split("-")
-
 quotationId = slugParts[slugParts.length - 1]
+
+}
 
 }
 
@@ -161,17 +164,9 @@ window.sendWhatsApp = function(){
 
 const phone = data.phone || ""
 
-const slug =
-data.client_name
-.toLowerCase()
-.replace(/\s+/g,"-")
-.replace(/[^a-z0-9\-]/g,"")
-
 const proposalLink =
 window.location.origin +
-"/studioos/p/" +
-slug +
-"-" +
+"/studioos/p/?id=" +
 quotationId
 
 const message =
@@ -185,7 +180,7 @@ ${proposalLink}
 For booking contact:
 
 Aditya Masram Photography
-📞 8087945135
+Phone: 8087945135
 
 Powered by StudioOS`
 
