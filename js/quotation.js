@@ -118,7 +118,6 @@ if(previewBtn){
 
 previewBtn.addEventListener("click", async function(){
 
-
 // =============================
 // BASIC VALIDATION
 // =============================
@@ -253,10 +252,9 @@ return
 
 const slug = slugify(clientName)
 
-const shortId = saved.id.substring(0,8)
-
+// FULL UUID use करेंगे
 window.location.href =
-"p/" + slug + "-" + shortId
+"p/" + slug + "-" + saved.id
 
 })
 
