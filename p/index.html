@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Loading Proposal...</title>
+
+<script>
+
+const path = window.location.pathname
+
+const parts = path.split("/")
+
+const slug = parts[parts.length - 1]
+
+if(slug){
+
+const id = slug.split("-").pop()
+
+window.location.href =
+"/studioos/proposal.html?id=" + id
+
+}
+
+</script>
+
+</head>
+
+<body>
+
+Loading proposal...
+
+</body>
+</html>
