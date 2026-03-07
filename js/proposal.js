@@ -136,28 +136,34 @@ list.innerHTML += "<li>Complimentary Gift : " + (deliverables.gift.name || "-") 
 
 
 // ======================
-// WHATSAPP SHARE
+// WHATSAPP SHARE (FIXED)
 // ======================
 
 window.sendWhatsApp = function(){
 
 const phone = data.phone || ""
-const proposalLink = window.location.href
+
+// short proposal link
+const shortId = quotationId.substring(0,8)
+
+const proposalLink =
+window.location.origin +
+"/studioos/proposal.html?id=" +
+quotationId
 
 const message =
 `Hello ${data.client_name},
 
-Your wedding photography proposal is ready.
+Your photography proposal is ready.
 
-View Proposal:
+View your proposal:
 ${proposalLink}
 
 For booking contact:
-
 Aditya Masram Photography
-📞 8087945135
+Phone: 8087945135
 
-Thank you.`
+Powered by StudioOS`
 
 const url =
 "https://wa.me/91" + phone + "?text=" + encodeURIComponent(message)
@@ -176,7 +182,6 @@ window.downloadPDF = function(){
 
 const element = document.getElementById("proposalPage")
 
-// remove shadow for pdf
 element.style.boxShadow = "none"
 element.style.margin = "0 auto"
 
@@ -210,7 +215,6 @@ html2pdf()
 .from(element)
 .save()
 
-// restore shadow after export
 setTimeout(()=>{
 element.style.boxShadow="0 10px 40px rgba(0,0,0,0.08)"
 },1000)
