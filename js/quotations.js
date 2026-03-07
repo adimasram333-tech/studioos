@@ -1,42 +1,47 @@
-function loadQuotations() {
+// =============================
+// LOAD QUOTATIONS FROM SUPABASE
+// =============================
+
+async function loadQuotations() {
 
   const listContainer = document.getElementById("quotationList");
 
-  let quotations = JSON.parse(localStorage.getItem("quotations")) || [];
+  if (!listContainer) return;
 
-  if (quotations.length === 0) {
+  const quotations = await getAllQuotations();
+
+  if (!quotations || quotations.length === 0) {
+
     listContainer.innerHTML =
       "<p class='text-gray-400'>No quotations found.</p>";
+
     return;
   }
 
   listContainer.innerHTML = "";
 
-  quotations
-    .slice()
-    .reverse()
-    .forEach((q) => {
+  quotations.forEach((q) => {
 
-      const statusColor =
-        q.status === "Draft"
-          ? "bg-gray-500"
-          : q.status === "Sent"
-          ? "bg-yellow-500"
-          : q.status.includes("Confirmed")
-          ? "bg-green-600"
-          : "bg-red-500";
+    const statusColor =
+      q.status === "proposal"
+        ? "bg-gray-500"
+        : q.status === "sent"
+        ? "bg-yellow-500"
+        : q.status === "confirmed"
+        ? "bg-green-600"
+        : "bg-red-500";
 
-      const card = document.createElement("div");
+    const card = document.createElement("div");
 
-      card.className = "glass p-5 rounded-2xl";
+    card.className = "glass p-5 rounded-2xl";
 
-      card.innerHTML = `
+    card.innerHTML = `
       <div class="flex justify-between items-center">
 
         <div>
-          <h2 class="text-lg font-semibold">${q.clientName}</h2>
+          <h2 class="text-lg font-semibold">${q.client_name}</h2>
           <p class="text-sm text-gray-400">
-            ${formatDate(q.startDate)} to ${formatDate(q.endDate)}
+            ${formatDate(q.event_date)}
           </p>
         </div>
 
@@ -56,27 +61,39 @@ function loadQuotations() {
 
       <div class="mt-4 flex gap-2 flex-wrap">
 
-        <button onclick="markSent(${q.id})"
+        <button onclick="markSent('${q.id}')"
         class="bg-yellow-600 px-3 py-1 rounded-lg text-sm">
         Mark Sent
         </button>
 
-        <button onclick="markConfirmed(${q.id})"
+        <button onclick="markConfirmed('${q.id}')"
         class="bg-green-600 px-3 py-1 rounded-lg text-sm">
         Confirm
         </button>
 
-        <button onclick="deleteQuotation(${q.id})"
+        <button onclick="deleteQuotation('${q.id}')"
         class="bg-red-600 px-3 py-1 rounded-lg text-sm">
         Delete
+        </button>
+
+        <button onclick="openProposal('${q.id}')"
+        class="bg-blue-600 px-3 py-1 rounded-lg text-sm">
+        Open Proposal
         </button>
 
       </div>
     `;
 
-      listContainer.appendChild(card);
-    });
+    listContainer.appendChild(card);
+
+  });
+
 }
+
+
+// =============================
+// FORMAT DATE
+// =============================
 
 function formatDate(dateString) {
 
@@ -89,45 +106,95 @@ function formatDate(dateString) {
     month: "long",
     year: "numeric",
   });
+
 }
+
+
+// =============================
+// UPDATE STATUS
+// =============================
+
+async function updateStatus(id, newStatus) {
+
+  const { error } = await supabaseClient
+    .from("quotations")
+    .update({ status: newStatus })
+    .eq("id", id);
+
+  if (error) {
+
+    console.error("Status update error:", error);
+    alert("Error updating status");
+    return;
+
+  }
+
+  loadQuotations();
+
+}
+
+
+// =============================
+// MARK SENT
+// =============================
 
 function markSent(id) {
 
-  updateStatus(id, "Sent");
+  updateStatus(id, "sent");
+
 }
+
+
+// =============================
+// MARK CONFIRMED
+// =============================
 
 function markConfirmed(id) {
 
-  updateStatus(id, "Advance Received (Booking Confirmed)");
+  updateStatus(id, "confirmed");
+
 }
 
-function deleteQuotation(id) {
 
-  let quotations = JSON.parse(localStorage.getItem("quotations")) || [];
+// =============================
+// DELETE QUOTATION
+// =============================
 
-  quotations = quotations.filter((q) => q.id !== id);
+async function deleteQuotation(id) {
 
-  localStorage.setItem("quotations", JSON.stringify(quotations));
+  if (!confirm("Delete this quotation?")) return;
+
+  const { error } = await supabaseClient
+    .from("quotations")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+
+    console.error("Delete error:", error);
+    alert("Error deleting quotation");
+    return;
+
+  }
 
   loadQuotations();
+
 }
 
-function updateStatus(id, newStatus) {
 
-  let quotations = JSON.parse(localStorage.getItem("quotations")) || [];
+// =============================
+// OPEN PROPOSAL
+// =============================
 
-  quotations = quotations.map((q) => {
+function openProposal(id){
 
-    if (q.id === id) {
-      q.status = newStatus;
-    }
+  window.location.href = "proposal.html?id=" + id;
 
-    return q;
-  });
-
-  localStorage.setItem("quotations", JSON.stringify(quotations));
-
-  loadQuotations();
 }
+
+
+// =============================
+// INIT
+// =============================
 
 loadQuotations();
