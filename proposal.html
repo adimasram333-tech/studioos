@@ -10,15 +10,10 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- PDF LIBRARY -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-
-/* (आपका पूरा existing CSS same रहेगा) */
 
 body{
 background:#f4f4f4;
@@ -26,13 +21,19 @@ margin:0;
 font-family:'Inter',sans-serif;
 }
 
+
+/* ===== PDF SAFE PAGE ===== */
+
 .page{
-width:210mm;
-min-height:297mm;
+width:794px;
+min-height:auto;
 background:white;
 margin:40px auto;
 box-shadow:0 10px 40px rgba(0,0,0,0.08);
 }
+
+
+/* ===== HERO ===== */
 
 .hero{
 height:240px;
@@ -58,6 +59,9 @@ margin-top:8px;
 font-size:15px;
 }
 
+
+/* ===== CONTENT ===== */
+
 .content{
 padding:50px;
 }
@@ -69,6 +73,7 @@ margin-bottom:10px;
 border-bottom:1px solid #eee;
 padding-bottom:6px;
 }
+
 
 .info-grid{
 display:grid;
@@ -87,12 +92,16 @@ ul{
 line-height:1.8;
 }
 
+
+/* ===== SUMMARY ===== */
+
 .summary{
 border:2px solid #C6A348;
 padding:25px;
 background:#faf7ef;
 margin-top:30px;
 }
+
 
 table{
 width:100%;
@@ -104,12 +113,18 @@ padding:10px;
 border-bottom:1px solid #eee;
 }
 
+
+/* ===== FOOTER ===== */
+
 .footer{
 margin-top:60px;
 text-align:center;
 font-size:13px;
 color:#666;
 }
+
+
+/* ===== BUTTONS ===== */
 
 .whatsappBtn{
 margin-top:25px;
@@ -138,12 +153,33 @@ text-align:center;
 margin-top:30px;
 }
 
+
+/* ===== PDF MODE ===== */
+
+@media print{
+
+body{
+background:white;
+}
+
+.page{
+box-shadow:none;
+margin:0;
+width:794px;
+}
+
+.whatsappBox{
+display:none;
+}
+
+}
+
 </style>
 
 </head>
 
-
 <body>
+
 
 <div class="page" id="proposalPage">
 
@@ -155,6 +191,7 @@ margin-top:30px;
 <p id="studioPhone">8087945135</p>
 
 </div>
+
 
 <div class="content">
 
@@ -177,6 +214,7 @@ margin-top:30px;
 </div>
 
 
+
 <h2 class="section-title">Services & Coverage</h2>
 
 <table>
@@ -192,8 +230,10 @@ margin-top:30px;
 </table>
 
 
+
 <h2 class="section-title">Deliverables</h2>
 <ul id="deliverablesList"></ul>
+
 
 
 <div class="summary">
@@ -211,6 +251,7 @@ margin-top:30px;
 </div>
 
 
+
 <div class="whatsappBox">
 
 <button class="whatsappBtn" onclick="sendWhatsApp()">
@@ -224,6 +265,7 @@ Download Proposal PDF
 </button>
 
 </div>
+
 
 
 <h2 class="section-title">Why Choose Us</h2>
@@ -243,6 +285,7 @@ Our team focuses on capturing real emotions, beautiful details, and timeless mom
 </ul>
 
 
+
 <h2 class="section-title">Booking Terms</h2>
 
 <ul>
@@ -254,6 +297,7 @@ Our team focuses on capturing real emotions, beautiful details, and timeless mom
 </ul>
 
 
+
 <div class="footer">
 
 <p><strong>Powered by StudioOS</strong></p>
@@ -261,12 +305,12 @@ Our team focuses on capturing real emotions, beautiful details, and timeless mom
 
 </div>
 
-</div>
 
 </div>
 
+</div>
 
-<!-- IMPORTANT SCRIPTS -->
+
 
 <script src="js/supabase.js"></script>
 <script src="js/proposal.js"></script>
