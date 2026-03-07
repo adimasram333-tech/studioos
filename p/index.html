@@ -6,7 +6,19 @@
 <meta charset="UTF-8">
 <title>Loading Proposal...</title>
 
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- SUPABASE CONNECTION -->
+<script src="../js/supabase.js"></script>
+
 <script>
+
+// =============================
+// GET SHORT ID
+// =============================
+
+let shortId = null
 
 // =============================
 // GET ID FROM QUERY (?id=)
@@ -14,15 +26,17 @@
 
 const params = new URLSearchParams(window.location.search)
 
-let quotationId = params.get("id")
+if(params.get("id")){
+shortId = params.get("id")
+}
 
 
 // =============================
 // SUPPORT SEO LINK
-// /p/client-name-UUID
+// /p/client-name-96c23df2
 // =============================
 
-if(!quotationId){
+if(!shortId){
 
 const path = window.location.pathname
 const parts = path.split("/")
@@ -31,7 +45,7 @@ const slug = parts[parts.length - 1]
 
 if(slug && slug.includes("-")){
 
-quotationId =
+shortId =
 slug.substring(slug.lastIndexOf("-") + 1)
 
 }
@@ -40,19 +54,58 @@ slug.substring(slug.lastIndexOf("-") + 1)
 
 
 // =============================
+// LOAD FULL UUID FROM DATABASE
+// =============================
+
+async function loadProposal(){
+
+if(!shortId){
+
+document.body.innerHTML = "Invalid proposal link"
+return
+
+}
+
+try{
+
+const { data, error } = await supabase
+.from("quotations")
+.select("id")
+.eq("short_id", shortId)
+.single()
+
+if(error || !data){
+
+document.body.innerHTML = "Proposal not found"
+return
+
+}
+
+const fullId = data.id
+
+
+// =============================
 // REDIRECT TO PROPOSAL
 // =============================
 
-if(quotationId){
-
 window.location.href =
-"/studioos/proposal.html?id=" + quotationId
+"/studioos/proposal.html?id=" + fullId
 
-}else{
 
-document.body.innerHTML = "Invalid proposal link"
+}catch(err){
+
+document.body.innerHTML = "Error loading proposal"
 
 }
+
+}
+
+
+// =============================
+// INIT
+// =============================
+
+loadProposal()
 
 </script>
 
