@@ -107,7 +107,13 @@ const quotationData = {
 
 client_name: get("clientName")?.value || "",
 phone: get("clientPhone")?.value || "",
+
+// =============================
+// EVENT DATES FIX
+// =============================
+
 event_date: get("startDate")?.value || "",
+end_date: get("endDate")?.value || "",
 
 package: packageSelect?.value || "",
 
@@ -117,7 +123,10 @@ balance: parseFloat(balanceInput?.value || 0),
 
 status: "proposal",
 
+
+// =============================
 // SERVICES JSON
+// =============================
 
 services: {
 
@@ -158,7 +167,10 @@ days: get("assistantDays")?.value || 0
 
 },
 
+
+// =============================
 // DELIVERABLES JSON
+// =============================
 
 deliverables: {
 
