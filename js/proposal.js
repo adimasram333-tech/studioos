@@ -13,21 +13,16 @@ const quotationId = params.get("id")
 async function loadProposal(){
 
 if(!quotationId){
-
 alert("Invalid proposal link")
 return
-
 }
 
 const data = await getQuotationById(quotationId)
 
 if(!data){
-
 alert("Proposal not found")
 return
-
 }
-
 
 
 // ======================
@@ -39,19 +34,15 @@ data.client_name || "-"
 
 
 // ======================
-// EVENT DATE FIX
+// EVENT DATE
 // ======================
 
 let eventDateText = "-"
 
 if(data.event_date && data.end_date){
-
 eventDateText = data.event_date + " → " + data.end_date
-
 }else{
-
 eventDateText = data.event_date || "-"
-
 }
 
 document.getElementById("eventDate").innerText = eventDateText
@@ -80,13 +71,11 @@ document.getElementById("balance").innerText =
 let services = data.services || {}
 
 if(typeof services === "string"){
-
 try{
 services = JSON.parse(services)
 }catch(e){
 services = {}
 }
-
 }
 
 document.getElementById("candidQty").innerText =
@@ -119,13 +108,11 @@ document.getElementById("assistantQty").innerText =
 let deliverables = data.deliverables || {}
 
 if(typeof deliverables === "string"){
-
 try{
 deliverables = JSON.parse(deliverables)
 }catch(e){
 deliverables = {}
 }
-
 }
 
 const list = document.getElementById("deliverablesList")
@@ -160,12 +147,14 @@ const proposalLink = window.location.href
 
 const message =
 "Hello " + data.client_name +
-"%0A%0AHere is your photography proposal." +
-"%0A%0AView Proposal:" +
+"%0A%0AThank you for considering Aditya Masram Photography." +
+"%0A%0AYour wedding photography proposal is ready." +
+"%0A%0AView your proposal here:" +
 "%0A" + proposalLink +
-"%0A%0AFor booking contact:" +
+"%0A%0AFor booking or any questions please contact:" +
 "%0AAditya Masram Photography" +
-"%0APhone: 8087945135"
+"%0APhone: 8087945135" +
+"%0A%0AWe look forward to capturing your beautiful moments."
 
 const url =
 "https://wa.me/91" + phone + "?text=" + message
@@ -177,14 +166,32 @@ window.open(url,"_blank")
 
 
 // ======================
-// PDF DOWNLOAD
+// PDF DOWNLOAD (FIXED)
 // ======================
 
 window.downloadPDF = function(){
 
 const element = document.getElementById("proposalPage")
 
-html2pdf().from(element).save("proposal.pdf")
+const opt = {
+
+margin: 0,
+
+filename: "photography-proposal.pdf",
+
+image: { type: "jpeg", quality: 1 },
+
+html2canvas: { scale: 2 },
+
+jsPDF: {
+unit: "mm",
+format: "a4",
+orientation: "portrait"
+}
+
+}
+
+html2pdf().set(opt).from(element).save()
 
 }
 
