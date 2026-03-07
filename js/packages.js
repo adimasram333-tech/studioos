@@ -1,63 +1,69 @@
 // =============================
-// LOAD PACKAGES FROM SUPABASE
+// SAFE PACKAGE SYSTEM
 // =============================
 
 async function loadPackages(){
 
-const packageSelect = document.getElementById("packageSelect")
+const packageDropdown = document.getElementById("packageSelect")
+const totalInput = document.getElementById("totalAmount")
 
-if(!packageSelect) return
+if(!packageDropdown) return
 
-const { data, error } = await supabaseClient
+try{
+
+const { data, error } = await window.supabaseClient
 .from("packages")
 .select("*")
 .order("price",{ascending:true})
 
-if(error){
+if(error) throw error
 
-console.error("Package load error:",error)
-return
+packageDropdown.innerHTML = `<option value="">Select Package</option>`
 
-}
+data.forEach(pkg=>{
 
-packageSelect.innerHTML = `<option value="">Select Package</option>`
+const option=document.createElement("option")
+option.value=pkg.price
+option.textContent=`${pkg.name} (₹${pkg.price})`
 
-data.forEach(pkg => {
+packageDropdown.appendChild(option)
 
-const option = document.createElement("option")
+})
 
-option.value = pkg.price
-option.dataset.packageId = pkg.id
+}catch(err){
 
-option.textContent = `${pkg.name} (₹${pkg.price})`
+console.warn("Using fallback packages")
 
-packageSelect.appendChild(option)
+const fallbackPackages=[
+{name:"Silver",price:50000},
+{name:"Gold",price:80000},
+{name:"Platinum",price:120000}
+]
+
+packageDropdown.innerHTML=`<option value="">Select Package</option>`
+
+fallbackPackages.forEach(pkg=>{
+
+const option=document.createElement("option")
+option.value=pkg.price
+option.textContent=`${pkg.name} (₹${pkg.price})`
+
+packageDropdown.appendChild(option)
 
 })
 
 }
 
+if(totalInput){
 
-// =============================
-// PACKAGE PRICE AUTO
-// =============================
+packageDropdown.addEventListener("change",function(){
 
-const packageSelect = document.getElementById("packageSelect")
-const totalInput = document.getElementById("totalAmount")
-
-if(packageSelect && totalInput){
-
-packageSelect.addEventListener("change",function(){
-
-totalInput.value = this.value || ""
+totalInput.value=this.value||""
 
 })
 
 }
 
-
-// =============================
-// INIT
-// =============================
+}
 
 loadPackages()
