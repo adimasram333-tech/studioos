@@ -247,14 +247,19 @@ return
 
 
 // =============================
-// SEO FRIENDLY LINK
+// GENERATE SLUG
 // =============================
 
 const slug = slugify(clientName)
 
-// FULL UUID use करेंगे
+
+// =============================
+// REDIRECT TO PROPOSAL ROUTER
+// =============================
+
+// GitHub Pages compatible
 window.location.href =
-"p/" + slug + "-" + saved.id
+"p/?id=" + saved.id
 
 })
 
