@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Loading Proposal...</title>
+
+<script>
+const path = window.location.pathname
+
+const parts = path.split("/")
+
+const id = parts[parts.length - 1]
+
+if(id){
+window.location.href = "../proposal.html?id=" + id
+}
+</script>
+
+</head>
+
+<body>
+
+Loading proposal...
+
+</body>
+</html>
