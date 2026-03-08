@@ -11,12 +11,19 @@
 
 <style>
 
+:root{
+--primary:#6366f1;
+--accent:#1e293b;
+--glass:rgba(255,255,255,0.05);
+}
+
 body{
 background: radial-gradient(circle at top,#1e293b,#0f172a);
+font-family:Inter,system-ui;
 }
 
 .glass{
-background: rgba(255,255,255,0.05);
+background: var(--glass);
 backdrop-filter: blur(12px);
 border:1px solid rgba(255,255,255,0.1);
 }
@@ -29,6 +36,12 @@ background:#374151;
 margin-bottom:8px;
 color:white;
 border:1px solid rgba(255,255,255,0.1);
+transition:0.2s;
+}
+
+.input:focus{
+border-color:var(--primary);
+outline:none;
 }
 
 .deliverable{
@@ -72,7 +85,7 @@ color:white;
 }
 
 .serviceInput:focus{
-border-color:#6366f1;
+border-color:var(--primary);
 }
 
 .serviceHeader{
@@ -245,12 +258,12 @@ placeholder="Balance ₹"
 readonly>
 
 <button id="previewBtn"
-class="w-full bg-indigo-600 p-3 rounded-xl mt-2 hover:bg-indigo-500 transition">
+class="w-full p-3 rounded-xl mt-2 transition"
+style="background:var(--primary)">
 Preview Quote
 </button>
 
 </div>
-
 
 <!-- SUPABASE LIBRARY -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
