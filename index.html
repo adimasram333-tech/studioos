@@ -124,42 +124,55 @@ Setup Now
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script src="js/storage.js"></script>
+<script src="js/supabase.js"></script>
 
 
 <script>
 
-function checkSetup(){
+// ===========================
+// CHECK STUDIO PROFILE
+// ===========================
 
-const profile = JSON.parse(localStorage.getItem("studioProfile"))
+async function checkSetup(){
 
-const dashboard = document.getElementById("dashboard")
+const dashboard =
+document.getElementById("dashboard")
 
-const overlay = document.getElementById("setupOverlay")
+const overlay =
+document.getElementById("setupOverlay")
 
-const btn = document.getElementById("setupBtn")
+const btn =
+document.getElementById("setupBtn")
 
-const title = document.getElementById("studioDisplay")
+const title =
+document.getElementById("studioDisplay")
 
 
-if(!profile || !profile.studioName){
+// load photographer settings
+
+const { data, error } =
+await supabase
+.from("photographer_settings")
+.select("*")
+.limit(1)
+.single()
+
+
+if(error || !data){
 
 dashboard.classList.add("blur-dashboard")
-
 overlay.classList.remove("hidden")
-
 btn.innerText="Complete Setup"
 
 }else{
 
-title.innerText=profile.studioName
-
+title.innerText = data.studio_name || "StudioOS"
 btn.innerText="Studio Settings"
 
 }
 
 }
+
 
 checkSetup()
 
