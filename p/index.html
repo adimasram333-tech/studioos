@@ -6,10 +6,8 @@
 <meta charset="UTF-8">
 <title>Loading Proposal...</title>
 
-<!-- SUPABASE LIBRARY -->
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- SUPABASE CONNECTION -->
 <script src="../js/supabase.js"></script>
 
 </head>
@@ -20,27 +18,38 @@
 
 <script>
 
-// =============================
-// GET SHORT ID
-// =============================
+// =====================
+// GET PARAMS
+// =====================
+
+const params = new URLSearchParams(window.location.search)
 
 let shortId = null
 
-// =============================
-// GET ID FROM QUERY (?id=)
-// =============================
-
-const params = new URLSearchParams(window.location.search)
+// CASE 1
+// ?id=xxxxx
 
 if(params.get("id")){
 shortId = params.get("id")
 }
 
 
-// =============================
-// SUPPORT SEO LINK
-// /p/client-name-96c23df2
-// =============================
+// CASE 2
+// ?slug=client-name-xxxxx
+
+if(!shortId && params.get("slug")){
+
+const slug = params.get("slug")
+
+if(slug.includes("-")){
+shortId = slug.substring(slug.lastIndexOf("-") + 1)
+}
+
+}
+
+
+// CASE 3
+// /p/client-name-xxxxx
 
 if(!shortId){
 
@@ -50,18 +59,15 @@ const parts = path.split("/")
 const slug = parts[parts.length - 1]
 
 if(slug && slug.includes("-")){
-
-shortId =
-slug.substring(slug.lastIndexOf("-") + 1)
-
+shortId = slug.substring(slug.lastIndexOf("-") + 1)
 }
 
 }
 
 
-// =============================
-// LOAD FULL UUID FROM DATABASE
-// =============================
+// =====================
+// LOAD PROPOSAL
+// =====================
 
 async function loadProposal(){
 
@@ -91,11 +97,6 @@ return
 
 const fullId = data.id
 
-
-// =============================
-// REDIRECT TO PROPOSAL
-// =============================
-
 window.location.replace(
 "../proposal.html?id=" + fullId
 )
@@ -107,11 +108,6 @@ status.innerHTML = "Error loading proposal"
 }
 
 }
-
-
-// =============================
-// INIT
-// =============================
 
 loadProposal()
 
