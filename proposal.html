@@ -28,6 +28,7 @@ justify-content:center;
 
 .page{
 width:794px;
+max-width:95%;
 background:white;
 margin:40px auto;
 box-shadow:0 10px 40px rgba(0,0,0,0.08);
@@ -171,6 +172,65 @@ cursor:pointer;
 .whatsappBox{
 text-align:center;
 margin-top:30px;
+}
+
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media (max-width:768px){
+
+body{
+display:block;
+}
+
+.page{
+width:100%;
+margin:0;
+box-shadow:none;
+}
+
+.hero{
+height:200px;
+padding:20px;
+}
+
+.hero h1{
+font-size:26px;
+line-height:32px;
+}
+
+.hero p{
+font-size:14px;
+}
+
+.content{
+padding:20px;
+}
+
+.info-grid{
+grid-template-columns:1fr;
+gap:15px;
+}
+
+.section-title{
+font-size:18px;
+}
+
+td{
+font-size:14px;
+padding:8px;
+}
+
+.summary{
+padding:18px;
+}
+
+.whatsappBtn,
+.pdfBtn{
+width:100%;
+font-size:15px;
+}
+
 }
 
 
