@@ -19,16 +19,14 @@ body{
 background:#f4f4f4;
 margin:0;
 font-family:'Inter',sans-serif;
-display:flex;
-justify-content:center;
 }
 
 
 /* ===== PAGE ===== */
 
 .page{
-width:794px;
-max-width:95%;
+width:100%;
+max-width:794px;
 background:white;
 margin:40px auto;
 box-shadow:0 10px 40px rgba(0,0,0,0.08);
@@ -180,7 +178,8 @@ margin-top:30px;
 @media (max-width:768px){
 
 body{
-display:block;
+margin:0;
+padding:0;
 }
 
 .page{
@@ -229,6 +228,34 @@ padding:18px;
 .pdfBtn{
 width:100%;
 font-size:15px;
+}
+
+}
+
+
+/* ===== EXTRA SMALL MOBILE ===== */
+
+@media (max-width:420px){
+
+.hero h1{
+font-size:22px;
+line-height:28px;
+}
+
+.hero{
+height:180px;
+}
+
+.content{
+padding:16px;
+}
+
+td{
+font-size:13px;
+}
+
+.section-title{
+font-size:17px;
 }
 
 }
