@@ -1,4 +1,18 @@
 // ======================
+// THEME ENGINE (NEW)
+// ======================
+
+const theme = "gold"
+
+const themeLink = document.getElementById("theme-style")
+
+if(themeLink){
+themeLink.href = "../themes/" + theme + ".css"
+}
+
+
+
+// ======================
 // GET QUOTATION ID
 // ======================
 
@@ -9,6 +23,7 @@ const params = new URLSearchParams(window.location.search)
 if(params.get("id")){
 quotationId = params.get("id")
 }
+
 
 
 // ======================
@@ -33,6 +48,7 @@ shortId = slugParts[slugParts.length - 1]
 }
 
 
+
 // ======================
 // LOAD PROPOSAL
 // ======================
@@ -41,6 +57,8 @@ async function loadProposal(){
 
 let data = null
 
+
+
 // ======================
 // LOAD BY FULL ID
 // ======================
@@ -48,6 +66,7 @@ let data = null
 if(quotationId){
 data = await getQuotationById(quotationId)
 }
+
 
 
 // ======================
@@ -76,12 +95,14 @@ return
 }
 
 
+
 // ======================
 // CLIENT INFO
 // ======================
 
 document.getElementById("clientName").innerText =
 data.client_name || "-"
+
 
 
 // ======================
@@ -99,6 +120,7 @@ eventDateText = data.event_date || "-"
 document.getElementById("eventDate").innerText = eventDateText
 
 
+
 // ======================
 // MONEY
 // ======================
@@ -111,6 +133,7 @@ document.getElementById("advance").innerText =
 
 document.getElementById("balance").innerText =
 "₹ " + (data.balance || 0) + " /-"
+
 
 
 // ======================
@@ -149,6 +172,7 @@ document.getElementById("assistantQty").innerText =
 (services.assistant?.qty || 0) + " × " + (services.assistant?.days || 0) + " Days"
 
 
+
 // ======================
 // DELIVERABLES
 // ======================
@@ -182,6 +206,7 @@ if(deliverables.gift?.enabled)
 list.innerHTML += "<li>Complimentary Gift : " + (deliverables.gift.name || "-") + "</li>"
 
 
+
 // ======================
 // GENERATE SHORT LINK
 // ======================
@@ -197,6 +222,7 @@ window.location.origin +
 slug +
 "-" +
 (data.short_id || quotationId.substring(0,8))
+
 
 
 // ======================
@@ -228,6 +254,7 @@ const url =
 window.open(url,"_blank")
 
 }
+
 
 
 // ======================
@@ -278,6 +305,7 @@ element.style.boxShadow="0 10px 40px rgba(0,0,0,0.08)"
 }
 
 }
+
 
 
 // ======================
