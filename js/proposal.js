@@ -1,18 +1,4 @@
 // ======================
-// THEME ENGINE
-// ======================
-
-const theme = "gold"
-
-const themeLink = document.getElementById("theme-style")
-
-if(themeLink){
-themeLink.href = "../themes/" + theme + ".css"
-}
-
-
-
-// ======================
 // GET QUOTATION ID
 // ======================
 
@@ -23,7 +9,6 @@ const params = new URLSearchParams(window.location.search)
 if(params.get("id")){
 quotationId = params.get("id")
 }
-
 
 
 // ======================
@@ -103,6 +88,28 @@ await supabase
 .single()
 
 
+
+// ======================
+// THEME ENGINE (DYNAMIC)
+// ======================
+
+if(profile){
+
+const theme = profile.theme || "gold"
+
+const themeLink = document.getElementById("theme-style")
+
+if(themeLink){
+themeLink.href = "../themes/" + theme + ".css"
+}
+
+}
+
+
+
+// ======================
+// LOAD STUDIO INFO
+// ======================
 
 if(profile){
 
