@@ -21,7 +21,7 @@ backdrop-filter: blur(15px);
 border:1px solid rgba(255,255,255,0.1);
 }
 
-input{
+input, select{
 background: rgba(255,255,255,0.08);
 }
 
@@ -45,6 +45,18 @@ background: rgba(255,255,255,0.08);
 <input id="upi" class="w-full p-3 rounded-xl" placeholder="UPI ID (example@upi)"/>
 <input id="address" class="w-full p-3 rounded-xl" placeholder="Studio Address"/>
 <input id="gst" class="w-full p-3 rounded-xl" placeholder="GST (Optional)"/>
+
+<!-- THEME SELECTOR -->
+
+<label class="text-sm text-gray-400">Select Proposal Theme</label>
+
+<select id="theme" class="w-full p-3 rounded-xl">
+
+<option value="gold">Gold Luxury</option>
+<option value="emerald">Emerald Premium</option>
+<option value="royal">Royal Dark</option>
+
+</select>
 
 <button id="saveBtn"
 class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl font-semibold transition">
@@ -88,7 +100,10 @@ address:
 document.getElementById("address").value.trim(),
 
 gst:
-document.getElementById("gst").value.trim()
+document.getElementById("gst").value.trim(),
+
+theme:
+document.getElementById("theme").value
 
 }
 
@@ -141,6 +156,9 @@ document.getElementById("phone").value = data.phone || ""
 document.getElementById("upi").value = data.upi || ""
 document.getElementById("address").value = data.address || ""
 document.getElementById("gst").value = data.gst || ""
+
+document.getElementById("theme").value =
+data.theme || "gold"
 
 }
 
