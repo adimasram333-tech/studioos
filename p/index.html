@@ -12,6 +12,12 @@
 <!-- SUPABASE CONNECTION -->
 <script src="../js/supabase.js"></script>
 
+</head>
+
+<body>
+
+<div id="status">Loading proposal...</div>
+
 <script>
 
 // =============================
@@ -19,7 +25,6 @@
 // =============================
 
 let shortId = null
-
 
 // =============================
 // GET ID FROM QUERY (?id=)
@@ -60,9 +65,11 @@ slug.substring(slug.lastIndexOf("-") + 1)
 
 async function loadProposal(){
 
+const status = document.getElementById("status")
+
 if(!shortId){
 
-document.body.innerHTML = "Invalid proposal link"
+status.innerHTML = "Invalid proposal link"
 return
 
 }
@@ -77,7 +84,7 @@ const { data, error } = await supabase
 
 if(error || !data){
 
-document.body.innerHTML = "Proposal not found"
+status.innerHTML = "Proposal not found"
 return
 
 }
@@ -93,10 +100,9 @@ window.location.replace(
 "../proposal.html?id=" + fullId
 )
 
-
 }catch(err){
 
-document.body.innerHTML = "Error loading proposal"
+status.innerHTML = "Error loading proposal"
 
 }
 
@@ -110,12 +116,6 @@ document.body.innerHTML = "Error loading proposal"
 loadProposal()
 
 </script>
-
-</head>
-
-<body>
-
-Loading proposal...
 
 </body>
 
