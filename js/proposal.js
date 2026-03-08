@@ -1,5 +1,5 @@
 // ======================
-// THEME ENGINE (NEW)
+// THEME ENGINE
 // ======================
 
 const theme = "gold"
@@ -28,7 +28,6 @@ quotationId = params.get("id")
 
 // ======================
 // SUPPORT SEO LINK
-// /p/client-name-shortid
 // ======================
 
 let shortId = null
@@ -59,9 +58,7 @@ let data = null
 
 
 
-// ======================
 // LOAD BY FULL ID
-// ======================
 
 if(quotationId){
 data = await getQuotationById(quotationId)
@@ -69,19 +66,17 @@ data = await getQuotationById(quotationId)
 
 
 
-// ======================
 // LOAD BY SHORT ID
-// ======================
 
 if(!data && shortId){
 
-const { data: row, error } = await supabase
+const { data: row } = await supabase
 .from("quotations")
 .select("*")
 .eq("short_id", shortId)
 .single()
 
-if(!error){
+if(row){
 data = row
 quotationId = row.id
 }
@@ -97,11 +92,36 @@ return
 
 
 // ======================
+// LOAD STUDIO PROFILE
+// ======================
+
+const { data: profile } =
+await supabase
+.from("photographer_settings")
+.select("*")
+.limit(1)
+.single()
+
+
+
+if(profile){
+
+document.getElementById("studioName").innerText =
+profile.studio_name || ""
+
+document.getElementById("studioPhone").innerText =
+profile.phone || ""
+
+}
+
+
+
+// ======================
 // CLIENT INFO
 // ======================
 
 document.getElementById("clientName").innerText =
-data.client_name || "-"
+data.client_name || ""
 
 
 
@@ -126,13 +146,13 @@ document.getElementById("eventDate").innerText = eventDateText
 // ======================
 
 document.getElementById("total").innerText =
-"₹ " + (data.total || 0) + " /-"
+"₹ " + (data.total || 0)
 
 document.getElementById("advance").innerText =
-"₹ " + (data.advance || 0) + " /-"
+"₹ " + (data.advance || 0)
 
 document.getElementById("balance").innerText =
-"₹ " + (data.balance || 0) + " /-"
+"₹ " + (data.balance || 0)
 
 
 
@@ -243,8 +263,8 @@ ${shortLink}
 
 For booking contact:
 
-Aditya Masram Photography
-Phone: 8087945135
+${profile?.studio_name || ""}
+Phone: ${profile?.phone || ""}
 
 Powered by StudioOS`
 
@@ -265,42 +285,15 @@ window.downloadPDF = function(){
 
 const element = document.getElementById("proposalPage")
 
-element.style.boxShadow = "none"
-element.style.margin = "0 auto"
-
 const opt = {
-
 margin:0,
-
 filename:"photography-proposal.pdf",
-
-image:{
-type:"jpeg",
-quality:1
-},
-
-html2canvas:{
-scale:3,
-scrollY:0,
-useCORS:true
-},
-
-jsPDF:{
-unit:"mm",
-format:"a4",
-orientation:"portrait"
+image:{type:"jpeg",quality:1},
+html2canvas:{scale:3},
+jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
 }
 
-}
-
-html2pdf()
-.set(opt)
-.from(element)
-.save()
-
-setTimeout(()=>{
-element.style.boxShadow="0 10px 40px rgba(0,0,0,0.08)"
-},1000)
+html2pdf().set(opt).from(element).save()
 
 }
 
