@@ -130,10 +130,10 @@ Setup Now
 <script>
 
 // ===========================
-// CHECK STUDIO PROFILE
+// LOAD DASHBOARD
 // ===========================
 
-async function checkSetup(){
+async function loadDashboard(){
 
 const dashboard =
 document.getElementById("dashboard")
@@ -147,10 +147,18 @@ document.getElementById("setupBtn")
 const title =
 document.getElementById("studioDisplay")
 
+const totalBookings =
+document.getElementById("totalBookings")
 
-// load photographer settings
+const pendingPayments =
+document.getElementById("pendingPayments")
 
-const { data, error } =
+
+// ===========================
+// CHECK STUDIO PROFILE
+// ===========================
+
+const { data: profile } =
 await supabase
 .from("photographer_settings")
 .select("*")
@@ -158,7 +166,7 @@ await supabase
 .single()
 
 
-if(error || !data){
+if(!profile){
 
 dashboard.classList.add("blur-dashboard")
 overlay.classList.remove("hidden")
@@ -166,15 +174,46 @@ btn.innerText="Complete Setup"
 
 }else{
 
-title.innerText = data.studio_name || "StudioOS"
+title.innerText = profile.studio_name || "StudioOS"
 btn.innerText="Studio Settings"
 
 }
 
+
+// ===========================
+// LOAD STATS
+// ===========================
+
+const { data: quotations } =
+await supabase
+.from("quotations")
+.select("status,balance")
+
+
+if(quotations){
+
+let confirmedCount = 0
+let pendingTotal = 0
+
+quotations.forEach(q=>{
+
+if(q.status === "confirmed"){
+confirmedCount++
+}
+
+pendingTotal += Number(q.balance || 0)
+
+})
+
+totalBookings.innerText = confirmedCount
+pendingPayments.innerText = "₹" + pendingTotal
+
+}
+
 }
 
 
-checkSetup()
+loadDashboard()
 
 </script>
 
