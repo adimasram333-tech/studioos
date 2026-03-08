@@ -8,6 +8,8 @@
 
 <title>Photography Proposal</title>
 
+<link id="theme-style" rel="stylesheet">
+
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -15,10 +17,18 @@
 
 <style>
 
+:root{
+--primary:#C6A348;
+--accent:#222;
+--bg:#faf7ef;
+--text:#1a1a1a;
+}
+
 body{
 background:#f4f4f4;
 margin:0;
 font-family:'Inter',sans-serif;
+color:var(--text);
 }
 
 
@@ -34,7 +44,7 @@ overflow:hidden;
 }
 
 
-/* ===== HERO (FIXED) ===== */
+/* ===== HERO ===== */
 
 .hero{
 width:100%;
@@ -107,7 +117,7 @@ margin-bottom:30px;
 .info-box{
 background:#fafafa;
 padding:15px;
-border-left:3px solid #C6A348;
+border-left:3px solid var(--primary);
 }
 
 ul{
@@ -118,9 +128,9 @@ line-height:1.8;
 /* ===== SUMMARY ===== */
 
 .summary{
-border:2px solid #C6A348;
+border:2px solid var(--primary);
 padding:25px;
-background:#faf7ef;
+background:var(--bg);
 margin-top:30px;
 }
 
@@ -161,7 +171,7 @@ cursor:pointer;
 
 .pdfBtn{
 margin-top:10px;
-background:#2563eb;
+background:var(--primary);
 color:white;
 border:none;
 padding:12px 20px;
