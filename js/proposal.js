@@ -33,6 +33,15 @@ shortId = slugParts[slugParts.length - 1]
 
 
 // ======================
+// FORMAT MONEY
+// ======================
+
+function formatMoney(num){
+return "₹ " + Number(num || 0).toLocaleString("en-IN") + "/-"
+}
+
+
+// ======================
 // LOAD PROPOSAL
 // ======================
 
@@ -91,7 +100,9 @@ profile = profileRow
 
 }
 
-// fallback (safety)
+
+// fallback safety
+
 if(!profile){
 
 const { data: fallback } =
@@ -166,13 +177,13 @@ document.getElementById("eventDate").innerText = eventDateText
 // ======================
 
 document.getElementById("total").innerText =
-"₹ " + (data.total || 0)
+formatMoney(data.total)
 
 document.getElementById("advance").innerText =
-"₹ " + (data.advance || 0)
+formatMoney(data.advance)
 
 document.getElementById("balance").innerText =
-"₹ " + (data.balance || 0)
+formatMoney(data.balance)
 
 
 // ======================
@@ -190,25 +201,25 @@ services = {}
 }
 
 document.getElementById("candidQty").innerText =
-(services.candid?.qty || 0) + " × " + (services.candid?.days || 0) + " Days"
+(services.candid?.qty || 0) + " x " + (services.candid?.days || 0) + " Days"
 
 document.getElementById("traditionalPhotoQty").innerText =
-(services.traditional_photo?.qty || 0) + " × " + (services.traditional_photo?.days || 0) + " Days"
+(services.traditional_photo?.qty || 0) + " x " + (services.traditional_photo?.days || 0) + " Days"
 
 document.getElementById("traditionalVideoQty").innerText =
-(services.traditional_video?.qty || 0) + " × " + (services.traditional_video?.days || 0) + " Days"
+(services.traditional_video?.qty || 0) + " x " + (services.traditional_video?.days || 0) + " Days"
 
 document.getElementById("cinemaQty").innerText =
-(services.cinematographer?.qty || 0) + " × " + (services.cinematographer?.days || 0) + " Days"
+(services.cinematographer?.qty || 0) + " x " + (services.cinematographer?.days || 0) + " Days"
 
 document.getElementById("droneQty").innerText =
-(services.drone?.qty || 0) + " × " + (services.drone?.days || 0) + " Days"
+(services.drone?.qty || 0) + " x " + (services.drone?.days || 0) + " Days"
 
 document.getElementById("ledQty").innerText =
-(services.led_wall?.qty || 0) + " × " + (services.led_wall?.days || 0) + " Days"
+(services.led_wall?.qty || 0) + " x " + (services.led_wall?.days || 0) + " Days"
 
 document.getElementById("assistantQty").innerText =
-(services.assistant?.qty || 0) + " × " + (services.assistant?.days || 0) + " Days"
+(services.assistant?.qty || 0) + " x " + (services.assistant?.days || 0) + " Days"
 
 
 // ======================
@@ -293,7 +304,7 @@ window.open(url,"_blank")
 
 
 // ======================
-// PDF DOWNLOAD
+// ULTRA HD PDF DOWNLOAD
 // ======================
 
 window.downloadPDF = function(){
@@ -301,11 +312,28 @@ window.downloadPDF = function(){
 const element = document.getElementById("proposalPage")
 
 const opt = {
+
 margin:0,
+
 filename:"photography-proposal.pdf",
-image:{type:"jpeg",quality:1},
-html2canvas:{scale:3},
-jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
+
+image:{
+type:"jpeg",
+quality:1
+},
+
+html2canvas:{
+scale:5,
+useCORS:true,
+logging:false
+},
+
+jsPDF:{
+unit:"mm",
+format:"a4",
+orientation:"portrait"
+}
+
 }
 
 html2pdf().set(opt).from(element).save()
