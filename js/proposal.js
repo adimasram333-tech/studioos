@@ -76,16 +76,38 @@ return
 // LOAD STUDIO PROFILE
 // ======================
 
-const { data: profile } =
+let profile = null
+
+if(data.user_id){
+
+const { data: profileRow } =
 await supabase
 .from("photographer_settings")
 .select("*")
 .eq("user_id", data.user_id)
 .single()
 
+profile = profileRow
+
+}
+
+// fallback (safety)
+if(!profile){
+
+const { data: fallback } =
+await supabase
+.from("photographer_settings")
+.select("*")
+.limit(1)
+.single()
+
+profile = fallback
+
+}
+
 
 // ======================
-// THEME ENGINE (DYNAMIC)
+// THEME ENGINE
 // ======================
 
 if(profile){
