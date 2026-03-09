@@ -246,23 +246,6 @@ list.innerHTML += "<li>Complimentary Gift : " + (deliverables.gift.name || "-") 
 
 
 // ======================
-// GENERATE SHORT LINK
-// ======================
-
-const slug =
-data.client_name
-.toLowerCase()
-.replace(/\s+/g,"-")
-
-const shortLink =
-window.location.origin +
-"/studioos/p/" +
-slug +
-"-" +
-(data.short_id || quotationId.substring(0,8))
-
-
-// ======================
 // WHATSAPP SHARE
 // ======================
 
@@ -276,7 +259,7 @@ const message =
 Your wedding photography proposal is ready.
 
 View your proposal:
-${shortLink}
+${window.location.href}
 
 For booking contact:
 
@@ -305,7 +288,7 @@ const element = document.getElementById("proposalPage")
 
 const opt = {
 
-margin:[0,0,0,0],
+margin:0,
 
 filename:"photography-proposal.pdf",
 
@@ -315,16 +298,16 @@ quality:1
 },
 
 html2canvas:{
-scale:5,
+scale:4,
 useCORS:true,
 scrollX:0,
 scrollY:0,
-windowWidth:1200
+windowWidth:794
 },
 
 jsPDF:{
-unit:"mm",
-format:"a4",
+unit:"px",
+format:[794,1123],
 orientation:"portrait"
 }
 
@@ -335,10 +318,5 @@ html2pdf().set(opt).from(element).save()
 }
 
 }
-
-
-// ======================
-// INIT
-// ======================
 
 loadProposal()
