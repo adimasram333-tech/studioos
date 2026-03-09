@@ -277,7 +277,7 @@ window.open(url,"_blank")
 
 
 // ======================
-// PDF EXPORT FINAL FIX
+// PERFECT CENTER PDF EXPORT
 // ======================
 
 window.downloadPDF = function(){
@@ -286,13 +286,9 @@ window.scrollTo(0,0)
 
 const element = document.getElementById("proposalPage")
 
-// FORCE CORRECT WIDTH
-element.style.width = "794px"
-element.style.margin = "0 auto"
-
 const opt = {
 
-margin:0,
+margin: [10,10,10,10],
 
 filename:"photography-proposal.pdf",
 
@@ -302,11 +298,10 @@ quality:1
 },
 
 html2canvas:{
-scale:2,
+scale:3,
 useCORS:true,
 scrollX:0,
-scrollY:0,
-windowWidth:794
+scrollY:0
 },
 
 jsPDF:{
@@ -317,7 +312,10 @@ orientation:"portrait"
 
 }
 
-html2pdf().set(opt).from(element).save()
+html2pdf()
+.set(opt)
+.from(element)
+.save()
 
 }
 
