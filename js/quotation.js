@@ -120,9 +120,26 @@ if(previewBtn){
 
 previewBtn.addEventListener("click", async function(){
 
-// prevent double click
 previewBtn.disabled = true
 previewBtn.innerText = "Generating..."
+
+
+// =============================
+// GET LOGGED USER
+// =============================
+
+const { data:{ user } } = await supabase.auth.getUser()
+
+if(!user){
+
+alert("Login required")
+
+previewBtn.disabled = false
+previewBtn.innerText = "Preview Quote"
+
+return
+
+}
 
 
 // =============================
@@ -134,24 +151,36 @@ const clientPhone = get("clientPhone")?.value.trim() || ""
 const startDate = get("startDate")?.value || ""
 
 if(!clientName){
+
 alert("Enter client name")
+
 previewBtn.disabled = false
 previewBtn.innerText = "Preview Quote"
+
 return
+
 }
 
 if(!clientPhone){
+
 alert("Enter client phone")
+
 previewBtn.disabled = false
 previewBtn.innerText = "Preview Quote"
+
 return
+
 }
 
 if(!startDate){
+
 alert("Select event date")
+
 previewBtn.disabled = false
 previewBtn.innerText = "Preview Quote"
+
 return
+
 }
 
 
@@ -229,6 +258,8 @@ name: giftInput?.value || ""
 // =============================
 
 const quotationData = {
+
+user_id: user.id,
 
 client_name: clientName,
 phone: clientPhone,
