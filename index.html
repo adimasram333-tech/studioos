@@ -34,6 +34,14 @@ pointer-events:none;
 
 <body class="text-white min-h-screen p-4 relative">
 
+<div class="max-w-md mx-auto mb-4 flex justify-end">
+<button
+id="logoutBtn"
+class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-sm">
+Logout
+</button>
+</div>
+
 <div id="dashboard" class="max-w-md mx-auto">
 
 <div class="glass rounded-2xl p-4 flex justify-between items-center mb-6">
@@ -130,6 +138,40 @@ Setup Now
 <script>
 
 // ===========================
+// AUTH CHECK
+// ===========================
+
+async function checkAuth(){
+
+const { data } = await supabase.auth.getSession()
+
+if(!data.session){
+window.location.href = "index.html"
+}
+
+}
+
+checkAuth()
+
+
+
+// ===========================
+// LOGOUT
+// ===========================
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click", async ()=>{
+
+await supabase.auth.signOut()
+
+window.location.href = "index.html"
+
+})
+
+
+
+// ===========================
 // LOAD DASHBOARD
 // ===========================
 
@@ -211,7 +253,6 @@ pendingPayments.innerText = "₹" + pendingTotal
 }
 
 }
-
 
 loadDashboard()
 
