@@ -63,6 +63,8 @@ position:relative;
 box-sizing:border-box;
 }
 
+/* DARK OVERLAY */
+
 .hero::after{
 content:'';
 position:absolute;
@@ -232,7 +234,7 @@ font-size:15px;
 
 }
 
-/* SMALL MOBILE (restored) */
+/* SMALL MOBILE */
 
 @media (max-width:420px){
 
@@ -266,7 +268,6 @@ font-size:17px;
 
 body{
 background:white;
-display:block;
 }
 
 .page{
@@ -275,13 +276,22 @@ margin:0;
 width:794px;
 }
 
+/* remove buttons in PDF */
+
 .whatsappBox{
 display:none;
 }
 
-/* FIX PDF OVERLAY ISSUE */
+/* remove overlay in PDF */
+
 .hero::after{
 display:none;
+}
+
+/* force sharp rendering */
+
+.hero{
+background-size:cover !important;
 }
 
 }
