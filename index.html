@@ -138,15 +138,21 @@ Setup Now
 <script>
 
 // ===========================
-// AUTH CHECK
+// AUTH CHECK (SAFE)
 // ===========================
 
 async function checkAuth(){
 
-const { data } = await supabase.auth.getSession()
+const { data, error } = await supabase.auth.getSession()
+
+if(error){
+console.log("Auth check error:", error)
+return
+}
 
 if(!data.session){
-window.location.href = "index.html"
+console.log("No session found")
+return
 }
 
 }
@@ -165,7 +171,7 @@ document
 
 await supabase.auth.signOut()
 
-window.location.href = "index.html"
+location.reload()
 
 })
 
