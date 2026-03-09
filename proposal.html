@@ -35,7 +35,7 @@ color:var(--text);
 /* ===== PAGE WRAPPER ===== */
 
 .page{
-width:794px;   /* FIXED WIDTH FOR PERFECT PDF */
+width:794px;
 background:white;
 margin:40px auto;
 box-shadow:0 10px 40px rgba(0,0,0,0.08);
@@ -138,11 +138,22 @@ border:2px solid var(--primary);
 padding:25px;
 background:var(--bg);
 margin-top:30px;
+
+/* ===== PDF FIX ===== */
+page-break-inside:avoid;
+break-inside:avoid;
+}
+
+/* ALSO PROTECT SECTIONS */
+
+.section-title{
+page-break-after:avoid;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
+page-break-inside:avoid;
 }
 
 td{
@@ -157,6 +168,7 @@ margin-top:60px;
 text-align:center;
 font-size:13px;
 color:#666;
+page-break-inside:avoid;
 }
 
 /* ===== BUTTONS ===== */
@@ -242,34 +254,6 @@ padding:18px;
 .pdfBtn{
 width:100%;
 font-size:15px;
-}
-
-}
-
-/* ===== SMALL MOBILE ===== */
-
-@media (max-width:420px){
-
-.hero{
-min-height:200px;
-padding:50px 16px;
-}
-
-.hero h1{
-font-size:22px;
-line-height:28px;
-}
-
-.content{
-padding:16px;
-}
-
-td{
-font-size:13px;
-}
-
-.section-title{
-font-size:17px;
 }
 
 }
