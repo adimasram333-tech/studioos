@@ -49,15 +49,9 @@ async function loadProposal(){
 
 let data = null
 
-
-// LOAD BY FULL ID
-
 if(quotationId){
 data = await getQuotationById(quotationId)
 }
-
-
-// LOAD BY SHORT ID
 
 if(!data && shortId){
 
@@ -73,7 +67,6 @@ quotationId = row.id
 }
 
 }
-
 
 if(!data){
 alert("Proposal not found")
@@ -99,9 +92,6 @@ await supabase
 profile = profileRow
 
 }
-
-
-// fallback safety
 
 if(!profile){
 
@@ -304,16 +294,18 @@ window.open(url,"_blank")
 
 
 // ======================
-// ULTRA HD PDF DOWNLOAD
+// PERFECT PDF EXPORT
 // ======================
 
 window.downloadPDF = function(){
+
+window.scrollTo(0,0)
 
 const element = document.getElementById("proposalPage")
 
 const opt = {
 
-margin:0,
+margin:[0,0,0,0],
 
 filename:"photography-proposal.pdf",
 
@@ -325,7 +317,9 @@ quality:1
 html2canvas:{
 scale:5,
 useCORS:true,
-logging:false
+scrollX:0,
+scrollY:0,
+windowWidth:1200
 },
 
 jsPDF:{
