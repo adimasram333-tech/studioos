@@ -277,7 +277,7 @@ window.open(url,"_blank")
 
 
 // ======================
-// PERFECT PDF EXPORT
+// PDF EXPORT FIXED
 // ======================
 
 window.downloadPDF = function(){
@@ -298,16 +298,13 @@ quality:1
 },
 
 html2canvas:{
-scale:4,
-useCORS:true,
-scrollX:0,
-scrollY:0,
-windowWidth:794
+scale:3,
+useCORS:true
 },
 
 jsPDF:{
-unit:"px",
-format:[794,1123],
+unit:"mm",
+format:"a4",
 orientation:"portrait"
 }
 
