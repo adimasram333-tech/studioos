@@ -1,86 +1,84 @@
-import { supabase } from "./supabase.js";
+// =============================
+// LOGIN
+// =============================
 
+export async function login(email,password){
 
-/* ===============================
-SIGNUP
-================================ */
+const { data, error } =
+await supabase.auth.signInWithPassword({
 
-export async function signup(email, password) {
+email: email,
+password: password
 
-    const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password
-    });
+})
 
-    if (error) {
-        alert(error.message);
-        return;
-    }
+if(error){
 
-    alert("Account created successfully. Please login.");
-    window.location.href = "index.html";
+alert(error.message)
+return
+
 }
 
-
-
-/* ===============================
-LOGIN
-================================ */
-
-export async function login(email, password) {
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-    });
-
-    if (error) {
-        alert(error.message);
-        return;
-    }
-
-    window.location.href = "dashboard.html";
-}
-
-
-
-/* ===============================
-GET CURRENT USER
-================================ */
-
-export async function getCurrentUser() {
-
-    const { data } = await supabase.auth.getUser();
-
-    return data.user;
-}
-
-
-
-/* ===============================
-PROTECT PAGE
-================================ */
-
-export async function protectPage() {
-
-    const user = await getCurrentUser();
-
-    if (!user) {
-        window.location.href = "index.html";
-    }
+window.location.href = "dashboard.html"
 
 }
 
 
 
-/* ===============================
-LOGOUT
-================================ */
+// =============================
+// SIGNUP
+// =============================
 
-export async function logout() {
+export async function signup(email,password){
 
-    await supabase.auth.signOut();
+const { data, error } =
+await supabase.auth.signUp({
 
-    window.location.href = "index.html";
+email: email,
+password: password
+
+})
+
+if(error){
+
+alert(error.message)
+return
+
+}
+
+alert("Account created. Please login.")
+
+}
+
+
+
+// =============================
+// PROTECT DASHBOARD
+// =============================
+
+export async function protectPage(){
+
+const { data } =
+await supabase.auth.getUser()
+
+if(!data.user){
+
+window.location.href = "index.html"
+
+}
+
+}
+
+
+
+// =============================
+// LOGOUT
+// =============================
+
+export async function logout(){
+
+await supabase.auth.signOut()
+
+window.location.href = "index.html"
 
 }
