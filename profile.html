@@ -26,8 +26,6 @@ background: rgba(255,255,255,0.08);
 color:white;
 }
 
-/* FIX DROPDOWN OPTIONS */
-
 select option{
 background:#0f172a;
 color:white;
@@ -41,7 +39,7 @@ color:white;
 
 <div class="max-w-md mx-auto">
 
-<a href="index.html" class="text-sm text-gray-400">← Back</a>
+<a href="dashboard.html" class="text-sm text-gray-400">← Back</a>
 
 <h1 class="text-2xl font-bold mb-6 mt-4">Studio Profile</h1>
 
@@ -88,7 +86,21 @@ document.getElementById("saveBtn").addEventListener("click", saveProfile)
 
 async function saveProfile(){
 
+const { data: userData } =
+await supabase.auth.getUser()
+
+const user = userData.user
+
+if(!user){
+
+alert("User not logged in")
+return
+
+}
+
 const profile = {
+
+user_id: user.id,
 
 studio_name:
 document.getElementById("studioName").value.trim(),
@@ -134,7 +146,7 @@ return
 
 }
 
-window.location.href="index.html"
+window.location.href="dashboard.html"
 
 }
 
@@ -146,11 +158,19 @@ window.location.href="index.html"
 
 async function loadProfile(){
 
+const { data: userData } =
+await supabase.auth.getUser()
+
+const user = userData.user
+
+if(!user) return
+
+
 const { data } =
 await supabase
 .from("photographer_settings")
 .select("*")
-.limit(1)
+.eq("user_id", user.id)
 .single()
 
 
