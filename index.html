@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>StudioOS</title>
+<title>StudioOS Login</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -22,245 +22,66 @@ backdrop-filter: blur(15px);
 border:1px solid rgba(255,255,255,0.1);
 }
 
-.blur-dashboard{
-filter: blur(6px);
-pointer-events:none;
-}
-
 </style>
 
 </head>
 
+<body class="text-white min-h-screen flex items-center justify-center">
 
-<body class="text-white min-h-screen p-4 relative">
+<div class="glass p-8 rounded-2xl w-80">
 
-<div class="max-w-md mx-auto mb-4 flex justify-end">
-<button
-id="logoutBtn"
-class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-sm">
-Logout
-</button>
-</div>
-
-<div id="dashboard" class="max-w-md mx-auto">
-
-<div class="glass rounded-2xl p-4 flex justify-between items-center mb-6">
-
-<div>
-<h1 id="studioDisplay" class="text-xl font-bold">StudioOS</h1>
-<p class="text-gray-400 text-xs">Photography Business System</p>
-</div>
-
-<a
-id="setupBtn"
-href="profile.html"
-class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm"
->
-Setup
-</a>
-
-</div>
-
-
-<div class="grid grid-cols-2 gap-4 mb-6">
-
-<div class="glass rounded-2xl p-4">
-<p class="text-gray-400 text-sm">Total Bookings</p>
-<h2 id="totalBookings" class="text-2xl font-bold">0</h2>
-</div>
-
-<div class="glass rounded-2xl p-4">
-<p class="text-gray-400 text-sm">Pending Payments</p>
-<h2 id="pendingPayments" class="text-2xl font-bold">₹0</h2>
-</div>
-
-</div>
-
-
-<div class="space-y-4">
-
-<a href="quotation.html"
-class="block glass rounded-2xl p-4 hover:scale-105 transition">
-📄 Quotations
-</a>
-
-<a href="invoices.html"
-class="block glass rounded-2xl p-4 hover:scale-105 transition">
-🧾 Invoices
-</a>
-
-<a href="packages.html"
-class="block glass rounded-2xl p-4 hover:scale-105 transition">
-📦 Packages
-</a>
-
-<a href="events.html"
-class="block glass rounded-2xl p-4 hover:scale-105 transition">
-📅 Events
-</a>
-
-</div>
-
-</div>
-
-
-<div
-id="setupOverlay"
-class="hidden absolute inset-0 flex items-center justify-center bg-black/60"
->
-
-<div class="glass rounded-2xl p-8 text-center max-w-sm">
-
-<h2 class="text-xl font-bold mb-4">
-Complete Studio Setup
+<h2 class="text-xl font-bold mb-6 text-center">
+StudioOS Login
 </h2>
 
-<p class="text-gray-400 text-sm mb-6">
-Please setup your studio profile before using StudioOS.
-</p>
+<form id="loginForm">
 
-<a
-href="profile.html"
-class="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-xl">
-Setup Now
-</a>
+<input
+id="email"
+type="email"
+placeholder="Email"
+class="w-full mb-4 p-3 rounded-lg bg-black/40"
+required>
+
+<input
+id="password"
+type="password"
+placeholder="Password"
+class="w-full mb-6 p-3 rounded-lg bg-black/40"
+required>
+
+<button
+class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-lg">
+Login
+</button>
+
+</form>
 
 </div>
-
-</div>
-
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 
+<script type="module">
 
-<script>
-
-// ===========================
-// AUTH CHECK (SAFE)
-// ===========================
-
-async function checkAuth(){
-
-const { data, error } = await supabase.auth.getSession()
-
-if(error){
-console.log("Auth check error:", error)
-return
-}
-
-if(!data.session){
-console.log("No session found")
-return
-}
-
-}
-
-checkAuth()
-
-
-
-// ===========================
-// LOGOUT
-// ===========================
+import { login } from "./js/auth.js"
 
 document
-.getElementById("logoutBtn")
-.addEventListener("click", async ()=>{
+.getElementById("loginForm")
+.addEventListener("submit", async (e)=>{
 
-await supabase.auth.signOut()
+e.preventDefault()
 
-location.reload()
+const email =
+document.getElementById("email").value
 
-})
+const password =
+document.getElementById("password").value
 
-
-
-// ===========================
-// LOAD DASHBOARD
-// ===========================
-
-async function loadDashboard(){
-
-const dashboard =
-document.getElementById("dashboard")
-
-const overlay =
-document.getElementById("setupOverlay")
-
-const btn =
-document.getElementById("setupBtn")
-
-const title =
-document.getElementById("studioDisplay")
-
-const totalBookings =
-document.getElementById("totalBookings")
-
-const pendingPayments =
-document.getElementById("pendingPayments")
-
-
-// ===========================
-// CHECK STUDIO PROFILE
-// ===========================
-
-const { data: profile } =
-await supabase
-.from("photographer_settings")
-.select("*")
-.limit(1)
-.single()
-
-
-if(!profile){
-
-dashboard.classList.add("blur-dashboard")
-overlay.classList.remove("hidden")
-btn.innerText="Complete Setup"
-
-}else{
-
-title.innerText = profile.studio_name || "StudioOS"
-btn.innerText="Studio Settings"
-
-}
-
-
-// ===========================
-// LOAD STATS
-// ===========================
-
-const { data: quotations } =
-await supabase
-.from("quotations")
-.select("status,balance")
-
-
-if(quotations){
-
-let confirmedCount = 0
-let pendingTotal = 0
-
-quotations.forEach(q=>{
-
-if(q.status === "confirmed"){
-confirmedCount++
-}
-
-pendingTotal += Number(q.balance || 0)
+await login(email,password)
 
 })
-
-totalBookings.innerText = confirmedCount
-pendingPayments.innerText = "₹" + pendingTotal
-
-}
-
-}
-
-loadDashboard()
 
 </script>
 
