@@ -22,6 +22,11 @@ backdrop-filter: blur(15px);
 border:1px solid rgba(255,255,255,0.1);
 }
 
+.link{
+color:#818cf8;
+cursor:pointer;
+}
+
 </style>
 
 </head>
@@ -30,11 +35,12 @@ border:1px solid rgba(255,255,255,0.1);
 
 <div class="glass p-8 rounded-2xl w-80">
 
-<h2 class="text-xl font-bold mb-6 text-center">
+<h2 id="title" class="text-xl font-bold mb-6 text-center">
 StudioOS Login
 </h2>
 
-<form id="loginForm">
+
+<form id="authForm">
 
 <input
 id="email"
@@ -51,11 +57,25 @@ class="w-full mb-6 p-3 rounded-lg bg-black/40"
 required>
 
 <button
+id="submitBtn"
 class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-lg">
 Login
 </button>
 
 </form>
+
+
+<p class="text-center text-sm mt-4">
+
+<span id="toggleText">
+Don't have an account?
+</span>
+
+<span id="toggleBtn" class="link">
+Signup
+</span>
+
+</p>
 
 </div>
 
@@ -65,11 +85,62 @@ Login
 
 <script type="module">
 
-import { login } from "./js/auth.js"
+import { login, signup } from "./js/auth.js"
 
-document
-.getElementById("loginForm")
-.addEventListener("submit", async (e)=>{
+let mode = "login"
+
+const form =
+document.getElementById("authForm")
+
+const title =
+document.getElementById("title")
+
+const btn =
+document.getElementById("submitBtn")
+
+const toggle =
+document.getElementById("toggleBtn")
+
+const text =
+document.getElementById("toggleText")
+
+
+// ======================
+// TOGGLE LOGIN / SIGNUP
+// ======================
+
+toggle.addEventListener("click",()=>{
+
+if(mode==="login"){
+
+mode="signup"
+
+title.innerText="Create Account"
+btn.innerText="Signup"
+
+text.innerText="Already have an account?"
+toggle.innerText="Login"
+
+}else{
+
+mode="login"
+
+title.innerText="StudioOS Login"
+btn.innerText="Login"
+
+text.innerText="Don't have an account?"
+toggle.innerText="Signup"
+
+}
+
+})
+
+
+// ======================
+// FORM SUBMIT
+// ======================
+
+form.addEventListener("submit", async (e)=>{
 
 e.preventDefault()
 
@@ -79,7 +150,16 @@ document.getElementById("email").value
 const password =
 document.getElementById("password").value
 
+
+if(mode==="login"){
+
 await login(email,password)
+
+}else{
+
+await signup(email,password)
+
+}
 
 })
 
