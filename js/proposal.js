@@ -32,7 +32,6 @@ shortId = slugParts[slugParts.length - 1]
 }
 
 
-
 // ======================
 // LOAD PROPOSAL
 // ======================
@@ -42,13 +41,11 @@ async function loadProposal(){
 let data = null
 
 
-
 // LOAD BY FULL ID
 
 if(quotationId){
 data = await getQuotationById(quotationId)
 }
-
 
 
 // LOAD BY SHORT ID
@@ -75,7 +72,6 @@ return
 }
 
 
-
 // ======================
 // LOAD STUDIO PROFILE
 // ======================
@@ -84,9 +80,8 @@ const { data: profile } =
 await supabase
 .from("photographer_settings")
 .select("*")
-.limit(1)
+.eq("user_id", data.user_id)
 .single()
-
 
 
 // ======================
@@ -100,11 +95,10 @@ const theme = profile.theme || "gold"
 const themeLink = document.getElementById("theme-style")
 
 if(themeLink){
-themeLink.href = "../themes/" + theme + ".css"
+themeLink.href = "themes/" + theme + ".css"
 }
 
 }
-
 
 
 // ======================
@@ -122,14 +116,12 @@ profile.phone || ""
 }
 
 
-
 // ======================
 // CLIENT INFO
 // ======================
 
 document.getElementById("clientName").innerText =
 data.client_name || ""
-
 
 
 // ======================
@@ -147,7 +139,6 @@ eventDateText = data.event_date || "-"
 document.getElementById("eventDate").innerText = eventDateText
 
 
-
 // ======================
 // MONEY
 // ======================
@@ -160,7 +151,6 @@ document.getElementById("advance").innerText =
 
 document.getElementById("balance").innerText =
 "₹ " + (data.balance || 0)
-
 
 
 // ======================
@@ -199,7 +189,6 @@ document.getElementById("assistantQty").innerText =
 (services.assistant?.qty || 0) + " × " + (services.assistant?.days || 0) + " Days"
 
 
-
 // ======================
 // DELIVERABLES
 // ======================
@@ -233,7 +222,6 @@ if(deliverables.gift?.enabled)
 list.innerHTML += "<li>Complimentary Gift : " + (deliverables.gift.name || "-") + "</li>"
 
 
-
 // ======================
 // GENERATE SHORT LINK
 // ======================
@@ -249,7 +237,6 @@ window.location.origin +
 slug +
 "-" +
 (data.short_id || quotationId.substring(0,8))
-
 
 
 // ======================
@@ -283,7 +270,6 @@ window.open(url,"_blank")
 }
 
 
-
 // ======================
 // PDF DOWNLOAD
 // ======================
@@ -305,7 +291,6 @@ html2pdf().set(opt).from(element).save()
 }
 
 }
-
 
 
 // ======================
