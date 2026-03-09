@@ -277,7 +277,7 @@ window.open(url,"_blank")
 
 
 // ======================
-// PDF EXPORT FIXED
+// PDF EXPORT FINAL FIX
 // ======================
 
 window.downloadPDF = function(){
@@ -285,6 +285,10 @@ window.downloadPDF = function(){
 window.scrollTo(0,0)
 
 const element = document.getElementById("proposalPage")
+
+// FORCE CORRECT WIDTH
+element.style.width = "794px"
+element.style.margin = "0 auto"
 
 const opt = {
 
@@ -298,8 +302,11 @@ quality:1
 },
 
 html2canvas:{
-scale:3,
-useCORS:true
+scale:2,
+useCORS:true,
+scrollX:0,
+scrollY:0,
+windowWidth:794
 },
 
 jsPDF:{
