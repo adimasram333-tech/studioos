@@ -135,7 +135,7 @@ return
 
 const { error } = await supabase
 .from("photographer_settings")
-.upsert(profile)
+.upsert(profile, { onConflict: "user_id" })
 
 
 if(error){
