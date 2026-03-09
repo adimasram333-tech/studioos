@@ -32,7 +32,7 @@ font-family:'Inter',sans-serif;
 color:var(--text);
 }
 
-/* PAGE */
+/* ===== PAGE WRAPPER ===== */
 
 .page{
 width:100%;
@@ -41,9 +41,17 @@ background:white;
 margin:40px auto;
 box-shadow:0 10px 40px rgba(0,0,0,0.08);
 overflow:hidden;
+position:relative;
 }
 
-/* HERO */
+/* FORCE PERFECT PDF WIDTH */
+
+#proposalPage{
+width:794px;
+margin:auto;
+}
+
+/* ===== HERO ===== */
 
 .hero{
 width:100%;
@@ -92,10 +100,11 @@ margin-top:8px;
 font-size:16px;
 }
 
-/* CONTENT */
+/* ===== CONTENT ===== */
 
 .content{
 padding:50px;
+box-sizing:border-box;
 }
 
 .section-title{
@@ -123,7 +132,7 @@ ul{
 line-height:1.8;
 }
 
-/* SUMMARY */
+/* ===== SUMMARY ===== */
 
 .summary{
 border:2px solid var(--primary);
@@ -142,7 +151,7 @@ padding:10px;
 border-bottom:1px solid #eee;
 }
 
-/* FOOTER */
+/* ===== FOOTER ===== */
 
 .footer{
 margin-top:60px;
@@ -151,7 +160,7 @@ font-size:13px;
 color:#666;
 }
 
-/* BUTTONS */
+/* ===== BUTTONS ===== */
 
 .whatsappBtn{
 margin-top:25px;
@@ -180,7 +189,7 @@ text-align:center;
 margin-top:30px;
 }
 
-/* MOBILE */
+/* ===== MOBILE ===== */
 
 @media (max-width:768px){
 
@@ -188,6 +197,10 @@ margin-top:30px;
 width:100%;
 margin:0;
 box-shadow:none;
+}
+
+#proposalPage{
+width:100%;
 }
 
 .hero{
@@ -234,7 +247,7 @@ font-size:15px;
 
 }
 
-/* SMALL MOBILE */
+/* ===== SMALL MOBILE ===== */
 
 @media (max-width:420px){
 
@@ -262,7 +275,7 @@ font-size:17px;
 
 }
 
-/* PRINT / PDF MODE */
+/* ===== PRINT / PDF MODE ===== */
 
 @media print{
 
@@ -276,19 +289,17 @@ margin:0;
 width:794px;
 }
 
-/* remove buttons in PDF */
+#proposalPage{
+width:794px;
+}
 
 .whatsappBox{
 display:none;
 }
 
-/* remove overlay in PDF */
-
 .hero::after{
 display:none;
 }
-
-/* force sharp rendering */
 
 .hero{
 background-size:cover !important;
