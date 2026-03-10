@@ -33,12 +33,13 @@ cursor:pointer;
 
 <body class="text-white min-h-screen flex items-center justify-center">
 
-<div class="glass p-8 rounded-2xl w-80">
+<!-- LOGIN CONTAINER -->
+
+<div id="loginBox" class="glass p-8 rounded-2xl w-80 hidden">
 
 <h2 id="title" class="text-xl font-bold mb-6 text-center">
 StudioOS Login
 </h2>
-
 
 <form id="authForm">
 
@@ -64,7 +65,6 @@ Login
 
 </form>
 
-
 <p class="text-center text-sm mt-4">
 
 <span id="toggleText">
@@ -89,7 +89,7 @@ import { login, signup } from "./js/auth.js"
 
 
 // ======================
-// AUTO REDIRECT IF LOGGED IN
+// SESSION CHECK
 // ======================
 
 const { data:{ session } } =
@@ -98,6 +98,10 @@ await supabase.auth.getSession()
 if(session){
 
 window.location.replace("dashboard.html")
+
+}else{
+
+document.getElementById("loginBox").classList.remove("hidden")
 
 }
 
@@ -124,7 +128,7 @@ const text =
 document.getElementById("toggleText")
 
 
-// TOGGLE MODE
+// TOGGLE LOGIN / SIGNUP
 
 toggle.addEventListener("click",()=>{
 
