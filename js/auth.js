@@ -53,17 +53,20 @@ alert("Account created. Please login.")
 
 
 // =============================
-// PROTECT DASHBOARD
+// PROTECT PAGE (SESSION SAFE)
 // =============================
 
 export async function protectPage(){
 
 const { data } =
-await supabase.auth.getUser()
+await supabase.auth.getSession()
 
-if(!data.user){
+const session = data.session
+
+if(!session){
 
 window.location.href = "index.html"
+return
 
 }
 
