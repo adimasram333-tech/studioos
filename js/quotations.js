@@ -94,33 +94,34 @@ const proposalLink =
 
 const card = document.createElement("div")
 
-card.className = "glass p-4 rounded-xl"
+card.className = "glass p-4 rounded-xl relative"
 
 
 // ===== CONFIRM BUTTON STATE =====
 
-let confirmButton = ""
+let confirmOption = ""
 
 if(q.status === "confirmed"){
 
-confirmButton = `
-<button disabled
-class="bg-green-600 px-3 py-1 rounded text-xs opacity-70 cursor-not-allowed">
+confirmOption = `
+<div class="px-3 py-1 text-xs text-green-400">
 Confirmed
-</button>
+</div>
 `
 
 }else{
 
-confirmButton = `
+confirmOption = `
 <button onclick="confirmBooking('${q.id}')"
-class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-xs">
-Confirm
+class="block w-full text-left px-3 py-1 text-xs hover:bg-gray-700">
+Confirm Booking
 </button>
 `
 
 }
 
+
+// ===== CARD HTML =====
 
 card.innerHTML = `
 
@@ -138,8 +139,17 @@ ${formatDate(q.event_date)}
 
 </div>
 
+<div class="flex items-center gap-2">
+
 <div class="text-sm font-semibold">
 ₹${q.total}
+</div>
+
+<button onclick="toggleMenu('${q.id}')"
+class="text-xl px-2">
+⋮
+</button>
+
 </div>
 
 </div>
@@ -157,10 +167,21 @@ class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded text-xs">
 Edit
 </button>
 
-${confirmButton}
+</div>
+
+
+<div id="menu-${q.id}"
+class="hidden absolute right-3 top-12 glass rounded-lg text-xs overflow-hidden">
+
+${confirmOption}
+
+<button onclick="addPayment('${q.id}')"
+class="block w-full text-left px-3 py-1 hover:bg-gray-700">
+Add Payment
+</button>
 
 <button onclick="deleteQuotation('${q.id}')"
-class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-xs">
+class="block w-full text-left px-3 py-1 text-red-400 hover:bg-gray-700">
 Delete
 </button>
 
@@ -171,6 +192,21 @@ Delete
 listContainer.appendChild(card)
 
 })
+
+}
+
+
+
+// =============================
+// TOGGLE MENU
+// =============================
+
+function toggleMenu(id){
+
+const menu =
+document.getElementById("menu-" + id)
+
+menu.classList.toggle("hidden")
 
 }
 
@@ -260,6 +296,18 @@ return
 }
 
 loadQuotations()
+
+}
+
+
+
+// =============================
+// ADD PAYMENT (PLACEHOLDER)
+// =============================
+
+function addPayment(id){
+
+alert("Payment feature coming next")
 
 }
 
