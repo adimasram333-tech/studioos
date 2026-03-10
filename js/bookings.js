@@ -8,10 +8,6 @@ await supabase.auth.getUser()
 if(!user) return
 
 
-// ===========================
-// GET CONFIRMED BOOKINGS
-// ===========================
-
 const { data , error } =
 await supabase
 .from("quotations")
@@ -87,9 +83,9 @@ Open Proposal
 </button>
 
 <button
-onclick="markCompleted('${b.id}')"
-class="bg-green-600 px-3 py-1 rounded-lg text-sm">
-Mark Completed
+onclick="updatePayment('${b.id}',${b.advance},${b.balance})"
+class="bg-yellow-600 px-3 py-1 rounded-lg text-sm">
+Update Payment
 </button>
 
 <button
@@ -110,36 +106,66 @@ Delete
 
 
 // ===========================
+// UPDATE PAYMENT
+// ===========================
+
+async function updatePayment(id,currentAdvance,currentBalance){
+
+const amount =
+prompt("Enter received amount:")
+
+if(!amount) return
+
+const received = Number(amount)
+
+if(received <= 0){
+alert("Invalid amount")
+return
+}
+
+const newAdvance =
+Number(currentAdvance) + received
+
+const newBalance =
+Number(currentBalance) - received
+
+let newStatus = "confirmed"
+
+if(newBalance <= 0){
+newStatus = "completed"
+}
+
+
+const { error } =
+await supabase
+.from("quotations")
+.update({
+advance:newAdvance,
+balance:newBalance < 0 ? 0 : newBalance,
+status:newStatus
+})
+.eq("id",id)
+
+
+if(error){
+
+alert("Error updating payment")
+return
+
+}
+
+loadBookings()
+
+}
+
+
+// ===========================
 // OPEN PROPOSAL
 // ===========================
 
 function openProposal(link){
 
 window.location.href = link
-
-}
-
-
-// ===========================
-// MARK COMPLETED
-// ===========================
-
-async function markCompleted(id){
-
-const { error } =
-await supabase
-.from("quotations")
-.update({status:"completed"})
-.eq("id",id)
-
-if(error){
-
-alert("Error updating booking")
-return
-
-}
-
-loadBookings()
 
 }
 
