@@ -94,46 +94,46 @@ const proposalLink =
 
 const card = document.createElement("div")
 
-card.className = "glass p-4 rounded-xl"
+card.className = "glass p-3 rounded-xl"
 
 
 card.innerHTML = `
 
+<div class="flex justify-between items-center">
+
 <div>
 
-<h2 class="text-lg font-semibold">
+<h2 class="font-semibold">
 ${q.client_name}
 </h2>
 
-<p class="text-sm text-gray-400">
-Event: ${formatDate(q.event_date)}
-</p>
-
-<p class="text-xs text-gray-500">
-Created: ${formatDate(q.created_at)}
-</p>
-
-<p class="text-sm mt-1">
-Total: ₹${q.total}
+<p class="text-xs text-gray-400">
+${formatDate(q.event_date)}
 </p>
 
 </div>
 
+<div class="text-sm font-semibold">
+₹${q.total}
+</div>
 
-<div class="mt-3 flex gap-2">
+</div>
+
+
+<div class="mt-2 flex gap-2">
 
 <button onclick="openProposal('${proposalLink}')"
-class="bg-blue-600 px-3 py-1 rounded-lg text-sm">
+class="bg-blue-600 px-2 py-1 rounded text-xs">
 View
 </button>
 
 <button onclick="editQuotation('${q.id}')"
-class="bg-indigo-600 px-3 py-1 rounded-lg text-sm">
+class="bg-indigo-600 px-2 py-1 rounded text-xs">
 Edit
 </button>
 
 <button onclick="deleteQuotation('${q.id}')"
-class="bg-red-600 px-3 py-1 rounded-lg text-sm">
+class="bg-red-600 px-2 py-1 rounded text-xs">
 Delete
 </button>
 
