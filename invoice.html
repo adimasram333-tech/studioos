@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Invoice</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+}
+
+.glass{
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+</style>
+
+</head>
+
+
+<body class="text-white min-h-screen p-4">
+
+<div class="max-w-md mx-auto space-y-4">
+
+<!-- HEADER -->
+
+<div class="glass p-4 rounded-xl">
+
+<h1 id="studioName" class="text-xl font-bold">
+Studio Name
+</h1>
+
+<p class="text-xs text-gray-400">
+Photography Studio
+</p>
+
+<p class="text-xs text-gray-400 mt-1">
+<span id="studioPhone">Phone</span> •
+<span id="studioEmail">Email</span>
+</p>
+
+</div>
+
+
+<!-- INVOICE TITLE -->
+
+<div class="glass p-4 rounded-xl flex justify-between items-center">
+
+<h2 class="text-lg font-semibold">
+Invoice
+</h2>
+
+<span id="invoiceNumber" class="text-xs text-gray-400">
+INV-001
+</span>
+
+</div>
+
+
+<!-- CLIENT INFO -->
+
+<div class="glass p-4 rounded-xl space-y-2">
+
+<h3 class="text-sm font-semibold text-gray-300">
+Client Details
+</h3>
+
+<div class="flex justify-between text-sm">
+<span>Client</span>
+<span id="clientName">-</span>
+</div>
+
+<div class="flex justify-between text-sm">
+<span>Phone</span>
+<span id="clientPhone">-</span>
+</div>
+
+</div>
+
+
+<!-- EVENT INFO -->
+
+<div class="glass p-4 rounded-xl space-y-2">
+
+<h3 class="text-sm font-semibold text-gray-300">
+Event Details
+</h3>
+
+<div class="flex justify-between text-sm">
+<span>Event</span>
+<span id="eventType">-</span>
+</div>
+
+<div class="flex justify-between text-sm">
+<span>Date</span>
+<span id="eventDate">-</span>
+</div>
+
+<div class="flex justify-between text-sm">
+<span>Venue</span>
+<span id="eventVenue">-</span>
+</div>
+
+</div>
+
+
+<!-- PACKAGE SUMMARY -->
+
+<div class="glass p-4 rounded-xl space-y-2">
+
+<h3 class="text-sm font-semibold text-gray-300">
+Package Summary
+</h3>
+
+<div class="flex justify-between text-sm">
+<span>Total Package</span>
+<span id="invoiceTotal">₹0</span>
+</div>
+
+<div class="flex justify-between text-sm">
+<span>Paid</span>
+<span id="invoicePaid">₹0</span>
+</div>
+
+<div class="flex justify-between text-sm font-semibold">
+<span>Balance</span>
+<span id="invoiceBalance">₹0</span>
+</div>
+
+</div>
+
+
+<!-- PAYMENTS -->
+
+<div class="glass p-4 rounded-xl">
+
+<h3 class="text-sm font-semibold text-gray-300 mb-2">
+Payments
+</h3>
+
+<div id="invoicePayments"
+class="space-y-2 text-sm text-gray-300">
+
+<p class="text-gray-400">
+No payments yet
+</p>
+
+</div>
+
+</div>
+
+
+<!-- NOTES -->
+
+<div class="glass p-4 rounded-xl">
+
+<h3 class="text-sm font-semibold text-gray-300 mb-2">
+Notes
+</h3>
+
+<p class="text-xs text-gray-400">
+Balance payment required before final delivery.
+Album delivery timeline 30 days.
+</p>
+
+</div>
+
+
+<!-- FOOTER -->
+
+<div class="glass p-4 rounded-xl text-center">
+
+<p class="text-sm font-semibold">
+Thank you for choosing
+</p>
+
+<p id="studioFooter" class="text-sm text-gray-400">
+Studio Name
+</p>
+
+</div>
+
+
+<!-- DOWNLOAD -->
+
+<button
+id="downloadInvoice"
+class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl">
+
+Download Invoice
+
+</button>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/invoice.js"></script>
+
+</body>
+</html>
