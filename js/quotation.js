@@ -111,6 +111,39 @@ giftInput.classList.add("hidden")
 
 
 // =============================
+// SAVE QUOTATION FUNCTION
+// =============================
+
+async function saveQuotation(data){
+
+try{
+
+const { data:inserted , error } = await supabase
+.from("quotations")
+.insert(data)
+.select()
+.single()
+
+if(error){
+
+console.error("Save error:",error)
+return null
+
+}
+
+return inserted
+
+}catch(err){
+
+console.error(err)
+return null
+
+}
+
+}
+
+
+// =============================
 // PREVIEW QUOTE
 // =============================
 
