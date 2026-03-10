@@ -97,6 +97,31 @@ const card = document.createElement("div")
 card.className = "glass p-4 rounded-xl"
 
 
+// ===== CONFIRM BUTTON STATE =====
+
+let confirmButton = ""
+
+if(q.status === "confirmed"){
+
+confirmButton = `
+<button disabled
+class="bg-green-600 px-3 py-1 rounded text-xs opacity-70 cursor-not-allowed">
+Confirmed
+</button>
+`
+
+}else{
+
+confirmButton = `
+<button onclick="confirmBooking('${q.id}')"
+class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-xs">
+Confirm
+</button>
+`
+
+}
+
+
 card.innerHTML = `
 
 <div class="flex justify-between items-center">
@@ -131,6 +156,8 @@ View
 class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded text-xs">
 Edit
 </button>
+
+${confirmButton}
 
 <button onclick="deleteQuotation('${q.id}')"
 class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-xs">
@@ -200,6 +227,34 @@ if(error){
 
 console.error("Delete error:",error)
 alert("Error deleting quotation")
+return
+
+}
+
+loadQuotations()
+
+}
+
+
+
+// =============================
+// CONFIRM BOOKING
+// =============================
+
+async function confirmBooking(id){
+
+if(!confirm("Confirm this booking?")) return
+
+const { error } =
+await supabase
+.from("quotations")
+.update({ status:"confirmed" })
+.eq("id",id)
+
+if(error){
+
+console.error("Confirm error:",error)
+alert("Error confirming booking")
 return
 
 }
