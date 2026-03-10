@@ -269,13 +269,14 @@ count || 0
 
 
 
-// FIXED PENDING PAYMENTS
+// FIXED PENDING PAYMENTS (ONLY CONFIRMED BOOKINGS)
 
 const { data: allQuotes } =
 await supabase
 .from("quotations")
 .select("id,total")
 .eq("user_id", user.id)
+.eq("status","confirmed")
 
 let pending = 0
 let revenue = 0
@@ -309,12 +310,66 @@ document.getElementById("pendingPayments").innerText =
 
 
 
-// MONTHLY REVENUE (BASED ON PAYMENTS)
+// MONTHLY REVENUE
 
 document.getElementById("monthlyRevenue").innerText =
 "₹" + revenue
 
 
+
+// EVENT REMINDERS
+
+const { data: events } =
+await supabase
+.from("quotations")
+.select("client_name,event_date,status")
+.eq("user_id", user.id)
+.eq("status","confirmed")
+
+const notify =
+document.getElementById("notifications")
+
+notify.innerHTML = ""
+
+const today = new Date()
+
+events?.forEach(e=>{
+
+const eventDate =
+new Date(e.event_date)
+
+const diff =
+Math.ceil(
+(eventDate - today)/(1000*60*60*24)
+)
+
+if(diff === 0){
+
+notify.innerHTML +=
+`<div>📅 ${e.client_name} event today</div>`
+
+}
+
+else if(diff === 1){
+
+notify.innerHTML +=
+`<div>📅 ${e.client_name} event tomorrow</div>`
+
+}
+
+else if(diff <= 3 && diff > 1){
+
+notify.innerHTML +=
+`<div>📅 ${e.client_name} event in ${diff} days</div>`
+
+}
+
+})
+
+if(notify.innerHTML === ""){
+notify.innerHTML =
+"<p class='text-gray-400'>No reminders</p>"
+}
 
 }
 
