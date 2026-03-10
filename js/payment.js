@@ -48,8 +48,11 @@ document.getElementById("paymentDate").value
 const method =
 document.getElementById("paymentMethod").value
 
+const type =
+document.getElementById("paymentType").value
 
-if(!amount || !date || !method){
+
+if(!amount || !date || !method || !type){
 
 alert("Please fill all fields")
 return
@@ -68,6 +71,7 @@ user_id: user.id,
 quotation_id: quotationId,
 amount: amount,
 payment_date: date,
+payment_type: type,
 method: method
 
 }])
