@@ -58,7 +58,7 @@ alert("Account created. Please login.")
 
 export async function protectPage(){
 
-// check current session
+// check immediate session
 const { data:{ session } } =
 await supabase.auth.getSession()
 
@@ -66,17 +66,34 @@ if(session){
 return
 }
 
-// wait briefly for session restore
-await new Promise(resolve => setTimeout(resolve,200))
+// wait for auth state initialization
+await new Promise((resolve)=>{
 
-const { data:{ session:retrySession } } =
+const { data: listener } =
+supabase.auth.onAuthStateChange((event, session)=>{
+
+// INITIAL_SESSION fires when Supabase restores session
+if(event === "INITIAL_SESSION"){
+
+listener.subscription.unsubscribe()
+
+resolve()
+
+}
+
+})
+
+})
+
+// check session again after initialization
+const { data:{ session:finalSession } } =
 await supabase.auth.getSession()
 
-if(retrySession){
+if(finalSession){
 return
 }
 
-// final redirect
+// if still no session redirect
 window.location.replace("index.html")
 
 }
