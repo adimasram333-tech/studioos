@@ -19,7 +19,7 @@ return
 
 }
 
-window.location.href = "dashboard.html"
+window.location.replace("dashboard.html")
 
 }
 
@@ -58,24 +58,26 @@ alert("Account created. Please login.")
 
 export async function protectPage(){
 
-// wait for session
-const { data } =
+// check current session
+const { data:{ session } } =
 await supabase.auth.getSession()
 
-if(data.session){
+if(session){
 return
 }
 
-// if session not ready yet listen for auth change
-supabase.auth.onAuthStateChange((event, session) => {
+// wait briefly for session restore
+await new Promise(resolve => setTimeout(resolve,200))
 
-if(!session){
+const { data:{ session:retrySession } } =
+await supabase.auth.getSession()
 
-window.location.href = "index.html"
-
+if(retrySession){
+return
 }
 
-})
+// final redirect
+window.location.replace("index.html")
 
 }
 
@@ -89,6 +91,6 @@ export async function logout(){
 
 await supabase.auth.signOut()
 
-window.location.href = "index.html"
+window.location.replace("index.html")
 
 }
