@@ -231,6 +231,25 @@ giftInput.classList.add("hidden")
 
 
 // =============================
+// CHECK EVENT LOAD (SOFT WARNING)
+// =============================
+
+async function checkEventLoad(date,userId){
+
+const { data } =
+await supabase
+.from("quotations")
+.select("event_date")
+.eq("user_id",userId)
+.eq("event_date",date)
+.eq("status","confirmed")
+
+return data?.length || 0
+
+}
+
+
+// =============================
 // SAVE / UPDATE QUOTATION
 // =============================
 
@@ -295,9 +314,7 @@ previewBtn.disabled = true
 previewBtn.innerText = "Generating..."
 
 
-// =============================
-// GET LOGGED USER
-// =============================
+// GET USER
 
 const { data:{ user } } =
 await supabase.auth.getUser()
@@ -314,9 +331,7 @@ return
 }
 
 
-// =============================
-// BASIC VALIDATION
-// =============================
+// VALIDATION
 
 const clientName = get("clientName")?.value.trim() || ""
 const clientPhone = get("clientPhone")?.value.trim() || ""
@@ -338,9 +353,21 @@ return
 }
 
 
-// =============================
-// BUILD SERVICES OBJECT
-// =============================
+// SOFT DOUBLE BOOKING WARNING
+
+const existingEvents =
+await checkEventLoad(startDate,user.id)
+
+if(existingEvents > 0){
+
+alert(
+`⚠ ${existingEvents} event(s) already booked on this date`
+)
+
+}
+
+
+// BUILD SERVICES
 
 const services = {
 
@@ -382,9 +409,7 @@ days: parseInt(get("assistantDays")?.value || 0)
 }
 
 
-// =============================
 // BUILD DELIVERABLES
-// =============================
 
 const deliverables = {
 
@@ -407,9 +432,7 @@ name: giftInput?.value || ""
 }
 
 
-// =============================
-// BUILD QUOTATION OBJECT
-// =============================
+// QUOTATION OBJECT
 
 const quotationData = {
 
@@ -435,9 +458,7 @@ deliverables
 }
 
 
-// =============================
-// SAVE / UPDATE
-// =============================
+// SAVE
 
 const saved = await saveQuotation(quotationData)
 
@@ -447,9 +468,7 @@ return
 }
 
 
-// =============================
 // SHORT ID
-// =============================
 
 const shortId = saved.id.substring(0,8)
 
@@ -459,9 +478,7 @@ await supabase
 .eq("id", saved.id)
 
 
-// =============================
-// REDIRECT TO PROPOSAL
-// =============================
+// REDIRECT
 
 const slug = slugify(clientName)
 
