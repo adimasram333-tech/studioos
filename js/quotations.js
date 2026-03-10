@@ -77,16 +77,6 @@ listContainer.innerHTML = ""
 quotations.forEach((q)=>{
 
 
-const statusColor =
-q.status === "proposal"
-? "bg-gray-500"
-: q.status === "sent"
-? "bg-yellow-500"
-: q.status === "confirmed"
-? "bg-green-600"
-: "bg-red-500"
-
-
 // ===== BUILD SEO LINK =====
 
 const slug =
@@ -104,12 +94,10 @@ const proposalLink =
 
 const card = document.createElement("div")
 
-card.className = "glass p-5 rounded-2xl"
+card.className = "glass p-4 rounded-xl"
 
 
 card.innerHTML = `
-
-<div class="flex justify-between items-center">
 
 <div>
 
@@ -125,54 +113,28 @@ Event: ${formatDate(q.event_date)}
 Created: ${formatDate(q.created_at)}
 </p>
 
-</div>
-
-<span class="px-3 py-1 text-sm rounded-full ${statusColor}">
-${q.status}
-</span>
+<p class="text-sm mt-1">
+Total: ₹${q.total}
+</p>
 
 </div>
 
 
-<div class="mt-3 text-sm">
-
-<p>Total: ₹${q.total}</p>
-<p>Advance: ₹${q.advance}</p>
-<p>Balance: ₹${q.balance}</p>
-
-</div>
-
-
-<div class="mt-4 flex gap-2 flex-wrap">
-
-<button onclick="markSent('${q.id}')"
-class="bg-yellow-600 px-3 py-1 rounded-lg text-sm">
-Mark Sent
-</button>
-
-<button onclick="markConfirmed('${q.id}')"
-class="bg-green-600 px-3 py-1 rounded-lg text-sm">
-Confirm
-</button>
-
-<button onclick="duplicateQuotation('${q.id}')"
-class="bg-purple-600 px-3 py-1 rounded-lg text-sm">
-Duplicate
-</button>
-
-<button onclick="deleteQuotation('${q.id}')"
-class="bg-red-600 px-3 py-1 rounded-lg text-sm">
-Delete
-</button>
+<div class="mt-3 flex gap-2">
 
 <button onclick="openProposal('${proposalLink}')"
 class="bg-blue-600 px-3 py-1 rounded-lg text-sm">
-Open Proposal
+View
 </button>
 
 <button onclick="editQuotation('${q.id}')"
 class="bg-indigo-600 px-3 py-1 rounded-lg text-sm">
 Edit
+</button>
+
+<button onclick="deleteQuotation('${q.id}')"
+class="bg-red-600 px-3 py-1 rounded-lg text-sm">
+Delete
 </button>
 
 </div>
@@ -199,7 +161,7 @@ const date = new Date(dateString)
 
 return date.toLocaleDateString("en-IN",{
 day:"numeric",
-month:"long",
+month:"short",
 year:"numeric"
 })
 
@@ -215,96 +177,6 @@ function editQuotation(id){
 
 window.location.href =
 `quotation.html?edit=${id}`
-
-}
-
-
-
-// =============================
-// UPDATE STATUS
-// =============================
-
-async function updateStatus(id,newStatus){
-
-const { error } =
-await supabase
-.from("quotations")
-.update({status:newStatus})
-.eq("id",id)
-
-if(error){
-
-console.error("Status update error:",error)
-alert("Error updating status")
-return
-
-}
-
-loadQuotations()
-
-}
-
-
-
-// =============================
-// MARK SENT
-// =============================
-
-function markSent(id){
-updateStatus(id,"sent")
-}
-
-
-
-// =============================
-// MARK CONFIRMED
-// =============================
-
-function markConfirmed(id){
-updateStatus(id,"confirmed")
-}
-
-
-
-// =============================
-// DUPLICATE QUOTATION
-// =============================
-
-async function duplicateQuotation(id){
-
-const { data , error } =
-await supabase
-.from("quotations")
-.select("*")
-.eq("id",id)
-.single()
-
-if(error){
-
-alert("Error duplicating quotation")
-return
-
-}
-
-delete data.id
-delete data.short_id
-delete data.created_at
-
-data.status = "proposal"
-
-const { error:insertError } =
-await supabase
-.from("quotations")
-.insert(data)
-
-if(insertError){
-
-alert("Error creating duplicate")
-return
-
-}
-
-loadQuotations()
 
 }
 
