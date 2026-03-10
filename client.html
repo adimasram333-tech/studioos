@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Client</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+}
+
+.glass{
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+</style>
+
+</head>
+
+
+<body class="text-white min-h-screen p-4">
+
+<div class="max-w-md mx-auto space-y-4">
+
+<a href="clients.html"
+class="text-sm text-gray-400">
+← Back
+</a>
+
+<h1 class="text-xl font-bold">
+Client Profile
+</h1>
+
+
+<!-- CLIENT DETAILS -->
+
+<div class="glass p-4 rounded-xl space-y-2">
+
+<h2 class="text-sm font-semibold text-gray-300">
+Client Details
+</h2>
+
+<div class="flex justify-between text-sm">
+<span>Name</span>
+<span id="clientName">-</span>
+</div>
+
+<div class="flex justify-between text-sm">
+<span>Phone</span>
+<span id="clientPhone">-</span>
+</div>
+
+</div>
+
+
+
+<!-- EVENT DETAILS -->
+
+<div class="glass p-4 rounded-xl space-y-2">
+
+<h2 class="text-sm font-semibold text-gray-300">
+Event Details
+</h2>
+
+<div class="flex justify-between text-sm">
+<span>Event</span>
+<span id="eventType">-</span>
+</div>
+
+<div class="flex justify-between text-sm">
+<span>Date</span>
+<span id="eventDate">-</span>
+</div>
+
+<div class="flex justify-between text-sm">
+<span>Venue</span>
+<span id="eventVenue">-</span>
+</div>
+
+</div>
+
+
+
+<!-- PAYMENT SUMMARY -->
+
+<div class="glass p-4 rounded-xl space-y-2">
+
+<h2 class="text-sm font-semibold text-gray-300">
+Payment Summary
+</h2>
+
+<div class="flex justify-between text-sm">
+<span>Total Package</span>
+<span id="totalAmount">₹0</span>
+</div>
+
+<div class="flex justify-between text-sm">
+<span>Paid</span>
+<span id="paidAmount">₹0</span>
+</div>
+
+<div class="flex justify-between text-sm font-semibold">
+<span>Pending</span>
+<span id="pendingAmount">₹0</span>
+</div>
+
+</div>
+
+
+
+<!-- PAYMENTS -->
+
+<div class="glass p-4 rounded-xl">
+
+<h2 class="text-sm font-semibold text-gray-300 mb-2">
+Payments
+</h2>
+
+<div id="paymentsList"
+class="space-y-2 text-sm text-gray-300">
+
+<p class="text-gray-400">
+No payments yet
+</p>
+
+</div>
+
+</div>
+
+
+
+<!-- ACTIONS -->
+
+<div class="space-y-2">
+
+<a id="addPaymentBtn"
+class="block text-center bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl">
+
+Add Payment
+
+</a>
+
+<a id="viewInvoiceBtn"
+class="block text-center glass p-3 rounded-xl">
+
+View Invoice
+
+</a>
+
+</div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/client.js"></script>
+
+</body>
+</html>
