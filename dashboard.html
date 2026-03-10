@@ -77,9 +77,7 @@ Setup
 </div>
 
 
-<!-- ========================= -->
 <!-- RECENT QUOTATIONS -->
-<!-- ========================= -->
 
 <div class="glass rounded-2xl p-4 mb-6">
 
@@ -96,9 +94,7 @@ Recent Quotations
 </div>
 
 
-<!-- ========================= -->
 <!-- NOTIFICATIONS -->
-<!-- ========================= -->
 
 <div class="glass rounded-2xl p-4 mb-6">
 
@@ -158,9 +154,7 @@ document
 
 
 
-// ============================
-// LOAD STUDIO PROFILE
-// ============================
+// LOAD STUDIO NAME
 
 async function loadStudio(){
 
@@ -171,14 +165,12 @@ const user = userData.user
 
 if(!user) return
 
-
 const { data } =
 await supabase
 .from("photographer_settings")
 .select("studio_name")
 .eq("user_id", user.id)
 .single()
-
 
 if(data){
 
@@ -193,9 +185,7 @@ loadStudio()
 
 
 
-// ============================
-// LOAD DASHBOARD DATA
-// ============================
+// DASHBOARD DATA
 
 async function loadDashboard(){
 
@@ -208,9 +198,7 @@ if(!user) return
 
 
 
-// ============================
 // RECENT QUOTATIONS
-// ============================
 
 const { data: quotations } =
 await supabase
@@ -219,7 +207,6 @@ await supabase
 .eq("user_id", user.id)
 .order("created_at",{ascending:false})
 .limit(5)
-
 
 const list =
 document.getElementById("recentQuotations")
@@ -249,9 +236,7 @@ list.appendChild(row)
 
 
 
-// ============================
 // BOOKINGS COUNT
-// ============================
 
 const { count } =
 await supabase
@@ -265,9 +250,7 @@ count || 0
 
 
 
-// ============================
 // PENDING PAYMENTS
-// ============================
 
 const { data: payments } =
 await supabase
@@ -286,42 +269,58 @@ document.getElementById("pendingPayments").innerText =
 
 
 
-// ============================
-// EVENT NOTIFICATIONS
-// ============================
+// EVENT REMINDERS
 
 const { data: events } =
 await supabase
 .from("quotations")
-.select("client_name,event_date")
+.select("client_name,event_date,status")
 .eq("user_id", user.id)
-.order("event_date",{ascending:true})
-.limit(3)
-
+.eq("status","confirmed")
 
 const notify =
 document.getElementById("notifications")
 
-if(events && events.length){
-
 notify.innerHTML = ""
 
-events.forEach(e=>{
+const today = new Date()
 
-const row =
-document.createElement("div")
+events?.forEach(e=>{
 
-row.innerHTML =
-`
-<div>
-📅 ${e.client_name} - ${new Date(e.event_date).toLocaleDateString()}
-</div>
-`
+const eventDate =
+new Date(e.event_date)
 
-notify.appendChild(row)
+const diff =
+Math.ceil(
+(eventDate - today)/(1000*60*60*24)
+)
+
+if(diff === 0){
+
+notify.innerHTML +=
+`<div>📅 ${e.client_name} event today</div>`
+
+}
+
+else if(diff === 1){
+
+notify.innerHTML +=
+`<div>📅 ${e.client_name} event tomorrow</div>`
+
+}
+
+else if(diff <= 3 && diff > 1){
+
+notify.innerHTML +=
+`<div>📅 ${e.client_name} event in ${diff} days</div>`
+
+}
 
 })
 
+if(notify.innerHTML === ""){
+notify.innerHTML =
+"<p class='text-gray-400'>No reminders</p>"
 }
 
 }
