@@ -64,7 +64,7 @@ const quotations = await getAllQuotations()
 if(!quotations || quotations.length === 0){
 
 listContainer.innerHTML =
-"<p class='text-gray-400'>No quotations found.</p>"
+"<p class='text-gray-400 text-sm'>No quotations found.</p>"
 
 return
 
@@ -94,7 +94,7 @@ const proposalLink =
 
 const card = document.createElement("div")
 
-card.className = "glass p-3 rounded-xl"
+card.className = "glass p-4 rounded-xl"
 
 
 card.innerHTML = `
@@ -103,7 +103,7 @@ card.innerHTML = `
 
 <div>
 
-<h2 class="font-semibold">
+<h2 class="font-semibold text-sm">
 ${q.client_name}
 </h2>
 
@@ -120,20 +120,20 @@ ${formatDate(q.event_date)}
 </div>
 
 
-<div class="mt-2 flex gap-2">
+<div class="mt-3 flex gap-2">
 
 <button onclick="openProposal('${proposalLink}')"
-class="bg-blue-600 px-2 py-1 rounded text-xs">
+class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs">
 View
 </button>
 
 <button onclick="editQuotation('${q.id}')"
-class="bg-indigo-600 px-2 py-1 rounded text-xs">
+class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded text-xs">
 Edit
 </button>
 
 <button onclick="deleteQuotation('${q.id}')"
-class="bg-red-600 px-2 py-1 rounded text-xs">
+class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-xs">
 Delete
 </button>
 
