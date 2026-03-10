@@ -77,6 +77,45 @@ Setup
 </div>
 
 
+<!-- ========================= -->
+<!-- RECENT QUOTATIONS -->
+<!-- ========================= -->
+
+<div class="glass rounded-2xl p-4 mb-6">
+
+<h3 class="text-lg font-semibold mb-3">
+Recent Quotations
+</h3>
+
+<div id="recentQuotations" class="space-y-2 text-sm text-gray-300">
+
+<p class="text-gray-400">No quotations yet</p>
+
+</div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- NOTIFICATIONS -->
+<!-- ========================= -->
+
+<div class="glass rounded-2xl p-4 mb-6">
+
+<h3 class="text-lg font-semibold mb-3">
+Notifications
+</h3>
+
+<div id="notifications" class="space-y-2 text-sm text-gray-300">
+
+<p class="text-gray-400">No notifications</p>
+
+</div>
+
+</div>
+
+
+
 <div class="space-y-4">
 
 <a href="quotation.html"
@@ -111,13 +150,12 @@ class="block glass rounded-2xl p-4 hover:scale-105 transition">
 
 import { protectPage, logout } from "./js/auth.js"
 
-// protect dashboard
 await protectPage()
 
-// logout button
 document
 .getElementById("logoutBtn")
 .addEventListener("click", logout)
+
 
 
 // ============================
@@ -152,6 +190,143 @@ data.studio_name
 }
 
 loadStudio()
+
+
+
+// ============================
+// LOAD DASHBOARD DATA
+// ============================
+
+async function loadDashboard(){
+
+const { data: userData } =
+await supabase.auth.getUser()
+
+const user = userData.user
+
+if(!user) return
+
+
+
+// ============================
+// RECENT QUOTATIONS
+// ============================
+
+const { data: quotations } =
+await supabase
+.from("quotations")
+.select("*")
+.eq("user_id", user.id)
+.order("created_at",{ascending:false})
+.limit(5)
+
+
+const list =
+document.getElementById("recentQuotations")
+
+if(quotations && quotations.length){
+
+list.innerHTML = ""
+
+quotations.forEach(q=>{
+
+const row =
+document.createElement("div")
+
+row.innerHTML =
+`
+<div class="flex justify-between">
+<span>${q.client_name}</span>
+<span>₹${q.total}</span>
+</div>
+`
+
+list.appendChild(row)
+
+})
+
+}
+
+
+
+// ============================
+// BOOKINGS COUNT
+// ============================
+
+const { count } =
+await supabase
+.from("quotations")
+.select("*",{count:"exact",head:true})
+.eq("user_id", user.id)
+.eq("status","confirmed")
+
+document.getElementById("totalBookings").innerText =
+count || 0
+
+
+
+// ============================
+// PENDING PAYMENTS
+// ============================
+
+const { data: payments } =
+await supabase
+.from("quotations")
+.select("balance")
+.eq("user_id", user.id)
+
+let pending = 0
+
+payments?.forEach(p=>{
+pending += Number(p.balance || 0)
+})
+
+document.getElementById("pendingPayments").innerText =
+"₹" + pending
+
+
+
+// ============================
+// EVENT NOTIFICATIONS
+// ============================
+
+const { data: events } =
+await supabase
+.from("quotations")
+.select("client_name,event_date")
+.eq("user_id", user.id)
+.order("event_date",{ascending:true})
+.limit(3)
+
+
+const notify =
+document.getElementById("notifications")
+
+if(events && events.length){
+
+notify.innerHTML = ""
+
+events.forEach(e=>{
+
+const row =
+document.createElement("div")
+
+row.innerHTML =
+`
+<div>
+📅 ${e.client_name} - ${new Date(e.event_date).toLocaleDateString()}
+</div>
+`
+
+notify.appendChild(row)
+
+})
+
+}
+
+}
+
+loadDashboard()
 
 </script>
 
