@@ -32,18 +32,17 @@ font-family:'Inter',sans-serif;
 color:var(--text);
 }
 
-/* ===== PAGE WRAPPER ===== */
+/* ===== PERFECT A4 PAGE ===== */
 
 .page{
 width:794px;
+min-height:1123px;
 background:white;
 margin:40px auto;
 box-shadow:0 10px 40px rgba(0,0,0,0.08);
 overflow:hidden;
 position:relative;
 }
-
-/* FORCE PERFECT PDF WIDTH */
 
 #proposalPage{
 width:794px;
@@ -58,8 +57,7 @@ min-height:260px;
 padding:70px 20px;
 background-image:url('https://images.unsplash.com/photo-1519741497674-611481863552');
 background-size:cover;
-background-position:center center;
-background-repeat:no-repeat;
+background-position:center;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -67,10 +65,7 @@ flex-direction:column;
 color:white;
 text-align:center;
 position:relative;
-box-sizing:border-box;
 }
-
-/* DARK OVERLAY */
 
 .hero::after{
 content:'';
@@ -104,6 +99,7 @@ font-size:16px;
 .content{
 padding:50px;
 box-sizing:border-box;
+page-break-inside:auto;
 }
 
 .section-title{
@@ -112,6 +108,7 @@ font-size:20px;
 margin-bottom:10px;
 border-bottom:1px solid #eee;
 padding-bottom:6px;
+page-break-after:avoid;
 }
 
 .info-grid{
@@ -127,28 +124,7 @@ padding:15px;
 border-left:3px solid var(--primary);
 }
 
-ul{
-line-height:1.8;
-}
-
-/* ===== SUMMARY ===== */
-
-.summary{
-border:2px solid var(--primary);
-padding:25px;
-background:var(--bg);
-margin-top:30px;
-
-/* ===== PDF FIX ===== */
-page-break-inside:avoid;
-break-inside:avoid;
-}
-
-/* ALSO PROTECT SECTIONS */
-
-.section-title{
-page-break-after:avoid;
-}
+/* ===== TABLE ===== */
 
 table{
 width:100%;
@@ -161,20 +137,34 @@ padding:10px;
 border-bottom:1px solid #eee;
 }
 
-/* ===== FOOTER ===== */
+/* ===== DELIVERABLES ===== */
 
-.footer{
-margin-top:60px;
-text-align:center;
-font-size:13px;
-color:#666;
+ul{
+line-height:1.8;
 page-break-inside:avoid;
+break-inside:avoid;
+}
+
+/* ===== INVESTMENT ===== */
+
+.summary{
+border:2px solid var(--primary);
+padding:25px;
+background:var(--bg);
+margin-top:30px;
+
+page-break-inside:avoid;
+break-inside:avoid;
 }
 
 /* ===== BUTTONS ===== */
 
+.whatsappBox{
+text-align:center;
+margin-top:40px;
+}
+
 .whatsappBtn{
-margin-top:25px;
 background:#25D366;
 color:white;
 border:none;
@@ -195,9 +185,14 @@ border-radius:6px;
 cursor:pointer;
 }
 
-.whatsappBox{
+/* ===== FOOTER ===== */
+
+.footer{
+margin-top:60px;
 text-align:center;
-margin-top:30px;
+font-size:13px;
+color:#666;
+page-break-inside:avoid;
 }
 
 /* ===== MOBILE ===== */
@@ -221,11 +216,6 @@ padding:60px 20px;
 
 .hero h1{
 font-size:26px;
-line-height:32px;
-}
-
-.hero p{
-font-size:14px;
 }
 
 .content{
@@ -234,31 +224,11 @@ padding:20px;
 
 .info-grid{
 grid-template-columns:1fr;
-gap:15px;
-}
-
-.section-title{
-font-size:18px;
-}
-
-td{
-font-size:14px;
-padding:8px;
-}
-
-.summary{
-padding:18px;
-}
-
-.whatsappBtn,
-.pdfBtn{
-width:100%;
-font-size:15px;
 }
 
 }
 
-/* ===== PRINT / PDF MODE ===== */
+/* ===== PRINT MODE ===== */
 
 @media print{
 
@@ -272,20 +242,12 @@ margin:0;
 width:794px;
 }
 
-#proposalPage{
-width:794px;
-}
-
 .whatsappBox{
 display:none;
 }
 
 .hero::after{
 display:none;
-}
-
-.hero{
-background-size:cover !important;
 }
 
 }
@@ -340,6 +302,7 @@ background-size:cover !important;
 </table>
 
 <h2 class="section-title">Deliverables</h2>
+
 <ul id="deliverablesList"></ul>
 
 <div class="summary">
@@ -348,9 +311,20 @@ background-size:cover !important;
 
 <table>
 
-<tr><td>Total Investment</td><td id="total"></td></tr>
-<tr><td>Advance Required</td><td id="advance"></td></tr>
-<tr><td>Balance</td><td id="balance"></td></tr>
+<tr>
+<td>Total Investment</td>
+<td id="total"></td>
+</tr>
+
+<tr>
+<td>Advance Required</td>
+<td id="advance"></td>
+</tr>
+
+<tr>
+<td>Balance</td>
+<td id="balance"></td>
+</tr>
 
 </table>
 
