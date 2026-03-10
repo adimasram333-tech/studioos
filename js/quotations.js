@@ -1,4 +1,48 @@
 // =============================
+// GET CURRENT USER
+// =============================
+
+async function getCurrentUser(){
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+return user
+
+}
+
+
+// =============================
+// FETCH QUOTATIONS
+// =============================
+
+async function getAllQuotations(){
+
+const user = await getCurrentUser()
+
+if(!user) return []
+
+const { data, error } =
+await supabase
+.from("quotations")
+.select("*")
+.eq("user_id",user.id)
+.order("created_at",{ascending:false})
+
+if(error){
+
+console.error("Fetch error:",error)
+return []
+
+}
+
+return data
+
+}
+
+
+
+// =============================
 // LOAD QUOTATIONS FROM SUPABASE
 // =============================
 
@@ -95,6 +139,11 @@ class="bg-green-600 px-3 py-1 rounded-lg text-sm">
 Confirm
 </button>
 
+<button onclick="duplicateQuotation('${q.id}')"
+class="bg-purple-600 px-3 py-1 rounded-lg text-sm">
+Duplicate
+</button>
+
 <button onclick="deleteQuotation('${q.id}')"
 class="bg-red-600 px-3 py-1 rounded-lg text-sm">
 Delete
@@ -178,6 +227,50 @@ updateStatus(id,"sent")
 
 function markConfirmed(id){
 updateStatus(id,"confirmed")
+}
+
+
+
+// =============================
+// DUPLICATE QUOTATION
+// =============================
+
+async function duplicateQuotation(id){
+
+const { data , error } =
+await supabase
+.from("quotations")
+.select("*")
+.eq("id",id)
+.single()
+
+if(error){
+
+alert("Error duplicating quotation")
+return
+
+}
+
+delete data.id
+delete data.short_id
+delete data.created_at
+
+data.status = "proposal"
+
+const { error:insertError } =
+await supabase
+.from("quotations")
+.insert(data)
+
+if(insertError){
+
+alert("Error creating duplicate")
+return
+
+}
+
+loadQuotations()
+
 }
 
 
