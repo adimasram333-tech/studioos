@@ -87,6 +87,25 @@ Signup
 
 import { login, signup } from "./js/auth.js"
 
+
+// ======================
+// AUTO REDIRECT IF LOGGED IN
+// ======================
+
+const { data:{ session } } =
+await supabase.auth.getSession()
+
+if(session){
+
+window.location.replace("dashboard.html")
+
+}
+
+
+// ======================
+// LOGIN / SIGNUP LOGIC
+// ======================
+
 let mode = "login"
 
 const form =
@@ -105,9 +124,7 @@ const text =
 document.getElementById("toggleText")
 
 
-// ======================
-// TOGGLE LOGIN / SIGNUP
-// ======================
+// TOGGLE MODE
 
 toggle.addEventListener("click",()=>{
 
@@ -136,9 +153,7 @@ toggle.innerText="Signup"
 })
 
 
-// ======================
 // FORM SUBMIT
-// ======================
 
 form.addEventListener("submit", async (e)=>{
 
@@ -149,7 +164,6 @@ document.getElementById("email").value
 
 const password =
 document.getElementById("password").value
-
 
 if(mode==="login"){
 
