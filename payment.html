@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Add Payment</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+}
+
+.glass{
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+.input{
+width:100%;
+padding:10px;
+border-radius:10px;
+background:#374151;
+color:white;
+border:1px solid rgba(255,255,255,0.1);
+margin-bottom:10px;
+}
+
+</style>
+
+</head>
+
+
+<body class="text-white min-h-screen p-4">
+
+<div class="max-w-md mx-auto glass p-4 rounded-xl">
+
+<a href="quotations.html" class="text-sm text-gray-400">
+← Back
+</a>
+
+<h1 class="text-xl font-bold mt-2 mb-4">
+Add Payment
+</h1>
+
+<input
+id="paymentAmount"
+type="number"
+placeholder="Amount ₹"
+class="input">
+
+<input
+id="paymentDate"
+type="date"
+class="input">
+
+<select
+id="paymentMethod"
+class="input">
+
+<option value="">Select Method</option>
+<option>Cash</option>
+<option>UPI</option>
+<option>Bank Transfer</option>
+
+</select>
+
+<button
+id="savePaymentBtn"
+class="w-full bg-indigo-600 hover:bg-indigo-700 p-2 rounded-lg">
+
+Save Payment
+
+</button>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/payment.js"></script>
+
+</body>
+</html>
