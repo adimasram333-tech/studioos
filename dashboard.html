@@ -86,9 +86,18 @@ Setup
 
 <div class="glass rounded-2xl p-4 mb-6">
 
-<h3 class="text-lg font-semibold mb-3">
+<div class="flex justify-between items-center mb-3">
+
+<h3 class="text-lg font-semibold">
 Recent Quotations
 </h3>
+
+<a href="quotations.html"
+class="text-indigo-400 text-sm hover:underline">
+View All →
+</a>
+
+</div>
 
 <div id="recentQuotations" class="space-y-2 text-sm text-gray-300">
 
@@ -158,6 +167,7 @@ document
 .addEventListener("click", logout)
 
 
+
 // LOAD STUDIO NAME
 
 async function loadStudio(){
@@ -200,15 +210,15 @@ if(!user) return
 
 
 
-// RECENT QUOTATIONS
+// RECENT QUOTATIONS (LAST 3)
 
 const { data: quotations } =
 await supabase
 .from("quotations")
-.select("*")
+.select("client_name,total,created_at")
 .eq("user_id", user.id)
 .order("created_at",{ascending:false})
-.limit(5)
+.limit(3)
 
 const list =
 document.getElementById("recentQuotations")
@@ -219,13 +229,20 @@ list.innerHTML = ""
 
 quotations.forEach(q=>{
 
+const date =
+new Date(q.created_at)
+.toLocaleDateString("en-IN")
+
 const row =
 document.createElement("div")
 
 row.innerHTML =
 `
 <div class="flex justify-between">
-<span>${q.client_name}</span>
+<div>
+<div>${q.client_name}</div>
+<div class="text-xs text-gray-400">${date}</div>
+</div>
 <span>₹${q.total}</span>
 </div>
 `
