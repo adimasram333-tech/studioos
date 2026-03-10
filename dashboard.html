@@ -62,7 +62,7 @@ Setup
 </div>
 
 
-<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="grid grid-cols-3 gap-4 mb-6">
 
 <div class="glass rounded-2xl p-4">
 <p class="text-gray-400 text-sm">Total Bookings</p>
@@ -72,6 +72,11 @@ Setup
 <div class="glass rounded-2xl p-4">
 <p class="text-gray-400 text-sm">Pending Payments</p>
 <h2 id="pendingPayments" class="text-2xl font-bold">₹0</h2>
+</div>
+
+<div class="glass rounded-2xl p-4">
+<p class="text-gray-400 text-sm">Monthly Revenue</p>
+<h2 id="monthlyRevenue" class="text-2xl font-bold">₹0</h2>
 </div>
 
 </div>
@@ -153,7 +158,6 @@ document
 .addEventListener("click", logout)
 
 
-
 // LOAD STUDIO NAME
 
 async function loadStudio(){
@@ -173,10 +177,8 @@ await supabase
 .single()
 
 if(data){
-
 document.getElementById("studioDisplay").innerText =
 data.studio_name
-
 }
 
 }
@@ -266,6 +268,37 @@ pending += Number(p.balance || 0)
 
 document.getElementById("pendingPayments").innerText =
 "₹" + pending
+
+
+
+// MONTHLY REVENUE
+
+const now = new Date()
+const month = now.getMonth()
+const year = now.getFullYear()
+
+const { data: revenue } =
+await supabase
+.from("quotations")
+.select("total,event_date")
+.eq("user_id", user.id)
+
+let monthlyTotal = 0
+
+revenue?.forEach(r=>{
+
+const eventDate = new Date(r.event_date)
+
+if(eventDate.getMonth() === month && eventDate.getFullYear() === year){
+
+monthlyTotal += Number(r.total || 0)
+
+}
+
+})
+
+document.getElementById("monthlyRevenue").innerText =
+"₹" + monthlyTotal
 
 
 
