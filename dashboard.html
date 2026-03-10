@@ -133,9 +133,9 @@ class="block glass rounded-2xl p-4 hover:scale-105 transition">
 📄 Quotations
 </a>
 
-<a href="invoices.html"
+<a href="clients.html"
 class="block glass rounded-2xl p-4 hover:scale-105 transition">
-🧾 Invoices
+👤 Clients
 </a>
 
 <a href="packages.html"
@@ -168,8 +168,6 @@ document
 
 
 
-// LOAD STUDIO NAME
-
 async function loadStudio(){
 
 const { data: userData } =
@@ -197,8 +195,6 @@ loadStudio()
 
 
 
-// DASHBOARD DATA
-
 async function loadDashboard(){
 
 const { data: userData } =
@@ -209,8 +205,6 @@ const user = userData.user
 if(!user) return
 
 
-
-// RECENT QUOTATIONS
 
 const { data: quotations } =
 await supabase
@@ -255,8 +249,6 @@ list.appendChild(row)
 
 
 
-// BOOKINGS COUNT
-
 const { count } =
 await supabase
 .from("quotations")
@@ -268,8 +260,6 @@ document.getElementById("totalBookings").innerText =
 count || 0
 
 
-
-// GET CONFIRMED BOOKINGS
 
 const { data: allQuotes } =
 await supabase
@@ -325,8 +315,6 @@ document.getElementById("monthlyRevenue").innerText =
 "₹" + monthlyRevenue
 
 
-
-// EVENT REMINDERS
 
 const { data: events } =
 await supabase
