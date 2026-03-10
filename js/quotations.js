@@ -43,7 +43,7 @@ return data
 
 
 // =============================
-// LOAD QUOTATIONS FROM SUPABASE
+// LOAD QUOTATIONS
 // =============================
 
 async function loadQuotations(){
@@ -52,6 +52,10 @@ const listContainer =
 document.getElementById("quotationList")
 
 if(!listContainer) return
+
+
+listContainer.innerHTML =
+"<p class='text-gray-400 text-sm'>Loading quotations...</p>"
 
 
 const quotations = await getAllQuotations()
@@ -104,13 +108,23 @@ card.className = "glass p-5 rounded-2xl"
 
 
 card.innerHTML = `
+
 <div class="flex justify-between items-center">
 
 <div>
-<h2 class="text-lg font-semibold">${q.client_name}</h2>
+
+<h2 class="text-lg font-semibold">
+${q.client_name}
+</h2>
+
 <p class="text-sm text-gray-400">
-${formatDate(q.event_date)}
+Event: ${formatDate(q.event_date)}
 </p>
+
+<p class="text-xs text-gray-500">
+Created: ${formatDate(q.created_at)}
+</p>
+
 </div>
 
 <span class="px-3 py-1 text-sm rounded-full ${statusColor}">
@@ -119,6 +133,7 @@ ${q.status}
 
 </div>
 
+
 <div class="mt-3 text-sm">
 
 <p>Total: ₹${q.total}</p>
@@ -126,6 +141,7 @@ ${q.status}
 <p>Balance: ₹${q.balance}</p>
 
 </div>
+
 
 <div class="mt-4 flex gap-2 flex-wrap">
 
@@ -154,7 +170,13 @@ class="bg-blue-600 px-3 py-1 rounded-lg text-sm">
 Open Proposal
 </button>
 
+<button onclick="editQuotation('${q.id}')"
+class="bg-indigo-600 px-3 py-1 rounded-lg text-sm">
+Edit
+</button>
+
 </div>
+
 `
 
 listContainer.appendChild(card)
@@ -180,6 +202,19 @@ day:"numeric",
 month:"long",
 year:"numeric"
 })
+
+}
+
+
+
+// =============================
+// EDIT QUOTATION
+// =============================
+
+function editQuotation(id){
+
+window.location.href =
+`quotation.html?edit=${id}`
 
 }
 
