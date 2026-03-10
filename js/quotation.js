@@ -25,6 +25,126 @@ return text
 
 
 // =============================
+// EDIT MODE DETECTION
+// =============================
+
+let editId = null
+
+function getQueryParam(name){
+const url = new URL(window.location.href)
+return url.searchParams.get(name)
+}
+
+editId = getQueryParam("edit")
+
+
+// =============================
+// LOAD QUOTATION FOR EDIT
+// =============================
+
+async function loadQuotationForEdit(){
+
+if(!editId) return
+
+const { data , error } =
+await supabase
+.from("quotations")
+.select("*")
+.eq("id",editId)
+.single()
+
+if(error || !data) return
+
+get("clientName").value = data.client_name || ""
+get("clientPhone").value = data.phone || ""
+
+get("startDate").value = data.event_date || ""
+get("endDate").value = data.end_date || ""
+
+get("packageSelect").value = data.package || ""
+
+get("totalAmount").value = data.total || ""
+get("advanceAmount").value = data.advance || ""
+get("balanceAmount").value = data.balance || ""
+
+
+// ===== SERVICES =====
+
+if(data.services){
+
+get("candidQty").value = data.services.candid?.qty || 0
+get("candidDays").value = data.services.candid?.days || 0
+
+get("traditionalPhotoQty").value =
+data.services.traditional_photo?.qty || 0
+
+get("traditionalPhotoDays").value =
+data.services.traditional_photo?.days || 0
+
+get("traditionalVideoQty").value =
+data.services.traditional_video?.qty || 0
+
+get("traditionalVideoDays").value =
+data.services.traditional_video?.days || 0
+
+get("cinemaQty").value =
+data.services.cinematographer?.qty || 0
+
+get("cinemaDays").value =
+data.services.cinematographer?.days || 0
+
+get("droneQty").value =
+data.services.drone?.qty || 0
+
+get("droneDays").value =
+data.services.drone?.days || 0
+
+get("ledQty").value =
+data.services.led_wall?.qty || 0
+
+get("ledDays").value =
+data.services.led_wall?.days || 0
+
+get("assistantQty").value =
+data.services.assistant?.qty || 0
+
+get("assistantDays").value =
+data.services.assistant?.days || 0
+
+}
+
+
+// ===== DELIVERABLES =====
+
+if(data.deliverables){
+
+get("rawCheck").checked = data.deliverables.raw || false
+get("traditionalCheck").checked =
+data.deliverables.traditional_video || false
+
+get("cinematicCheck").checked =
+data.deliverables.cinematic || false
+
+get("albumCheck").checked =
+data.deliverables.album?.enabled || false
+
+get("albumPagesInput").value =
+data.deliverables.album?.pages || ""
+
+get("giftCheck").checked =
+data.deliverables.gift?.enabled || false
+
+get("giftInput").value =
+data.deliverables.gift?.name || ""
+
+}
+
+}
+
+loadQuotationForEdit()
+
+
+// =============================
 // PACKAGE PRICE AUTO
 // =============================
 
@@ -111,27 +231,45 @@ giftInput.classList.add("hidden")
 
 
 // =============================
-// SAVE QUOTATION FUNCTION
+// SAVE / UPDATE QUOTATION
 // =============================
 
 async function saveQuotation(data){
 
 try{
 
-const { data:inserted , error } = await supabase
+if(editId){
+
+const { error } =
+await supabase
+.from("quotations")
+.update(data)
+.eq("id",editId)
+
+if(error){
+console.error(error)
+return null
+}
+
+return { id: editId }
+
+}else{
+
+const { data:inserted , error } =
+await supabase
 .from("quotations")
 .insert(data)
 .select()
 .single()
 
 if(error){
-
-console.error("Save error:",error)
+console.error(error)
 return null
-
 }
 
 return inserted
+
+}
 
 }catch(err){
 
@@ -161,7 +299,8 @@ previewBtn.innerText = "Generating..."
 // GET LOGGED USER
 // =============================
 
-const { data:{ user } } = await supabase.auth.getUser()
+const { data:{ user } } =
+await supabase.auth.getUser()
 
 if(!user){
 
@@ -184,36 +323,18 @@ const clientPhone = get("clientPhone")?.value.trim() || ""
 const startDate = get("startDate")?.value || ""
 
 if(!clientName){
-
 alert("Enter client name")
-
-previewBtn.disabled = false
-previewBtn.innerText = "Preview Quote"
-
 return
-
 }
 
 if(!clientPhone){
-
 alert("Enter client phone")
-
-previewBtn.disabled = false
-previewBtn.innerText = "Preview Quote"
-
 return
-
 }
 
 if(!startDate){
-
 alert("Select event date")
-
-previewBtn.disabled = false
-previewBtn.innerText = "Preview Quote"
-
 return
-
 }
 
 
@@ -262,7 +383,7 @@ days: parseInt(get("assistantDays")?.value || 0)
 
 
 // =============================
-// BUILD DELIVERABLES OBJECT
+// BUILD DELIVERABLES
 // =============================
 
 const deliverables = {
@@ -315,33 +436,22 @@ deliverables
 
 
 // =============================
-// SAVE TO SUPABASE
+// SAVE / UPDATE
 // =============================
 
 const saved = await saveQuotation(quotationData)
 
 if(!saved){
-
 alert("Error saving quotation")
-
-previewBtn.disabled = false
-previewBtn.innerText = "Preview Quote"
-
 return
-
 }
 
 
 // =============================
-// GENERATE SHORT ID
+// SHORT ID
 // =============================
 
 const shortId = saved.id.substring(0,8)
-
-
-// =============================
-// UPDATE SHORT ID
-// =============================
 
 await supabase
 .from("quotations")
@@ -350,15 +460,10 @@ await supabase
 
 
 // =============================
-// GENERATE CLIENT SLUG
+// REDIRECT TO PROPOSAL
 // =============================
 
 const slug = slugify(clientName)
-
-
-// =============================
-// REDIRECT TO PROPOSAL
-// =============================
 
 window.location.href =
 "p/" + slug + "-" + shortId
