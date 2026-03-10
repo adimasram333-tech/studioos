@@ -27,6 +27,86 @@ return params.get("quotation")
 
 
 // =============================
+// LOAD PAYMENT HISTORY
+// =============================
+
+async function loadPayments(){
+
+const quotationId = getQuotationId()
+
+const container =
+document.getElementById("paymentHistory")
+
+if(!container) return
+
+
+const { data, error } =
+await supabase
+.from("payments")
+.select("*")
+.eq("quotation_id", quotationId)
+.order("payment_date",{ascending:false})
+
+
+if(error){
+
+console.error("Payment load error:",error)
+return
+
+}
+
+
+if(!data || data.length === 0){
+
+container.innerHTML =
+"<p class='text-gray-400'>No payments yet</p>"
+
+return
+
+}
+
+
+container.innerHTML = ""
+
+
+data.forEach(p=>{
+
+const date =
+new Date(p.payment_date)
+.toLocaleDateString("en-IN")
+
+const row =
+document.createElement("div")
+
+row.className =
+"flex justify-between glass p-2 rounded"
+
+row.innerHTML = `
+
+<div>
+
+<div>₹${p.amount}</div>
+
+<div class="text-xs text-gray-400">
+${p.payment_type} • ${p.method}
+</div>
+
+</div>
+
+<div class="text-xs text-gray-400">
+${date}
+</div>
+
+`
+
+container.appendChild(row)
+
+})
+
+}
+
+
+// =============================
 // SAVE PAYMENT
 // =============================
 
@@ -88,7 +168,15 @@ return
 
 alert("Payment saved successfully")
 
-window.location.href = "quotations.html"
+// reload history
+loadPayments()
+
+// clear form
+
+document.getElementById("paymentAmount").value = ""
+document.getElementById("paymentDate").value = ""
+document.getElementById("paymentMethod").value = ""
+document.getElementById("paymentType").value = ""
 
 }
 
@@ -100,3 +188,5 @@ window.location.href = "quotations.html"
 document
 .getElementById("savePaymentBtn")
 .addEventListener("click", savePayment)
+
+loadPayments()
