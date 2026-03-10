@@ -27,6 +27,61 @@ return params.get("quotation")
 
 
 // =============================
+// LOAD PAYMENT SUMMARY
+// =============================
+
+async function loadSummary(){
+
+const quotationId = getQuotationId()
+
+// GET QUOTATION TOTAL
+
+const { data: quotation } =
+await supabase
+.from("quotations")
+.select("total")
+.eq("id", quotationId)
+.single()
+
+let total = quotation?.total || 0
+
+
+// GET PAYMENTS
+
+const { data: payments } =
+await supabase
+.from("payments")
+.select("amount")
+.eq("quotation_id", quotationId)
+
+let paid = 0
+
+payments?.forEach(p=>{
+paid += Number(p.amount || 0)
+})
+
+const remaining = total - paid
+
+
+// UPDATE UI
+
+const totalEl =
+document.getElementById("totalPackage")
+
+const paidEl =
+document.getElementById("paidAmount")
+
+const remainingEl =
+document.getElementById("remainingAmount")
+
+if(totalEl) totalEl.innerText = "₹" + total
+if(paidEl) paidEl.innerText = "₹" + paid
+if(remainingEl) remainingEl.innerText = "₹" + remaining
+
+}
+
+
+// =============================
 // LOAD PAYMENT HISTORY
 // =============================
 
@@ -61,6 +116,7 @@ if(!data || data.length === 0){
 container.innerHTML =
 "<p class='text-gray-400'>No payments yet</p>"
 
+loadSummary()
 return
 
 }
@@ -102,6 +158,8 @@ ${date}
 container.appendChild(row)
 
 })
+
+loadSummary()
 
 }
 
