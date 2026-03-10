@@ -302,12 +302,13 @@ loadQuotations()
 
 
 // =============================
-// ADD PAYMENT (PLACEHOLDER)
+// ADD PAYMENT
 // =============================
 
 function addPayment(id){
 
-alert("Payment feature coming next")
+window.location.href =
+`payment.html?quotation=${id}`
 
 }
 
