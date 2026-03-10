@@ -269,7 +269,7 @@ count || 0
 
 
 
-// FIXED PENDING PAYMENTS (ONLY CONFIRMED BOOKINGS)
+// GET CONFIRMED BOOKINGS
 
 const { data: allQuotes } =
 await supabase
@@ -279,23 +279,36 @@ await supabase
 .eq("status","confirmed")
 
 let pending = 0
-let revenue = 0
+let monthlyRevenue = 0
+
+const now = new Date()
+const currentMonth = now.getMonth()
+const currentYear = now.getFullYear()
 
 for(const q of allQuotes){
 
 const { data: payments } =
 await supabase
 .from("payments")
-.select("amount")
+.select("amount,payment_date")
 .eq("quotation_id", q.id)
 
 let paid = 0
 
 payments?.forEach(p=>{
-paid += Number(p.amount || 0)
-})
 
-revenue += paid
+paid += Number(p.amount || 0)
+
+const payDate = new Date(p.payment_date)
+
+if(
+payDate.getMonth() === currentMonth &&
+payDate.getFullYear() === currentYear
+){
+monthlyRevenue += Number(p.amount || 0)
+}
+
+})
 
 const remaining = q.total - paid
 
@@ -308,12 +321,8 @@ pending += remaining
 document.getElementById("pendingPayments").innerText =
 "₹" + pending
 
-
-
-// MONTHLY REVENUE
-
 document.getElementById("monthlyRevenue").innerText =
-"₹" + revenue
+"₹" + monthlyRevenue
 
 
 
