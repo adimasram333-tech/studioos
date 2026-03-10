@@ -146,7 +146,6 @@ await supabase
 .order("payment_date",{ascending:true})
 
 
-
 const container =
 document.getElementById("invoicePayments")
 
@@ -220,12 +219,33 @@ document.getElementById("invoiceNumber").innerText =
 
 
 // =============================
-// DOWNLOAD INVOICE (COMING)
+// DOWNLOAD INVOICE PDF
 // =============================
 
 function downloadInvoice(){
 
-alert("PDF download coming soon")
+const element =
+document.getElementById("invoiceContainer")
+
+const opt = {
+
+margin:0.3,
+
+filename:"invoice.pdf",
+
+image:{ type:"jpeg", quality:0.98 },
+
+html2canvas:{ scale:2 },
+
+jsPDF:{
+unit:"in",
+format:"a4",
+orientation:"portrait"
+}
+
+}
+
+html2pdf().set(opt).from(element).save()
 
 }
 
