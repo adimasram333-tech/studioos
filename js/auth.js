@@ -4,7 +4,7 @@
 
 export async function login(email,password){
 
-const { data, error } =
+const { error } =
 await supabase.auth.signInWithPassword({
 
 email: email,
@@ -31,7 +31,7 @@ window.location.href = "dashboard.html"
 
 export async function signup(email,password){
 
-const { data, error } =
+const { error } =
 await supabase.auth.signUp({
 
 email: email,
@@ -58,17 +58,24 @@ alert("Account created. Please login.")
 
 export async function protectPage(){
 
+// wait for session
 const { data } =
 await supabase.auth.getSession()
 
-const session = data.session
+if(data.session){
+return
+}
+
+// if session not ready yet listen for auth change
+supabase.auth.onAuthStateChange((event, session) => {
 
 if(!session){
 
 window.location.href = "index.html"
-return
 
 }
+
+})
 
 }
 
