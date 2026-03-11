@@ -22,6 +22,32 @@ backdrop-filter: blur(15px);
 border:1px solid rgba(255,255,255,0.1);
 }
 
+/* PDF MODE (FOR DOWNLOAD) */
+
+.pdf-mode{
+background:#ffffff;
+color:#000000;
+padding:30px;
+border-radius:10px;
+}
+
+.pdf-mode .glass{
+background:#ffffff;
+border:1px solid #e5e7eb;
+backdrop-filter:none;
+}
+
+.pdf-mode h1,
+.pdf-mode h2,
+.pdf-mode h3{
+color:#000000;
+}
+
+.pdf-mode span,
+.pdf-mode p{
+color:#374151;
+}
+
 </style>
 
 </head>
@@ -207,7 +233,6 @@ Download Invoice
 <script src="js/supabase.js"></script>
 <script src="js/invoice.js"></script>
 
-<!-- PDF GENERATOR -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 </body>
