@@ -147,10 +147,7 @@ text-align:right;
 /* PAYMENTS */
 
 .payment-summary{
-display:flex;
-justify-content:space-between;
 margin-top:40px;
-gap:40px;
 }
 
 .payment-row{
@@ -169,11 +166,12 @@ margin-top:45px;
 
 .terms ul{
 margin-top:10px;
-padding-left:18px;
+padding-left:0;
 }
 
 .terms li{
 margin-bottom:6px;
+list-style:none;
 }
 
 /* FOOTER */
@@ -191,7 +189,8 @@ margin-top:50px;
 width:200px;
 border-bottom:1px solid #9ca3af;
 margin-left:auto;
-margin-top:20px;
+margin-top:10px;
+margin-bottom:5px;
 }
 
 .generated{
@@ -216,10 +215,6 @@ flex-direction:column;
 .event{
 border-left:none;
 padding-left:0;
-}
-
-.payment-summary{
-flex-direction:column;
 }
 
 }
@@ -251,6 +246,7 @@ flex-direction:column;
 <div class="invoice-body">
 
 <div class="invoice-top">
+
 <div>
 <strong>Invoice No :</strong>
 <span id="invoiceNumber">INV-2026-001</span>
@@ -260,6 +256,7 @@ flex-direction:column;
 <strong>Invoice Date :</strong>
 <span id="invoiceDate">-</span>
 </div>
+
 </div>
 
 <div class="divider"></div>
@@ -273,16 +270,19 @@ flex-direction:column;
 </div>
 
 <div class="event">
+
 <strong>Event</strong><br>
 <span id="eventType">Event Type</span><br>
 
 <strong class="block mt-2">Event Date</strong>
+
 <span id="eventStart">-</span>
  →
 <span id="eventEnd">-</span>
 
 <br>
 <span id="eventVenue">Venue</span>
+
 </div>
 
 </div>
@@ -323,14 +323,10 @@ flex-direction:column;
 
 <div class="payment-summary">
 
-<div>
-
 <h3 class="font-semibold mb-3">Payments</h3>
 
 <div id="invoicePayments">
 <p class="text-gray-500 text-sm">No payments yet</p>
-</div>
-
 </div>
 
 </div>
@@ -340,8 +336,8 @@ flex-direction:column;
 <strong>Terms and Conditions</strong>
 
 <ul>
-<li>Balance payment required before final delivery.</li>
-<li>Album delivery timeline 30 days.</li>
+<li>✓ Balance payment required before final delivery</li>
+<li>✓ Album delivery timeline 30 days</li>
 </ul>
 
 </div>
@@ -364,9 +360,10 @@ UPI / Bank Transfer accepted
 
 Thank you for your business
 
+<span id="photographerName">Aditya Masram Photography</span>
+
 <div class="signature-line"></div>
 
-<span id="photographerName">Aditya Masram Photography</span><br>
 Authorized Sign
 
 </div>
