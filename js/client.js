@@ -87,7 +87,7 @@ quote.phone || "-"
 
 
 // =============================
-// EVENT DETAILS (FIXED)
+// EVENT DETAILS (UPDATED)
 // =============================
 
 const eventType =
@@ -99,8 +99,20 @@ quote.package ||
 document.getElementById("eventType").innerText =
 eventType
 
+
+// START → END DATE FIX
+
+const startDate =
+quote.event_start_date ||
+quote.event_date
+
+const endDate =
+quote.event_end_date ||
+quote.event_date
+
 document.getElementById("eventDate").innerText =
-formatDate(quote.event_date)
+formatDate(startDate) + " → " + formatDate(endDate)
+
 
 document.getElementById("eventVenue").innerText =
 quote.venue || "-"
