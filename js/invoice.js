@@ -131,7 +131,7 @@ quote.phone || "-"
 
 
 // =============================
-// INVOICE DATE (FIX)
+// INVOICE DATE
 // =============================
 
 document.getElementById("invoiceDate").innerText =
@@ -156,7 +156,7 @@ quote.venue || "-"
 
 
 // =============================
-// EVENT START → END DATE (FIX)
+// EVENT DATE FIX
 // =============================
 
 const startDate =
@@ -167,11 +167,17 @@ const endDate =
 quote.event_end_date ||
 quote.event_date
 
-document.getElementById("eventStart").innerText =
-formatDate(startDate)
+let eventDateText = formatDate(startDate)
 
-document.getElementById("eventEnd").innerText =
-formatDate(endDate)
+if(endDate && startDate !== endDate){
+eventDateText =
+formatDate(startDate) + " → " + formatDate(endDate)
+}
+
+document.getElementById("eventStart").innerText =
+eventDateText
+
+document.getElementById("eventEnd").innerText = ""
 
 
 // =============================
@@ -267,7 +273,7 @@ formatCurrency(balance)
 
 
 // =============================
-// INVOICE NUMBER (CLEAN FORMAT)
+// INVOICE NUMBER
 // =============================
 
 const year = new Date().getFullYear()
