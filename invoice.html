@@ -17,8 +17,6 @@ background: radial-gradient(circle at top,#1e293b,#0f172a);
 font-family:Arial, Helvetica, sans-serif;
 }
 
-/* INVOICE PAGE */
-
 .invoice-page{
 background:white;
 max-width:794px;
@@ -28,8 +26,6 @@ overflow:hidden;
 border-radius:6px;
 box-shadow:0 10px 30px rgba(0,0,0,0.15);
 }
-
-/* HEADER */
 
 .invoice-header{
 background:linear-gradient(135deg,#5b4cc4,#4c3db2);
@@ -70,18 +66,13 @@ border-top-left-radius:100% 90px;
 border-top-right-radius:100% 90px;
 }
 
-/* BODY */
-
 .invoice-body{
 padding:60px 55px;
 }
 
-/* TOP ROW */
-
 .invoice-top{
 display:flex;
 justify-content:space-between;
-align-items:center;
 font-size:15px;
 margin-bottom:18px;
 }
@@ -91,8 +82,6 @@ height:1px;
 background:#e5e7eb;
 margin-bottom:35px;
 }
-
-/* CLIENT EVENT */
 
 .client-event{
 display:flex;
@@ -110,53 +99,43 @@ border-left:1px solid #e5e7eb;
 
 /* TABLE */
 
-.table-head{
+.invoice-table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+font-size:14px;
+}
+
+.invoice-table thead{
 background:#4c3db2;
 color:white;
-display:grid;
-grid-template-columns:2fr 1fr 80px 1fr;
-padding:12px 20px;
-font-size:14px;
 }
 
-.table-head div{
-text-align:right;
-}
-
-.table-head div:first-child{
-text-align:left;
-}
-
-.table-row{
-display:grid;
-grid-template-columns:2fr 1fr 80px 1fr;
-padding:14px 20px;
+.invoice-table th,
+.invoice-table td{
+padding:12px;
 border-bottom:1px solid #e5e7eb;
-font-size:14px;
-align-items:center;
 }
 
-.table-row div{
-text-align:right;
-white-space:nowrap;
-}
-
-.table-row div:first-child{
+.invoice-table th{
 text-align:left;
-white-space:normal;
 }
 
-/* PAYMENTS + SUMMARY */
+.invoice-table td{
+text-align:right;
+}
+
+.invoice-table td:first-child{
+text-align:left;
+}
+
+/* PAYMENTS */
 
 .payment-summary{
 display:flex;
 justify-content:space-between;
 margin-top:40px;
 gap:40px;
-}
-
-.payments{
-flex:1;
 }
 
 .payment-row{
@@ -180,7 +159,6 @@ display:flex;
 justify-content:space-between;
 padding:10px 0;
 border-bottom:1px solid #e5e7eb;
-font-size:14px;
 }
 
 .summary-row:last-child{
@@ -188,20 +166,9 @@ border:none;
 font-weight:bold;
 }
 
-/* TERMS */
-
 .terms{
 margin-top:45px;
 }
-
-.terms ul{
-margin-top:8px;
-padding-left:18px;
-color:#4b5563;
-font-size:14px;
-}
-
-/* FOOTER */
 
 .invoice-footer{
 padding:60px 55px;
@@ -210,8 +177,6 @@ padding:60px 55px;
 .signature{
 text-align:right;
 margin-top:50px;
-font-size:14px;
-color:#374151;
 }
 
 .signature-line{
@@ -220,8 +185,6 @@ border-bottom:1px solid #9ca3af;
 margin-left:auto;
 margin-top:20px;
 }
-
-/* MOBILE */
 
 @media(max-width:640px){
 
@@ -246,20 +209,6 @@ flex-direction:column;
 width:100%;
 }
 
-.table-head{
-grid-template-columns:1.5fr 1fr 60px 1fr;
-font-size:12px;
-}
-
-.table-row{
-grid-template-columns:1.5fr 1fr 60px 1fr;
-font-size:12px;
-}
-
-.signature{
-text-align:left;
-}
-
 }
 
 </style>
@@ -270,11 +219,9 @@ text-align:left;
 
 <div id="invoiceContainer" class="invoice-page">
 
-<!-- HEADER -->
-
 <div class="invoice-header">
 
-<h1 id="studioName" class="text-2xl font-bold">Studio Name</h1>
+<h1 id="studioName">Studio Name</h1>
 
 <div class="text-sm mt-2">
 <span id="studioPhone">Phone</span> •
@@ -287,8 +234,6 @@ text-align:left;
 <div class="wave-2"></div>
 
 </div>
-
-<!-- BODY -->
 
 <div class="invoice-body">
 
@@ -322,54 +267,52 @@ text-align:left;
 
 </div>
 
-<!-- TABLE -->
+<table class="invoice-table">
 
-<div class="table-head">
-<div>ITEM NAME</div>
-<div>PRICE</div>
-<div>QTY</div>
-<div>TOTAL</div>
-</div>
+<thead>
+<tr>
+<th>ITEM NAME</th>
+<th>PRICE</th>
+<th>QTY</th>
+<th>TOTAL</th>
+</tr>
+</thead>
 
-<div id="invoiceTableRows">
+<tbody>
 
-<div class="table-row">
-<div>Photography Package</div>
-<div id="invoiceTotal">₹0</div>
-<div>1</div>
-<div id="invoiceTotalFooter">₹0</div>
-</div>
+<tr>
+<td>Photography Package</td>
+<td id="invoiceTotal">₹0</td>
+<td>1</td>
+<td id="invoiceTotalFooter">₹0</td>
+</tr>
 
-<div class="table-row">
-<div>Amount Paid</div>
-<div id="invoicePaid">₹0</div>
-<div>1</div>
-<div id="invoicePaidFooter">₹0</div>
-</div>
+<tr>
+<td>Amount Paid</td>
+<td id="invoicePaid">₹0</td>
+<td>1</td>
+<td id="invoicePaidFooter">₹0</td>
+</tr>
 
-<div class="table-row">
-<div>Balance</div>
-<div id="invoiceBalance">₹0</div>
-<div>1</div>
-<div id="invoiceBalanceFooter">₹0</div>
-</div>
+<tr>
+<td>Balance</td>
+<td id="invoiceBalance">₹0</td>
+<td>1</td>
+<td id="invoiceBalanceFooter">₹0</td>
+</tr>
 
-</div>
+</tbody>
 
-<!-- PAYMENTS + SUMMARY -->
+</table>
 
 <div class="payment-summary">
 
-<div class="payments">
+<div>
 
 <h3 class="font-semibold mb-3">Payments</h3>
 
 <div id="invoicePayments">
-
-<p class="text-gray-500 text-sm">
-No payments yet
-</p>
-
+<p class="text-gray-500 text-sm">No payments yet</p>
 </div>
 
 </div>
@@ -395,8 +338,6 @@ No payments yet
 
 </div>
 
-<!-- TERMS -->
-
 <div class="terms">
 
 <strong>Terms and Conditions</strong>
@@ -409,8 +350,6 @@ No payments yet
 </div>
 
 </div>
-
-<!-- FOOTER -->
 
 <div class="invoice-footer">
 
