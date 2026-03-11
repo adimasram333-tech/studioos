@@ -137,8 +137,7 @@ quote.venue || "-"
 
 // TOTAL PACKAGE
 
-const total =
-Number(quote.total || 0)
+const total = Number(quote.total || 0)
 
 document.getElementById("invoiceTotal").innerText =
 formatCurrency(total)
@@ -182,20 +181,12 @@ const row =
 document.createElement("div")
 
 row.className =
-"flex justify-between items-center text-sm border-b pb-2 mb-2"
+"payment-row"
 
 row.innerHTML = `
 
-<div>
-<div class="font-medium">${formatCurrency(p.amount)}</div>
-<div class="text-xs text-gray-500">
-${p.payment_type} • ${p.method}
-</div>
-</div>
-
-<div class="text-xs text-gray-500">
-${formatDate(p.payment_date)}
-</div>
+<span>${formatCurrency(p.amount)} ${p.payment_type} • ${p.method}</span>
+<span>${formatDate(p.payment_date)}</span>
 
 `
 
@@ -231,13 +222,23 @@ formatCurrency(balance)
 // SUMMARY BOX VALUES
 // =============================
 
-const summaryPackage = document.getElementById("summaryPackage")
-const summaryPaid = document.getElementById("summaryPaid")
-const summaryBalance = document.getElementById("summaryBalance")
+const summaryPackage =
+document.getElementById("summaryPackage")
 
-if(summaryPackage) summaryPackage.innerText = formatCurrency(total)
-if(summaryPaid) summaryPaid.innerText = formatCurrency(paid)
-if(summaryBalance) summaryBalance.innerText = formatCurrency(balance)
+const summaryPaid =
+document.getElementById("summaryPaid")
+
+const summaryBalance =
+document.getElementById("summaryBalance")
+
+if(summaryPackage)
+summaryPackage.innerText = formatCurrency(total)
+
+if(summaryPaid)
+summaryPaid.innerText = formatCurrency(paid)
+
+if(summaryBalance)
+summaryBalance.innerText = formatCurrency(balance)
 
 
 // =============================
