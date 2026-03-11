@@ -13,7 +13,7 @@ return user
 
 
 // =============================
-// GET QUOTATION ID FROM URL
+// GET QUOTATION ID
 // =============================
 
 function getQuotationId(){
@@ -46,7 +46,7 @@ year:"numeric"
 
 
 // =============================
-// LOAD STUDIO INFO
+// LOAD STUDIO
 // =============================
 
 async function loadStudio(){
@@ -77,7 +77,7 @@ data.email || "-"
 
 
 // =============================
-// LOAD INVOICE DATA
+// LOAD INVOICE
 // =============================
 
 async function loadInvoice(){
@@ -99,7 +99,7 @@ await supabase
 if(!quote) return
 
 
-// CLIENT DETAILS
+// CLIENT
 
 document.getElementById("clientName").innerText =
 quote.client_name || "-"
@@ -108,7 +108,7 @@ document.getElementById("clientPhone").innerText =
 quote.phone || "-"
 
 
-// EVENT DETAILS
+// EVENT
 
 document.getElementById("eventType").innerText =
 quote.package || "-"
@@ -120,7 +120,7 @@ document.getElementById("eventVenue").innerText =
 quote.venue || "-"
 
 
-// TOTAL
+// TOTAL PACKAGE
 
 const total =
 Number(quote.total || 0)
@@ -133,7 +133,9 @@ document.getElementById("invoiceTotalFooter").innerText =
 
 
 
-// GET PAYMENTS
+// =============================
+// LOAD PAYMENTS
+// =============================
 
 const { data: payments } =
 await supabase
@@ -166,12 +168,12 @@ const row =
 document.createElement("div")
 
 row.className =
-"flex justify-between text-sm border-b pb-1"
+"flex justify-between items-center text-sm border-b pb-2 mb-2"
 
 row.innerHTML = `
 
 <div>
-₹${p.amount}
+<div class="font-medium">₹${p.amount}</div>
 <div class="text-xs text-gray-500">
 ${p.payment_type} • ${p.method}
 </div>
@@ -190,8 +192,9 @@ container.appendChild(row)
 }
 
 
-
-// PAID
+// =============================
+// CALCULATIONS
+// =============================
 
 document.getElementById("invoicePaid").innerText =
 "₹" + paid
@@ -199,9 +202,6 @@ document.getElementById("invoicePaid").innerText =
 document.getElementById("invoicePaidFooter").innerText =
 "₹" + paid
 
-
-
-// BALANCE
 
 const balance =
 total - paid
@@ -213,8 +213,9 @@ document.getElementById("invoiceBalanceFooter").innerText =
 "₹" + balance
 
 
-
+// =============================
 // INVOICE NUMBER
+// =============================
 
 document.getElementById("invoiceNumber").innerText =
 "INV-" + quotationId.substring(0,6).toUpperCase()
@@ -224,7 +225,7 @@ document.getElementById("invoiceNumber").innerText =
 
 
 // =============================
-// DOWNLOAD INVOICE PDF
+// DOWNLOAD PDF
 // =============================
 
 function downloadInvoice(){
@@ -234,13 +235,19 @@ document.getElementById("invoiceContainer")
 
 const opt = {
 
-margin:0.3,
+margin:[0.4,0.4,0.4,0.4],
 
 filename:"invoice.pdf",
 
-image:{ type:"jpeg", quality:0.98 },
+image:{
+type:"jpeg",
+quality:1
+},
 
-html2canvas:{ scale:2 },
+html2canvas:{
+scale:3,
+useCORS:true
+},
 
 jsPDF:{
 unit:"in",
@@ -265,5 +272,4 @@ document
 .addEventListener("click",downloadInvoice)
 
 loadStudio()
-
 loadInvoice()
