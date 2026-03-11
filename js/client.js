@@ -59,7 +59,9 @@ const quotationId = getQuotationId()
 if(!quotationId) return
 
 
+// =============================
 // GET QUOTATION
+// =============================
 
 const { data: quote } =
 await supabase
@@ -72,7 +74,9 @@ if(!quote) return
 
 
 
+// =============================
 // CLIENT DETAILS
+// =============================
 
 document.getElementById("clientName").innerText =
 quote.client_name || "-"
@@ -104,7 +108,7 @@ quote.venue || "-"
 
 
 // =============================
-// TOTAL
+// TOTAL PACKAGE
 // =============================
 
 const total =
@@ -176,7 +180,7 @@ container.appendChild(row)
 
 
 // =============================
-// PAID
+// PAID AMOUNT
 // =============================
 
 document.getElementById("paidAmount").innerText =
@@ -185,14 +189,14 @@ document.getElementById("paidAmount").innerText =
 
 
 // =============================
-// PENDING
+// BALANCE (UPDATED)
 // =============================
 
-const pending =
+const balance =
 total - paid
 
-document.getElementById("pendingAmount").innerText =
-"₹" + pending
+document.getElementById("balanceAmount").innerText =
+"₹" + balance
 
 
 
