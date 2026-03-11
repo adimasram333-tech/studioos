@@ -233,11 +233,13 @@ function downloadInvoice(){
 const element =
 document.getElementById("invoiceContainer")
 
+const quotationId = getQuotationId()
+
 const opt = {
 
-margin:[0.4,0.4,0.4,0.4],
+margin:[0.3,0.3,0.3,0.3],
 
-filename:"invoice.pdf",
+filename:`invoice-${quotationId}.pdf`,
 
 image:{
 type:"jpeg",
@@ -245,8 +247,13 @@ quality:1
 },
 
 html2canvas:{
-scale:3,
-useCORS:true
+scale:2,
+useCORS:true,
+windowWidth:800
+},
+
+pagebreak:{
+mode:['avoid-all','css','legacy']
 },
 
 jsPDF:{
