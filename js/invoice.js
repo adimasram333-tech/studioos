@@ -66,8 +66,6 @@ maximumFractionDigits:0
 
 async function loadStudio(){
 
-try{
-
 const user = await getCurrentUser()
 
 if(!user) return
@@ -90,12 +88,6 @@ data.phone || "-"
 document.getElementById("studioEmail").innerText =
 data.email || "-"
 
-}catch(err){
-
-console.error("Studio load error",err)
-
-}
-
 }
 
 
@@ -104,8 +96,6 @@ console.error("Studio load error",err)
 // =============================
 
 async function loadInvoice(){
-
-try{
 
 const quotationId = getQuotationId()
 
@@ -138,17 +128,16 @@ quote.phone || "-"
 
 
 // =============================
-// EVENT
+// EVENT FIX
 // =============================
 
-const eventName =
+const eventType =
 quote.event_type ||
-quote.package_name ||
-quote.package ||
+quote.event_name ||
 "-"
 
 document.getElementById("eventType").innerText =
-eventName
+eventType
 
 document.getElementById("eventDate").innerText =
 formatDate(quote.event_date)
@@ -210,12 +199,12 @@ row.innerHTML = `
 
 <div>
 <strong>${formatCurrency(p.amount)}</strong>
-<span class="text-gray-500 text-xs">
+<span class="text-gray-500 ml-2">
 ${p.payment_type || ""} • ${p.method || ""}
 </span>
 </div>
 
-<div class="text-gray-500 text-xs">
+<div class="text-gray-500">
 ${formatDate(p.payment_date)}
 </div>
 
@@ -252,23 +241,14 @@ formatCurrency(balance)
 // SUMMARY BOX VALUES
 // =============================
 
-const summaryPackage =
-document.getElementById("summaryPackage")
+document.getElementById("summaryPackage").innerText =
+formatCurrency(total)
 
-const summaryPaid =
-document.getElementById("summaryPaid")
+document.getElementById("summaryPaid").innerText =
+formatCurrency(paid)
 
-const summaryBalance =
-document.getElementById("summaryBalance")
-
-if(summaryPackage)
-summaryPackage.innerText = formatCurrency(total)
-
-if(summaryPaid)
-summaryPaid.innerText = formatCurrency(paid)
-
-if(summaryBalance)
-summaryBalance.innerText = formatCurrency(balance)
+document.getElementById("summaryBalance").innerText =
+formatCurrency(balance)
 
 
 // =============================
@@ -278,13 +258,8 @@ summaryBalance.innerText = formatCurrency(balance)
 document.getElementById("invoiceNumber").innerText =
 "INV-" + quotationId.substring(0,6).toUpperCase()
 
-}catch(err){
-
-console.error("Invoice load error",err)
-
 }
 
-}
 
 
 // =============================
@@ -331,6 +306,7 @@ orientation:"portrait"
 html2pdf().set(opt).from(element).save()
 
 }
+
 
 
 // =============================
