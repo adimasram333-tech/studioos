@@ -156,7 +156,7 @@ quote.venue || "-"
 
 
 // =============================
-// EVENT DATE (START → END)
+// EVENT DATE
 // =============================
 
 const startDate =
@@ -199,12 +199,10 @@ await supabase
 .eq("quotation_id", quotationId)
 .order("payment_date",{ascending:true})
 
-
 const container =
 document.getElementById("invoicePayments")
 
 let paid = 0
-
 
 if(!payments || payments.length === 0){
 
@@ -296,13 +294,20 @@ function downloadInvoice(){
 const element =
 document.getElementById("invoiceContainer")
 
-const quotationId = getQuotationId()
+const clientName =
+document.getElementById("clientName")
+.innerText
+.replace(/\s+/g,"-")
+.toLowerCase()
+
+const invoiceNumber =
+document.getElementById("invoiceNumber").innerText
 
 const opt = {
 
-margin:[0.25,0.25,0.25,0.25],
+margin:0,
 
-filename:`invoice-${quotationId}.pdf`,
+filename:`invoice-${clientName}-${invoiceNumber}.pdf`,
 
 image:{
 type:"jpeg",
@@ -310,19 +315,14 @@ quality:1
 },
 
 html2canvas:{
-scale:3,
+scale:2,
 useCORS:true,
-scrollY:0,
-windowWidth:794
-},
-
-pagebreak:{
-mode:['avoid-all','css','legacy']
+scrollY:0
 },
 
 jsPDF:{
-unit:"in",
-format:"a4",
+unit:"px",
+format:[794,1123],
 orientation:"portrait"
 }
 
