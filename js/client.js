@@ -82,10 +82,18 @@ quote.phone || "-"
 
 
 
-// EVENT DETAILS
+// =============================
+// EVENT DETAILS (FIXED)
+// =============================
+
+const eventType =
+quote.event_category ||
+quote.event_type ||
+quote.package ||
+"-"
 
 document.getElementById("eventType").innerText =
-quote.package || "-"
+eventType
 
 document.getElementById("eventDate").innerText =
 formatDate(quote.event_date)
@@ -95,7 +103,9 @@ quote.venue || "-"
 
 
 
+// =============================
 // TOTAL
+// =============================
 
 const total =
 Number(quote.total || 0)
@@ -105,7 +115,9 @@ document.getElementById("totalAmount").innerText =
 
 
 
+// =============================
 // GET PAYMENTS
+// =============================
 
 const { data: payments } =
 await supabase
@@ -163,14 +175,18 @@ container.appendChild(row)
 
 
 
+// =============================
 // PAID
+// =============================
 
 document.getElementById("paidAmount").innerText =
 "₹" + paid
 
 
 
+// =============================
 // PENDING
+// =============================
 
 const pending =
 total - paid
@@ -180,14 +196,18 @@ document.getElementById("pendingAmount").innerText =
 
 
 
+// =============================
 // ADD PAYMENT BUTTON
+// =============================
 
 document.getElementById("addPaymentBtn").href =
 "payment.html?quotation=" + quotationId
 
 
 
+// =============================
 // VIEW INVOICE BUTTON
+// =============================
 
 document.getElementById("viewInvoiceBtn").href =
 "invoice.html?quotation=" + quotationId
