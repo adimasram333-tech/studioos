@@ -59,6 +59,7 @@ const quotationId = getQuotationId()
 if(!quotationId) return
 
 
+
 // =============================
 // GET QUOTATION
 // =============================
@@ -87,7 +88,7 @@ quote.phone || "-"
 
 
 // =============================
-// EVENT DETAILS (FIXED)
+// EVENT DETAILS
 // =============================
 
 const eventType =
@@ -102,7 +103,7 @@ eventType
 
 
 // =============================
-// EVENT DATE LOGIC (FIX)
+// EVENT DATE (START → END FIX)
 // =============================
 
 const startDate =
@@ -111,15 +112,19 @@ quote.event_date
 
 const endDate =
 quote.event_end_date ||
+quote.end_date ||
 quote.event_date
 
 
-let eventDateText = formatDate(startDate)
 
-// अगर start और end अलग हैं तभी arrow दिखे
+let eventDateText =
+formatDate(startDate)
+
 if(endDate && startDate !== endDate){
+
 eventDateText =
 formatDate(startDate) + " → " + formatDate(endDate)
+
 }
 
 document.getElementById("eventDate").innerText =
