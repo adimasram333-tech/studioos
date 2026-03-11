@@ -128,10 +128,11 @@ quote.phone || "-"
 
 
 // =============================
-// EVENT FIX
+// EVENT (UPDATED)
 // =============================
 
 const eventType =
+quote.event_category ||
 quote.event_type ||
 quote.event_name ||
 "-"
