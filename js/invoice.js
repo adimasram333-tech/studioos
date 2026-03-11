@@ -91,7 +91,9 @@ document.getElementById("studioEmail").innerText =
 data.email || "-"
 
 }catch(err){
+
 console.error("Studio load error",err)
+
 }
 
 }
@@ -139,8 +141,14 @@ quote.phone || "-"
 // EVENT
 // =============================
 
+const eventName =
+quote.event_type ||
+quote.package_name ||
+quote.package ||
+"-"
+
 document.getElementById("eventType").innerText =
-quote.package || "-"
+eventName
 
 document.getElementById("eventDate").innerText =
 formatDate(quote.event_date)
@@ -195,20 +203,21 @@ paid += Number(p.amount || 0)
 const row =
 document.createElement("div")
 
-// FIXED ROW LAYOUT
 row.className =
 "flex justify-between items-center border-b py-2 text-sm"
 
 row.innerHTML = `
 
-<span>
-${formatCurrency(p.amount)} 
+<div>
+<strong>${formatCurrency(p.amount)}</strong>
+<span class="text-gray-500 text-xs">
 ${p.payment_type || ""} • ${p.method || ""}
 </span>
+</div>
 
-<span>
+<div class="text-gray-500 text-xs">
 ${formatDate(p.payment_date)}
-</span>
+</div>
 
 `
 
@@ -228,7 +237,6 @@ formatCurrency(paid)
 
 document.getElementById("invoicePaidFooter").innerText =
 formatCurrency(paid)
-
 
 const balance =
 total - paid
@@ -279,7 +287,6 @@ console.error("Invoice load error",err)
 }
 
 
-
 // =============================
 // DOWNLOAD PDF
 // =============================
@@ -324,7 +331,6 @@ orientation:"portrait"
 html2pdf().set(opt).from(element).save()
 
 }
-
 
 
 // =============================
