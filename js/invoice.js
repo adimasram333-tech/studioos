@@ -156,7 +156,7 @@ quote.venue || "-"
 
 
 // =============================
-// EVENT DATE FIX
+// EVENT DATE (START → END)
 // =============================
 
 const startDate =
@@ -165,19 +165,14 @@ quote.event_date
 
 const endDate =
 quote.event_end_date ||
+quote.end_date ||
 quote.event_date
 
-let eventDateText = formatDate(startDate)
-
-if(endDate && startDate !== endDate){
-eventDateText =
-formatDate(startDate) + " → " + formatDate(endDate)
-}
-
 document.getElementById("eventStart").innerText =
-eventDateText
+formatDate(startDate)
 
-document.getElementById("eventEnd").innerText = ""
+document.getElementById("eventEnd").innerText =
+formatDate(endDate)
 
 
 // =============================
@@ -278,8 +273,16 @@ formatCurrency(balance)
 
 const year = new Date().getFullYear()
 
+let number = quotationId.substring(0,6)
+
+number = number.replace(/[^0-9]/g,'')
+
+if(number.length < 3){
+number = Math.floor(Math.random()*900)+100
+}
+
 document.getElementById("invoiceNumber").innerText =
-`INV-${year}-${quotationId.substring(0,3).toUpperCase()}`
+`INV-${year}-${number}`
 
 }
 
