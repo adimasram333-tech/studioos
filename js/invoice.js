@@ -45,7 +45,6 @@ year:"numeric"
 }
 
 
-
 // =============================
 // LOAD STUDIO INFO
 // =============================
@@ -68,9 +67,6 @@ if(!data) return
 document.getElementById("studioName").innerText =
 data.studio_name || "Studio"
 
-document.getElementById("studioFooter").innerText =
-data.studio_name || "Studio"
-
 document.getElementById("studioPhone").innerText =
 data.phone || "-"
 
@@ -78,7 +74,6 @@ document.getElementById("studioEmail").innerText =
 data.email || "-"
 
 }
-
 
 
 // =============================
@@ -125,13 +120,15 @@ document.getElementById("eventVenue").innerText =
 quote.venue || "-"
 
 
-
 // TOTAL
 
 const total =
 Number(quote.total || 0)
 
 document.getElementById("invoiceTotal").innerText =
+"₹" + total
+
+document.getElementById("invoiceTotalFooter").innerText =
 "₹" + total
 
 
@@ -155,7 +152,7 @@ let paid = 0
 if(!payments || payments.length === 0){
 
 container.innerHTML =
-"<p class='text-gray-400'>No payments yet</p>"
+"<p class='text-gray-500'>No payments yet</p>"
 
 }else{
 
@@ -169,18 +166,18 @@ const row =
 document.createElement("div")
 
 row.className =
-"flex justify-between"
+"flex justify-between text-sm border-b pb-1"
 
 row.innerHTML = `
 
 <div>
 ₹${p.amount}
-<div class="text-xs text-gray-400">
+<div class="text-xs text-gray-500">
 ${p.payment_type} • ${p.method}
 </div>
 </div>
 
-<div class="text-xs text-gray-400">
+<div class="text-xs text-gray-500">
 ${formatDate(p.payment_date)}
 </div>
 
@@ -199,6 +196,10 @@ container.appendChild(row)
 document.getElementById("invoicePaid").innerText =
 "₹" + paid
 
+document.getElementById("invoicePaidFooter").innerText =
+"₹" + paid
+
+
 
 // BALANCE
 
@@ -207,6 +208,10 @@ total - paid
 
 document.getElementById("invoiceBalance").innerText =
 "₹" + balance
+
+document.getElementById("invoiceBalanceFooter").innerText =
+"₹" + balance
+
 
 
 // INVOICE NUMBER
@@ -258,7 +263,6 @@ html2pdf().set(opt).from(element).save()
 document
 .getElementById("downloadInvoice")
 .addEventListener("click",downloadInvoice)
-
 
 loadStudio()
 
