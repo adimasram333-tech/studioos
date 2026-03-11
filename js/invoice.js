@@ -46,6 +46,21 @@ year:"numeric"
 
 
 // =============================
+// FORMAT CURRENCY
+// =============================
+
+function formatCurrency(amount){
+
+return new Intl.NumberFormat("en-IN",{
+style:"currency",
+currency:"INR",
+maximumFractionDigits:0
+}).format(amount)
+
+}
+
+
+// =============================
 // LOAD STUDIO
 // =============================
 
@@ -126,10 +141,10 @@ const total =
 Number(quote.total || 0)
 
 document.getElementById("invoiceTotal").innerText =
-"₹" + total
+formatCurrency(total)
 
 document.getElementById("invoiceTotalFooter").innerText =
-"₹" + total
+formatCurrency(total)
 
 
 // =============================
@@ -153,7 +168,7 @@ let paid = 0
 if(!payments || payments.length === 0){
 
 container.innerHTML =
-"<p class='text-gray-500'>No payments yet</p>"
+"<p class='text-gray-500 text-sm'>No payments yet</p>"
 
 }else{
 
@@ -172,7 +187,7 @@ row.className =
 row.innerHTML = `
 
 <div>
-<div class="font-medium">₹${p.amount}</div>
+<div class="font-medium">${formatCurrency(p.amount)}</div>
 <div class="text-xs text-gray-500">
 ${p.payment_type} • ${p.method}
 </div>
@@ -196,20 +211,20 @@ container.appendChild(row)
 // =============================
 
 document.getElementById("invoicePaid").innerText =
-"₹" + paid
+formatCurrency(paid)
 
 document.getElementById("invoicePaidFooter").innerText =
-"₹" + paid
+formatCurrency(paid)
 
 
 const balance =
 total - paid
 
 document.getElementById("invoiceBalance").innerText =
-"₹" + balance
+formatCurrency(balance)
 
 document.getElementById("invoiceBalanceFooter").innerText =
-"₹" + balance
+formatCurrency(balance)
 
 
 // =============================
@@ -220,9 +235,9 @@ const summaryPackage = document.getElementById("summaryPackage")
 const summaryPaid = document.getElementById("summaryPaid")
 const summaryBalance = document.getElementById("summaryBalance")
 
-if(summaryPackage) summaryPackage.innerText = "₹" + total
-if(summaryPaid) summaryPaid.innerText = "₹" + paid
-if(summaryBalance) summaryBalance.innerText = "₹" + balance
+if(summaryPackage) summaryPackage.innerText = formatCurrency(total)
+if(summaryPaid) summaryPaid.innerText = formatCurrency(paid)
+if(summaryBalance) summaryBalance.innerText = formatCurrency(balance)
 
 
 // =============================
@@ -249,7 +264,7 @@ const quotationId = getQuotationId()
 
 const opt = {
 
-margin:[0.3,0.3,0.3,0.3],
+margin:[0.25,0.25,0.25,0.25],
 
 filename:`invoice-${quotationId}.pdf`,
 
@@ -259,9 +274,10 @@ quality:1
 },
 
 html2canvas:{
-scale:2,
+scale:3,
 useCORS:true,
-windowWidth:800
+scrollY:0,
+windowWidth:794
 },
 
 pagebreak:{
