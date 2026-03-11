@@ -21,7 +21,7 @@ font-family:Arial, Helvetica, sans-serif;
 
 .invoice-page{
 background:white;
-max-width:900px;
+max-width:794px; /* A4 WIDTH FIX */
 margin:auto;
 color:#111827;
 overflow:hidden;
@@ -69,7 +69,7 @@ padding:60px 50px;
 background:#4c3db2;
 color:white;
 display:grid;
-grid-template-columns:2fr 1fr 1fr 1fr;
+grid-template-columns:2fr 120px 80px 120px;
 padding:10px 20px;
 border-radius:25px;
 font-size:14px;
@@ -79,7 +79,7 @@ gap:10px;
 
 .table-row{
 display:grid;
-grid-template-columns:2fr 1fr 1fr 1fr;
+grid-template-columns:2fr 120px 80px 120px;
 padding:12px 20px;
 border-bottom:1px solid #e5e7eb;
 font-size:14px;
@@ -89,6 +89,15 @@ gap:10px;
 .table-head div,
 .table-row div{
 word-break:break-word;
+}
+
+.table-head div:nth-child(2),
+.table-head div:nth-child(3),
+.table-head div:nth-child(4),
+.table-row div:nth-child(2),
+.table-row div:nth-child(3),
+.table-row div:nth-child(4){
+white-space:nowrap;
 }
 
 /* PAYMENTS */
@@ -145,12 +154,12 @@ padding:40px 20px;
 }
 
 .table-head{
-grid-template-columns:1.5fr 1fr 1fr 1fr;
+grid-template-columns:1.5fr 80px 60px 90px;
 font-size:12px;
 }
 
 .table-row{
-grid-template-columns:1.5fr 1fr 1fr 1fr;
+grid-template-columns:1.5fr 80px 60px 90px;
 font-size:12px;
 }
 
