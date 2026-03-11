@@ -87,7 +87,7 @@ quote.phone || "-"
 
 
 // =============================
-// EVENT DETAILS (UPDATED)
+// EVENT DETAILS (FIXED)
 // =============================
 
 const eventType =
@@ -100,7 +100,10 @@ document.getElementById("eventType").innerText =
 eventType
 
 
-// START → END DATE FIX
+
+// =============================
+// EVENT DATE LOGIC (FIX)
+// =============================
 
 const startDate =
 quote.event_start_date ||
@@ -110,8 +113,18 @@ const endDate =
 quote.event_end_date ||
 quote.event_date
 
-document.getElementById("eventDate").innerText =
+
+let eventDateText = formatDate(startDate)
+
+// अगर start और end अलग हैं तभी arrow दिखे
+if(endDate && startDate !== endDate){
+eventDateText =
 formatDate(startDate) + " → " + formatDate(endDate)
+}
+
+document.getElementById("eventDate").innerText =
+eventDateText
+
 
 
 document.getElementById("eventVenue").innerText =
@@ -201,7 +214,7 @@ document.getElementById("paidAmount").innerText =
 
 
 // =============================
-// BALANCE (UPDATED)
+// BALANCE
 // =============================
 
 const balance =
