@@ -66,6 +66,8 @@ maximumFractionDigits:0
 
 async function loadStudio(){
 
+try{
+
 const user = await getCurrentUser()
 
 if(!user) return
@@ -88,6 +90,10 @@ data.phone || "-"
 document.getElementById("studioEmail").innerText =
 data.email || "-"
 
+}catch(err){
+console.error("Studio load error",err)
+}
+
 }
 
 
@@ -97,12 +103,16 @@ data.email || "-"
 
 async function loadInvoice(){
 
+try{
+
 const quotationId = getQuotationId()
 
 if(!quotationId) return
 
 
+// =============================
 // GET QUOTATION
+// =============================
 
 const { data: quote } =
 await supabase
@@ -114,7 +124,9 @@ await supabase
 if(!quote) return
 
 
+// =============================
 // CLIENT
+// =============================
 
 document.getElementById("clientName").innerText =
 quote.client_name || "-"
@@ -123,7 +135,9 @@ document.getElementById("clientPhone").innerText =
 quote.phone || "-"
 
 
+// =============================
 // EVENT
+// =============================
 
 document.getElementById("eventType").innerText =
 quote.package || "-"
@@ -135,7 +149,9 @@ document.getElementById("eventVenue").innerText =
 quote.venue || "-"
 
 
+// =============================
 // TOTAL PACKAGE
+// =============================
 
 const total = Number(quote.total || 0)
 
@@ -163,7 +179,6 @@ document.getElementById("invoicePayments")
 
 let paid = 0
 
-
 if(!payments || payments.length === 0){
 
 container.innerHTML =
@@ -180,13 +195,20 @@ paid += Number(p.amount || 0)
 const row =
 document.createElement("div")
 
+// FIXED ROW LAYOUT
 row.className =
-"payment-row"
+"flex justify-between items-center border-b py-2 text-sm"
 
 row.innerHTML = `
 
-<span>${formatCurrency(p.amount)} ${p.payment_type} • ${p.method}</span>
-<span>${formatDate(p.payment_date)}</span>
+<span>
+${formatCurrency(p.amount)} 
+${p.payment_type || ""} • ${p.method || ""}
+</span>
+
+<span>
+${formatDate(p.payment_date)}
+</span>
 
 `
 
@@ -247,6 +269,12 @@ summaryBalance.innerText = formatCurrency(balance)
 
 document.getElementById("invoiceNumber").innerText =
 "INV-" + quotationId.substring(0,6).toUpperCase()
+
+}catch(err){
+
+console.error("Invoice load error",err)
+
+}
 
 }
 
