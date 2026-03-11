@@ -102,9 +102,7 @@ const quotationId = getQuotationId()
 if(!quotationId) return
 
 
-// =============================
 // GET QUOTATION
-// =============================
 
 const { data: quote } =
 await supabase
@@ -116,9 +114,7 @@ await supabase
 if(!quote) return
 
 
-// =============================
 // CLIENT
-// =============================
 
 document.getElementById("clientName").innerText =
 quote.client_name || "-"
@@ -127,9 +123,7 @@ document.getElementById("clientPhone").innerText =
 quote.phone || "-"
 
 
-// =============================
-// EVENT (UPDATED)
-// =============================
+// EVENT
 
 const eventType =
 quote.event_category ||
@@ -147,9 +141,7 @@ document.getElementById("eventVenue").innerText =
 quote.venue || "-"
 
 
-// =============================
 // TOTAL PACKAGE
-// =============================
 
 const total = Number(quote.total || 0)
 
@@ -194,7 +186,7 @@ const row =
 document.createElement("div")
 
 row.className =
-"flex justify-between items-center border-b py-2 text-sm"
+"grid grid-cols-2 border-b py-2 text-sm"
 
 row.innerHTML = `
 
@@ -205,7 +197,7 @@ ${p.payment_type || ""} • ${p.method || ""}
 </span>
 </div>
 
-<div class="text-gray-500">
+<div class="text-right text-gray-500">
 ${formatDate(p.payment_date)}
 </div>
 
@@ -238,9 +230,7 @@ document.getElementById("invoiceBalanceFooter").innerText =
 formatCurrency(balance)
 
 
-// =============================
-// SUMMARY BOX VALUES
-// =============================
+// SUMMARY BOX
 
 document.getElementById("summaryPackage").innerText =
 formatCurrency(total)
@@ -252,15 +242,12 @@ document.getElementById("summaryBalance").innerText =
 formatCurrency(balance)
 
 
-// =============================
 // INVOICE NUMBER
-// =============================
 
 document.getElementById("invoiceNumber").innerText =
 "INV-" + quotationId.substring(0,6).toUpperCase()
 
 }
-
 
 
 // =============================
@@ -307,7 +294,6 @@ orientation:"portrait"
 html2pdf().set(opt).from(element).save()
 
 }
-
 
 
 // =============================
