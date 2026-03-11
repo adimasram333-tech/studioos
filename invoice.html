@@ -27,6 +27,8 @@ border-radius:6px;
 box-shadow:0 10px 30px rgba(0,0,0,0.15);
 }
 
+/* HEADER */
+
 .invoice-header{
 background:linear-gradient(135deg,#5b4cc4,#4c3db2);
 color:white;
@@ -66,6 +68,8 @@ border-top-left-radius:100% 90px;
 border-top-right-radius:100% 90px;
 }
 
+/* BODY */
+
 .invoice-body{
 padding:60px 55px;
 }
@@ -103,7 +107,8 @@ border-left:1px solid #e5e7eb;
 width:100%;
 border-collapse:collapse;
 margin-top:20px;
-font-size:14px;
+font-size:15px;
+table-layout:fixed;
 }
 
 .invoice-table thead{
@@ -111,23 +116,35 @@ background:#4c3db2;
 color:white;
 }
 
-.invoice-table th,
+.invoice-table th{
+padding:14px 12px;
+text-align:left;
+font-weight:600;
+}
+
 .invoice-table td{
-padding:12px;
+padding:14px 12px;
 border-bottom:1px solid #e5e7eb;
 }
 
-.invoice-table th{
-text-align:left;
-}
-
-.invoice-table td{
+.invoice-table th:nth-child(2),
+.invoice-table th:nth-child(3),
+.invoice-table th:nth-child(4){
 text-align:right;
 }
 
-.invoice-table td:first-child{
-text-align:left;
+.invoice-table td:nth-child(2),
+.invoice-table td:nth-child(3),
+.invoice-table td:nth-child(4){
+text-align:right;
 }
+
+/* COLUMN WIDTH */
+
+.invoice-table th:nth-child(1){width:50%;}
+.invoice-table th:nth-child(2){width:18%;}
+.invoice-table th:nth-child(3){width:12%;}
+.invoice-table th:nth-child(4){width:20%;}
 
 /* PAYMENTS */
 
@@ -142,7 +159,7 @@ gap:40px;
 display:flex;
 justify-content:space-between;
 border-bottom:1px solid #e5e7eb;
-padding:8px 0;
+padding:10px 0;
 font-size:14px;
 }
 
@@ -150,14 +167,14 @@ font-size:14px;
 width:260px;
 background:#f9fafb;
 border-radius:8px;
-padding:15px;
+padding:18px;
 border-bottom:5px solid #4c3db2;
 }
 
 .summary-row{
 display:flex;
 justify-content:space-between;
-padding:10px 0;
+padding:12px 0;
 border-bottom:1px solid #e5e7eb;
 }
 
@@ -166,9 +183,22 @@ border:none;
 font-weight:bold;
 }
 
+/* TERMS */
+
 .terms{
 margin-top:45px;
 }
+
+.terms ul{
+margin-top:10px;
+padding-left:18px;
+}
+
+.terms li{
+margin-bottom:6px;
+}
+
+/* FOOTER */
 
 .invoice-footer{
 padding:60px 55px;
@@ -185,6 +215,8 @@ border-bottom:1px solid #9ca3af;
 margin-left:auto;
 margin-top:20px;
 }
+
+/* MOBILE */
 
 @media(max-width:640px){
 
