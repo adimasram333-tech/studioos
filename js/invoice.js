@@ -132,7 +132,6 @@ document.getElementById("invoiceTotalFooter").innerText =
 "₹" + total
 
 
-
 // =============================
 // LOAD PAYMENTS
 // =============================
@@ -211,6 +210,19 @@ document.getElementById("invoiceBalance").innerText =
 
 document.getElementById("invoiceBalanceFooter").innerText =
 "₹" + balance
+
+
+// =============================
+// SUMMARY BOX VALUES
+// =============================
+
+const summaryPackage = document.getElementById("summaryPackage")
+const summaryPaid = document.getElementById("summaryPaid")
+const summaryBalance = document.getElementById("summaryBalance")
+
+if(summaryPackage) summaryPackage.innerText = "₹" + total
+if(summaryPaid) summaryPaid.innerText = "₹" + paid
+if(summaryBalance) summaryBalance.innerText = "₹" + balance
 
 
 // =============================
