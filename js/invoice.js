@@ -105,7 +105,9 @@ const quotationId = getQuotationId()
 if(!quotationId) return
 
 
+// =============================
 // GET QUOTATION
+// =============================
 
 const { data: quote } =
 await supabase
@@ -117,7 +119,9 @@ await supabase
 if(!quote) return
 
 
+// =============================
 // CLIENT
+// =============================
 
 document.getElementById("clientName").innerText =
 quote.client_name || "-"
@@ -126,7 +130,17 @@ document.getElementById("clientPhone").innerText =
 quote.phone || "-"
 
 
-// EVENT
+// =============================
+// INVOICE DATE (FIX)
+// =============================
+
+document.getElementById("invoiceDate").innerText =
+formatDate(quote.created_at)
+
+
+// =============================
+// EVENT DETAILS
+// =============================
 
 const eventType =
 quote.event_category ||
@@ -141,16 +155,28 @@ document.getElementById("eventVenue").innerText =
 quote.venue || "-"
 
 
-// EVENT DATE RANGE
+// =============================
+// EVENT START → END DATE (FIX)
+// =============================
+
+const startDate =
+quote.event_start_date ||
+quote.event_date
+
+const endDate =
+quote.event_end_date ||
+quote.event_date
 
 document.getElementById("eventStart").innerText =
-formatDate(quote.event_date)
+formatDate(startDate)
 
 document.getElementById("eventEnd").innerText =
-formatDate(quote.event_end || quote.event_date)
+formatDate(endDate)
 
 
+// =============================
 // TOTAL PACKAGE
+// =============================
 
 const total = Number(quote.total || 0)
 
@@ -178,6 +204,7 @@ document.getElementById("invoicePayments")
 
 let paid = 0
 
+
 if(!payments || payments.length === 0){
 
 container.innerHTML =
@@ -195,7 +222,7 @@ const row =
 document.createElement("div")
 
 row.className =
-"grid grid-cols-2 border-b py-2 text-sm"
+"flex justify-between border-b py-2 text-sm"
 
 row.innerHTML = `
 
@@ -206,7 +233,7 @@ ${p.payment_type || ""} • ${p.method || ""}
 </span>
 </div>
 
-<div class="text-right text-gray-500">
+<div class="text-gray-500">
 ${formatDate(p.payment_date)}
 </div>
 
@@ -240,7 +267,7 @@ formatCurrency(balance)
 
 
 // =============================
-// INVOICE NUMBER
+// INVOICE NUMBER (CLEAN FORMAT)
 // =============================
 
 const year = new Date().getFullYear()
