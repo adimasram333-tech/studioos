@@ -88,6 +88,9 @@ data.phone || "-"
 document.getElementById("studioEmail").innerText =
 data.email || "-"
 
+document.getElementById("photographerName").innerText =
+data.studio_name || "Photographer"
+
 }
 
 
@@ -134,11 +137,17 @@ quote.event_name ||
 document.getElementById("eventType").innerText =
 eventType
 
-document.getElementById("eventDate").innerText =
-formatDate(quote.event_date)
-
 document.getElementById("eventVenue").innerText =
 quote.venue || "-"
+
+
+// EVENT DATE RANGE
+
+document.getElementById("eventStart").innerText =
+formatDate(quote.event_date)
+
+document.getElementById("eventEnd").innerText =
+formatDate(quote.event_end || quote.event_date)
 
 
 // TOTAL PACKAGE
@@ -230,22 +239,14 @@ document.getElementById("invoiceBalanceFooter").innerText =
 formatCurrency(balance)
 
 
-// SUMMARY BOX
-
-document.getElementById("summaryPackage").innerText =
-formatCurrency(total)
-
-document.getElementById("summaryPaid").innerText =
-formatCurrency(paid)
-
-document.getElementById("summaryBalance").innerText =
-formatCurrency(balance)
-
-
+// =============================
 // INVOICE NUMBER
+// =============================
+
+const year = new Date().getFullYear()
 
 document.getElementById("invoiceNumber").innerText =
-"INV-" + quotationId.substring(0,6).toUpperCase()
+`INV-${year}-${quotationId.substring(0,3).toUpperCase()}`
 
 }
 
