@@ -17,14 +17,13 @@ background: radial-gradient(circle at top,#1e293b,#0f172a);
 font-family:Arial, Helvetica, sans-serif;
 }
 
-/* INVOICE DESIGN */
+/* INVOICE PAGE */
 
-.invoice-wrapper{
+.invoice-page{
 background:white;
-color:#111827;
-max-width:850px;
+max-width:900px;
 margin:auto;
-border-radius:10px;
+color:#111827;
 overflow:hidden;
 }
 
@@ -33,19 +32,20 @@ overflow:hidden;
 .invoice-header{
 background:#4c3db2;
 color:white;
-padding:40px;
+padding:50px;
 position:relative;
 }
 
 .invoice-title{
+position:absolute;
+right:50px;
+top:40px;
 font-size:32px;
 font-weight:bold;
-position:absolute;
-right:40px;
-top:40px;
+letter-spacing:1px;
 }
 
-.wave{
+.wave-top{
 position:absolute;
 bottom:-40px;
 left:0;
@@ -56,26 +56,27 @@ border-top-left-radius:100% 80px;
 border-top-right-radius:100% 80px;
 }
 
-/* CONTENT */
+/* BODY */
 
 .invoice-body{
-padding:40px;
+padding:60px 50px;
 }
 
 .table-head{
 background:#4c3db2;
 color:white;
-padding:10px;
-border-radius:20px;
-font-size:14px;
 display:grid;
-grid-template-columns:2fr 1fr;
+grid-template-columns:2fr 1fr 1fr 1fr;
+padding:10px 20px;
+border-radius:25px;
+font-size:14px;
+margin-top:20px;
 }
 
 .table-row{
 display:grid;
-grid-template-columns:2fr 1fr;
-padding:10px 0;
+grid-template-columns:2fr 1fr 1fr 1fr;
+padding:12px 20px;
 border-bottom:1px solid #e5e7eb;
 font-size:14px;
 }
@@ -83,26 +84,26 @@ font-size:14px;
 /* FOOTER */
 
 .invoice-footer{
-padding:40px;
+padding:50px;
+position:relative;
 }
 
-.total-box{
-text-align:right;
-font-size:16px;
+.wave-bottom{
+position:absolute;
+bottom:0;
+left:0;
+width:100%;
+height:120px;
+background:#4c3db2;
+border-top-left-radius:100% 120px;
+border-top-right-radius:100% 120px;
 }
 
 .signature{
-margin-top:40px;
 text-align:right;
+margin-top:60px;
 font-size:14px;
-color:#6b7280;
-}
-
-/* PDF MODE */
-
-.pdf-mode{
-background:white;
-color:black;
+color:#374151;
 }
 
 </style>
@@ -110,15 +111,17 @@ color:black;
 </head>
 
 
-<body class="p-4">
+<body class="p-6">
 
-<div id="invoiceContainer" class="invoice-wrapper">
+<div id="invoiceContainer" class="invoice-page">
 
 <!-- HEADER -->
 
 <div class="invoice-header">
 
-<h1 id="studioName">Studio Name</h1>
+<h1 id="studioName" class="text-2xl font-bold">
+Studio Name
+</h1>
 
 <div class="text-sm mt-2">
 <span id="studioPhone">Phone</span> •
@@ -129,7 +132,7 @@ color:black;
 INVOICE
 </div>
 
-<div class="wave"></div>
+<div class="wave-top"></div>
 
 </div>
 
@@ -138,73 +141,79 @@ INVOICE
 
 <div class="invoice-body">
 
-<div class="flex justify-between mb-6 text-sm">
+<div class="flex justify-between text-sm mb-6">
 
 <div>
-<strong>Invoice No:</strong>
+<strong>Invoice No :</strong>
 <span id="invoiceNumber">INV-001</span>
 </div>
 
 <div>
-<strong>Date:</strong>
+<strong>Date :</strong>
 <span id="eventDate">-</span>
 </div>
 
 </div>
 
 
-<!-- CLIENT -->
+<div class="flex justify-between mb-8 text-sm">
 
-<div class="mb-6 text-sm">
-
+<div>
 <strong>Invoice To</strong>
-
-<div id="clientName">Client Name</div>
-
-<div id="clientPhone">Phone</div>
-
+<br>
+<span id="clientName">Client Name</span>
+<br>
+<span id="clientPhone">Phone</span>
 </div>
 
-
-<!-- EVENT -->
-
-<div class="mb-8 text-sm">
-
+<div class="text-right">
 <strong>Event</strong>
-
-<div id="eventType">Event Type</div>
-
-<div id="eventVenue">Venue</div>
+<br>
+<span id="eventType">Event Type</span>
+<br>
+<span id="eventVenue">Venue</span>
+</div>
 
 </div>
 
 
-<!-- PACKAGE TABLE -->
+<!-- TABLE -->
 
 <div class="table-head">
-<div>Item</div>
-<div>Total</div>
+<div>ITEM NAME</div>
+<div>PRICE</div>
+<div>QTY</div>
+<div>TOTAL</div>
 </div>
+
 
 <div class="table-row">
 <div>Photography Package</div>
 <div id="invoiceTotal">₹0</div>
+<div>1</div>
+<div id="invoiceTotalFooter">₹0</div>
 </div>
 
+
 <div class="table-row">
-<div>Total Paid</div>
+<div>Amount Paid</div>
 <div id="invoicePaid">₹0</div>
+<div>1</div>
+<div id="invoicePaidFooter">₹0</div>
 </div>
+
 
 <div class="table-row">
 <div>Balance</div>
 <div id="invoiceBalance">₹0</div>
+<div>1</div>
+<div id="invoiceBalanceFooter">₹0</div>
 </div>
 
 
 <!-- PAYMENTS -->
 
-<div class="mt-8">
+<div class="mt-10">
 
 <h3 class="font-semibold mb-2">Payments</h3>
 
@@ -218,6 +227,20 @@ No payments yet
 
 </div>
 
+
+<!-- TERMS -->
+
+<div class="mt-10 text-sm text-gray-600">
+
+<strong>Terms and Conditions</strong>
+
+<p class="mt-2">
+Balance payment required before final delivery.
+Album delivery timeline 30 days.
+</p>
+
+</div>
+
 </div>
 
 
@@ -225,29 +248,13 @@ No payments yet
 
 <div class="invoice-footer">
 
-<div class="flex justify-between text-sm">
-
-<div>
+<div class="text-sm">
 
 <strong>Payment Info</strong>
 
-<p class="text-gray-500">
-UPI / Bank transfer accepted
+<p class="text-gray-600 mt-2">
+UPI / Bank Transfer accepted
 </p>
-
-</div>
-
-<div class="total-box">
-
-<div>Total Package: <span id="invoiceTotalFooter">₹0</span></div>
-
-<div>Paid: <span id="invoicePaidFooter">₹0</span></div>
-
-<div class="font-semibold">
-Balance: <span id="invoiceBalanceFooter">₹0</span>
-</div>
-
-</div>
 
 </div>
 
@@ -258,20 +265,21 @@ Thank you for your business
 
 <br><br>
 
-____________________
+________________________
 
 Authorized Sign
 
 </div>
 
-</div>
+
+<div class="wave-bottom"></div>
 
 </div>
 
+</div>
 
-<!-- DOWNLOAD BUTTON -->
 
-<div class="max-w-md mx-auto mt-4">
+<div class="max-w-md mx-auto mt-6">
 
 <button
 id="downloadInvoice"
