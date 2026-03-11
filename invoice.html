@@ -25,6 +25,7 @@ max-width:900px;
 margin:auto;
 color:#111827;
 overflow:hidden;
+border-radius:10px;
 }
 
 /* HEADER */
@@ -62,6 +63,8 @@ border-top-right-radius:100% 80px;
 padding:60px 50px;
 }
 
+/* TABLE */
+
 .table-head{
 background:#4c3db2;
 color:white;
@@ -71,6 +74,7 @@ padding:10px 20px;
 border-radius:25px;
 font-size:14px;
 margin-top:20px;
+gap:10px;
 }
 
 .table-row{
@@ -79,6 +83,12 @@ grid-template-columns:2fr 1fr 1fr 1fr;
 padding:12px 20px;
 border-bottom:1px solid #e5e7eb;
 font-size:14px;
+gap:10px;
+}
+
+.table-row div,
+.table-head div{
+word-break:break-word;
 }
 
 /* FOOTER */
@@ -104,6 +114,39 @@ text-align:right;
 margin-top:60px;
 font-size:14px;
 color:#374151;
+}
+
+/* MOBILE */
+
+@media(max-width:640px){
+
+.invoice-header{
+padding:30px;
+}
+
+.invoice-title{
+position:static;
+margin-top:10px;
+}
+
+.invoice-body{
+padding:40px 20px;
+}
+
+.table-head{
+grid-template-columns:1.5fr 1fr 1fr 1fr;
+font-size:12px;
+}
+
+.table-row{
+grid-template-columns:1.5fr 1fr 1fr 1fr;
+font-size:12px;
+}
+
+.signature{
+text-align:left;
+}
+
 }
 
 </style>
@@ -141,7 +184,7 @@ INVOICE
 
 <div class="invoice-body">
 
-<div class="flex justify-between text-sm mb-6">
+<div class="flex justify-between text-sm mb-6 flex-wrap gap-2">
 
 <div>
 <strong>Invoice No :</strong>
@@ -156,7 +199,7 @@ INVOICE
 </div>
 
 
-<div class="flex justify-between mb-8 text-sm">
+<div class="flex justify-between mb-8 text-sm flex-wrap gap-4">
 
 <div>
 <strong>Invoice To</strong>
