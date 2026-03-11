@@ -100,9 +100,7 @@ gap:40px;
 margin-bottom:40px;
 }
 
-.client{
-flex:1;
-}
+.client{flex:1;}
 
 .event{
 flex:1;
@@ -116,18 +114,36 @@ border-left:1px solid #e5e7eb;
 background:#4c3db2;
 color:white;
 display:grid;
-grid-template-columns:2fr 120px 80px 120px;
+grid-template-columns:2fr 1fr 80px 1fr;
 padding:12px 20px;
 font-size:14px;
-margin-bottom:8px;
+}
+
+.table-head div{
+text-align:right;
+}
+
+.table-head div:first-child{
+text-align:left;
 }
 
 .table-row{
 display:grid;
-grid-template-columns:2fr 120px 80px 120px;
+grid-template-columns:2fr 1fr 80px 1fr;
 padding:14px 20px;
 border-bottom:1px solid #e5e7eb;
 font-size:14px;
+align-items:center;
+}
+
+.table-row div{
+text-align:right;
+white-space:nowrap;
+}
+
+.table-row div:first-child{
+text-align:left;
+white-space:normal;
 }
 
 /* PAYMENTS + SUMMARY */
@@ -141,6 +157,14 @@ gap:40px;
 
 .payments{
 flex:1;
+}
+
+.payment-row{
+display:flex;
+justify-content:space-between;
+border-bottom:1px solid #e5e7eb;
+padding:8px 0;
+font-size:14px;
 }
 
 .summary-box{
@@ -201,21 +225,8 @@ margin-top:20px;
 
 @media(max-width:640px){
 
-body{
-padding:10px;
-}
-
 .invoice-body{
 padding:30px 20px;
-}
-
-.invoice-header{
-padding:40px 25px 70px 25px;
-}
-
-.invoice-title{
-position:static;
-margin-top:10px;
 }
 
 .client-event{
@@ -236,12 +247,12 @@ width:100%;
 }
 
 .table-head{
-grid-template-columns:1.5fr 80px 60px 90px;
+grid-template-columns:1.5fr 1fr 60px 1fr;
 font-size:12px;
 }
 
 .table-row{
-grid-template-columns:1.5fr 80px 60px 90px;
+grid-template-columns:1.5fr 1fr 60px 1fr;
 font-size:12px;
 }
 
@@ -255,7 +266,6 @@ text-align:left;
 
 </head>
 
-
 <body class="p-6">
 
 <div id="invoiceContainer" class="invoice-page">
@@ -264,24 +274,19 @@ text-align:left;
 
 <div class="invoice-header">
 
-<h1 id="studioName" class="text-2xl font-bold">
-Studio Name
-</h1>
+<h1 id="studioName" class="text-2xl font-bold">Studio Name</h1>
 
 <div class="text-sm mt-2">
 <span id="studioPhone">Phone</span> •
 <span id="studioEmail">Email</span>
 </div>
 
-<div class="invoice-title">
-INVOICE
-</div>
+<div class="invoice-title">INVOICE</div>
 
 <div class="wave-1"></div>
 <div class="wave-2"></div>
 
 </div>
-
 
 <!-- BODY -->
 
@@ -317,7 +322,6 @@ INVOICE
 
 </div>
 
-
 <!-- TABLE -->
 
 <div class="table-head">
@@ -352,7 +356,6 @@ INVOICE
 
 </div>
 
-
 <!-- PAYMENTS + SUMMARY -->
 
 <div class="payment-summary">
@@ -370,7 +373,6 @@ No payments yet
 </div>
 
 </div>
-
 
 <div class="summary-box">
 
@@ -393,7 +395,6 @@ No payments yet
 
 </div>
 
-
 <!-- TERMS -->
 
 <div class="terms">
@@ -409,7 +410,6 @@ No payments yet
 
 </div>
 
-
 <!-- FOOTER -->
 
 <div class="invoice-footer">
@@ -423,7 +423,6 @@ UPI / Bank Transfer accepted
 </p>
 
 </div>
-
 
 <div class="signature">
 
@@ -439,7 +438,6 @@ Authorized Sign
 
 </div>
 
-
 <div class="max-w-md mx-auto mt-6">
 
 <button
@@ -452,11 +450,9 @@ Download Invoice
 
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/invoice.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 </body>
