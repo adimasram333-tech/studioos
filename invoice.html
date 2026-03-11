@@ -86,9 +86,20 @@ font-size:14px;
 gap:10px;
 }
 
-.table-row div,
-.table-head div{
+.table-head div,
+.table-row div{
 word-break:break-word;
+}
+
+/* PAYMENTS */
+
+.payment-row{
+display:flex;
+justify-content:space-between;
+border-bottom:1px solid #e5e7eb;
+padding-bottom:6px;
+margin-bottom:6px;
+font-size:13px;
 }
 
 /* FOOTER */
@@ -230,13 +241,14 @@ INVOICE
 </div>
 
 
+<div id="invoiceTableRows">
+
 <div class="table-row">
 <div>Photography Package</div>
 <div id="invoiceTotal">₹0</div>
 <div>1</div>
 <div id="invoiceTotalFooter">₹0</div>
 </div>
-
 
 <div class="table-row">
 <div>Amount Paid</div>
@@ -245,12 +257,13 @@ INVOICE
 <div id="invoicePaidFooter">₹0</div>
 </div>
 
-
 <div class="table-row">
 <div>Balance</div>
 <div id="invoiceBalance">₹0</div>
 <div>1</div>
 <div id="invoiceBalanceFooter">₹0</div>
+</div>
+
 </div>
 
 
