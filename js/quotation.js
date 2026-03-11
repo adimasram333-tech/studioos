@@ -63,6 +63,11 @@ get("endDate").value = data.end_date || ""
 
 get("packageSelect").value = data.package || ""
 
+// NEW: EVENT CATEGORY LOAD
+if(get("eventCategory")){
+get("eventCategory").value = data.event_category || ""
+}
+
 get("totalAmount").value = data.total || ""
 get("advanceAmount").value = data.advance || ""
 get("balanceAmount").value = data.balance || ""
@@ -337,6 +342,10 @@ const clientName = get("clientName")?.value.trim() || ""
 const clientPhone = get("clientPhone")?.value.trim() || ""
 const startDate = get("startDate")?.value || ""
 
+// NEW EVENT CATEGORY
+const eventCategory =
+get("eventCategory")?.value || ""
+
 if(!clientName){
 alert("Enter client name")
 return
@@ -440,6 +449,9 @@ user_id: user.id,
 
 client_name: clientName,
 phone: clientPhone,
+
+// NEW FIELD
+event_category: eventCategory,
 
 event_date: startDate,
 end_date: get("endDate")?.value || "",
