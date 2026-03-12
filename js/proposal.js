@@ -82,16 +82,14 @@ let profile = null
 
 try{
 
-// DIRECTLY LOAD FIRST PROFILE
-const { data: profileRow } =
+const { data: rows } =
 await supabase
 .from("photographer_settings")
 .select("*")
 .limit(1)
-.single()
 
-if(profileRow){
-profile = profileRow
+if(rows && rows.length > 0){
+profile = rows[0]
 }
 
 }catch(e){
