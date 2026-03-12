@@ -83,6 +83,8 @@ box-sizing:border-box;
 overflow:hidden;
 }
 
+/* SAFE OVERLAY */
+
 .hero::after{
 content:'';
 position:absolute;
@@ -91,13 +93,19 @@ left:0;
 width:100%;
 height:100%;
 background:rgba(0,0,0,0.45);
-z-index:1;
+z-index:0;
+pointer-events:none;
 }
+
+/* HERO TEXT */
 
 .hero h1,
 .hero p{
 position:relative;
-z-index:5;
+z-index:2;
+display:block;
+width:100%;
+color:white;
 }
 
 .hero h1{
@@ -220,7 +228,7 @@ text-align:center;
 margin-top:30px;
 }
 
-/* ===== MOBILE FIX ===== */
+/* ===== MOBILE ===== */
 
 @media (max-width:768px){
 
@@ -239,7 +247,7 @@ margin:0 auto;
 
 .hero{
 min-height:240px;
-padding:70px 20px;
+padding:60px 20px;
 background-size:cover;
 background-position:center center;
 }
