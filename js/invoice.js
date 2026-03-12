@@ -237,6 +237,10 @@ formatCurrency(balance)
 // PROFESSIONAL INVOICE NUMBER
 // =============================
 
+let invoiceNumber = quote.invoice_number
+
+if(!invoiceNumber){
+
 const year = new Date().getFullYear()
 
 const { data: lastInvoice } =
@@ -263,12 +267,8 @@ nextNumber = number + 1
 
 }
 
-const invoiceNumber =
+invoiceNumber =
 `INV-${year}-${String(nextNumber).padStart(4,"0")}`
-
-document.getElementById("invoiceNumber").innerText =
-invoiceNumber
-
 
 await supabase
 .from("quotations")
@@ -276,6 +276,11 @@ await supabase
 invoice_number: invoiceNumber
 })
 .eq("id", quotationId)
+
+}
+
+document.getElementById("invoiceNumber").innerText =
+invoiceNumber
 
 }
 
