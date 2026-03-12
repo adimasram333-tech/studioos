@@ -233,18 +233,49 @@ document.getElementById("invoiceBalanceFooter").innerText =
 formatCurrency(balance)
 
 
+// =============================
+// PROFESSIONAL INVOICE NUMBER
+// =============================
+
 const year = new Date().getFullYear()
 
-let number = quotationId.substring(0,6)
+const { data: lastInvoice } =
+await supabase
+.from("quotations")
+.select("invoice_number")
+.order("created_at",{ascending:false})
+.limit(1)
 
-number = number.replace(/[^0-9]/g,'')
+let nextNumber = 1
 
-if(number.length < 3){
-number = Math.floor(Math.random()*900)+100
+if(lastInvoice && lastInvoice.length > 0){
+
+const last = lastInvoice[0].invoice_number
+
+if(last){
+
+const parts = last.split("-")
+const number = parseInt(parts[2])
+
+nextNumber = number + 1
+
 }
 
+}
+
+const invoiceNumber =
+`INV-${year}-${String(nextNumber).padStart(4,"0")}`
+
 document.getElementById("invoiceNumber").innerText =
-`INV-${year}-${number}`
+invoiceNumber
+
+
+await supabase
+.from("quotations")
+.update({
+invoice_number: invoiceNumber
+})
+.eq("id", quotationId)
 
 }
 
