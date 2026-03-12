@@ -15,16 +15,22 @@
 body{
 background: radial-gradient(circle at top,#1e293b,#0f172a);
 font-family:Arial, Helvetica, sans-serif;
+margin:0;
+padding:0;
 }
+
+/* EXACT A4 CONTAINER */
 
 .invoice-page{
 background:white;
-max-width:794px;
+width:794px;
+min-height:1123px;
 margin:auto;
 color:#111827;
 overflow:hidden;
 border-radius:6px;
 box-shadow:0 10px 30px rgba(0,0,0,0.15);
+page-break-inside:avoid;
 }
 
 /* HEADER */
@@ -138,8 +144,6 @@ text-align:right;
 text-align:right;
 }
 
-/* COLUMN WIDTH */
-
 .invoice-table th:nth-child(1){width:60%;}
 .invoice-table th:nth-child(2){width:20%;}
 .invoice-table th:nth-child(3){width:20%;}
@@ -193,11 +197,18 @@ color:#6b7280;
 margin-top:40px;
 }
 
+/* PREVENT PAGE BREAK */
+
+.invoice-page *{
+page-break-inside:avoid;
+break-inside:avoid;
+}
+
 </style>
 
 </head>
 
-<body class="p-6">
+<body>
 
 <div id="invoiceContainer" class="invoice-page">
 
