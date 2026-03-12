@@ -349,4 +349,11 @@ html2pdf()
 
 }
 
+
+// ======================
+// SAFE PAGE LOAD
+// ======================
+
+document.addEventListener("DOMContentLoaded", function(){
 loadProposal()
+})
