@@ -105,10 +105,6 @@ const quotationId = getQuotationId()
 if(!quotationId) return
 
 
-// =============================
-// GET QUOTATION
-// =============================
-
 const { data: quote } =
 await supabase
 .from("quotations")
@@ -119,10 +115,6 @@ await supabase
 if(!quote) return
 
 
-// =============================
-// CLIENT
-// =============================
-
 document.getElementById("clientName").innerText =
 quote.client_name || "-"
 
@@ -130,17 +122,9 @@ document.getElementById("clientPhone").innerText =
 quote.phone || "-"
 
 
-// =============================
-// INVOICE DATE
-// =============================
-
 document.getElementById("invoiceDate").innerText =
 formatDate(quote.created_at)
 
-
-// =============================
-// EVENT DETAILS
-// =============================
 
 const eventType =
 quote.event_category ||
@@ -154,10 +138,6 @@ eventType
 document.getElementById("eventVenue").innerText =
 quote.venue || "-"
 
-
-// =============================
-// EVENT DATE
-// =============================
 
 const startDate =
 quote.event_start_date ||
@@ -175,10 +155,6 @@ document.getElementById("eventEnd").innerText =
 formatDate(endDate)
 
 
-// =============================
-// TOTAL PACKAGE
-// =============================
-
 const total = Number(quote.total || 0)
 
 document.getElementById("invoiceTotal").innerText =
@@ -187,10 +163,6 @@ formatCurrency(total)
 document.getElementById("invoiceTotalFooter").innerText =
 formatCurrency(total)
 
-
-// =============================
-// LOAD PAYMENTS
-// =============================
 
 const { data: payments } =
 await supabase
@@ -245,10 +217,6 @@ container.appendChild(row)
 }
 
 
-// =============================
-// CALCULATIONS
-// =============================
-
 document.getElementById("invoicePaid").innerText =
 formatCurrency(paid)
 
@@ -264,10 +232,6 @@ formatCurrency(balance)
 document.getElementById("invoiceBalanceFooter").innerText =
 formatCurrency(balance)
 
-
-// =============================
-// INVOICE NUMBER
-// =============================
 
 const year = new Date().getFullYear()
 
@@ -303,7 +267,6 @@ document.getElementById("clientName")
 const invoiceNumber =
 document.getElementById("invoiceNumber").innerText
 
-
 const opt = {
 
 margin:0,
@@ -316,13 +279,14 @@ quality:1
 },
 
 html2canvas:{
-scale:3,
+scale:2,
 useCORS:true,
-scrollY:0
+scrollY:0,
+windowWidth:794
 },
 
 pagebreak:{
-mode:["avoid-all","css","legacy"]
+mode:["avoid-all"]
 },
 
 jsPDF:{
