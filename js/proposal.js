@@ -75,34 +75,40 @@ return
 
 
 // ======================
-// LOAD STUDIO PROFILE
+// LOAD STUDIO PROFILE (FIXED)
 // ======================
 
 let profile = null
 
+// Try user specific profile
 if(data.user_id){
 
-const { data: profileRow } =
+const { data: profileRow, error } =
 await supabase
 .from("photographer_settings")
 .select("*")
 .eq("user_id", data.user_id)
-.single()
+.maybeSingle()
 
+if(profileRow){
 profile = profileRow
+}
 
 }
 
+// Fallback profile
 if(!profile){
 
-const { data: fallback } =
+const { data: fallbackRow } =
 await supabase
 .from("photographer_settings")
 .select("*")
 .limit(1)
-.single()
+.maybeSingle()
 
-profile = fallback
+if(fallbackRow){
+profile = fallbackRow
+}
 
 }
 
@@ -125,8 +131,11 @@ themeLink.href = "themes/" + theme + ".css"
 
 
 // ======================
-// LOAD STUDIO INFO (SAFE FIX)
+// LOAD STUDIO INFO
 // ======================
+
+const studioNameEl = document.getElementById("studioName")
+const studioPhoneEl = document.getElementById("studioPhone")
 
 let studioName = ""
 let studioPhone = ""
@@ -136,11 +145,13 @@ studioName = profile.studio_name || ""
 studioPhone = profile.phone || ""
 }
 
-const studioNameEl = document.getElementById("studioName")
-const studioPhoneEl = document.getElementById("studioPhone")
+if(studioNameEl){
+studioNameEl.textContent = studioName
+}
 
-if(studioNameEl) studioNameEl.innerText = studioName
-if(studioPhoneEl) studioPhoneEl.innerText = studioPhone
+if(studioPhoneEl){
+studioPhoneEl.textContent = studioPhone
+}
 
 
 // ======================
