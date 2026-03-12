@@ -279,14 +279,8 @@ quality:1
 },
 
 html2canvas:{
-scale:2,
-useCORS:true,
-scrollY:0,
-windowWidth:794
-},
-
-pagebreak:{
-mode:["avoid-all"]
+scale:1.8,
+useCORS:true
 },
 
 jsPDF:{
