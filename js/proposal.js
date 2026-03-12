@@ -75,59 +75,27 @@ return
 
 
 // ======================
-// LOAD STUDIO PROFILE
+// LOAD STUDIO PROFILE (FIX)
 // ======================
 
 let profile = null
 
-async function fetchProfile(){
+try{
 
-let result = null
-
-if(data.user_id){
-
+// DIRECTLY LOAD FIRST PROFILE
 const { data: profileRow } =
 await supabase
 .from("photographer_settings")
 .select("*")
-.eq("user_id", data.user_id)
-.maybeSingle()
+.limit(1)
+.single()
 
 if(profileRow){
-result = profileRow
+profile = profileRow
 }
 
-}
-
-if(!result){
-
-const { data: fallbackRow } =
-await supabase
-.from("photographer_settings")
-.select("*")
-.limit(1)
-.maybeSingle()
-
-if(fallbackRow){
-result = fallbackRow
-}
-
-}
-
-return result
-}
-
-
-// FIRST TRY
-profile = await fetchProfile()
-
-// RETRY IF FAILED
-if(!profile){
-
-await new Promise(r => setTimeout(r,300))
-
-profile = await fetchProfile()
-
+}catch(e){
+console.log("Profile load error",e)
 }
 
 
@@ -361,7 +329,6 @@ const element = document.getElementById("proposalPage")
 const opt = {
 
 margin:0,
-
 filename:"photography-proposal.pdf",
 
 image:{ type:"jpeg", quality:1 },
