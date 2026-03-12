@@ -75,15 +75,17 @@ return
 
 
 // ======================
-// LOAD STUDIO PROFILE (FIXED)
+// LOAD STUDIO PROFILE (SAFE)
 // ======================
 
 let profile = null
 
-// Try user specific profile
+try{
+
+// Try user profile first
 if(data.user_id){
 
-const { data: profileRow, error } =
+const { data: profileRow } =
 await supabase
 .from("photographer_settings")
 .select("*")
@@ -110,6 +112,10 @@ if(fallbackRow){
 profile = fallbackRow
 }
 
+}
+
+}catch(e){
+console.log("Profile load error",e)
 }
 
 
@@ -145,12 +151,14 @@ studioName = profile.studio_name || ""
 studioPhone = profile.phone || ""
 }
 
+// FINAL SAFETY RENDER
+
 if(studioNameEl){
-studioNameEl.textContent = studioName
+studioNameEl.textContent = studioName || ""
 }
 
 if(studioPhoneEl){
-studioPhoneEl.textContent = studioPhone
+studioPhoneEl.textContent = studioPhone || ""
 }
 
 
