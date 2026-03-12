@@ -277,7 +277,7 @@ window.open(url,"_blank")
 
 
 // ======================
-// PERFECT CENTER PDF EXPORT
+// PERFECT PDF EXPORT
 // ======================
 
 window.downloadPDF = function(){
@@ -288,7 +288,7 @@ const element = document.getElementById("proposalPage")
 
 const opt = {
 
-margin: [10,10,10,10],
+margin:0,
 
 filename:"photography-proposal.pdf",
 
@@ -298,7 +298,7 @@ quality:1
 },
 
 html2canvas:{
-scale:3,
+scale:2,
 useCORS:true,
 scrollX:0,
 scrollY:0
@@ -306,7 +306,7 @@ scrollY:0
 
 jsPDF:{
 unit:"mm",
-format:"a4",
+format:[210,297],
 orientation:"portrait"
 }
 
