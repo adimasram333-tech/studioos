@@ -253,13 +253,28 @@ window.sendWhatsApp = function(){
 
 const phone = data.phone || ""
 
+// CREATE SEO PROPOSAL LINK
+
+let clientSlug =
+(data.client_name || "")
+.toLowerCase()
+.replace(/[^a-z0-9 ]/g,"")
+.replace(/\s+/g,"-")
+
+const shortLink =
+window.location.origin +
+"/studioos/p/" +
+clientSlug +
+"-" +
+(data.short_id || "")
+
 const message =
 `Hello ${data.client_name},
 
 Your wedding photography proposal is ready.
 
 View your proposal:
-${window.location.href}
+${shortLink}
 
 For booking contact:
 
