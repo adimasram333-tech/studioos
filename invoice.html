@@ -15,11 +15,13 @@
 body{
 background: radial-gradient(circle at top,#1e293b,#0f172a);
 font-family:Arial, Helvetica, sans-serif;
+margin:0;
+padding:0;
 }
 
 .invoice-page{
 background:white;
-max-width:794px;
+width:794px;
 margin:auto;
 color:#111827;
 overflow:hidden;
@@ -32,7 +34,7 @@ box-shadow:0 10px 30px rgba(0,0,0,0.15);
 .invoice-header{
 background:linear-gradient(135deg,#5b4cc4,#4c3db2);
 color:white;
-padding:50px 50px 70px 50px;
+padding:55px 50px 80px 50px;
 position:relative;
 overflow:hidden;
 }
@@ -71,7 +73,7 @@ border-top-right-radius:100% 90px;
 /* BODY */
 
 .invoice-body{
-padding:40px 50px;
+padding:60px 55px;
 }
 
 .invoice-top{
@@ -85,13 +87,13 @@ margin-bottom:18px;
 .divider{
 height:1px;
 background:#e5e7eb;
-margin-bottom:30px;
+margin-bottom:35px;
 }
 
 .client-event{
 display:flex;
 gap:40px;
-margin-bottom:35px;
+margin-bottom:40px;
 }
 
 .client{flex:1;}
@@ -107,7 +109,7 @@ border-left:1px solid #e5e7eb;
 .invoice-table{
 width:100%;
 border-collapse:collapse;
-margin-top:15px;
+margin-top:20px;
 font-size:15px;
 table-layout:fixed;
 }
@@ -145,13 +147,13 @@ text-align:right;
 /* PAYMENTS */
 
 .payment-summary{
-margin-top:30px;
+margin-top:40px;
 }
 
 /* TERMS */
 
 .terms{
-margin-top:30px;
+margin-top:45px;
 }
 
 .terms ul{
@@ -167,12 +169,12 @@ list-style:none;
 /* FOOTER */
 
 .invoice-footer{
-padding:40px 50px;
+padding:60px 55px;
 }
 
 .signature{
 text-align:right;
-margin-top:25px;
+margin-top:50px;
 line-height:1.6;
 }
 
@@ -188,14 +190,14 @@ margin-bottom:6px;
 text-align:center;
 font-size:12px;
 color:#6b7280;
-margin-top:25px;
+margin-top:40px;
 }
 
 </style>
 
 </head>
 
-<body class="p-6">
+<body>
 
 <div id="invoiceContainer" class="invoice-page">
 
