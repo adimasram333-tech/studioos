@@ -283,13 +283,12 @@ quality:1
 html2canvas:{
 scale:2,
 useCORS:true,
-scrollY:0,
-width:794
+scrollY:0
 },
 
 jsPDF:{
 unit:"mm",
-format:"a4",
+format:[210,297],
 orientation:"portrait"
 }
 
