@@ -125,18 +125,22 @@ themeLink.href = "themes/" + theme + ".css"
 
 
 // ======================
-// LOAD STUDIO INFO
+// LOAD STUDIO INFO (SAFE FIX)
 // ======================
 
+let studioName = ""
+let studioPhone = ""
+
 if(profile){
-
-document.getElementById("studioName").innerText =
-profile.studio_name || ""
-
-document.getElementById("studioPhone").innerText =
-profile.phone || ""
-
+studioName = profile.studio_name || ""
+studioPhone = profile.phone || ""
 }
+
+const studioNameEl = document.getElementById("studioName")
+const studioPhoneEl = document.getElementById("studioPhone")
+
+if(studioNameEl) studioNameEl.innerText = studioName
+if(studioPhoneEl) studioPhoneEl.innerText = studioPhone
 
 
 // ======================
@@ -253,8 +257,6 @@ window.sendWhatsApp = function(){
 
 const phone = data.phone || ""
 
-// CREATE SEO PROPOSAL LINK
-
 let clientSlug =
 (data.client_name || "")
 .toLowerCase()
@@ -278,8 +280,8 @@ ${shortLink}
 
 For booking contact:
 
-${profile?.studio_name || ""}
-Phone: ${profile?.phone || ""}
+${studioName}
+Phone: ${studioPhone}
 
 Powered by StudioOS`
 
