@@ -25,29 +25,41 @@
 --text:#1a1a1a;
 }
 
+html,
+body{
+margin:0;
+padding:0;
+}
+
 body{
 background:#f4f4f4;
-margin:0;
 font-family:'Inter',sans-serif;
 color:var(--text);
+-webkit-print-color-adjust:exact;
+print-color-adjust:exact;
 }
 
 /* ===== PAGE WRAPPER ===== */
 
 .page{
 width:794px;
+max-width:794px;
 background:white;
 margin:40px auto;
 box-shadow:0 10px 40px rgba(0,0,0,0.08);
 overflow:hidden;
 position:relative;
+box-sizing:border-box;
 }
 
 /* FORCE PERFECT PDF WIDTH */
 
 #proposalPage{
 width:794px;
+max-width:794px;
 margin:auto;
+box-sizing:border-box;
+overflow:hidden;
 }
 
 /* ===== HERO ===== */
@@ -104,6 +116,7 @@ font-size:16px;
 .content{
 padding:50px;
 box-sizing:border-box;
+overflow:hidden;
 }
 
 .section-title{
@@ -112,6 +125,8 @@ font-size:20px;
 margin-bottom:10px;
 border-bottom:1px solid #eee;
 padding-bottom:6px;
+page-break-after:avoid;
+break-after:avoid;
 }
 
 .info-grid{
@@ -119,12 +134,15 @@ display:grid;
 grid-template-columns:1fr 1fr;
 gap:20px;
 margin-bottom:30px;
+page-break-inside:avoid;
+break-inside:avoid;
 }
 
 .info-box{
 background:#fafafa;
 padding:15px;
 border-left:3px solid var(--primary);
+box-sizing:border-box;
 }
 
 ul{
@@ -138,22 +156,23 @@ border:2px solid var(--primary);
 padding:25px;
 background:var(--bg);
 margin-top:30px;
-
-/* ===== PDF FIX ===== */
 page-break-inside:avoid;
 break-inside:avoid;
+box-sizing:border-box;
 }
 
 /* ALSO PROTECT SECTIONS */
-
-.section-title{
-page-break-after:avoid;
-}
 
 table{
 width:100%;
 border-collapse:collapse;
 page-break-inside:avoid;
+break-inside:avoid;
+}
+
+tr{
+page-break-inside:avoid;
+break-inside:avoid;
 }
 
 td{
@@ -169,6 +188,7 @@ text-align:center;
 font-size:13px;
 color:#666;
 page-break-inside:avoid;
+break-inside:avoid;
 }
 
 /* ===== BUTTONS ===== */
@@ -206,12 +226,14 @@ margin-top:30px;
 
 .page{
 width:100%;
+max-width:100%;
 margin:0;
 box-shadow:none;
 }
 
 #proposalPage{
 width:100%;
+max-width:100%;
 }
 
 .hero{
@@ -260,20 +282,36 @@ font-size:15px;
 
 /* ===== PRINT / PDF MODE ===== */
 
+@page{
+size:A4;
+margin:0;
+}
+
 @media print{
 
+html,
 body{
-background:white;
+margin:0 !important;
+padding:0 !important;
+background:white !important;
+}
+
+body{
+-webkit-print-color-adjust:exact;
+print-color-adjust:exact;
 }
 
 .page{
 box-shadow:none;
-margin:0;
-width:794px;
+margin:0 auto !important;
+width:794px !important;
+max-width:794px !important;
 }
 
 #proposalPage{
-width:794px;
+width:794px !important;
+max-width:794px !important;
+margin:0 auto !important;
 }
 
 .whatsappBox{
@@ -281,11 +319,23 @@ display:none;
 }
 
 .hero::after{
-display:none;
+display:block;
 }
 
 .hero{
 background-size:cover !important;
+background-position:center center !important;
+background-repeat:no-repeat !important;
+}
+
+.content,
+.summary,
+.info-grid,
+.footer,
+table,
+tr{
+page-break-inside:avoid !important;
+break-inside:avoid !important;
 }
 
 }
