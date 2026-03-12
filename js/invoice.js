@@ -281,9 +281,10 @@ quality:1
 },
 
 html2canvas:{
-scale:1.9,
+scale:2,
 useCORS:true,
-scrollY:0
+scrollY:0,
+width:794
 },
 
 jsPDF:{
