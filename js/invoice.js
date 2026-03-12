@@ -305,7 +305,7 @@ document.getElementById("invoiceNumber").innerText
 
 const opt = {
 
-margin:0,
+margin:10,
 
 filename:`invoice-${clientName}-${invoiceNumber}.pdf`,
 
@@ -316,13 +316,12 @@ quality:1
 
 html2canvas:{
 scale:2,
-useCORS:true,
-scrollY:0
+useCORS:true
 },
 
 jsPDF:{
-unit:"px",
-format:[794,1123],
+unit:"mm",
+format:"a4",
 orientation:"portrait"
 }
 
