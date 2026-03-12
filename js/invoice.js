@@ -255,6 +255,8 @@ document.getElementById("invoiceNumber").innerText =
 
 function downloadInvoice(){
 
+window.scrollTo(0,0)
+
 const element =
 document.getElementById("invoiceContainer")
 
@@ -279,8 +281,9 @@ quality:1
 },
 
 html2canvas:{
-scale:1.8,
-useCORS:true
+scale:1.9,
+useCORS:true,
+scrollY:0
 },
 
 jsPDF:{
