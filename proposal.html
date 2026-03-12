@@ -80,6 +80,7 @@ color:white;
 text-align:center;
 position:relative;
 box-sizing:border-box;
+overflow:hidden;
 }
 
 .hero::after{
@@ -90,12 +91,13 @@ left:0;
 width:100%;
 height:100%;
 background:rgba(0,0,0,0.45);
+z-index:1;
 }
 
 .hero h1,
 .hero p{
 position:relative;
-z-index:2;
+z-index:5;
 }
 
 .hero h1{
@@ -318,10 +320,6 @@ margin:0 auto !important;
 
 .whatsappBox{
 display:none;
-}
-
-.hero::after{
-display:block;
 }
 
 .hero{
