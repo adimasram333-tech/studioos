@@ -75,14 +75,15 @@ return
 
 
 // ======================
-// LOAD STUDIO PROFILE (SAFE)
+// LOAD STUDIO PROFILE
 // ======================
 
 let profile = null
 
-try{
+async function fetchProfile(){
 
-// Try user profile first
+let result = null
+
 if(data.user_id){
 
 const { data: profileRow } =
@@ -93,13 +94,12 @@ await supabase
 .maybeSingle()
 
 if(profileRow){
-profile = profileRow
+result = profileRow
 }
 
 }
 
-// Fallback profile
-if(!profile){
+if(!result){
 
 const { data: fallbackRow } =
 await supabase
@@ -109,13 +109,25 @@ await supabase
 .maybeSingle()
 
 if(fallbackRow){
-profile = fallbackRow
+result = fallbackRow
 }
 
 }
 
-}catch(e){
-console.log("Profile load error",e)
+return result
+}
+
+
+// FIRST TRY
+profile = await fetchProfile()
+
+// RETRY IF FAILED
+if(!profile){
+
+await new Promise(r => setTimeout(r,300))
+
+profile = await fetchProfile()
+
 }
 
 
@@ -151,14 +163,12 @@ studioName = profile.studio_name || ""
 studioPhone = profile.phone || ""
 }
 
-// FINAL SAFETY RENDER
-
 if(studioNameEl){
-studioNameEl.textContent = studioName || ""
+studioNameEl.textContent = studioName
 }
 
 if(studioPhoneEl){
-studioPhoneEl.textContent = studioPhone || ""
+studioPhoneEl.textContent = studioPhone
 }
 
 
@@ -166,8 +176,11 @@ studioPhoneEl.textContent = studioPhone || ""
 // CLIENT INFO
 // ======================
 
-document.getElementById("clientName").innerText =
-data.client_name || ""
+const clientNameEl = document.getElementById("clientName")
+
+if(clientNameEl){
+clientNameEl.innerText = data.client_name || ""
+}
 
 
 // ======================
@@ -182,21 +195,32 @@ eventDateText = data.event_date + " → " + data.end_date
 eventDateText = data.event_date || "-"
 }
 
-document.getElementById("eventDate").innerText = eventDateText
+const eventDateEl = document.getElementById("eventDate")
+
+if(eventDateEl){
+eventDateEl.innerText = eventDateText
+}
 
 
 // ======================
 // MONEY
 // ======================
 
-document.getElementById("total").innerText =
-formatMoney(data.total)
+const totalEl = document.getElementById("total")
+const advanceEl = document.getElementById("advance")
+const balanceEl = document.getElementById("balance")
 
-document.getElementById("advance").innerText =
-formatMoney(data.advance)
+if(totalEl){
+totalEl.innerText = formatMoney(data.total)
+}
 
-document.getElementById("balance").innerText =
-formatMoney(data.balance)
+if(advanceEl){
+advanceEl.innerText = formatMoney(data.advance)
+}
+
+if(balanceEl){
+balanceEl.innerText = formatMoney(data.balance)
+}
 
 
 // ======================
@@ -213,26 +237,33 @@ services = {}
 }
 }
 
-document.getElementById("candidQty").innerText =
-(services.candid?.qty || 0) + " x " + (services.candid?.days || 0) + " Days"
+function setService(id,value){
+const el = document.getElementById(id)
+if(el){
+el.innerText = value
+}
+}
 
-document.getElementById("traditionalPhotoQty").innerText =
-(services.traditional_photo?.qty || 0) + " x " + (services.traditional_photo?.days || 0) + " Days"
+setService("candidQty",
+(services.candid?.qty || 0) + " x " + (services.candid?.days || 0) + " Days")
 
-document.getElementById("traditionalVideoQty").innerText =
-(services.traditional_video?.qty || 0) + " x " + (services.traditional_video?.days || 0) + " Days"
+setService("traditionalPhotoQty",
+(services.traditional_photo?.qty || 0) + " x " + (services.traditional_photo?.days || 0) + " Days")
 
-document.getElementById("cinemaQty").innerText =
-(services.cinematographer?.qty || 0) + " x " + (services.cinematographer?.days || 0) + " Days"
+setService("traditionalVideoQty",
+(services.traditional_video?.qty || 0) + " x " + (services.traditional_video?.days || 0) + " Days")
 
-document.getElementById("droneQty").innerText =
-(services.drone?.qty || 0) + " x " + (services.drone?.days || 0) + " Days"
+setService("cinemaQty",
+(services.cinematographer?.qty || 0) + " x " + (services.cinematographer?.days || 0) + " Days")
 
-document.getElementById("ledQty").innerText =
-(services.led_wall?.qty || 0) + " x " + (services.led_wall?.days || 0) + " Days"
+setService("droneQty",
+(services.drone?.qty || 0) + " x " + (services.drone?.days || 0) + " Days")
 
-document.getElementById("assistantQty").innerText =
-(services.assistant?.qty || 0) + " x " + (services.assistant?.days || 0) + " Days"
+setService("ledQty",
+(services.led_wall?.qty || 0) + " x " + (services.led_wall?.days || 0) + " Days")
+
+setService("assistantQty",
+(services.assistant?.qty || 0) + " x " + (services.assistant?.days || 0) + " Days")
 
 
 // ======================
@@ -250,6 +281,9 @@ deliverables = {}
 }
 
 const list = document.getElementById("deliverablesList")
+
+if(list){
+
 list.innerHTML = ""
 
 if(deliverables.raw)
@@ -266,6 +300,8 @@ list.innerHTML += "<li>Premium Printed Album (" + (deliverables.album.pages || 0
 
 if(deliverables.gift?.enabled)
 list.innerHTML += "<li>Complimentary Gift : " + (deliverables.gift.name || "-") + "</li>"
+
+}
 
 
 // ======================
@@ -328,10 +364,7 @@ margin:0,
 
 filename:"photography-proposal.pdf",
 
-image:{
-type:"jpeg",
-quality:1
-},
+image:{ type:"jpeg", quality:1 },
 
 html2canvas:{
 scale:2,
@@ -348,10 +381,7 @@ orientation:"portrait"
 
 }
 
-html2pdf()
-.set(opt)
-.from(element)
-.save()
+html2pdf().set(opt).from(element).save()
 
 }
 
@@ -362,6 +392,6 @@ html2pdf()
 // SAFE PAGE LOAD
 // ======================
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded",function(){
 loadProposal()
 })
