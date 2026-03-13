@@ -287,6 +287,15 @@ await supabase
 .eq("user_id", user.id)
 .eq("status","confirmed")
 
+
+
+const { data: allPayments } =
+await supabase
+.from("payments")
+.select("amount,payment_date,quotation_id")
+
+
+
 let pending = 0
 let monthlyRevenue = 0
 
@@ -294,19 +303,9 @@ const now = new Date()
 const currentMonth = now.getMonth()
 const currentYear = now.getFullYear()
 
-for(const q of allQuotes){
 
-const { data: payments } =
-await supabase
-.from("payments")
-.select("amount,payment_date")
-.eq("quotation_id", q.id)
 
-let paid = 0
-
-payments?.forEach(p=>{
-
-paid += Number(p.amount || 0)
+allPayments?.forEach(p=>{
 
 const payDate = new Date(p.payment_date)
 
@@ -319,6 +318,19 @@ monthlyRevenue += Number(p.amount || 0)
 
 })
 
+
+
+for(const q of allQuotes){
+
+const payments =
+allPayments?.filter(p=>p.quotation_id === q.id) || []
+
+let paid = 0
+
+payments.forEach(p=>{
+paid += Number(p.amount || 0)
+})
+
 const remaining = q.total - paid
 
 if(remaining > 0){
@@ -326,6 +338,8 @@ pending += remaining
 }
 
 }
+
+
 
 document.getElementById("pendingPayments").innerText =
 "₹" + pending
