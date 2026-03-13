@@ -10,14 +10,15 @@ if(!user) return
 
 
 const now = new Date()
+const month = now.getMonth()
+const year = now.getFullYear()
 
+// current month range
 const firstDay =
-new Date(now.getFullYear(), now.getMonth(), 1)
-.toISOString()
+new Date(year, month, 1).toISOString()
 
 const lastDay =
-new Date(now.getFullYear(), now.getMonth()+1, 0, 23, 59, 59)
-.toISOString()
+new Date(year, month + 1, 0, 23, 59, 59).toISOString()
 
 
 
