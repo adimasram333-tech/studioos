@@ -13,31 +13,16 @@ const now = new Date()
 const month = now.getMonth()
 const year = now.getFullYear()
 
-// current month range
-const firstDay =
-new Date(year, month, 1)
-
-const lastDay =
-new Date(year, month + 1, 0)
-
 
 
 // =============================
-// GET PAYMENTS WITH QUOTATION
+// GET PAYMENTS
 // =============================
 
 const { data: payments } =
 await supabase
 .from("payments")
-.select(`
-amount,
-payment_date,
-method,
-quotation_id,
-quotations (
-client_name
-)
-`)
+.select("*")
 .eq("user_id", user.id)
 .order("payment_date",{ascending:false})
 
@@ -64,15 +49,28 @@ for(const p of payments){
 
 const date = new Date(p.payment_date)
 
-// month filter
 if(
 date.getMonth() !== month ||
 date.getFullYear() !== year
 ) continue
 
 
+
+// =============================
+// GET CLIENT NAME
+// =============================
+
+const { data: quotation } =
+await supabase
+.from("quotations")
+.select("client_name")
+.eq("id", p.quotation_id)
+.single()
+
+
+
 const clientName =
-p.quotations?.client_name || "Client"
+quotation?.client_name || "Client"
 
 
 
