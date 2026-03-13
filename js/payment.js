@@ -284,4 +284,10 @@ if(saveBtn){
 saveBtn.addEventListener("click", savePayment)
 }
 
+
+// SAFE INIT
+const quotationId = getQuotationId()
+
+if(quotationId){
 loadPayments()
+}
