@@ -34,6 +34,8 @@ async function loadSummary(){
 
 const quotationId = getQuotationId()
 
+if(!quotationId) return
+
 // GET QUOTATION TOTAL
 
 const { data: quotation } =
@@ -43,7 +45,7 @@ await supabase
 .eq("id", quotationId)
 .single()
 
-let total = quotation?.total || 0
+let total = Number(quotation?.total || 0)
 
 
 // GET PAYMENTS
@@ -89,6 +91,8 @@ async function loadPayments(){
 
 const quotationId = getQuotationId()
 
+if(!quotationId) return
+
 const container =
 document.getElementById("paymentHistory")
 
@@ -106,6 +110,10 @@ await supabase
 if(error){
 
 console.error("Payment load error:",error)
+
+container.innerHTML =
+"<p class='text-red-400'>Error loading payments</p>"
+
 return
 
 }
@@ -168,7 +176,11 @@ loadSummary()
 // SAVE PAYMENT
 // =============================
 
+let savingPayment = false
+
 async function savePayment(){
+
+if(savingPayment) return
 
 const user = await getCurrentUser()
 
@@ -177,17 +189,34 @@ if(!user) return
 
 const quotationId = getQuotationId()
 
+if(!quotationId){
+alert("Invalid quotation")
+return
+}
+
+const amountEl =
+document.getElementById("paymentAmount")
+
+const dateEl =
+document.getElementById("paymentDate")
+
+const methodEl =
+document.getElementById("paymentMethod")
+
+const typeEl =
+document.getElementById("paymentType")
+
 const amount =
-document.getElementById("paymentAmount").value
+amountEl?.value
 
 const date =
-document.getElementById("paymentDate").value
+dateEl?.value
 
 const method =
-document.getElementById("paymentMethod").value
+methodEl?.value
 
 const type =
-document.getElementById("paymentType").value
+typeEl?.value
 
 
 if(!amount || !date || !method || !type){
@@ -196,6 +225,8 @@ alert("Please fill all fields")
 return
 
 }
+
+savingPayment = true
 
 
 // INSERT PAYMENT
@@ -207,12 +238,15 @@ await supabase
 
 user_id: user.id,
 quotation_id: quotationId,
-amount: amount,
+amount: Number(amount),
 payment_date: date,
 payment_type: type,
 method: method
 
 }])
+
+
+savingPayment = false
 
 
 if(error){
@@ -231,10 +265,10 @@ loadPayments()
 
 // clear form
 
-document.getElementById("paymentAmount").value = ""
-document.getElementById("paymentDate").value = ""
-document.getElementById("paymentMethod").value = ""
-document.getElementById("paymentType").value = ""
+if(amountEl) amountEl.value = ""
+if(dateEl) dateEl.value = ""
+if(methodEl) methodEl.value = ""
+if(typeEl) typeEl.value = ""
 
 }
 
@@ -243,8 +277,11 @@ document.getElementById("paymentType").value = ""
 // INIT
 // =============================
 
-document
-.getElementById("savePaymentBtn")
-.addEventListener("click", savePayment)
+const saveBtn =
+document.getElementById("savePaymentBtn")
+
+if(saveBtn){
+saveBtn.addEventListener("click", savePayment)
+}
 
 loadPayments()
