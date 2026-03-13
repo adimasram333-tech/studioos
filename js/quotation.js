@@ -342,23 +342,40 @@ const clientName = get("clientName")?.value.trim() || ""
 const clientPhone = get("clientPhone")?.value.trim() || ""
 const startDate = get("startDate")?.value || ""
 
-// NEW EVENT CATEGORY
 const eventCategory =
 get("eventCategory")?.value || ""
 
 if(!clientName){
+
 alert("Enter client name")
+
+previewBtn.disabled = false
+previewBtn.innerText = "Preview Quote"
+
 return
+
 }
 
 if(!clientPhone){
+
 alert("Enter client phone")
+
+previewBtn.disabled = false
+previewBtn.innerText = "Preview Quote"
+
 return
+
 }
 
 if(!startDate){
+
 alert("Select event date")
+
+previewBtn.disabled = false
+previewBtn.innerText = "Preview Quote"
+
 return
+
 }
 
 
@@ -450,7 +467,6 @@ user_id: user.id,
 client_name: clientName,
 phone: clientPhone,
 
-// NEW FIELD
 event_category: eventCategory,
 
 event_date: startDate,
@@ -474,8 +490,13 @@ deliverables
 
 const saved = await saveQuotation(quotationData)
 
-if(!saved){
+if(!saved || !saved.id){
+
 alert("Error saving quotation")
+
+previewBtn.disabled = false
+previewBtn.innerText = "Preview Quote"
+
 return
 }
 
