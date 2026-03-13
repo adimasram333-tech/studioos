@@ -399,6 +399,6 @@ html2pdf().set(opt).from(element).save()
 // SAFE PAGE LOAD
 // ======================
 
-document.addEventListener("DOMContentLoaded",function(){
+window.addEventListener("load", function(){
 loadProposal()
 })
