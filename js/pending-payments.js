@@ -16,6 +16,15 @@ await supabase
 
 list.innerHTML = ""
 
+if(!quotations || quotations.length === 0){
+
+list.innerHTML =
+"<p class='text-gray-400'>No pending payments</p>"
+
+return
+
+}
+
 for(const q of quotations){
 
 const { data: payments } =
