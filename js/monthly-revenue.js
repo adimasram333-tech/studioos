@@ -8,16 +8,30 @@ await supabase.auth.getUser()
 if(!user) return
 
 const now = new Date()
-
 const month = now.getMonth()
 const year = now.getFullYear()
+
+
+
+// =============================
+// GET PAYMENTS WITH QUOTATION
+// =============================
 
 const { data: payments } =
 await supabase
 .from("payments")
-.select("*")
+.select(`
+amount,
+payment_date,
+method,
+quotation_id,
+quotations (
+client_name
+)
+`)
 .eq("user_id", user.id)
 .order("payment_date",{ascending:false})
+
 
 list.innerHTML = ""
 
@@ -30,6 +44,12 @@ return
 
 }
 
+
+
+// =============================
+// LOOP PAYMENTS
+// =============================
+
 for(const p of payments){
 
 const date = new Date(p.payment_date)
@@ -40,17 +60,18 @@ date.getFullYear() !== year
 ) continue
 
 
-const { data: quotation } =
-await supabase
-.from("quotations")
-.select("client_name")
-.eq("id", p.quotation_id)
-.single()
+
+const clientName =
+p.quotations?.client_name || "Client"
+
+
 
 const card = document.createElement("div")
 
 card.className =
 "glass rounded-xl p-4"
+
+
 
 card.innerHTML = `
 
@@ -59,7 +80,7 @@ card.innerHTML = `
 <div>
 
 <p class="font-semibold">
-${quotation?.client_name || "Client"}
+${clientName}
 </p>
 
 <p class="text-xs text-gray-400">
@@ -87,6 +108,8 @@ ${p.method || ""}
 list.appendChild(card)
 
 }
+
+
 
 if(list.innerHTML === ""){
 list.innerHTML =
