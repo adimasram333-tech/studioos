@@ -27,6 +27,25 @@ filter: blur(6px);
 pointer-events:none;
 }
 
+.stat-card{
+cursor:pointer;
+transition:transform .2s ease;
+}
+
+.stat-card:hover{
+transform:scale(1.05);
+}
+
+.notification-item{
+cursor:pointer;
+transition:all .2s ease;
+}
+
+.notification-item:hover{
+transform:translateX(5px);
+color:white;
+}
+
 </style>
 
 </head>
@@ -64,17 +83,17 @@ Setup
 
 <div class="grid grid-cols-3 gap-4 mb-6">
 
-<div class="glass rounded-2xl p-4">
+<div onclick="location.href='events.html'" class="glass rounded-2xl p-4 stat-card">
 <p class="text-gray-400 text-sm">Total Bookings</p>
 <h2 id="totalBookings" class="text-2xl font-bold">0</h2>
 </div>
 
-<div class="glass rounded-2xl p-4">
+<div onclick="location.href='payments.html'" class="glass rounded-2xl p-4 stat-card">
 <p class="text-gray-400 text-sm">Pending Payments</p>
 <h2 id="pendingPayments" class="text-2xl font-bold">₹0</h2>
 </div>
 
-<div class="glass rounded-2xl p-4">
+<div onclick="location.href='invoice.html'" class="glass rounded-2xl p-4 stat-card">
 <p class="text-gray-400 text-sm">Monthly Revenue</p>
 <h2 id="monthlyRevenue" class="text-2xl font-bold">₹0</h2>
 </div>
@@ -330,7 +349,11 @@ notify.innerHTML = ""
 
 const today = new Date()
 
+let shown = 0
+
 events?.forEach(e=>{
+
+if(shown >= 3) return
 
 const eventDate =
 new Date(e.event_date)
@@ -340,24 +363,33 @@ Math.ceil(
 (eventDate - today)/(1000*60*60*24)
 )
 
+let text = ""
+
 if(diff === 0){
-
-notify.innerHTML +=
-`<div>📅 ${e.client_name} event today</div>`
-
+text = `📅 ${e.client_name} event today`
 }
 
 else if(diff === 1){
-
-notify.innerHTML +=
-`<div>📅 ${e.client_name} event tomorrow</div>`
-
+text = `📅 ${e.client_name} event tomorrow`
 }
 
 else if(diff <= 3 && diff > 1){
+text = `📅 ${e.client_name} event in ${diff} days`
+}
 
-notify.innerHTML +=
-`<div>📅 ${e.client_name} event in ${diff} days</div>`
+if(text){
+
+const div = document.createElement("div")
+
+div.className = "notification-item"
+
+div.onclick = () => location.href = "clients.html"
+
+div.innerText = text
+
+notify.appendChild(div)
+
+shown++
 
 }
 
