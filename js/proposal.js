@@ -49,19 +49,8 @@ async function loadProposal(){
 
 let data = null
 
-// SAFE DIRECT QUERY
 if(quotationId){
-
-const { data: row } = await supabase
-.from("quotations")
-.select("*")
-.eq("id", quotationId)
-.single()
-
-if(row){
-data = row
-}
-
+data = await getQuotationById(quotationId)
 }
 
 if(!data && shortId){
@@ -91,20 +80,54 @@ return
 
 let profile = null
 
-try{
+async function fetchProfile(){
 
-const { data: rows } =
+let result = null
+
+if(data.user_id){
+
+const { data: profileRow } =
+await supabase
+.from("photographer_settings")
+.select("*")
+.eq("user_id", data.user_id)
+.maybeSingle()
+
+if(profileRow){
+result = profileRow
+}
+
+}
+
+if(!result){
+
+const { data: fallbackRow } =
 await supabase
 .from("photographer_settings")
 .select("*")
 .limit(1)
+.maybeSingle()
 
-if(rows && rows.length > 0){
-profile = rows[0]
+if(fallbackRow){
+result = fallbackRow
 }
 
-}catch(e){
-console.log("Profile load error",e)
+}
+
+return result
+}
+
+
+// FIRST TRY
+profile = await fetchProfile()
+
+// RETRY IF FAILED
+if(!profile){
+
+await new Promise(r => setTimeout(r,300))
+
+profile = await fetchProfile()
+
 }
 
 
@@ -338,6 +361,7 @@ const element = document.getElementById("proposalPage")
 const opt = {
 
 margin:0,
+
 filename:"photography-proposal.pdf",
 
 image:{ type:"jpeg", quality:1 },
@@ -368,6 +392,6 @@ html2pdf().set(opt).from(element).save()
 // SAFE PAGE LOAD
 // ======================
 
-window.addEventListener("load", function(){
+document.addEventListener("DOMContentLoaded",function(){
 loadProposal()
 })
