@@ -42,10 +42,29 @@ return "₹ " + Number(num || 0).toLocaleString("en-IN") + "/-"
 
 
 // ======================
+// WAIT FOR SUPABASE (SAFE ADD)
+// ======================
+
+async function waitForSupabase(){
+
+let tries = 0
+
+while(!window.supabase && tries < 50){
+await new Promise(r => setTimeout(r,100))
+tries++
+}
+
+}
+
+
+// ======================
 // LOAD PROPOSAL
 // ======================
 
 async function loadProposal(){
+
+// SAFE WAIT
+await waitForSupabase()
 
 let data = null
 
