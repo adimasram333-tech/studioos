@@ -101,8 +101,6 @@ Setup
 </div>
 
 
-<!-- RECENT QUOTATIONS -->
-
 <div class="glass rounded-2xl p-4 mb-6">
 
 <div class="flex justify-between items-center mb-3">
@@ -126,8 +124,6 @@ View All →
 
 </div>
 
-
-<!-- NOTIFICATIONS -->
 
 <div class="glass rounded-2xl p-4 mb-6">
 
@@ -292,7 +288,8 @@ await supabase
 const { data: allPayments } =
 await supabase
 .from("payments")
-.select("amount,payment_date,quotation_id")
+.select("*")
+.eq("user_id", user.id)
 
 
 
