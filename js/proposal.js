@@ -42,7 +42,24 @@ return "₹ " + Number(num || 0).toLocaleString("en-IN") + "/-"
 
 
 // ======================
-// WAIT FOR SUPABASE (SAFE ADD)
+// FORMAT DATE (NEW)
+// ======================
+
+function formatDate(dateStr){
+
+if(!dateStr) return "-"
+
+const parts = dateStr.split("-")
+
+if(parts.length !== 3) return dateStr
+
+return parts[2] + "-" + parts[1] + "-" + parts[0]
+
+}
+
+
+// ======================
+// WAIT FOR SUPABASE
 // ======================
 
 async function waitForSupabase(){
@@ -63,12 +80,15 @@ tries++
 
 async function loadProposal(){
 
-// SAFE WAIT
 await waitForSupabase()
 
 let data = null
 
-// SAFE DIRECT QUERY
+
+// ======================
+// LOAD QUOTATION
+// ======================
+
 if(quotationId){
 
 const { data: row } = await supabase
@@ -169,6 +189,21 @@ studioPhoneEl.textContent = studioPhone
 
 
 // ======================
+// DYNAMIC HERO TITLE (NEW)
+// ======================
+
+const heroTitle = document.querySelector(".hero h1")
+
+if(heroTitle){
+
+let category = data.event_category || "Photography"
+
+heroTitle.innerText = category + " Photography Proposal"
+
+}
+
+
+// ======================
 // CLIENT INFO
 // ======================
 
@@ -180,15 +215,22 @@ clientNameEl.innerText = data.client_name || ""
 
 
 // ======================
-// EVENT DATE
+// EVENT DATE (UPDATED)
 // ======================
 
 let eventDateText = "-"
 
 if(data.event_date && data.end_date){
-eventDateText = data.event_date + " → " + data.end_date
+
+eventDateText =
+formatDate(data.event_date) +
+" → " +
+formatDate(data.end_date)
+
 }else{
-eventDateText = data.event_date || "-"
+
+eventDateText = formatDate(data.event_date)
+
 }
 
 const eventDateEl = document.getElementById("eventDate")
@@ -324,7 +366,7 @@ clientSlug +
 const message =
 `Hello ${data.client_name},
 
-Your wedding photography proposal is ready.
+Your photography proposal is ready.
 
 View your proposal:
 ${shortLink}
