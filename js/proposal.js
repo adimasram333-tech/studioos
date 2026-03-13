@@ -42,46 +42,12 @@ return "₹ " + Number(num || 0).toLocaleString("en-IN") + "/-"
 
 
 // ======================
-// WAIT FOR SUPABASE
-// ======================
-
-async function waitForSupabase(){
-
-return new Promise((resolve)=>{
-
-let tries = 0
-
-const check = setInterval(()=>{
-
-if(window.supabase){
-clearInterval(check)
-resolve()
-}
-
-tries++
-
-if(tries > 50){
-clearInterval(check)
-resolve()
-}
-
-},100)
-
-})
-
-}
-
-
-// ======================
 // LOAD PROPOSAL
 // ======================
 
 async function loadProposal(){
 
-await waitForSupabase()
-
 let data = null
-
 
 // SAFE DIRECT QUERY
 if(quotationId){
@@ -98,7 +64,6 @@ data = row
 
 }
 
-
 if(!data && shortId){
 
 const { data: row } = await supabase
@@ -113,7 +78,6 @@ quotationId = row.id
 }
 
 }
-
 
 if(!data){
 alert("Proposal not found")
@@ -394,6 +358,8 @@ orientation:"portrait"
 }
 
 html2pdf().set(opt).from(element).save()
+
+}
 
 }
 
