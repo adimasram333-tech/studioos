@@ -7,9 +7,17 @@ await supabase.auth.getUser()
 
 if(!user) return
 
+
+
 const now = new Date()
-const month = now.getMonth()
-const year = now.getFullYear()
+
+const firstDay =
+new Date(now.getFullYear(), now.getMonth(), 1)
+.toISOString()
+
+const lastDay =
+new Date(now.getFullYear(), now.getMonth()+1, 0, 23, 59, 59)
+.toISOString()
 
 
 
@@ -30,7 +38,10 @@ client_name
 )
 `)
 .eq("user_id", user.id)
+.gte("payment_date", firstDay)
+.lte("payment_date", lastDay)
 .order("payment_date",{ascending:false})
+
 
 
 list.innerHTML = ""
@@ -53,13 +64,6 @@ return
 for(const p of payments){
 
 const date = new Date(p.payment_date)
-
-if(
-date.getMonth() !== month ||
-date.getFullYear() !== year
-) continue
-
-
 
 const clientName =
 p.quotations?.client_name || "Client"
@@ -110,6 +114,10 @@ list.appendChild(card)
 }
 
 
+
+// =============================
+// EMPTY STATE CHECK
+// =============================
 
 if(list.innerHTML === ""){
 list.innerHTML =
