@@ -2,6 +2,8 @@ const eventList = document.getElementById("eventList")
 
 async function loadEvents(){
 
+if(!eventList) return
+
 const { data:{ user } } =
 await supabase.auth.getUser()
 
@@ -49,12 +51,18 @@ grouped[date].push(e)
 
 })
 
-
 eventList.innerHTML = ""
 
 
+// SORT DATES
+const sortedDates =
+Object.keys(grouped).sort(
+(a,b)=> new Date(a) - new Date(b)
+)
+
+
 // RENDER GROUPED EVENTS
-Object.keys(grouped).forEach(date=>{
+sortedDates.forEach(date=>{
 
 const events = grouped[date]
 
@@ -96,7 +104,10 @@ ${busyLabel}
 <div class="space-y-1">
 
 ${events.map(e=>`
-<div class="text-sm text-gray-300">
+<div 
+class="text-sm text-gray-300 cursor-pointer hover:text-white transition"
+onclick="location.href='client.html?id=${e.id}'"
+>
 • ${e.client_name} — ₹${e.total}
 </div>
 `).join("")}
