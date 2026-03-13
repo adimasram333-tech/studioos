@@ -15,10 +15,10 @@ const year = now.getFullYear()
 
 // current month range
 const firstDay =
-new Date(year, month, 1).toISOString()
+new Date(year, month, 1)
 
 const lastDay =
-new Date(year, month + 1, 0, 23, 59, 59).toISOString()
+new Date(year, month + 1, 0)
 
 
 
@@ -39,8 +39,6 @@ client_name
 )
 `)
 .eq("user_id", user.id)
-.gte("payment_date", firstDay)
-.lte("payment_date", lastDay)
 .order("payment_date",{ascending:false})
 
 
@@ -65,6 +63,13 @@ return
 for(const p of payments){
 
 const date = new Date(p.payment_date)
+
+// month filter
+if(
+date.getMonth() !== month ||
+date.getFullYear() !== year
+) continue
+
 
 const clientName =
 p.quotations?.client_name || "Client"
