@@ -49,8 +49,19 @@ async function loadProposal(){
 
 let data = null
 
+// SAFE DIRECT QUERY
 if(quotationId){
-data = await getQuotationById(quotationId)
+
+const { data: row } = await supabase
+.from("quotations")
+.select("*")
+.eq("id", quotationId)
+.single()
+
+if(row){
+data = row
+}
+
 }
 
 if(!data && shortId){
@@ -75,7 +86,7 @@ return
 
 
 // ======================
-// LOAD STUDIO PROFILE (FIX)
+// LOAD STUDIO PROFILE
 // ======================
 
 let profile = null
@@ -354,7 +365,7 @@ html2pdf().set(opt).from(element).save()
 
 
 // ======================
-// SAFE PAGE LOAD (FIX)
+// SAFE PAGE LOAD
 // ======================
 
 window.addEventListener("load", function(){
