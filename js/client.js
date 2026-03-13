@@ -22,7 +22,9 @@ function getQuotationId(){
 const params =
 new URLSearchParams(window.location.search)
 
-return params.get("quotation")
+// FIX: support both quotation and id
+
+return params.get("quotation") || params.get("id")
 
 }
 
@@ -103,7 +105,7 @@ eventType
 
 
 // =============================
-// EVENT DATE (START → END FIX)
+// EVENT DATE
 // =============================
 
 const startDate =
