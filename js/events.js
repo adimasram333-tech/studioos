@@ -91,7 +91,7 @@ busyLabel =
 
 eventList.innerHTML += `
 
-<div class="bg-slate-800 p-4 rounded-xl">
+<div class="glass p-4 rounded-xl">
 
 <p class="text-lg font-semibold mb-2">
 ${eventDate}
