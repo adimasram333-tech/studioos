@@ -52,8 +52,6 @@ position:relative;
 box-sizing:border-box;
 }
 
-/* FORCE PERFECT PDF WIDTH */
-
 #proposalPage{
 width:794px;
 max-width:794px;
@@ -66,11 +64,11 @@ overflow:hidden;
 
 .hero{
 width:100%;
-min-height:260px;
-padding:70px 20px;
+min-height:320px;
+padding:80px 20px;
 background-image:url('https://images.unsplash.com/photo-1519741497674-611481863552');
 background-size:cover;
-background-position:center center;
+background-position:center;
 background-repeat:no-repeat;
 display:flex;
 align-items:center;
@@ -83,7 +81,7 @@ box-sizing:border-box;
 overflow:hidden;
 }
 
-/* SAFE OVERLAY */
+/* OVERLAY */
 
 .hero::after{
 content:'';
@@ -112,11 +110,12 @@ color:white;
 font-family:'Playfair Display',serif;
 font-size:36px;
 margin:0;
+white-space:nowrap;
 }
 
 .hero p{
-margin-top:8px;
-font-size:16px;
+margin-top:10px;
+font-size:18px;
 }
 
 /* ===== CONTENT ===== */
@@ -168,8 +167,6 @@ page-break-inside:avoid;
 break-inside:avoid;
 box-sizing:border-box;
 }
-
-/* ALSO PROTECT SECTIONS */
 
 table{
 width:100%;
@@ -246,20 +243,20 @@ margin:0 auto;
 }
 
 .hero{
-min-height:240px;
-padding:60px 20px;
+min-height:280px;
+padding:70px 20px;
 background-size:cover;
-background-position:center center;
+background-position:center;
 }
 
 .hero h1{
-font-size:26px;
-line-height:32px;
+font-size:22px;
+white-space:nowrap;
 }
 
 .hero p{
-font-size:14px;
-margin-top:6px;
+font-size:16px;
+margin-top:8px;
 }
 
 .content{
@@ -332,7 +329,7 @@ display:none;
 
 .hero{
 background-size:cover !important;
-background-position:center center !important;
+background-position:center !important;
 background-repeat:no-repeat !important;
 }
 
