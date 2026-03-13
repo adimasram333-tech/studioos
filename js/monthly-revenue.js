@@ -21,6 +21,15 @@ await supabase
 
 list.innerHTML = ""
 
+if(!payments || payments.length === 0){
+
+list.innerHTML =
+"<p class='text-gray-400'>No payments this month</p>"
+
+return
+
+}
+
 for(const p of payments){
 
 const date = new Date(p.payment_date)
@@ -66,7 +75,7 @@ ${date.toLocaleDateString("en-IN")}
 </p>
 
 <p class="text-xs text-gray-400">
-${p.method}
+${p.method || ""}
 </p>
 
 </div>
