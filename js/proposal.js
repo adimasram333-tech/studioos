@@ -42,10 +42,43 @@ return "₹ " + Number(num || 0).toLocaleString("en-IN") + "/-"
 
 
 // ======================
+// WAIT FOR SUPABASE
+// ======================
+
+async function waitForSupabase(){
+
+return new Promise((resolve)=>{
+
+let tries = 0
+
+const interval = setInterval(()=>{
+
+if(window.supabase){
+clearInterval(interval)
+resolve()
+}
+
+tries++
+
+if(tries > 50){
+clearInterval(interval)
+resolve()
+}
+
+},100)
+
+})
+
+}
+
+
+// ======================
 // LOAD PROPOSAL
 // ======================
 
 async function loadProposal(){
+
+await waitForSupabase()
 
 let data = null
 
@@ -361,13 +394,11 @@ html2pdf().set(opt).from(element).save()
 
 }
 
-}
-
 
 // ======================
 // SAFE PAGE LOAD
 // ======================
 
-window.addEventListener("load", function(){
+document.addEventListener("DOMContentLoaded",function(){
 loadProposal()
 })
