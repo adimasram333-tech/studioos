@@ -51,17 +51,17 @@ return new Promise((resolve)=>{
 
 let tries = 0
 
-const interval = setInterval(()=>{
+const check = setInterval(()=>{
 
 if(window.supabase){
-clearInterval(interval)
+clearInterval(check)
 resolve()
 }
 
 tries++
 
 if(tries > 50){
-clearInterval(interval)
+clearInterval(check)
 resolve()
 }
 
@@ -82,6 +82,7 @@ await waitForSupabase()
 
 let data = null
 
+
 // SAFE DIRECT QUERY
 if(quotationId){
 
@@ -97,6 +98,7 @@ data = row
 
 }
 
+
 if(!data && shortId){
 
 const { data: row } = await supabase
@@ -111,6 +113,7 @@ quotationId = row.id
 }
 
 }
+
 
 if(!data){
 alert("Proposal not found")
