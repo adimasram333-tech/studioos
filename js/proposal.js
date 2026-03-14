@@ -92,6 +92,35 @@ tries++
 
 
 // ======================
+// THEME ENGINE
+// ======================
+
+function applyTheme(themeName){
+
+const allowedThemes = [
+"classic",
+"gold",
+"magazine",
+"luxury",
+"minimal"
+]
+
+let theme = themeName || "classic"
+
+if(!allowedThemes.includes(theme)){
+theme = "classic"
+}
+
+const themeLink = document.getElementById("theme-style")
+
+if(themeLink){
+themeLink.href = "themes/" + theme + ".css"
+}
+
+}
+
+
+// ======================
 // LOAD PROPOSAL
 // ======================
 
@@ -172,7 +201,6 @@ let profile = null
 
 try{
 
-// FIX: use quotation user_id instead of logged user
 const { data: row } =
 await supabase
 .from("photographer_settings")
@@ -190,18 +218,16 @@ console.log("Profile load error",e)
 
 
 // ======================
-// THEME ENGINE
+// APPLY THEME
 // ======================
 
 if(profile){
 
-const theme = profile.theme || "gold"
+applyTheme(profile.theme)
 
-const themeLink = document.getElementById("theme-style")
+}else{
 
-if(themeLink){
-themeLink.href = "themes/" + theme + ".css"
-}
+applyTheme("classic")
 
 }
 
