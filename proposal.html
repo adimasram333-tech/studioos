@@ -8,13 +8,7 @@
 
 <title>Photography Proposal</title>
 
-<!-- THEME ENGINE -->
 <link id="theme-style" rel="stylesheet" href="themes/gold.css">
-
-<!-- LAYOUT ENGINE CSS -->
-<link rel="stylesheet" href="themes/layouts.css">
-
-<!-- FONT ENGINE -->
 <link id="font-style" rel="stylesheet">
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -24,23 +18,15 @@
 
 <style>
 
-/* =====================================================
-GLOBAL DESIGN SYSTEM
-===================================================== */
-
 :root{
 --primary:#C6A348;
 --accent:#222;
 --bg:#faf7ef;
 --text:#1a1a1a;
---page-width:794px;
 }
 
-/* =====================================================
-RESET
-===================================================== */
-
-html,body{
+html,
+body{
 margin:0;
 padding:0;
 }
@@ -53,13 +39,11 @@ color:var(--text);
 print-color-adjust:exact;
 }
 
-/* =====================================================
-PAGE WRAPPER
-===================================================== */
+/* ===== PAGE WRAPPER ===== */
 
 .page{
-width:var(--page-width);
-max-width:var(--page-width);
+width:794px;
+max-width:794px;
 background:white;
 margin:40px auto;
 box-shadow:0 10px 40px rgba(0,0,0,0.08);
@@ -69,16 +53,14 @@ box-sizing:border-box;
 }
 
 #proposalPage{
-width:var(--page-width);
-max-width:var(--page-width);
+width:794px;
+max-width:794px;
 margin:auto;
 box-sizing:border-box;
 overflow:hidden;
 }
 
-/* =====================================================
-HERO
-===================================================== */
+/* ===== HERO ===== */
 
 .hero{
 width:100%;
@@ -99,6 +81,8 @@ box-sizing:border-box;
 overflow:hidden;
 }
 
+/* OVERLAY */
+
 .hero::after{
 content:'';
 position:absolute;
@@ -110,6 +94,8 @@ background:rgba(0,0,0,0.45);
 z-index:0;
 pointer-events:none;
 }
+
+/* HERO TEXT */
 
 .hero h1,
 .hero p{
@@ -132,27 +118,7 @@ margin-top:10px;
 font-size:18px;
 }
 
-/* =====================================================
-PORTFOLIO STRIP
-===================================================== */
-
-.portfolio-strip{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:0;
-width:100%;
-}
-
-.portfolio-strip img{
-width:100%;
-height:140px;
-object-fit:cover;
-display:block;
-}
-
-/* =====================================================
-CONTENT
-===================================================== */
+/* ===== CONTENT ===== */
 
 .content{
 padding:50px;
@@ -190,9 +156,17 @@ ul{
 line-height:1.8;
 }
 
-/* =====================================================
-SERVICES TABLE
-===================================================== */
+/* ===== SUMMARY ===== */
+
+.summary{
+border:2px solid var(--primary);
+padding:25px;
+background:var(--bg);
+margin-top:30px;
+page-break-inside:avoid;
+break-inside:avoid;
+box-sizing:border-box;
+}
 
 table{
 width:100%;
@@ -211,23 +185,7 @@ padding:10px;
 border-bottom:1px solid #eee;
 }
 
-/* =====================================================
-INVESTMENT SUMMARY
-===================================================== */
-
-.summary{
-border:2px solid var(--primary);
-padding:25px;
-background:var(--bg);
-margin-top:30px;
-page-break-inside:avoid;
-break-inside:avoid;
-box-sizing:border-box;
-}
-
-/* =====================================================
-FOOTER
-===================================================== */
+/* ===== FOOTER ===== */
 
 .footer{
 margin-top:60px;
@@ -238,9 +196,7 @@ page-break-inside:avoid;
 break-inside:avoid;
 }
 
-/* =====================================================
-BUTTONS
-===================================================== */
+/* ===== BUTTONS ===== */
 
 .whatsappBtn{
 margin-top:25px;
@@ -269,9 +225,7 @@ text-align:center;
 margin-top:30px;
 }
 
-/* =====================================================
-MOBILE
-===================================================== */
+/* ===== MOBILE ===== */
 
 @media (max-width:768px){
 
@@ -291,6 +245,8 @@ margin:0 auto;
 .hero{
 min-height:280px;
 padding:70px 20px;
+background-size:cover;
+background-position:center;
 }
 
 .hero h1{
@@ -301,10 +257,6 @@ white-space:nowrap;
 .hero p{
 font-size:16px;
 margin-top:8px;
-}
-
-.portfolio-strip{
-grid-template-columns:repeat(2,1fr);
 }
 
 .content{
@@ -337,9 +289,7 @@ font-size:15px;
 
 }
 
-/* =====================================================
-PRINT
-===================================================== */
+/* ===== PRINT / PDF MODE ===== */
 
 @page{
 size:A4;
@@ -348,7 +298,8 @@ margin:0;
 
 @media print{
 
-html,body{
+html,
+body{
 margin:0 !important;
 padding:0 !important;
 background:white !important;
@@ -376,6 +327,22 @@ margin:0 auto !important;
 display:none;
 }
 
+.hero{
+background-size:cover !important;
+background-position:center !important;
+background-repeat:no-repeat !important;
+}
+
+.content,
+.summary,
+.info-grid,
+.footer,
+table,
+tr{
+page-break-inside:avoid !important;
+break-inside:avoid !important;
+}
+
 }
 
 </style>
@@ -392,17 +359,6 @@ display:none;
 
 <p id="studioName"></p>
 <p id="studioPhone"></p>
-
-</div>
-
-<!-- PORTFOLIO STRIP -->
-
-<div class="portfolio-strip">
-
-<img src="https://images.unsplash.com/photo-1520857014576-2c4f4c972b57">
-<img src="https://images.unsplash.com/photo-1529634898454-9d9c8e04b3c7">
-<img src="https://images.unsplash.com/photo-1501901609772-df0848060b33">
-<img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee">
 
 </div>
 
@@ -439,7 +395,6 @@ display:none;
 </table>
 
 <h2 class="section-title">Deliverables</h2>
-
 <ul id="deliverablesList"></ul>
 
 <div class="summary">
@@ -507,8 +462,7 @@ Our team focuses on capturing real emotions, beautiful details, and timeless mom
 </div>
 
 <script src="js/supabase.js?v=2"></script>
-<script src="js/proposal.js?v=4"></script>
-<script src="js/layoutEngine.js"></script>
+<script src="js/proposal.js?v=3"></script>
 
 </body>
 </html>
