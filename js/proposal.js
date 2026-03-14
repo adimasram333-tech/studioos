@@ -132,14 +132,22 @@ let profile = null
 
 try{
 
-const { data: rows } =
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+if(user){
+
+const { data: row } =
 await supabase
 .from("photographer_settings")
 .select("*")
-.limit(1)
+.eq("user_id", user.id)
+.single()
 
-if(rows && rows.length > 0){
-profile = rows[0]
+if(row){
+profile = row
+}
+
 }
 
 }catch(e){
