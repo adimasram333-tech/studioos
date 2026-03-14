@@ -26,6 +26,7 @@ const params = new URLSearchParams(window.location.search)
 
 let shortId = null
 
+
 // CASE 1
 // ?id=xxxxx
 
@@ -97,9 +98,15 @@ return
 
 const fullId = data.id
 
+
+// =====================
+// REDIRECT FIX
+// =====================
+
 window.location.replace(
-"../proposal.html?id=" + fullId
+"/studioos/proposal.html?id=" + fullId
 )
+
 
 }catch(err){
 
