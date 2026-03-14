@@ -19,40 +19,42 @@
 <script>
 
 // =====================
-// GET PARAMS
+// EXTRACT SHORT ID
 // =====================
+
+function extractShortId(){
 
 const params = new URLSearchParams(window.location.search)
 
-let shortId = null
+let id = null
 
 
 // CASE 1
 // ?id=xxxxx
 
 if(params.get("id")){
-shortId = params.get("id")
+id = params.get("id")
 }
 
 
 // CASE 2
-// ?slug=client-name-xxxxx
+// ?slug=name-xxxxx
 
-if(!shortId && params.get("slug")){
+if(!id && params.get("slug")){
 
 const slug = params.get("slug")
 
 if(slug.includes("-")){
-shortId = slug.substring(slug.lastIndexOf("-") + 1)
+id = slug.substring(slug.lastIndexOf("-") + 1)
 }
 
 }
 
 
 // CASE 3
-// /p/client-name-xxxxx
+// /p/name-xxxxx
 
-if(!shortId){
+if(!id){
 
 const path = window.location.pathname
 const parts = path.split("/")
@@ -60,10 +62,16 @@ const parts = path.split("/")
 const slug = parts[parts.length - 1]
 
 if(slug && slug.includes("-")){
-shortId = slug.substring(slug.lastIndexOf("-") + 1)
+id = slug.substring(slug.lastIndexOf("-") + 1)
 }
 
 }
+
+return id
+
+}
+
+const shortId = extractShortId()
 
 
 // =====================
@@ -87,9 +95,17 @@ const { data, error } = await supabase
 .from("quotations")
 .select("id")
 .eq("short_id", shortId)
-.single()
+.maybeSingle()
 
-if(error || !data){
+
+if(error){
+
+status.innerHTML = "Error loading proposal"
+return
+
+}
+
+if(!data){
 
 status.innerHTML = "Proposal not found"
 return
@@ -100,13 +116,12 @@ const fullId = data.id
 
 
 // =====================
-// REDIRECT FIX
+// REDIRECT
 // =====================
 
 window.location.replace(
 "/studioos/proposal.html?id=" + fullId
 )
-
 
 }catch(err){
 
