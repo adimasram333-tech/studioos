@@ -52,12 +52,14 @@ id = slug.substring(slug.lastIndexOf("-") + 1)
 
 
 // CASE 3
-// /p/name-xxxxx
+// /p/name-xxxxx  (SEO LINK)
 
 if(!id){
 
 const path = window.location.pathname
-const parts = path.split("/")
+
+// FIX MOBILE TRAILING SLASH
+const parts = path.split("/").filter(Boolean)
 
 const slug = parts[parts.length - 1]
 
