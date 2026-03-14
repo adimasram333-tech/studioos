@@ -119,6 +119,44 @@ themeLink.href = "themes/" + theme + ".css"
 
 
 // ======================
+// HERO IMAGE ENGINE
+// ======================
+
+function applyHeroImage(category){
+
+const hero = document.querySelector(".hero")
+
+if(!hero) return
+
+const heroImages = {
+
+wedding:
+"https://images.unsplash.com/photo-1519741497674-611481863552",
+
+engagement:
+"https://images.unsplash.com/photo-1520857014576-2c4f4c972b57",
+
+haldi:
+"https://images.unsplash.com/photo-1600155897808-0e2c7f9c3f61",
+
+reception:
+"https://images.unsplash.com/photo-1606800052052-a08af7148866",
+
+prewedding:
+"https://images.unsplash.com/photo-1501901609772-df0848060b33"
+
+}
+
+let key = (category || "").toLowerCase()
+
+if(heroImages[key]){
+hero.style.backgroundImage = "url('" + heroImages[key] + "')"
+}
+
+}
+
+
+// ======================
 // LOAD PROPOSAL
 // ======================
 
@@ -220,13 +258,9 @@ console.log("Profile load error",e)
 // ======================
 
 if(profile){
-
 applyTheme(profile.theme)
-
 }else{
-
 applyTheme("gold")
-
 }
 
 
@@ -265,6 +299,8 @@ if(heroTitle){
 let category = data.event_category || "Photography"
 
 heroTitle.innerText = category + " Photography Proposal"
+
+applyHeroImage(category)
 
 }
 
