@@ -520,12 +520,12 @@ await supabase
 .eq("id", saved.id)
 
 
-// REDIRECT
+// REDIRECT FIX
 
 const slug = slugify(clientName)
 
 window.location.href =
-"p/" + slug + "-" + shortId
+"/studioos/p/" + slug + "-" + shortId
 
 })
 
