@@ -42,7 +42,7 @@ return "₹ " + Number(num || 0).toLocaleString("en-IN") + "/-"
 
 
 // ======================
-// FORMAT DATE (NEW)
+// FORMAT DATE
 // ======================
 
 function formatDate(dateStr){
@@ -103,7 +103,6 @@ const { data: row } = await supabase
 .from("quotations")
 .select("*")
 .eq("id", quotationId)
-.eq("user_id", user.id)
 .single()
 
 if(row){
@@ -118,7 +117,6 @@ const { data: row } = await supabase
 .from("quotations")
 .select("*")
 .eq("short_id", shortId)
-.eq("user_id", user.id)
 .single()
 
 if(row){
@@ -204,7 +202,7 @@ studioPhoneEl.textContent = studioPhone
 
 
 // ======================
-// DYNAMIC HERO TITLE (NEW)
+// HERO TITLE
 // ======================
 
 const heroTitle = document.querySelector(".hero h1")
@@ -230,7 +228,7 @@ clientNameEl.innerText = data.client_name || ""
 
 
 // ======================
-// EVENT DATE (UPDATED)
+// EVENT DATE
 // ======================
 
 let eventDateText = "-"
@@ -402,7 +400,7 @@ window.open(url,"_blank")
 
 
 // ======================
-// PERFECT PDF EXPORT
+// PDF EXPORT
 // ======================
 
 window.downloadPDF = function(){
