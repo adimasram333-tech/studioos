@@ -12,12 +12,28 @@ quotationId = params.get("id")
 
 
 // ======================
-// SUPPORT SEO LINK
+// SUPPORT SLUG QUERY (NEW FIX)
 // ======================
 
 let shortId = null
 
-if(!quotationId){
+if(params.get("slug")){
+
+const slug = params.get("slug")
+
+if(slug && slug.includes("-")){
+const slugParts = slug.split("-")
+shortId = slugParts[slugParts.length - 1]
+}
+
+}
+
+
+// ======================
+// SUPPORT SEO LINK
+// ======================
+
+if(!quotationId && !shortId){
 
 const pathParts = window.location.pathname.split("/")
 const lastPart = pathParts[pathParts.length - 1]
