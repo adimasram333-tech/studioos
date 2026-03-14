@@ -92,137 +92,6 @@ tries++
 
 
 // ======================
-// THEME ENGINE
-// ======================
-
-function applyTheme(themeName){
-
-const allowedThemes = [
-"gold",
-"royal",
-"emerald"
-]
-
-let theme = themeName || "gold"
-
-if(!allowedThemes.includes(theme)){
-theme = "gold"
-}
-
-const themeLink = document.getElementById("theme-style")
-
-if(themeLink){
-themeLink.href = "themes/" + theme + ".css"
-}
-
-}
-
-
-// ======================
-// HERO IMAGE ENGINE
-// ======================
-
-function applyHeroImage(category){
-
-const hero = document.querySelector(".hero")
-
-if(!hero) return
-
-const heroImages = {
-
-wedding:
-"https://images.unsplash.com/photo-1519741497674-611481863552",
-
-engagement:
-"https://images.unsplash.com/photo-1520857014576-2c4f4c972b57",
-
-haldi:
-"https://images.unsplash.com/photo-1600155897808-0e2c7f9c3f61",
-
-reception:
-"https://images.unsplash.com/photo-1606800052052-a08af7148866",
-
-prewedding:
-"https://images.unsplash.com/photo-1501901609772-df0848060b33"
-
-}
-
-let key = (category || "").toLowerCase()
-
-if(heroImages[key]){
-hero.style.backgroundImage = "url('" + heroImages[key] + "')"
-}
-
-}
-
-
-// ======================
-// PORTFOLIO ENGINE (FIXED)
-// ======================
-
-function applyPortfolioImages(category){
-
-const portfolio = document.querySelectorAll(".portfolio-strip img")
-
-if(!portfolio || portfolio.length === 0) return
-
-const portfolioSets = {
-
-wedding:[
-"https://images.unsplash.com/photo-1520857014576-2c4f4c972b57",
-"https://images.unsplash.com/photo-1529634898454-9d9c8e04b3c7",
-"https://images.unsplash.com/photo-1501901609772-df0848060b33",
-"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee"
-],
-
-engagement:[
-"https://images.unsplash.com/photo-1511285560929-80b456fea0bc",
-"https://images.unsplash.com/photo-1501901609772-df0848060b33",
-"https://images.unsplash.com/photo-1529634898454-9d9c8e04b3c7",
-"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee"
-],
-
-haldi:[
-"https://images.unsplash.com/photo-1600155897808-0e2c7f9c3f61",
-"https://images.unsplash.com/photo-1519741497674-611481863552",
-"https://images.unsplash.com/photo-1520857014576-2c4f4c972b57",
-"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee"
-],
-
-reception:[
-"https://images.unsplash.com/photo-1606800052052-a08af7148866",
-"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-"https://images.unsplash.com/photo-1529634898454-9d9c8e04b3c7",
-"https://images.unsplash.com/photo-1501901609772-df0848060b33"
-]
-
-}
-
-const fallback = [
-"https://images.unsplash.com/photo-1520857014576-2c4f4c972b57",
-"https://images.unsplash.com/photo-1529634898454-9d9c8e04b3c7",
-"https://images.unsplash.com/photo-1501901609772-df0848060b33",
-"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee"
-]
-
-let key = (category || "").toLowerCase()
-
-const images = portfolioSets[key] || fallback
-
-portfolio.forEach((img,i)=>{
-
-if(images[i]){
-img.src = images[i]
-}else{
-img.src = fallback[i]
-}
-
-})
-
-}
-
-
-// ======================
 // LOAD PROPOSAL
 // ======================
 
@@ -232,9 +101,18 @@ await waitForSupabase()
 
 let data = null
 
+
+// ======================
+// GET CURRENT USER
+// ======================
+
 const { data:{ user } } =
 await supabase.auth.getUser()
 
+
+// ======================
+// LOAD QUOTATION
+// ======================
 
 if(quotationId){
 
@@ -266,6 +144,10 @@ quotationId = row.id
 }
 
 
+// ======================
+// SAFE DATA CHECK
+// ======================
+
 if(!data){
 
 console.warn("Proposal not found:", quotationId || shortId)
@@ -290,6 +172,7 @@ let profile = null
 
 try{
 
+// FIX: use quotation user_id instead of logged user
 const { data: row } =
 await supabase
 .from("photographer_settings")
@@ -307,13 +190,19 @@ console.log("Profile load error",e)
 
 
 // ======================
-// APPLY THEME
+// THEME ENGINE
 // ======================
 
 if(profile){
-applyTheme(profile.theme)
-}else{
-applyTheme("gold")
+
+const theme = profile.theme || "gold"
+
+const themeLink = document.getElementById("theme-style")
+
+if(themeLink){
+themeLink.href = "themes/" + theme + ".css"
+}
+
 }
 
 
@@ -352,10 +241,6 @@ if(heroTitle){
 let category = data.event_category || "Photography"
 
 heroTitle.innerText = category + " Photography Proposal"
-
-applyHeroImage(category)
-
-applyPortfolioImages(category)
 
 }
 
