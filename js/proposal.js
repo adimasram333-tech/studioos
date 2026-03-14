@@ -142,9 +142,24 @@ quotationId = row.id
 
 }
 
+
+// ======================
+// SAFE DATA CHECK (FIX)
+// ======================
+
 if(!data){
-alert("Proposal not found")
+
+console.warn("Proposal not found:", quotationId || shortId)
+
+const page = document.getElementById("proposalPage")
+
+if(page){
+page.innerHTML =
+"<h2 style='text-align:center;margin-top:40px'>Proposal not available</h2>"
+}
+
 return
+
 }
 
 
