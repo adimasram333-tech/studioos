@@ -157,14 +157,14 @@ hero.style.backgroundImage = "url('" + heroImages[key] + "')"
 
 
 // ======================
-// PORTFOLIO ENGINE (NEW)
+// PORTFOLIO ENGINE (FIXED)
 // ======================
 
 function applyPortfolioImages(category){
 
 const portfolio = document.querySelectorAll(".portfolio-strip img")
 
-if(!portfolio.length) return
+if(!portfolio || portfolio.length === 0) return
 
 const portfolioSets = {
 
@@ -198,15 +198,26 @@ reception:[
 
 }
 
+const fallback = [
+"https://images.unsplash.com/photo-1520857014576-2c4f4c972b57",
+"https://images.unsplash.com/photo-1529634898454-9d9c8e04b3c7",
+"https://images.unsplash.com/photo-1501901609772-df0848060b33",
+"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee"
+]
+
 let key = (category || "").toLowerCase()
 
-if(portfolioSets[key]){
+const images = portfolioSets[key] || fallback
 
 portfolio.forEach((img,i)=>{
-img.src = portfolioSets[key][i]
-})
 
+if(images[i]){
+img.src = images[i]
+}else{
+img.src = fallback[i]
 }
+
+})
 
 }
 
@@ -221,18 +232,9 @@ await waitForSupabase()
 
 let data = null
 
-
-// ======================
-// GET CURRENT USER
-// ======================
-
 const { data:{ user } } =
 await supabase.auth.getUser()
 
-
-// ======================
-// LOAD QUOTATION
-// ======================
 
 if(quotationId){
 
@@ -263,10 +265,6 @@ quotationId = row.id
 
 }
 
-
-// ======================
-// SAFE DATA CHECK
-// ======================
 
 if(!data){
 
