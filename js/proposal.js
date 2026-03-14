@@ -157,6 +157,61 @@ hero.style.backgroundImage = "url('" + heroImages[key] + "')"
 
 
 // ======================
+// PORTFOLIO ENGINE (NEW)
+// ======================
+
+function applyPortfolioImages(category){
+
+const portfolio = document.querySelectorAll(".portfolio-strip img")
+
+if(!portfolio.length) return
+
+const portfolioSets = {
+
+wedding:[
+"https://images.unsplash.com/photo-1520857014576-2c4f4c972b57",
+"https://images.unsplash.com/photo-1529634898454-9d9c8e04b3c7",
+"https://images.unsplash.com/photo-1501901609772-df0848060b33",
+"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee"
+],
+
+engagement:[
+"https://images.unsplash.com/photo-1511285560929-80b456fea0bc",
+"https://images.unsplash.com/photo-1501901609772-df0848060b33",
+"https://images.unsplash.com/photo-1529634898454-9d9c8e04b3c7",
+"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee"
+],
+
+haldi:[
+"https://images.unsplash.com/photo-1600155897808-0e2c7f9c3f61",
+"https://images.unsplash.com/photo-1519741497674-611481863552",
+"https://images.unsplash.com/photo-1520857014576-2c4f4c972b57",
+"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee"
+],
+
+reception:[
+"https://images.unsplash.com/photo-1606800052052-a08af7148866",
+"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+"https://images.unsplash.com/photo-1529634898454-9d9c8e04b3c7",
+"https://images.unsplash.com/photo-1501901609772-df0848060b33"
+]
+
+}
+
+let key = (category || "").toLowerCase()
+
+if(portfolioSets[key]){
+
+portfolio.forEach((img,i)=>{
+img.src = portfolioSets[key][i]
+})
+
+}
+
+}
+
+
+// ======================
 // LOAD PROPOSAL
 // ======================
 
@@ -301,6 +356,8 @@ let category = data.event_category || "Photography"
 heroTitle.innerText = category + " Photography Proposal"
 
 applyHeroImage(category)
+
+applyPortfolioImages(category)
 
 }
 
