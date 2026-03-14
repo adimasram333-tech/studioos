@@ -46,11 +46,17 @@ async function loadQuotationForEdit(){
 
 if(!editId) return
 
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+if(!user) return
+
 const { data , error } =
 await supabase
 .from("quotations")
 .select("*")
 .eq("id",editId)
+.eq("user_id",user.id)
 .single()
 
 if(error || !data) return
@@ -63,7 +69,6 @@ get("endDate").value = data.end_date || ""
 
 get("packageSelect").value = data.package || ""
 
-// NEW: EVENT CATEGORY LOAD
 if(get("eventCategory")){
 get("eventCategory").value = data.event_category || ""
 }
@@ -264,11 +269,15 @@ try{
 
 if(editId){
 
+const { data:{ user } } =
+await supabase.auth.getUser()
+
 const { error } =
 await supabase
 .from("quotations")
 .update(data)
 .eq("id",editId)
+.eq("user_id",user.id)
 
 if(error){
 console.error(error)
