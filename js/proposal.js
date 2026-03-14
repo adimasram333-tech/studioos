@@ -86,6 +86,14 @@ let data = null
 
 
 // ======================
+// GET CURRENT USER
+// ======================
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+
+// ======================
 // LOAD QUOTATION
 // ======================
 
@@ -95,6 +103,7 @@ const { data: row } = await supabase
 .from("quotations")
 .select("*")
 .eq("id", quotationId)
+.eq("user_id", user.id)
 .single()
 
 if(row){
@@ -109,6 +118,7 @@ const { data: row } = await supabase
 .from("quotations")
 .select("*")
 .eq("short_id", shortId)
+.eq("user_id", user.id)
 .single()
 
 if(row){
@@ -131,9 +141,6 @@ return
 let profile = null
 
 try{
-
-const { data:{ user } } =
-await supabase.auth.getUser()
 
 if(user){
 
@@ -431,11 +438,6 @@ html2pdf().set(opt).from(element).save()
 }
 
 }
-
-
-// ======================
-// SAFE PAGE LOAD
-// ======================
 
 window.addEventListener("load", function(){
 loadProposal()
