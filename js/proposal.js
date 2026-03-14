@@ -98,17 +98,15 @@ tries++
 function applyTheme(themeName){
 
 const allowedThemes = [
-"classic",
 "gold",
-"magazine",
-"luxury",
-"minimal"
+"royal",
+"emerald"
 ]
 
-let theme = themeName || "classic"
+let theme = themeName || "gold"
 
 if(!allowedThemes.includes(theme)){
-theme = "classic"
+theme = "gold"
 }
 
 const themeLink = document.getElementById("theme-style")
@@ -227,7 +225,7 @@ applyTheme(profile.theme)
 
 }else{
 
-applyTheme("classic")
+applyTheme("gold")
 
 }
 
