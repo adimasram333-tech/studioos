@@ -19,6 +19,22 @@
 <script>
 
 // =====================
+// WAIT FOR SUPABASE
+// =====================
+
+async function waitForSupabase(){
+
+let tries = 0
+
+while(!window.supabase && tries < 50){
+await new Promise(r => setTimeout(r,100))
+tries++
+}
+
+}
+
+
+// =====================
 // EXTRACT SHORT ID
 // =====================
 
@@ -52,13 +68,11 @@ id = slug.substring(slug.lastIndexOf("-") + 1)
 
 
 // CASE 3
-// /p/name-xxxxx  (SEO LINK)
+// /p/name-xxxxx
 
 if(!id){
 
 const path = window.location.pathname
-
-// FIX MOBILE TRAILING SLASH
 const parts = path.split("/").filter(Boolean)
 
 const slug = parts[parts.length - 1]
@@ -73,8 +87,6 @@ return id
 
 }
 
-const shortId = extractShortId()
-
 
 // =====================
 // LOAD PROPOSAL
@@ -82,7 +94,11 @@ const shortId = extractShortId()
 
 async function loadProposal(){
 
+await waitForSupabase()
+
 const status = document.getElementById("status")
+
+const shortId = extractShortId()
 
 if(!shortId){
 
