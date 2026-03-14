@@ -8,7 +8,10 @@
 
 <title>Photography Proposal</title>
 
-<link id="theme-style" rel="stylesheet" href="themes/gold.css">
+<!-- THEME ENGINE -->
+<link id="theme-style" rel="stylesheet" href="themes/classic.css">
+
+<!-- FONT ENGINE -->
 <link id="font-style" rel="stylesheet">
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -18,15 +21,24 @@
 
 <style>
 
+/* =====================================================
+GLOBAL DESIGN SYSTEM
+Future themes will override these variables
+===================================================== */
+
 :root{
 --primary:#C6A348;
 --accent:#222;
 --bg:#faf7ef;
 --text:#1a1a1a;
+--page-width:794px;
 }
 
-html,
-body{
+/* =====================================================
+RESET
+===================================================== */
+
+html,body{
 margin:0;
 padding:0;
 }
@@ -39,11 +51,13 @@ color:var(--text);
 print-color-adjust:exact;
 }
 
-/* ===== PAGE WRAPPER ===== */
+/* =====================================================
+PAGE WRAPPER
+===================================================== */
 
 .page{
-width:794px;
-max-width:794px;
+width:var(--page-width);
+max-width:var(--page-width);
 background:white;
 margin:40px auto;
 box-shadow:0 10px 40px rgba(0,0,0,0.08);
@@ -53,14 +67,16 @@ box-sizing:border-box;
 }
 
 #proposalPage{
-width:794px;
-max-width:794px;
+width:var(--page-width);
+max-width:var(--page-width);
 margin:auto;
 box-sizing:border-box;
 overflow:hidden;
 }
 
-/* ===== HERO ===== */
+/* =====================================================
+HERO
+===================================================== */
 
 .hero{
 width:100%;
@@ -118,7 +134,9 @@ margin-top:10px;
 font-size:18px;
 }
 
-/* ===== CONTENT ===== */
+/* =====================================================
+CONTENT
+===================================================== */
 
 .content{
 padding:50px;
@@ -156,17 +174,9 @@ ul{
 line-height:1.8;
 }
 
-/* ===== SUMMARY ===== */
-
-.summary{
-border:2px solid var(--primary);
-padding:25px;
-background:var(--bg);
-margin-top:30px;
-page-break-inside:avoid;
-break-inside:avoid;
-box-sizing:border-box;
-}
+/* =====================================================
+SERVICES TABLE
+===================================================== */
 
 table{
 width:100%;
@@ -185,7 +195,23 @@ padding:10px;
 border-bottom:1px solid #eee;
 }
 
-/* ===== FOOTER ===== */
+/* =====================================================
+INVESTMENT SUMMARY
+===================================================== */
+
+.summary{
+border:2px solid var(--primary);
+padding:25px;
+background:var(--bg);
+margin-top:30px;
+page-break-inside:avoid;
+break-inside:avoid;
+box-sizing:border-box;
+}
+
+/* =====================================================
+FOOTER
+===================================================== */
 
 .footer{
 margin-top:60px;
@@ -196,7 +222,9 @@ page-break-inside:avoid;
 break-inside:avoid;
 }
 
-/* ===== BUTTONS ===== */
+/* =====================================================
+BUTTONS
+===================================================== */
 
 .whatsappBtn{
 margin-top:25px;
@@ -225,7 +253,9 @@ text-align:center;
 margin-top:30px;
 }
 
-/* ===== MOBILE ===== */
+/* =====================================================
+MOBILE RESPONSIVE
+===================================================== */
 
 @media (max-width:768px){
 
@@ -245,8 +275,6 @@ margin:0 auto;
 .hero{
 min-height:280px;
 padding:70px 20px;
-background-size:cover;
-background-position:center;
 }
 
 .hero h1{
@@ -289,7 +317,9 @@ font-size:15px;
 
 }
 
-/* ===== PRINT / PDF MODE ===== */
+/* =====================================================
+PRINT / PDF MODE
+===================================================== */
 
 @page{
 size:A4;
@@ -298,8 +328,7 @@ margin:0;
 
 @media print{
 
-html,
-body{
+html,body{
 margin:0 !important;
 padding:0 !important;
 background:white !important;
@@ -462,7 +491,7 @@ Our team focuses on capturing real emotions, beautiful details, and timeless mom
 </div>
 
 <script src="js/supabase.js?v=2"></script>
-<script src="js/proposal.js?v=3"></script>
+<script src="js/proposal.js?v=4"></script>
 
 </body>
 </html>
