@@ -119,7 +119,7 @@ const { data: row } = await supabase
 .from("quotations")
 .select("*")
 .eq("id", quotationId)
-.single()
+.maybeSingle()
 
 if(row){
 data = row
@@ -133,7 +133,7 @@ const { data: row } = await supabase
 .from("quotations")
 .select("*")
 .eq("short_id", shortId)
-.single()
+.maybeSingle()
 
 if(row){
 data = row
@@ -163,7 +163,7 @@ await supabase
 .from("photographer_settings")
 .select("*")
 .eq("user_id", user.id)
-.single()
+.maybeSingle()
 
 if(row){
 profile = row
