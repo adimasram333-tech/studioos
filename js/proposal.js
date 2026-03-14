@@ -12,7 +12,7 @@ quotationId = params.get("id")
 
 
 // ======================
-// SUPPORT SLUG QUERY (NEW FIX)
+// SUPPORT SLUG QUERY
 // ======================
 
 let shortId = null
@@ -35,7 +35,9 @@ shortId = slugParts[slugParts.length - 1]
 
 if(!quotationId && !shortId){
 
-const pathParts = window.location.pathname.split("/")
+// FIX FOR MOBILE TRAILING SLASH
+const pathParts = window.location.pathname.split("/").filter(Boolean)
+
 const lastPart = pathParts[pathParts.length - 1]
 
 if(lastPart && lastPart.includes("-")){
@@ -144,7 +146,7 @@ quotationId = row.id
 
 
 // ======================
-// SAFE DATA CHECK (FIX)
+// SAFE DATA CHECK
 // ======================
 
 if(!data){
