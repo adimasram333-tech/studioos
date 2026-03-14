@@ -35,7 +35,6 @@ shortId = slugParts[slugParts.length - 1]
 
 if(!quotationId && !shortId){
 
-// FIX FOR MOBILE TRAILING SLASH
 const pathParts = window.location.pathname.split("/").filter(Boolean)
 
 const lastPart = pathParts[pathParts.length - 1]
@@ -173,19 +172,16 @@ let profile = null
 
 try{
 
-if(user){
-
+// FIX: use quotation user_id instead of logged user
 const { data: row } =
 await supabase
 .from("photographer_settings")
 .select("*")
-.eq("user_id", user.id)
+.eq("user_id", data.user_id)
 .maybeSingle()
 
 if(row){
 profile = row
-}
-
 }
 
 }catch(e){
