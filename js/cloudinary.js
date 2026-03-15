@@ -1,6 +1,21 @@
+// ===============================
+// CLOUDINARY CONFIG
+// ===============================
+
+// cloud name
+const CLOUD_NAME = "dlu9ozif2"
+
+// upload preset
+const UPLOAD_PRESET = "studioos_gallery"
+
+// upload endpoint
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dlu9ozif2/image/upload"
 
-const UPLOAD_PRESET = "studioos_gallery"
+
+
+// ===============================
+// UPLOAD FUNCTION
+// ===============================
 
 async function uploadToCloudinary(file,eventId){
 
