@@ -52,29 +52,12 @@ for(const file of files){
 
 try{
 
-const formData = new FormData()
+// upload using cloudinary.js function
+const url = await uploadToCloudinary(file,eventId)
 
-formData.append("file",file)
-formData.append("upload_preset",UPLOAD_PRESET)
-formData.append("folder","studioos/"+eventId)
+if(url){
 
-
-
-const res = await fetch(
-`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-{
-method:"POST",
-body:formData
-}
-)
-
-
-
-const data = await res.json()
-
-if(data.secure_url){
-
-urls.push(data.secure_url)
+urls.push(url)
 
 uploaded++
 
