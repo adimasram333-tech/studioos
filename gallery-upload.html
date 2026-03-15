@@ -87,6 +87,7 @@ Please select images or folder
 function selectFolder(){
 
 const input = document.getElementById("images")
+
 input.setAttribute("webkitdirectory","")
 input.click()
 
@@ -95,6 +96,7 @@ input.click()
 function selectImages(){
 
 const input = document.getElementById("images")
+
 input.removeAttribute("webkitdirectory")
 input.click()
 
@@ -102,11 +104,11 @@ input.click()
 
 </script>
 
-<!-- REQUIRED SCRIPTS (FIXED PATHS) -->
+<!-- REQUIRED MODULE FILES -->
 
-<script src="cloudinary.js"></script>
-<script src="supabase.js"></script>
-<script src="gallery-upload.js"></script>
+<script defer src="cloudinary.js"></script>
+<script defer src="supabase.js"></script>
+<script defer src="gallery-upload.js"></script>
 
 </body>
 </html>
