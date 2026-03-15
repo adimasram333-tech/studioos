@@ -54,7 +54,6 @@ return data.secure_url
 }catch(err){
 
 console.error("Upload error:",err)
-
 status.innerText = "Upload error occurred"
 
 }
@@ -73,6 +72,15 @@ uploads.push(uploadFile(file))
 const uploadedUrls = await Promise.all(uploads)
 
 console.log("Uploaded Images:",uploadedUrls)
+
+status.innerText = "Saving gallery..."
+
+const images = uploadedUrls.map(url => ({
+event_id: eventId,
+image_url: url
+}))
+
+await saveGalleryImages(images)
 
 status.innerText = "Upload Complete"
 progress.innerText = "All photos uploaded"
