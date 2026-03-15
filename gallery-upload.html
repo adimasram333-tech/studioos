@@ -1,36 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<title>StudioOS Gallery Upload</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Upload Event Photos</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 </head>
 
-<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+<body class="bg-gradient-to-b from-[#0f172a] to-[#020617] min-h-screen flex items-center justify-center text-white">
 
-<div class="bg-gray-800 p-8 rounded-xl w-[400px]">
+<div class="bg-[#1e293b] w-[420px] rounded-xl p-6 shadow-lg">
 
-<h2 class="text-xl font-semibold mb-6 text-center">
+<h2 class="text-center text-lg font-semibold mb-6">
 Upload Event Photos
 </h2>
 
-<input 
-type="file" 
+<!-- SELECT FILES -->
+
+<input
+type="file"
 id="images"
 multiple
-class="mb-4 w-full"
+webkitdirectory
+class="w-full bg-[#0f172a] border border-gray-600 rounded-lg p-2 mb-4 text-sm"
 />
 
 <button
 onclick="uploadImages()"
-class="bg-purple-600 w-full py-2 rounded-lg"
+class="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-medium transition"
 >
 Upload Photos
 </button>
 
-<div id="status" class="mt-4 text-sm text-gray-300"></div>
+<p id="status" class="text-center text-sm mt-3 text-gray-400">
+Please select images or folder
+</p>
 
 </div>
 
