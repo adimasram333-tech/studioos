@@ -13,7 +13,11 @@ const SUPABASE_ANON_KEY =
 // CREATE SUPABASE CLIENT
 // ================================
 
-const supabaseClient = supabase.createClient(
+let supabaseClient = null
+
+if(window.supabase){
+
+supabaseClient = window.supabase.createClient(
 SUPABASE_URL,
 SUPABASE_ANON_KEY,
 {
@@ -25,6 +29,7 @@ detectSessionInUrl:true
 }
 )
 
+}
 
 // expose globally
 window.supabase = supabaseClient
