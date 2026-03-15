@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>StudioOS Gallery Upload</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+
+<div class="bg-gray-800 p-8 rounded-xl w-[400px]">
+
+<h2 class="text-xl font-semibold mb-6 text-center">
+Upload Event Photos
+</h2>
+
+<input 
+type="file" 
+id="images"
+multiple
+class="mb-4 w-full"
+/>
+
+<button
+onclick="uploadImages()"
+class="bg-purple-600 w-full py-2 rounded-lg"
+>
+Upload Photos
+</button>
+
+<div id="status" class="mt-4 text-sm text-gray-300"></div>
+
+</div>
+
+<script src="js/gallery-upload.js"></script>
+
+</body>
+</html>
