@@ -38,6 +38,23 @@ return
 
 }
 
+// safety check
+if(typeof uploadToCloudinary !== "function"){
+
+console.error("Cloudinary uploader missing")
+status.innerText = "Upload system not loaded"
+return
+
+}
+
+if(typeof saveGalleryImages !== "function"){
+
+console.error("Supabase save function missing")
+status.innerText = "Database system not loaded"
+return
+
+}
+
 status.innerText = "Uploading photos..."
 progress.innerText = ""
 
