@@ -1,12 +1,4 @@
 // =============================
-// CLOUDINARY CONFIG
-// =============================
-
-const CLOUD_NAME = "dlu9ozif2"
-const UPLOAD_PRESET = "studioos_gallery"
-
-
-// =============================
 // GET EVENT ID
 // =============================
 
@@ -28,7 +20,7 @@ return eventId
 
 
 // =============================
-// MAIN UPLOAD FUNCTION
+// UPLOAD IMAGES
 // =============================
 
 async function uploadImages(){
@@ -55,9 +47,6 @@ let uploaded = 0
 let urls = []
 
 
-// =============================
-// LOOP FILES
-// =============================
 
 for(const file of files){
 
@@ -69,6 +58,8 @@ formData.append("file",file)
 formData.append("upload_preset",UPLOAD_PRESET)
 formData.append("folder","studioos/"+eventId)
 
+
+
 const res = await fetch(
 `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
 {
@@ -77,7 +68,11 @@ body:formData
 }
 )
 
+
+
 const data = await res.json()
+
+if(data.secure_url){
 
 urls.push(data.secure_url)
 
@@ -85,18 +80,33 @@ uploaded++
 
 progress.innerText = `${uploaded} / ${files.length}`
 
+}
+
 }catch(err){
 
 console.error("Upload error",err)
+status.innerText = "Upload error occurred"
 
 }
 
 }
 
 
+
+if(!urls.length){
+
+status.innerText = "Upload failed"
+return
+
+}
+
+
+
 // =============================
-// SAVE TO SUPABASE
+// SAVE TO DATABASE
 // =============================
+
+try{
 
 const rows = urls.map(url => ({
 event_id:eventId,
@@ -109,5 +119,12 @@ status.innerText = "Upload Complete"
 progress.innerText = "All photos uploaded"
 
 console.log("Uploaded URLs",urls)
+
+}catch(err){
+
+console.error("Database save error",err)
+status.innerText = "Upload complete but database save failed"
+
+}
 
 }
