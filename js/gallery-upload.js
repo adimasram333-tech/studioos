@@ -5,6 +5,7 @@ async function uploadImages() {
 
 const files = document.getElementById("images").files
 const status = document.getElementById("status")
+const progress = document.getElementById("progress")
 
 if (!files.length) {
 status.innerText = "Please select images or folder"
@@ -12,6 +13,7 @@ return
 }
 
 status.innerText = "Preparing upload..."
+progress.innerText = ""
 
 let uploaded = 0
 
@@ -45,6 +47,7 @@ const data = await res.json()
 uploaded++
 
 status.innerText = `Uploaded ${uploaded} / ${files.length}`
+progress.innerText = `${Math.round((uploaded/files.length)*100)}% complete`
 
 return data.secure_url
 
@@ -72,5 +75,6 @@ const uploadedUrls = await Promise.all(uploads)
 console.log("Uploaded Images:",uploadedUrls)
 
 status.innerText = "Upload Complete"
+progress.innerText = "All photos uploaded"
 
 }
