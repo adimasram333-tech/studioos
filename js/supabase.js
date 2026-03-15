@@ -15,7 +15,7 @@ const SUPABASE_ANON_KEY =
 
 let supabaseClient = null
 
-if(window.supabase){
+if (window.supabase) {
 
 supabaseClient = window.supabase.createClient(
 SUPABASE_URL,
@@ -33,6 +33,9 @@ detectSessionInUrl:true
 
 // expose globally
 window.supabase = supabaseClient
+
+// stable reference
+const supabase = window.supabase
 
 
 
@@ -188,7 +191,7 @@ await supabase
 .from("photographer_settings")
 .select("*")
 .eq("user_id", userId)
-.single()
+.maybeSingle()
 
 if(error){
 
