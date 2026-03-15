@@ -1,4 +1,4 @@
-const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload"
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dlu9ozif2/image/upload"
 
 const UPLOAD_PRESET = "studioos_gallery"
 
