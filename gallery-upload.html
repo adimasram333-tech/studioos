@@ -40,9 +40,27 @@ Upload Event Photos
 type="file"
 id="images"
 multiple
-webkitdirectory
+accept="image/*"
 class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-4 text-sm"
 />
+
+<div class="flex gap-2 mb-4">
+
+<button
+onclick="selectFolder()"
+class="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-xl text-xs"
+>
+Select Folder
+</button>
+
+<button
+onclick="selectImages()"
+class="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-xl text-xs"
+>
+Select Images
+</button>
+
+</div>
 
 <button
 onclick="uploadImages()"
@@ -60,6 +78,26 @@ Please select images or folder
 </div>
 
 </div>
+
+<script>
+
+function selectFolder(){
+
+const input = document.getElementById("images")
+input.setAttribute("webkitdirectory","")
+input.click()
+
+}
+
+function selectImages(){
+
+const input = document.getElementById("images")
+input.removeAttribute("webkitdirectory")
+input.click()
+
+}
+
+</script>
 
 <script src="js/cloudinary.js"></script>
 <script src="js/gallery-upload.js"></script>
