@@ -20,7 +20,7 @@ return eventId
 
 
 // =============================
-// UPLOAD IMAGES
+// UPLOAD IMAGES (FAST PARALLEL)
 // =============================
 
 async function uploadImages(){
@@ -48,31 +48,33 @@ let urls = []
 
 
 
-for(const file of files){
+const uploadPromises = [...files].map(async (file)=>{
 
 try{
 
-// upload using cloudinary.js function
 const url = await uploadToCloudinary(file,eventId)
 
 if(url){
 
-urls.push(url)
-
 uploaded++
 
 progress.innerText = `${uploaded} / ${files.length}`
+
+return url
 
 }
 
 }catch(err){
 
 console.error("Upload error",err)
-status.innerText = "Upload error occurred"
 
 }
 
-}
+})
+
+
+
+urls = (await Promise.all(uploadPromises)).filter(Boolean)
 
 
 
