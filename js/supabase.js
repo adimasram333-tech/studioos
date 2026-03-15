@@ -18,11 +18,9 @@ SUPABASE_URL,
 SUPABASE_ANON_KEY,
 {
 auth:{
-
 persistSession:true,
 autoRefreshToken:true,
 detectSessionInUrl:true
-
 }
 }
 )
@@ -200,6 +198,39 @@ return data
 
 console.error("Settings fetch failed:",err)
 return null
+
+}
+
+}
+
+
+
+// ================================
+// SAVE GALLERY IMAGES
+// ================================
+
+window.saveGalleryImages = async function(images){
+
+try{
+
+const { data, error } =
+await supabase
+.from("gallery_photos")
+.insert(images)
+
+if(error){
+
+console.error("Gallery save error:",error)
+return false
+
+}
+
+return true
+
+}catch(err){
+
+console.error("Gallery save failed:",err)
+return false
 
 }
 
