@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -9,11 +10,27 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 
+<style>
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+}
+
+.glass{
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+</style>
+
 </head>
 
-<body class="bg-gradient-to-b from-[#0f172a] to-[#020617] min-h-screen flex items-center justify-center text-white">
+<body class="text-white min-h-screen p-4">
 
-<div class="bg-[#1e293b] w-[420px] rounded-xl p-6 shadow-lg">
+<div class="max-w-md mx-auto mt-24">
+
+<div class="glass rounded-2xl p-6">
 
 <h2 class="text-center text-lg font-semibold mb-6">
 Upload Event Photos
@@ -24,12 +41,12 @@ type="file"
 id="images"
 multiple
 webkitdirectory
-class="w-full bg-[#0f172a] border border-gray-600 rounded-lg p-2 mb-4 text-sm"
+class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-4 text-sm"
 />
 
 <button
 onclick="uploadImages()"
-class="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-medium transition"
+class="w-full bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm font-medium"
 >
 Upload Photos
 </button>
@@ -39,6 +56,8 @@ Please select images or folder
 </p>
 
 <div id="progress" class="text-center text-sm mt-2 text-green-400"></div>
+
+</div>
 
 </div>
 
