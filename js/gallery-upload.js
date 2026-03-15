@@ -1,88 +1,113 @@
+// =============================
+// CLOUDINARY CONFIG
+// =============================
+
 const CLOUD_NAME = "dlu9ozif2"
 const UPLOAD_PRESET = "studioos_gallery"
 
-async function uploadImages() {
 
-const files = document.getElementById("images").files
-const status = document.getElementById("status")
-const progress = document.getElementById("progress")
+// =============================
+// GET EVENT ID
+// =============================
 
-if (!files.length) {
-status.innerText = "Please select images or folder"
-return
-}
+function getEventId(){
 
-status.innerText = "Preparing upload..."
-progress.innerText = ""
-
-let uploaded = 0
-
-// event id create or get
 let eventId = localStorage.getItem("current_event")
 
 if(!eventId){
-eventId = crypto.randomUUID()
+
+eventId = "event_" + Date.now()
 localStorage.setItem("current_event",eventId)
+
 }
 
-const uploadFile = async (file) => {
+return eventId
+
+}
+
+
+
+// =============================
+// MAIN UPLOAD FUNCTION
+// =============================
+
+async function uploadImages(){
+
+const input = document.getElementById("images")
+const status = document.getElementById("status")
+const progress = document.getElementById("progress")
+
+const files = input.files
+
+if(!files.length){
+
+status.innerText = "Please select images or folder"
+return
+
+}
+
+status.innerText = "Uploading photos..."
+progress.innerText = ""
+
+const eventId = getEventId()
+
+let uploaded = 0
+let urls = []
+
+
+// =============================
+// LOOP FILES
+// =============================
+
+for(const file of files){
 
 try{
 
-let formData = new FormData()
+const formData = new FormData()
 
-formData.append("file", file)
-formData.append("upload_preset", UPLOAD_PRESET)
+formData.append("file",file)
+formData.append("upload_preset",UPLOAD_PRESET)
 formData.append("folder","studioos/"+eventId)
 
 const res = await fetch(
 `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
 {
-method: "POST",
-body: formData
-})
+method:"POST",
+body:formData
+}
+)
 
 const data = await res.json()
 
+urls.push(data.secure_url)
+
 uploaded++
 
-status.innerText = `Uploaded ${uploaded} / ${files.length}`
-progress.innerText = `${Math.round((uploaded/files.length)*100)}% complete`
-
-return data.secure_url
+progress.innerText = `${uploaded} / ${files.length}`
 
 }catch(err){
 
-console.error("Upload error:",err)
-status.innerText = "Upload error occurred"
+console.error("Upload error",err)
 
 }
 
 }
 
-const uploads = []
 
-for (let file of files) {
+// =============================
+// SAVE TO SUPABASE
+// =============================
 
-uploads.push(uploadFile(file))
-
-}
-
-// parallel upload
-const uploadedUrls = await Promise.all(uploads)
-
-console.log("Uploaded Images:",uploadedUrls)
-
-status.innerText = "Saving gallery..."
-
-const images = uploadedUrls.map(url => ({
-event_id: eventId,
-image_url: url
+const rows = urls.map(url => ({
+event_id:eventId,
+image_url:url
 }))
 
-await saveGalleryImages(images)
+await saveGalleryImages(rows)
 
 status.innerText = "Upload Complete"
 progress.innerText = "All photos uploaded"
+
+console.log("Uploaded URLs",urls)
 
 }
