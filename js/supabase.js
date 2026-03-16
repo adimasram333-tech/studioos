@@ -6,22 +6,34 @@ const SUPABASE_URL =
 "https://gnnaaagvlrmdveqxicob.supabase.co"
 
 const SUPABASE_ANON_KEY =
-"YOUR_ANON_KEY"
+"sb_publishable_TnjoiedXWPbSjjqh2tmfsQ_kpiIMaND"
 
 
 
 // ================================
-// CREATE SUPABASE CLIENT (SAFE)
+// CREATE SUPABASE CLIENT (STABLE)
 // ================================
 
 let supabaseClient = null
 
-// prevent duplicate initialization
-if (!window.supabaseClient) {
+function initializeSupabase(){
 
-if (window.supabase && typeof window.supabase.createClient === "function") {
+// already initialized
+if(window.supabaseClient){
+return window.supabaseClient
+}
 
-supabaseClient = window.supabase.createClient(
+// CDN check
+if(!window.supabase || typeof window.supabase.createClient !== "function"){
+
+console.error("Supabase CDN not loaded")
+return null
+
+}
+
+// create client
+supabaseClient =
+window.supabase.createClient(
 SUPABASE_URL,
 SUPABASE_ANON_KEY,
 {
@@ -33,19 +45,15 @@ detectSessionInUrl:true
 }
 )
 
+// expose globally
 window.supabaseClient = supabaseClient
 
-} else {
-
-console.error("Supabase CDN not loaded")
+return supabaseClient
 
 }
 
-} else {
-
-supabaseClient = window.supabaseClient
-
-}
+// initialize immediately
+supabaseClient = initializeSupabase()
 
 
 
@@ -55,12 +63,13 @@ supabaseClient = window.supabaseClient
 
 window.saveQuotation = async function(data){
 
-if(!supabaseClient) return null
+const supabase = initializeSupabase()
+if(!supabase) return null
 
 try{
 
 const { data: result, error } =
-await supabaseClient
+await supabase
 .from("quotations")
 .insert([data])
 .select()
@@ -92,12 +101,13 @@ return null
 
 window.getQuotationById = async function(id){
 
-if(!supabaseClient) return null
+const supabase = initializeSupabase()
+if(!supabase) return null
 
 try{
 
 const { data, error } =
-await supabaseClient
+await supabase
 .from("quotations")
 .select("*")
 .eq("id", id)
@@ -129,12 +139,13 @@ return null
 
 window.getQuotationByShortId = async function(shortId){
 
-if(!supabaseClient) return null
+const supabase = initializeSupabase()
+if(!supabase) return null
 
 try{
 
 const { data, error } =
-await supabaseClient
+await supabase
 .from("quotations")
 .select("*")
 .eq("short_id", shortId)
@@ -166,12 +177,13 @@ return null
 
 window.getAllQuotations = async function(){
 
-if(!supabaseClient) return []
+const supabase = initializeSupabase()
+if(!supabase) return []
 
 try{
 
 const { data, error } =
-await supabaseClient
+await supabase
 .from("quotations")
 .select("*")
 .order("created_at",{ ascending:false })
@@ -202,12 +214,13 @@ return []
 
 window.getPhotographerSettings = async function(userId){
 
-if(!supabaseClient) return null
+const supabase = initializeSupabase()
+if(!supabase) return null
 
 try{
 
 const { data, error } =
-await supabaseClient
+await supabase
 .from("photographer_settings")
 .select("*")
 .eq("user_id", userId)
@@ -239,12 +252,13 @@ return null
 
 window.saveGalleryImages = async function(images){
 
-if(!supabaseClient) return false
+const supabase = initializeSupabase()
+if(!supabase) return false
 
 try{
 
-const { data, error } =
-await supabaseClient
+const { error } =
+await supabase
 .from("gallery_photos")
 .insert(images)
 
