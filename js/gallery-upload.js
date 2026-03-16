@@ -29,6 +29,11 @@ const input = document.getElementById("images")
 const status = document.getElementById("status")
 const progress = document.getElementById("progress")
 
+if(!input){
+console.error("Image input missing")
+return
+}
+
 const files = input.files
 
 if(!files.length){
@@ -39,7 +44,7 @@ return
 }
 
 // safety check
-if(typeof uploadToCloudinary !== "function"){
+if(typeof window.uploadToCloudinary !== "function"){
 
 console.error("Cloudinary uploader missing")
 status.innerText = "Upload system not loaded"
@@ -47,7 +52,7 @@ return
 
 }
 
-if(typeof saveGalleryImages !== "function"){
+if(typeof window.saveGalleryImages !== "function"){
 
 console.error("Supabase save function missing")
 status.innerText = "Database system not loaded"
@@ -69,7 +74,7 @@ const uploadPromises = [...files].map(async (file)=>{
 
 try{
 
-const url = await uploadToCloudinary(file,eventId)
+const url = await window.uploadToCloudinary(file,eventId)
 
 if(url){
 
@@ -115,7 +120,7 @@ event_id:eventId,
 image_url:url
 }))
 
-await saveGalleryImages(rows)
+await window.saveGalleryImages(rows)
 
 status.innerText = "Upload Complete"
 progress.innerText = "All photos uploaded"
@@ -130,3 +135,11 @@ status.innerText = "Upload complete but database save failed"
 }
 
 }
+
+
+
+// =============================
+// GLOBAL EXPORT
+// =============================
+
+window.uploadImages = uploadImages
