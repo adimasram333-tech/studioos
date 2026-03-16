@@ -26,9 +26,9 @@ return window.supabaseClient
 // CDN check
 if(!window.supabase || typeof window.supabase.createClient !== "function"){
 
-console.error("Supabase CDN not loaded")
-return null
+console.error("Supabase CDN not loaded yet")
 
+return null
 }
 
 // create client
@@ -52,8 +52,60 @@ return supabaseClient
 
 }
 
-// initialize immediately
-supabaseClient = initializeSupabase()
+
+
+// ================================
+// SAFE SUPABASE ACCESS
+// ================================
+
+window.getSupabase = function(){
+
+if(window.supabaseClient){
+return window.supabaseClient
+}
+
+return initializeSupabase()
+
+}
+
+
+
+// ================================
+// SAFE CURRENT USER
+// ================================
+
+window.getCurrentUser = async function(){
+
+const supabase = window.getSupabase()
+
+if(!supabase) return null
+
+try{
+
+const { data } = await supabase.auth.getUser()
+
+return data?.user || null
+
+}catch(err){
+
+console.error("User fetch failed:",err)
+return null
+
+}
+
+}
+
+
+
+// ================================
+// INITIALIZE IMMEDIATELY
+// ================================
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+initializeSupabase()
+
+})
 
 
 
@@ -63,7 +115,7 @@ supabaseClient = initializeSupabase()
 
 window.saveQuotation = async function(data){
 
-const supabase = initializeSupabase()
+const supabase = window.getSupabase()
 if(!supabase) return null
 
 try{
@@ -101,7 +153,7 @@ return null
 
 window.getQuotationById = async function(id){
 
-const supabase = initializeSupabase()
+const supabase = window.getSupabase()
 if(!supabase) return null
 
 try{
@@ -139,7 +191,7 @@ return null
 
 window.getQuotationByShortId = async function(shortId){
 
-const supabase = initializeSupabase()
+const supabase = window.getSupabase()
 if(!supabase) return null
 
 try{
@@ -177,7 +229,7 @@ return null
 
 window.getAllQuotations = async function(){
 
-const supabase = initializeSupabase()
+const supabase = window.getSupabase()
 if(!supabase) return []
 
 try{
@@ -214,7 +266,7 @@ return []
 
 window.getPhotographerSettings = async function(userId){
 
-const supabase = initializeSupabase()
+const supabase = window.getSupabase()
 if(!supabase) return null
 
 try{
@@ -252,7 +304,7 @@ return null
 
 window.saveGalleryImages = async function(images){
 
-const supabase = initializeSupabase()
+const supabase = window.getSupabase()
 if(!supabase) return false
 
 try{
