@@ -1,8 +1,28 @@
 // =============================
-// GET CURRENT USER
+// SAFE SUPABASE ACCESS
 // =============================
 
+function getSupabase(){
+
+if(window.getSupabase){
+return window.getSupabase()
+}
+
+if(window.supabaseClient){
+return window.supabaseClient
+}
+
+throw new Error("Supabase client not initialized")
+
+}
+
 async function getCurrentUser(){
+
+if(window.getCurrentUser){
+return await window.getCurrentUser()
+}
+
+const supabase = getSupabase()
 
 const { data:{ user } } =
 await supabase.auth.getUser()
@@ -10,6 +30,7 @@ await supabase.auth.getUser()
 return user
 
 }
+
 
 
 // =============================
@@ -21,6 +42,8 @@ async function getAllQuotations(){
 const user = await getCurrentUser()
 
 if(!user) return []
+
+const supabase = getSupabase()
 
 const { data, error } =
 await supabase
@@ -253,11 +276,18 @@ async function deleteQuotation(id){
 
 if(!confirm("Delete this quotation?")) return
 
+const user = await getCurrentUser()
+
+if(!user) return
+
+const supabase = getSupabase()
+
 const { error } =
 await supabase
 .from("quotations")
 .delete()
 .eq("id",id)
+.eq("user_id",user.id)
 
 if(error){
 
@@ -281,11 +311,18 @@ async function confirmBooking(id){
 
 if(!confirm("Confirm this booking?")) return
 
+const user = await getCurrentUser()
+
+if(!user) return
+
+const supabase = getSupabase()
+
 const { error } =
 await supabase
 .from("quotations")
 .update({ status:"confirmed" })
 .eq("id",id)
+.eq("user_id",user.id)
 
 if(error){
 
