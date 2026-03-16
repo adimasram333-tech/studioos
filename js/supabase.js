@@ -6,7 +6,8 @@ const SUPABASE_URL =
 "https://gnnaaagvlrmdveqxicob.supabase.co"
 
 const SUPABASE_ANON_KEY =
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE"
+"YOUR_ANON_KEY"
+
 
 
 // ================================
@@ -14,6 +15,9 @@ const SUPABASE_ANON_KEY =
 // ================================
 
 let supabaseClient = null
+
+// prevent duplicate initialization
+if (!window.supabaseClient) {
 
 if (window.supabase && typeof window.supabase.createClient === "function") {
 
@@ -29,15 +33,19 @@ detectSessionInUrl:true
 }
 )
 
+window.supabaseClient = supabaseClient
+
 } else {
 
 console.error("Supabase CDN not loaded")
 
 }
 
+} else {
 
-// expose safely
-window.supabaseClient = supabaseClient
+supabaseClient = window.supabaseClient
+
+}
 
 
 
