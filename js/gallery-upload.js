@@ -1,4 +1,39 @@
 // =============================
+// SAFE SUPABASE ACCESS
+// =============================
+
+function getSupabase(){
+
+if(window.getSupabase){
+return window.getSupabase()
+}
+
+if(window.supabaseClient){
+return window.supabaseClient
+}
+
+throw new Error("Supabase client not initialized")
+
+}
+
+async function getCurrentUser(){
+
+if(window.getCurrentUser){
+return await window.getCurrentUser()
+}
+
+const supabase = getSupabase()
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+return user
+
+}
+
+
+
+// =============================
 // GET EVENT ID
 // =============================
 
@@ -43,7 +78,26 @@ return
 
 }
 
-// safety check
+
+// =============================
+// USER CHECK
+// =============================
+
+const user = await getCurrentUser()
+
+if(!user){
+
+status.innerText = "Login required"
+console.error("User not authenticated")
+return
+
+}
+
+
+// =============================
+// SYSTEM CHECKS
+// =============================
+
 if(typeof window.uploadToCloudinary !== "function"){
 
 console.error("Cloudinary uploader missing")
@@ -60,6 +114,7 @@ return
 
 }
 
+
 status.innerText = "Uploading photos..."
 progress.innerText = ""
 
@@ -69,18 +124,39 @@ let uploaded = 0
 let urls = []
 
 
+// =============================
+// FILTER VALID IMAGES
+// =============================
 
-const uploadPromises = [...files].map(async (file)=>{
+const validFiles =
+[...files].filter(file => file.type.startsWith("image/"))
+
+if(validFiles.length === 0){
+
+status.innerText = "No valid images selected"
+return
+
+}
+
+
+
+// =============================
+// PARALLEL UPLOAD
+// =============================
+
+const uploadPromises = validFiles.map(async (file)=>{
 
 try{
 
-const url = await window.uploadToCloudinary(file,eventId)
+const url =
+await window.uploadToCloudinary(file,eventId)
 
 if(url){
 
 uploaded++
 
-progress.innerText = `${uploaded} / ${files.length}`
+progress.innerText =
+`${uploaded} / ${validFiles.length}`
 
 return url
 
@@ -96,7 +172,9 @@ console.error("Upload error",err)
 
 
 
-urls = (await Promise.all(uploadPromises)).filter(Boolean)
+urls =
+(await Promise.all(uploadPromises))
+.filter(Boolean)
 
 
 
@@ -117,10 +195,21 @@ try{
 
 const rows = urls.map(url => ({
 event_id:eventId,
-image_url:url
+image_url:url,
+uploaded_by:user.id
 }))
 
+const success =
 await window.saveGalleryImages(rows)
+
+if(!success){
+
+status.innerText =
+"Upload complete but database save failed"
+
+return
+
+}
 
 status.innerText = "Upload Complete"
 progress.innerText = "All photos uploaded"
@@ -130,7 +219,9 @@ console.log("Uploaded URLs",urls)
 }catch(err){
 
 console.error("Database save error",err)
-status.innerText = "Upload complete but database save failed"
+
+status.innerText =
+"Upload complete but database save failed"
 
 }
 
