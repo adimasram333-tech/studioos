@@ -1,8 +1,26 @@
 // =============================
+// GET SUPABASE CLIENT SAFELY
+// =============================
+
+function getSupabase(){
+
+if(window.supabaseClient){
+return window.supabaseClient
+}
+
+throw new Error("Supabase client not initialized")
+
+}
+
+
+
+// =============================
 // LOGIN
 // =============================
 
 export async function login(email,password){
+
+const supabase = getSupabase()
 
 const { error } =
 await supabase.auth.signInWithPassword({
@@ -31,6 +49,8 @@ window.location.replace("dashboard.html")
 
 export async function signup(email,password){
 
+const supabase = getSupabase()
+
 const { error } =
 await supabase.auth.signUp({
 
@@ -58,6 +78,8 @@ alert("Account created. Please login.")
 
 export async function protectPage(){
 
+const supabase = getSupabase()
+
 // check immediate session
 const { data:{ session } } =
 await supabase.auth.getSession()
@@ -72,11 +94,9 @@ await new Promise((resolve)=>{
 const { data: listener } =
 supabase.auth.onAuthStateChange((event, session)=>{
 
-// INITIAL_SESSION fires when Supabase restores session
 if(event === "INITIAL_SESSION"){
 
 listener.subscription.unsubscribe()
-
 resolve()
 
 }
@@ -85,7 +105,7 @@ resolve()
 
 })
 
-// check session again after initialization
+// check again
 const { data:{ session:finalSession } } =
 await supabase.auth.getSession()
 
@@ -93,7 +113,6 @@ if(finalSession){
 return
 }
 
-// if still no session redirect
 window.location.replace("index.html")
 
 }
@@ -105,6 +124,8 @@ window.location.replace("index.html")
 // =============================
 
 export async function logout(){
+
+const supabase = getSupabase()
 
 await supabase.auth.signOut()
 
