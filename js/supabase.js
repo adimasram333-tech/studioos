@@ -10,12 +10,12 @@ const SUPABASE_ANON_KEY =
 
 
 // ================================
-// CREATE SUPABASE CLIENT
+// CREATE SUPABASE CLIENT (SAFE)
 // ================================
 
 let supabaseClient = null
 
-if (window.supabase) {
+if (window.supabase && typeof window.supabase.createClient === "function") {
 
 supabaseClient = window.supabase.createClient(
 SUPABASE_URL,
@@ -29,13 +29,15 @@ detectSessionInUrl:true
 }
 )
 
+} else {
+
+console.error("Supabase CDN not loaded")
+
 }
 
-// expose globally
-window.supabase = supabaseClient
 
-// stable reference
-const supabase = window.supabase
+// expose safely
+window.supabaseClient = supabaseClient
 
 
 
@@ -45,10 +47,12 @@ const supabase = window.supabase
 
 window.saveQuotation = async function(data){
 
+if(!supabaseClient) return null
+
 try{
 
 const { data: result, error } =
-await supabase
+await supabaseClient
 .from("quotations")
 .insert([data])
 .select()
@@ -80,10 +84,12 @@ return null
 
 window.getQuotationById = async function(id){
 
+if(!supabaseClient) return null
+
 try{
 
 const { data, error } =
-await supabase
+await supabaseClient
 .from("quotations")
 .select("*")
 .eq("id", id)
@@ -115,10 +121,12 @@ return null
 
 window.getQuotationByShortId = async function(shortId){
 
+if(!supabaseClient) return null
+
 try{
 
 const { data, error } =
-await supabase
+await supabaseClient
 .from("quotations")
 .select("*")
 .eq("short_id", shortId)
@@ -150,10 +158,12 @@ return null
 
 window.getAllQuotations = async function(){
 
+if(!supabaseClient) return []
+
 try{
 
 const { data, error } =
-await supabase
+await supabaseClient
 .from("quotations")
 .select("*")
 .order("created_at",{ ascending:false })
@@ -179,15 +189,17 @@ return []
 
 
 // ================================
-// FUTURE: PHOTOGRAPHER SETTINGS
+// PHOTOGRAPHER SETTINGS
 // ================================
 
 window.getPhotographerSettings = async function(userId){
 
+if(!supabaseClient) return null
+
 try{
 
 const { data, error } =
-await supabase
+await supabaseClient
 .from("photographer_settings")
 .select("*")
 .eq("user_id", userId)
@@ -219,10 +231,12 @@ return null
 
 window.saveGalleryImages = async function(images){
 
+if(!supabaseClient) return false
+
 try{
 
 const { data, error } =
-await supabase
+await supabaseClient
 .from("gallery_photos")
 .insert(images)
 
