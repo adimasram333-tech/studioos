@@ -3,15 +3,32 @@
 // =============================
 
 function getSupabase(){
-if(window.supabaseClient) return window.supabaseClient
-if(window.supabase) return window.supabase
+
+if(window.getSupabase){
+return window.getSupabase()
+}
+
+if(window.supabaseClient){
+return window.supabaseClient
+}
+
 throw new Error("Supabase client not initialized")
+
 }
 
 async function getCurrentUser(){
+
+if(window.getCurrentUser){
+return await window.getCurrentUser()
+}
+
 const supabase = getSupabase()
-const { data:{ user } } = await supabase.auth.getUser()
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
 return user
+
 }
 
 
