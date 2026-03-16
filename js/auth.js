@@ -4,6 +4,10 @@
 
 function getSupabase(){
 
+if(window.getSupabase){
+return window.getSupabase()
+}
+
 if(window.supabaseClient){
 return window.supabaseClient
 }
@@ -80,7 +84,7 @@ export async function protectPage(){
 
 const supabase = getSupabase()
 
-// check immediate session
+// immediate session check
 const { data:{ session } } =
 await supabase.auth.getSession()
 
@@ -92,7 +96,7 @@ return
 await new Promise((resolve)=>{
 
 const { data: listener } =
-supabase.auth.onAuthStateChange((event, session)=>{
+supabase.auth.onAuthStateChange((event)=>{
 
 if(event === "INITIAL_SESSION"){
 
