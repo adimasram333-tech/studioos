@@ -4,7 +4,8 @@
 
 function getSupabase(){
 
-if(window.getSupabase){
+// use global helper if available
+if(window.getSupabase && window.getSupabase !== getSupabase){
 return window.getSupabase()
 }
 
@@ -18,7 +19,8 @@ throw new Error("Supabase client not initialized")
 
 async function getCurrentUser(){
 
-if(window.getCurrentUser){
+// prevent recursion
+if(window.getCurrentUser && window.getCurrentUser !== getCurrentUser){
 return await window.getCurrentUser()
 }
 
