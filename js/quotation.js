@@ -1,4 +1,21 @@
 // =============================
+// SAFE SUPABASE ACCESS (PERMANENT FIX)
+// =============================
+
+function getSupabase(){
+if(window.supabaseClient) return window.supabaseClient
+if(window.supabase) return window.supabase
+throw new Error("Supabase client not initialized")
+}
+
+async function getCurrentUser(){
+const supabase = getSupabase()
+const { data:{ user } } = await supabase.auth.getUser()
+return user
+}
+
+
+// =============================
 // SAFE ELEMENT GETTER
 // =============================
 
@@ -46,10 +63,10 @@ async function loadQuotationForEdit(){
 
 if(!editId) return
 
-const { data:{ user } } =
-await supabase.auth.getUser()
-
+const user = await getCurrentUser()
 if(!user) return
+
+const supabase = getSupabase()
 
 const { data , error } =
 await supabase
@@ -241,10 +258,12 @@ giftInput.classList.add("hidden")
 
 
 // =============================
-// CHECK EVENT LOAD (SOFT WARNING)
+// CHECK EVENT LOAD
 // =============================
 
 async function checkEventLoad(date,userId){
+
+const supabase = getSupabase()
 
 const { data } =
 await supabase
@@ -267,10 +286,11 @@ async function saveQuotation(data){
 
 try{
 
+const supabase = getSupabase()
+
 if(editId){
 
-const { data:{ user } } =
-await supabase.auth.getUser()
+const user = await getCurrentUser()
 
 const { error } =
 await supabase
@@ -330,8 +350,7 @@ previewBtn.innerText = "Generating..."
 
 // GET USER
 
-const { data:{ user } } =
-await supabase.auth.getUser()
+const user = await getCurrentUser()
 
 if(!user){
 
@@ -343,6 +362,8 @@ previewBtn.innerText = "Preview Quote"
 return
 
 }
+
+const supabase = getSupabase()
 
 
 // VALIDATION
