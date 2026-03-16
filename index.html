@@ -89,8 +89,34 @@ import { login, signup } from "./js/auth.js"
 
 
 // ======================
+// WAIT FOR SUPABASE CLIENT
+// ======================
+
+function waitForSupabase(){
+
+return new Promise(resolve=>{
+
+const check = setInterval(()=>{
+
+if(window.supabaseClient){
+
+clearInterval(check)
+resolve(window.supabaseClient)
+
+}
+
+},50)
+
+})
+
+}
+
+
+// ======================
 // SESSION CHECK
 // ======================
+
+const supabase = await waitForSupabase()
 
 const { data:{ session } } =
 await supabase.auth.getSession()
