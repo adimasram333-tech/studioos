@@ -175,6 +175,20 @@ class="block glass rounded-2xl p-4 hover:scale-105 transition">
 
 import { protectPage, logout } from "./js/auth.js"
 
+
+// SAFE SUPABASE ACCESS
+function getSupabase(){
+
+if(window.supabaseClient){
+return window.supabaseClient
+}
+
+throw new Error("Supabase client not initialized")
+
+}
+
+
+// PROTECT PAGE
 await protectPage()
 
 document
@@ -185,10 +199,12 @@ document
 
 async function loadStudio(){
 
+const supabase = getSupabase()
+
 const { data: userData } =
 await supabase.auth.getUser()
 
-const user = userData.user
+const user = userData?.user
 
 if(!user) return
 
@@ -212,10 +228,12 @@ loadStudio()
 
 async function loadDashboard(){
 
+const supabase = getSupabase()
+
 const { data: userData } =
 await supabase.auth.getUser()
 
-const user = userData.user
+const user = userData?.user
 
 if(!user) return
 
