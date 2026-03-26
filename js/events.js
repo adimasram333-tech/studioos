@@ -204,7 +204,7 @@ const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
 const year = currentDate.getFullYear()
 const month = currentDate.getMonth()
 
-// ✅ TODAY LOGIC (ADDED)
+// TODAY
 const today = new Date()
 const todayStr =
 `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
@@ -229,22 +229,24 @@ for(let d=1; d<=daysInMonth; d++){
 const fullDate =
 `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
 
-let classes = "p-2 rounded cursor-pointer transition"
+let classes = "p-2 rounded cursor-pointer transition hover:scale-105"
 
-// BASE
-classes += " bg-slate-800 hover:scale-105"
+// ✅ PRIORITY LOGIC FIXED
 
-// EVENT
+// Event
 if(eventDates[fullDate]){
 classes += " bg-red-600"
 }
-
-// NOTE
-if(notes[fullDate]){
+// Note (only if no event)
+else if(notes[fullDate]){
 classes += " bg-blue-600"
 }
+// Default
+else{
+classes += " bg-slate-800"
+}
 
-// ✅ TODAY HIGHLIGHT (ADDED)
+// Today highlight
 if(fullDate === todayStr){
 classes += " ring-2 ring-green-400 shadow-lg"
 }
