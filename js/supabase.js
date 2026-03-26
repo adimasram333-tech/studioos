@@ -11,25 +11,60 @@ const SUPABASE_ANON_KEY =
 
 
 // ================================
-// CREATE SUPABASE CLIENT (STABLE)
+// INTERNAL STATE
 // ================================
 
 let supabaseClient = null
+let supabaseInitPromise = null
 
-function initializeSupabase(){
+
+
+// ================================
+// WAIT FOR CDN (CRITICAL FIX)
+// ================================
+
+function waitForSupabaseCDN(){
+
+return new Promise((resolve)=>{
+
+const check = () => {
+
+if(window.supabase && typeof window.supabase.createClient === "function"){
+resolve()
+} else {
+setTimeout(check, 50)
+}
+
+}
+
+check()
+
+})
+
+}
+
+
+
+// ================================
+// CREATE SUPABASE CLIENT (STABLE)
+// ================================
+
+async function initializeSupabase(){
 
 // already initialized
 if(window.supabaseClient){
 return window.supabaseClient
 }
 
-// CDN check
-if(!window.supabase || typeof window.supabase.createClient !== "function"){
-
-console.error("Supabase CDN not loaded yet")
-
-return null
+// prevent multiple init
+if(supabaseInitPromise){
+return supabaseInitPromise
 }
+
+supabaseInitPromise = (async ()=>{
+
+// wait for CDN
+await waitForSupabaseCDN()
 
 // create client
 supabaseClient =
@@ -50,33 +85,37 @@ window.supabaseClient = supabaseClient
 
 return supabaseClient
 
+})()
+
+return supabaseInitPromise
+
 }
 
 
 
 // ================================
-// SAFE SUPABASE ACCESS
+// SAFE SUPABASE ACCESS (ALWAYS WORKS)
 // ================================
 
-window.getSupabase = function(){
+window.getSupabase = async function(){
 
 if(window.supabaseClient){
 return window.supabaseClient
 }
 
-return initializeSupabase()
+return await initializeSupabase()
 
 }
 
 
 
 // ================================
-// SAFE CURRENT USER
+// SAFE CURRENT USER (NO CRASH)
 // ================================
 
 window.getCurrentUser = async function(){
 
-const supabase = window.getSupabase()
+const supabase = await window.getSupabase()
 
 if(!supabase) return null
 
@@ -98,14 +137,10 @@ return null
 
 
 // ================================
-// INITIALIZE IMMEDIATELY
+// PRELOAD SUPABASE (FASTER)
 // ================================
 
-document.addEventListener("DOMContentLoaded",()=>{
-
 initializeSupabase()
-
-})
 
 
 
@@ -115,7 +150,7 @@ initializeSupabase()
 
 window.saveQuotation = async function(data){
 
-const supabase = window.getSupabase()
+const supabase = await window.getSupabase()
 if(!supabase) return null
 
 try{
@@ -153,7 +188,7 @@ return null
 
 window.getQuotationById = async function(id){
 
-const supabase = window.getSupabase()
+const supabase = await window.getSupabase()
 if(!supabase) return null
 
 try{
@@ -191,7 +226,7 @@ return null
 
 window.getQuotationByShortId = async function(shortId){
 
-const supabase = window.getSupabase()
+const supabase = await window.getSupabase()
 if(!supabase) return null
 
 try{
@@ -229,7 +264,7 @@ return null
 
 window.getAllQuotations = async function(){
 
-const supabase = window.getSupabase()
+const supabase = await window.getSupabase()
 if(!supabase) return []
 
 try{
@@ -266,7 +301,7 @@ return []
 
 window.getPhotographerSettings = async function(userId){
 
-const supabase = window.getSupabase()
+const supabase = await window.getSupabase()
 if(!supabase) return null
 
 try{
@@ -304,7 +339,7 @@ return null
 
 window.saveGalleryImages = async function(images){
 
-const supabase = window.getSupabase()
+const supabase = await window.getSupabase()
 if(!supabase) return false
 
 try{
