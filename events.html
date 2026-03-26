@@ -29,7 +29,7 @@ Smart Calendar
 </div>
 
 <!-- Modal -->
-<div id="modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center">
+<div id="modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center">
 
 <div class="bg-slate-800 p-4 rounded w-full max-w-sm">
 
@@ -49,10 +49,31 @@ Close
 
 </div>
 
+<!-- ✅ Supabase CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- ✅ Supabase INIT -->
 <script src="js/supabase.js"></script>
 
-<script src="js/events.js"></script>
+<!-- ✅ SAFE LOAD WRAPPER (IMPORTANT FIX) -->
+<script>
+
+window.addEventListener("DOMContentLoaded", function(){
+
+// 🔥 Wait until supabase is ready
+if(!window.supabase){
+console.error("Supabase not loaded")
+return
+}
+
+// Load events system
+const script = document.createElement("script")
+script.src = "js/events.js"
+document.body.appendChild(script)
+
+})
+
+</script>
 
 </body>
 </html>
