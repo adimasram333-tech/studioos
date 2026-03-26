@@ -24,7 +24,10 @@ Smart Calendar
 </div>
 
 <!-- Calendar Grid -->
-<div id="calendar" class="grid grid-cols-7 gap-2 text-center"></div>
+<div id="calendar" class="grid grid-cols-7 gap-2 text-center mb-6"></div>
+
+<!-- ✅ ADD THIS (MISSING ELEMENT — FIX) -->
+<div id="eventList" class="space-y-4"></div>
 
 </div>
 
@@ -55,7 +58,7 @@ Close
 <!-- Supabase INIT -->
 <script src="js/supabase.js"></script>
 
-<!-- ✅ FINAL FIXED LOADER -->
+<!-- LOADER -->
 <script>
 
 function loadEventsScript(){
@@ -67,7 +70,6 @@ document.body.appendChild(script)
 
 function waitForSupabaseAndLoad(){
 
-// Wait until getSupabase is available
 if(typeof window.getSupabase === "function"){
 loadEventsScript()
 } else {
@@ -76,7 +78,6 @@ setTimeout(waitForSupabaseAndLoad, 50)
 
 }
 
-// ✅ DOM READY FIRST
 document.addEventListener("DOMContentLoaded", function(){
 waitForSupabaseAndLoad()
 })
