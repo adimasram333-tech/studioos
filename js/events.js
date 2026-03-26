@@ -1,4 +1,11 @@
 // =============================
+// SAFE SUPABASE CLIENT FIX (NEW)
+// =============================
+
+const supabaseClient = window.supabase || null;
+
+
+// =============================
 // ORIGINAL EVENT LIST (UNCHANGED)
 // =============================
 
@@ -7,16 +14,17 @@ const eventList = document.getElementById("eventList")
 async function loadEvents(){
 
 if(!eventList) return
+if(!supabaseClient) return
 
 const { data:{ user } } =
-await supabase.auth.getUser()
+await supabaseClient.auth.getUser()
 
 if(!user) return
 
 
 // FETCH CONFIRMED EVENTS
 const { data , error } =
-await supabase
+await supabaseClient
 .from("quotations")
 .select("*")
 .eq("user_id",user.id)
@@ -131,7 +139,7 @@ return data
 
 
 // =============================
-// 🔥 SMART CALENDAR SYSTEM (NEW)
+// 🔥 SMART CALENDAR SYSTEM (FIXED)
 // =============================
 
 const calendar = document.getElementById("calendar")
@@ -154,15 +162,16 @@ return { firstDay, daysInMonth }
 async function loadCalendar(){
 
 if(!calendar) return
+if(!supabaseClient) return
 
 const { data:{ user } } =
-await supabase.auth.getUser()
+await supabaseClient.auth.getUser()
 
 if(!user) return
 
 // FETCH EVENTS
 const { data } =
-await supabase
+await supabaseClient
 .from("quotations")
 .select("*")
 .eq("user_id",user.id)
@@ -253,7 +262,10 @@ function closeModal(){
 modal.classList.add("hidden")
 }
 
-document.getElementById("saveNote").addEventListener("click",function(){
+const saveBtn = document.getElementById("saveNote")
+
+if(saveBtn){
+saveBtn.addEventListener("click",function(){
 
 const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
 
@@ -266,26 +278,36 @@ closeModal()
 loadCalendar()
 
 })
+}
 
 
 // =============================
 // 📅 MONTH NAVIGATION
 // =============================
 
-document.getElementById("prevMonth").onclick = function(){
+const prevBtn = document.getElementById("prevMonth")
+const nextBtn = document.getElementById("nextMonth")
+
+if(prevBtn){
+prevBtn.onclick = function(){
 currentDate.setMonth(currentDate.getMonth() - 1)
 loadCalendar()
 }
+}
 
-document.getElementById("nextMonth").onclick = function(){
+if(nextBtn){
+nextBtn.onclick = function(){
 currentDate.setMonth(currentDate.getMonth() + 1)
 loadCalendar()
+}
 }
 
 
 // =============================
-// INIT
+// INIT (SAFE)
 // =============================
 
+window.addEventListener("DOMContentLoaded",function(){
 loadEvents()
 loadCalendar()
+})
