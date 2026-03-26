@@ -1,11 +1,34 @@
 const list = document.getElementById("pendingList")
 
-async function loadPending(){
+
+// =============================
+// GET CURRENT USER
+// =============================
+
+async function getCurrentUser(){
+
+const supabase = await window.getSupabase()
 
 const { data:{ user } } =
 await supabase.auth.getUser()
 
+return user
+
+}
+
+
+// =============================
+// LOAD PENDING PAYMENTS
+// =============================
+
+async function loadPending(){
+
+const supabase = await window.getSupabase()
+
+const user = await getCurrentUser()
+
 if(!user) return
+
 
 const { data: quotations } =
 await supabase
@@ -14,7 +37,9 @@ await supabase
 .eq("user_id", user.id)
 .eq("status","confirmed")
 
+
 list.innerHTML = ""
+
 
 if(!quotations || quotations.length === 0){
 
@@ -25,6 +50,7 @@ return
 
 }
 
+
 for(const q of quotations){
 
 const { data: payments } =
@@ -33,27 +59,35 @@ await supabase
 .select("amount")
 .eq("quotation_id", q.id)
 
+
 let paid = 0
 
 payments?.forEach(p=>{
 paid += Number(p.amount || 0)
 })
 
+
 const pending = q.total - paid
 
+
 if(pending <= 0) continue
+
 
 const date =
 new Date(q.event_date)
 .toLocaleDateString("en-IN")
+
 
 const card = document.createElement("div")
 
 card.className =
 "glass rounded-xl p-4 cursor-pointer"
 
+
+// FIXED LINK
 card.onclick =
-() => location.href = "client.html?id="+q.id
+() => location.href = "client.html?quotation="+q.id
+
 
 card.innerHTML = `
 
@@ -79,9 +113,11 @@ Pending ₹${pending}
 
 `
 
+
 list.appendChild(card)
 
 }
+
 
 if(list.innerHTML === ""){
 list.innerHTML =
@@ -89,5 +125,10 @@ list.innerHTML =
 }
 
 }
+
+
+// =============================
+// INIT
+// =============================
 
 loadPending()
