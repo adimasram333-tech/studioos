@@ -204,6 +204,11 @@ const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
 const year = currentDate.getFullYear()
 const month = currentDate.getMonth()
 
+// ✅ TODAY LOGIC (ADDED)
+const today = new Date()
+const todayStr =
+`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+
 const { firstDay, daysInMonth } = getMonthData(year, month)
 
 calendar.innerHTML = ""
@@ -224,21 +229,29 @@ for(let d=1; d<=daysInMonth; d++){
 const fullDate =
 `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
 
-let color = "bg-slate-800"
+let classes = "p-2 rounded cursor-pointer transition"
 
-// EVENT = RED
+// BASE
+classes += " bg-slate-800 hover:scale-105"
+
+// EVENT
 if(eventDates[fullDate]){
-color = "bg-red-600"
+classes += " bg-red-600"
 }
 
-// NOTE = BLUE
+// NOTE
 if(notes[fullDate]){
-color = "bg-blue-600"
+classes += " bg-blue-600"
+}
+
+// ✅ TODAY HIGHLIGHT (ADDED)
+if(fullDate === todayStr){
+classes += " ring-2 ring-green-400 shadow-lg"
 }
 
 calendar.innerHTML += `
 <div 
-class="${color} p-2 rounded cursor-pointer"
+class="${classes}"
 onclick="openModal('${fullDate}')"
 >
 ${d}
@@ -328,7 +341,7 @@ loadCalendar()
 
 
 // =============================
-// ✅ FINAL FIXED INIT
+// INIT
 // =============================
 
 async function init(){
@@ -342,5 +355,4 @@ await loadCalendar()
 
 }
 
-// 🔥 RUN IMMEDIATELY (NO DOMContentLoaded)
 init()
