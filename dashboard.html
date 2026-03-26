@@ -176,19 +176,26 @@ class="block glass rounded-2xl p-4 hover:scale-105 transition">
 import { protectPage, logout } from "./js/auth.js"
 
 
-// SAFE SUPABASE ACCESS
-function getSupabase(){
+// =============================
+// GET CURRENT USER (FIXED)
+// =============================
 
-if(window.supabaseClient){
-return window.supabaseClient
+async function getCurrentUser(){
+
+const supabase = await window.getSupabase()
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+return user
+
 }
 
-throw new Error("Supabase client not initialized")
 
-}
-
-
+// =============================
 // PROTECT PAGE
+// =============================
+
 await protectPage()
 
 document
@@ -197,14 +204,15 @@ document
 
 
 
+// =============================
+// LOAD STUDIO
+// =============================
+
 async function loadStudio(){
 
-const supabase = getSupabase()
+const supabase = await window.getSupabase()
 
-const { data: userData } =
-await supabase.auth.getUser()
-
-const user = userData?.user
+const user = await getCurrentUser()
 
 if(!user) return
 
@@ -226,18 +234,21 @@ loadStudio()
 
 
 
+// =============================
+// LOAD DASHBOARD
+// =============================
+
 async function loadDashboard(){
 
-const supabase = getSupabase()
+const supabase = await window.getSupabase()
 
-const { data: userData } =
-await supabase.auth.getUser()
-
-const user = userData?.user
+const user = await getCurrentUser()
 
 if(!user) return
 
 
+
+// RECENT QUOTATIONS
 
 const { data: quotations } =
 await supabase
@@ -282,6 +293,8 @@ list.appendChild(row)
 
 
 
+// TOTAL BOOKINGS
+
 const { count } =
 await supabase
 .from("quotations")
@@ -294,14 +307,14 @@ count || 0
 
 
 
+// PAYMENTS + REVENUE
+
 const { data: allQuotes } =
 await supabase
 .from("quotations")
 .select("id,total")
 .eq("user_id", user.id)
 .eq("status","confirmed")
-
-
 
 const { data: allPayments } =
 await supabase
@@ -364,6 +377,8 @@ document.getElementById("monthlyRevenue").innerText =
 
 
 
+// NOTIFICATIONS
+
 const { data: events } =
 await supabase
 .from("quotations")
@@ -397,11 +412,9 @@ let text = ""
 if(diff === 0){
 text = `📅 ${e.client_name} event today`
 }
-
 else if(diff === 1){
 text = `📅 ${e.client_name} event tomorrow`
 }
-
 else if(diff <= 3 && diff > 1){
 text = `📅 ${e.client_name} event in ${diff} days`
 }
