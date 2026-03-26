@@ -4,6 +4,8 @@
 
 async function getCurrentUser(){
 
+const supabase = await window.getSupabase()
+
 const { data:{ user } } =
 await supabase.auth.getUser()
 
@@ -38,6 +40,8 @@ year:"numeric"
 // =============================
 
 async function loadClients(){
+
+const supabase = await window.getSupabase()
 
 const user = await getCurrentUser()
 
