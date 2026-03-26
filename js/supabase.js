@@ -9,14 +9,12 @@ const SUPABASE_ANON_KEY =
 "sb_publishable_TnjoiedXWPbSjjqh2tmfsQ_kpiIMaND"
 
 
-
 // ================================
 // INTERNAL STATE
 // ================================
 
 let supabaseClient = null
 let supabaseInitPromise = null
-
 
 
 // ================================
@@ -42,7 +40,6 @@ check()
 })
 
 }
-
 
 
 // ================================
@@ -83,6 +80,9 @@ detectSessionInUrl:true
 // expose globally
 window.supabaseClient = supabaseClient
 
+// 🔥 CRITICAL FIX (bridge old + new system)
+window.supabase = supabaseClient
+
 return supabaseClient
 
 })()
@@ -90,7 +90,6 @@ return supabaseClient
 return supabaseInitPromise
 
 }
-
 
 
 // ================================
@@ -106,7 +105,6 @@ return window.supabaseClient
 return await initializeSupabase()
 
 }
-
 
 
 // ================================
@@ -135,13 +133,11 @@ return null
 }
 
 
-
 // ================================
 // PRELOAD SUPABASE (FASTER)
 // ================================
 
 initializeSupabase()
-
 
 
 // ================================
@@ -181,7 +177,6 @@ return null
 }
 
 
-
 // ================================
 // GET QUOTATION BY ID
 // ================================
@@ -217,7 +212,6 @@ return null
 }
 
 }
-
 
 
 // ================================
@@ -257,7 +251,6 @@ return null
 }
 
 
-
 // ================================
 // GET ALL QUOTATIONS
 // ================================
@@ -292,7 +285,6 @@ return []
 }
 
 }
-
 
 
 // ================================
@@ -332,7 +324,6 @@ return null
 }
 
 
-
 // ================================
 // SAVE GALLERY IMAGES
 // ================================
@@ -362,7 +353,5 @@ return true
 
 console.error("Gallery save failed:",err)
 return false
-
-}
 
 }
