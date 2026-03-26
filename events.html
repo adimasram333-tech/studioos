@@ -6,6 +6,13 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 
+<style>
+.day-label {
+  color: #94a3b8;
+  font-size: 12px;
+}
+</style>
+
 </head>
 
 <body class="bg-slate-900 text-white p-6">
@@ -18,15 +25,26 @@ Smart Calendar
 
 <!-- Month Navigation -->
 <div class="flex justify-between items-center mb-4">
-<button id="prevMonth" class="px-3 py-1 bg-slate-700 rounded">←</button>
+<button id="prevMonth" class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600 transition">←</button>
 <h2 id="monthLabel" class="font-semibold"></h2>
-<button id="nextMonth" class="px-3 py-1 bg-slate-700 rounded">→</button>
+<button id="nextMonth" class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600 transition">→</button>
+</div>
+
+<!-- ✅ WEEK LABELS (ADDED) -->
+<div class="grid grid-cols-7 gap-2 text-center mb-2">
+<div class="day-label">Sun</div>
+<div class="day-label">Mon</div>
+<div class="day-label">Tue</div>
+<div class="day-label">Wed</div>
+<div class="day-label">Thu</div>
+<div class="day-label">Fri</div>
+<div class="day-label">Sat</div>
 </div>
 
 <!-- Calendar Grid -->
 <div id="calendar" class="grid grid-cols-7 gap-2 text-center mb-6"></div>
 
-<!-- ✅ ADD THIS (MISSING ELEMENT — FIX) -->
+<!-- ✅ EXISTING (UNCHANGED) -->
 <div id="eventList" class="space-y-4"></div>
 
 </div>
@@ -40,11 +58,11 @@ Smart Calendar
 
 <textarea id="noteInput" class="w-full p-2 rounded bg-slate-700 mb-3" placeholder="Write note..."></textarea>
 
-<button id="saveNote" class="w-full bg-blue-600 py-2 rounded mb-2">
+<button id="saveNote" class="w-full bg-blue-600 py-2 rounded mb-2 hover:bg-blue-500 transition">
 Save Note
 </button>
 
-<button onclick="closeModal()" class="w-full bg-slate-600 py-2 rounded">
+<button onclick="closeModal()" class="w-full bg-slate-600 py-2 rounded hover:bg-slate-500 transition">
 Close
 </button>
 
