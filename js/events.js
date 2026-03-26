@@ -30,10 +30,13 @@ await waitForSupabase()
 if(!eventList) return
 if(!window.supabase) return
 
-const { data:{ user } } =
-await window.supabase.auth.getUser()
+// 🔥 FINAL FIX (USE SAFE USER)
+const user = await window.getCurrentUser()
 
-if(!user) return
+if(!user){
+console.log("No user found")
+return
+}
 
 
 // FETCH CONFIRMED EVENTS
@@ -181,10 +184,13 @@ await waitForSupabase()
 if(!calendar) return
 if(!window.supabase) return
 
-const { data:{ user } } =
-await window.supabase.auth.getUser()
+// 🔥 FINAL FIX (SAFE USER)
+const user = await window.getCurrentUser()
 
-if(!user) return
+if(!user){
+console.log("No user found")
+return
+}
 
 // FETCH EVENTS
 const { data } =
