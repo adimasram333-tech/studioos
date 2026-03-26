@@ -18,9 +18,7 @@ throw new Error("Supabase client not initialized")
 
 async function getCurrentUser(){
 
-if(window.getCurrentUser){
-return await window.getCurrentUser()
-}
+// ✅ FIX: recursion removed
 
 const supabase = getSupabase()
 
