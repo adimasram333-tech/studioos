@@ -26,8 +26,8 @@ async function waitForSupabase(){
 
 let tries = 0
 
-// ORIGINAL CONDITION (kept but fixed logic)
-while((!window.getSupabase || !window.getSupabase()) && tries < 50){
+// 🔥 FIX: only check function existence
+while((!window.getSupabase) && tries < 50){
 await new Promise(r => setTimeout(r,100))
 tries++
 }
@@ -84,8 +84,8 @@ async function loadProposal(){
 
 await waitForSupabase()
 
-// ORIGINAL LINE (kept logic, but fixed usage)
-const supabase = window.getSupabase()
+// 🔥 FIX: await REQUIRED
+const supabase = await window.getSupabase()
 
 const status = document.getElementById("status")
 
@@ -99,7 +99,7 @@ return
 try{
 
 // =====================
-// 🔴 ORIGINAL CODE (NOT REMOVED, JUST COMMENTED)
+// 🔴 ORIGINAL CODE (KEPT — NOT REMOVED)
 // =====================
 
 // const { data, error } = await supabase
@@ -115,29 +115,27 @@ try{
 const { data, error } = await supabase
 .from("quotations")
 .select("id, short_id")
-.ilike("short_id", shortId + "%")   // partial match
-
+.ilike("short_id", shortId + "%")
 
 if(error){
 status.innerHTML = "Error loading proposal"
 return
 }
 
-// ORIGINAL LOGIC (kept but adapted)
+// ORIGINAL LOGIC (KEPT)
 let record = null
 
 if(data && data.length > 0){
 record = data[0]
 }
 
-// ORIGINAL CHECK (kept behavior)
+// ORIGINAL CHECK (KEPT)
 if(!record){
 status.innerHTML = "Proposal not found"
 return
 }
 
 const fullId = record.id
-
 
 // =====================
 // REDIRECT
@@ -149,6 +147,7 @@ window.location.replace(
 
 }catch(err){
 
+console.error(err)
 status.innerHTML = "Error loading proposal"
 
 }
