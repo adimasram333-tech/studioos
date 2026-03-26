@@ -1,5 +1,5 @@
 // =============================
-// SAFE WAIT FOR SUPABASE (ADDED - NO REMOVAL)
+// SAFE WAIT FOR SUPABASE
 // =============================
 
 async function waitForSupabase(){
@@ -17,20 +17,25 @@ check()
 
 
 // =============================
-// ORIGINAL EVENT LIST (UNCHANGED)
+// GLOBAL ELEMENTS (FIX)
 // =============================
 
-const eventList = document.getElementById("eventList")
+let eventList = null
+let calendar = null
+let monthLabel = null
+
+
+// =============================
+// ORIGINAL EVENT LIST
+// =============================
 
 async function loadEvents(){
 
-// 🔥 FIX: wait for supabase
 await waitForSupabase()
 
 if(!eventList) return
 if(!window.supabase) return
 
-// 🔥 FINAL FIX (USE SAFE USER)
 const user = await window.getCurrentUser()
 
 if(!user){
@@ -38,8 +43,6 @@ console.log("No user found")
 return
 }
 
-
-// FETCH CONFIRMED EVENTS
 const { data , error } =
 await window.supabase
 .from("quotations")
@@ -49,48 +52,32 @@ await window.supabase
 .order("event_date",{ascending:true})
 
 if(error){
-
-eventList.innerHTML =
-"<p>Error loading events</p>"
+eventList.innerHTML = "<p>Error loading events</p>"
 return
-
 }
 
 if(!data || data.length === 0){
-
-eventList.innerHTML =
-"<p>No upcoming events</p>"
+eventList.innerHTML = "<p>No upcoming events</p>"
 return
-
 }
 
-
-// GROUP EVENTS BY DATE
 const grouped = {}
 
 data.forEach(e=>{
-
 const date = e.event_date
-
 if(!grouped[date]){
 grouped[date] = []
 }
-
 grouped[date].push(e)
-
 })
 
 eventList.innerHTML = ""
 
-
-// SORT DATES
 const sortedDates =
 Object.keys(grouped).sort(
 (a,b)=> new Date(a) - new Date(b)
 )
 
-
-// RENDER GROUPED EVENTS
 sortedDates.forEach(date=>{
 
 const events = grouped[date]
@@ -105,21 +92,13 @@ year:"numeric"
 let busyLabel = ""
 
 if(events.length >= 8){
-
-busyLabel =
-"<span class='text-red-400 text-xs ml-2'>🔥 Very Busy Day</span>"
-
+busyLabel = "<span class='text-red-400 text-xs ml-2'>🔥 Very Busy Day</span>"
 }
 else if(events.length >= 5){
-
-busyLabel =
-"<span class='text-yellow-400 text-xs ml-2'>⚡ Busy Day</span>"
-
+busyLabel = "<span class='text-yellow-400 text-xs ml-2'>⚡ Busy Day</span>"
 }
 
-
 eventList.innerHTML += `
-
 <div class="glass p-4 rounded-xl">
 
 <p class="text-lg font-semibold mb-2">
@@ -131,7 +110,6 @@ ${busyLabel}
 </p>
 
 <div class="space-y-1">
-
 ${events.map(e=>`
 <div 
 class="text-sm text-gray-300 cursor-pointer hover:text-white transition"
@@ -140,11 +118,9 @@ onclick="location.href='client.html?id=${e.id}'"
 • ${e.client_name} — ₹${e.total}
 </div>
 `).join("")}
-
 </div>
 
 </div>
-
 `
 
 })
@@ -154,13 +130,9 @@ return data
 }
 
 
-
 // =============================
-// 🔥 SMART CALENDAR SYSTEM (UNCHANGED + FIXED)
+// SMART CALENDAR SYSTEM
 // =============================
-
-const calendar = document.getElementById("calendar")
-const monthLabel = document.getElementById("monthLabel")
 
 let currentDate = new Date()
 
@@ -174,17 +146,17 @@ return { firstDay, daysInMonth }
 }
 
 
+// =============================
 // LOAD CALENDAR
+// =============================
 
 async function loadCalendar(){
 
-// 🔥 FIX: wait for supabase
 await waitForSupabase()
 
 if(!calendar) return
 if(!window.supabase) return
 
-// 🔥 FINAL FIX (SAFE USER)
 const user = await window.getCurrentUser()
 
 if(!user){
@@ -200,7 +172,6 @@ await window.supabase
 .eq("user_id",user.id)
 .eq("status","confirmed")
 
-// MAP EVENTS
 const eventDates = {}
 
 if(data){
@@ -237,12 +208,12 @@ const fullDate =
 
 let color = "bg-slate-800"
 
-// 🔴 EVENT
+// EVENT = RED
 if(eventDates[fullDate]){
 color = "bg-red-600"
 }
 
-// 🔵 NOTE
+// NOTE = BLUE
 if(notes[fullDate]){
 color = "bg-blue-600"
 }
@@ -262,7 +233,7 @@ ${d}
 
 
 // =============================
-// 📝 NOTES SYSTEM (UNCHANGED)
+// NOTES SYSTEM
 // =============================
 
 const modal = document.getElementById("modal")
@@ -317,7 +288,7 @@ loadCalendar()
 
 
 // =============================
-// 📅 MONTH NAVIGATION (UNCHANGED)
+// MONTH NAVIGATION
 // =============================
 
 const prevBtn = document.getElementById("prevMonth")
@@ -339,10 +310,15 @@ loadCalendar()
 
 
 // =============================
-// INIT (FIXED)
+// INIT (MAIN FIX HERE)
 // =============================
 
 window.addEventListener("DOMContentLoaded",async function(){
+
+// 🔥 FIX: elements yaha load honge
+eventList = document.getElementById("eventList")
+calendar = document.getElementById("calendar")
+monthLabel = document.getElementById("monthLabel")
 
 await loadEvents()
 await loadCalendar()
