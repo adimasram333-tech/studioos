@@ -355,3 +355,5 @@ console.error("Gallery save failed:",err)
 return false
 
 }
+
+} // ✅ THIS WAS MISSING
