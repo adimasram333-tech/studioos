@@ -4,6 +4,8 @@
 
 async function getCurrentUser(){
 
+const supabase = await window.getSupabase()
+
 const { data:{ user } } =
 await supabase.auth.getUser()
 
@@ -66,6 +68,8 @@ maximumFractionDigits:0
 
 async function loadStudio(){
 
+const supabase = await window.getSupabase()
+
 const user = await getCurrentUser()
 
 if(!user) return
@@ -99,6 +103,8 @@ data.studio_name || "Photographer"
 // =============================
 
 async function loadInvoice(){
+
+const supabase = await window.getSupabase()
 
 const quotationId = getQuotationId()
 
