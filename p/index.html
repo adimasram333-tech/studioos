@@ -26,9 +26,7 @@ async function waitForSupabase(){
 
 let tries = 0
 
-// ❌ OLD: window.supabase
-// ✅ FIX: window.getSupabase()
-
+// ORIGINAL CONDITION (kept but fixed logic)
 while((!window.getSupabase || !window.getSupabase()) && tries < 50){
 await new Promise(r => setTimeout(r,100))
 tries++
@@ -47,43 +45,30 @@ const params = new URLSearchParams(window.location.search)
 
 let id = null
 
-
 // CASE 1
 // ?id=xxxxx
-
 if(params.get("id")){
 id = params.get("id")
 }
 
-
 // CASE 2
 // ?slug=name-xxxxx
-
 if(!id && params.get("slug")){
-
 const slug = params.get("slug")
-
 if(slug.includes("-")){
 id = slug.substring(slug.lastIndexOf("-") + 1)
 }
-
 }
-
 
 // CASE 3
 // /p/name-xxxxx
-
 if(!id){
-
 const path = window.location.pathname
 const parts = path.split("/").filter(Boolean)
-
 const slug = parts[parts.length - 1]
-
 if(slug && slug.includes("-")){
 id = slug.substring(slug.lastIndexOf("-") + 1)
 }
-
 }
 
 return id
@@ -99,45 +84,59 @@ async function loadProposal(){
 
 await waitForSupabase()
 
-// ✅ FIX START (ONLY CHANGE)
+// ORIGINAL LINE (kept logic, but fixed usage)
 const supabase = window.getSupabase()
-// ✅ FIX END
 
 const status = document.getElementById("status")
 
 const shortId = extractShortId()
 
 if(!shortId){
-
 status.innerHTML = "Invalid proposal link"
 return
-
 }
 
 try{
 
+// =====================
+// 🔴 ORIGINAL CODE (NOT REMOVED, JUST COMMENTED)
+// =====================
+
+// const { data, error } = await supabase
+// .from("quotations")
+// .select("id")
+// .eq("short_id", shortId)
+// .maybeSingle()
+
+// =====================
+// ✅ FIXED CODE (ADDED)
+// =====================
+
 const { data, error } = await supabase
 .from("quotations")
-.select("id")
-.eq("short_id", shortId)
-.maybeSingle()
+.select("id, short_id")
+.ilike("short_id", shortId + "%")   // partial match
 
 
 if(error){
-
 status.innerHTML = "Error loading proposal"
 return
-
 }
 
-if(!data){
+// ORIGINAL LOGIC (kept but adapted)
+let record = null
 
+if(data && data.length > 0){
+record = data[0]
+}
+
+// ORIGINAL CHECK (kept behavior)
+if(!record){
 status.innerHTML = "Proposal not found"
 return
-
 }
 
-const fullId = data.id
+const fullId = record.id
 
 
 // =====================
