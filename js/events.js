@@ -1,3 +1,7 @@
+// =============================
+// ORIGINAL EVENT LIST (UNCHANGED)
+// =============================
+
 const eventList = document.getElementById("eventList")
 
 async function loadEvents(){
@@ -120,6 +124,168 @@ onclick="location.href='client.html?id=${e.id}'"
 
 })
 
+return data
+
 }
 
+
+
+// =============================
+// 🔥 SMART CALENDAR SYSTEM (NEW)
+// =============================
+
+const calendar = document.getElementById("calendar")
+const monthLabel = document.getElementById("monthLabel")
+
+let currentDate = new Date()
+
+function getMonthData(year, month){
+
+const firstDay = new Date(year, month, 1).getDay()
+const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+return { firstDay, daysInMonth }
+
+}
+
+
+// LOAD CALENDAR
+
+async function loadCalendar(){
+
+if(!calendar) return
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+if(!user) return
+
+// FETCH EVENTS
+const { data } =
+await supabase
+.from("quotations")
+.select("*")
+.eq("user_id",user.id)
+.eq("status","confirmed")
+
+// MAP EVENTS
+const eventDates = {}
+
+data.forEach(e=>{
+eventDates[e.event_date] = true
+})
+
+// LOAD NOTES
+const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
+
+const year = currentDate.getFullYear()
+const month = currentDate.getMonth()
+
+const { firstDay, daysInMonth } = getMonthData(year, month)
+
+calendar.innerHTML = ""
+
+monthLabel.innerText =
+currentDate.toLocaleString("default",{month:"long",year:"numeric"})
+
+// EMPTY CELLS
+for(let i=0;i<firstDay;i++){
+calendar.innerHTML += `<div></div>`
+}
+
+// DAYS
+for(let d=1; d<=daysInMonth; d++){
+
+const fullDate =
+`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+
+let color = "bg-slate-800"
+
+// 🔴 EVENT
+if(eventDates[fullDate]){
+color = "bg-red-600"
+}
+
+// 🔵 NOTE
+if(notes[fullDate]){
+color = "bg-blue-600"
+}
+
+calendar.innerHTML += `
+<div 
+class="${color} p-2 rounded cursor-pointer"
+onclick="openModal('${fullDate}')"
+>
+${d}
+</div>
+`
+
+}
+
+}
+
+
+// =============================
+// 📝 NOTES SYSTEM
+// =============================
+
+const modal = document.getElementById("modal")
+const noteInput = document.getElementById("noteInput")
+const selectedDate = document.getElementById("selectedDate")
+
+let activeDate = null
+
+function openModal(date){
+
+activeDate = date
+
+selectedDate.innerText = date
+
+const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
+
+noteInput.value = notes[date] || ""
+
+modal.classList.remove("hidden")
+
+}
+
+function closeModal(){
+modal.classList.add("hidden")
+}
+
+document.getElementById("saveNote").addEventListener("click",function(){
+
+const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
+
+notes[activeDate] = noteInput.value
+
+localStorage.setItem("calendar_notes",JSON.stringify(notes))
+
+closeModal()
+
+loadCalendar()
+
+})
+
+
+// =============================
+// 📅 MONTH NAVIGATION
+// =============================
+
+document.getElementById("prevMonth").onclick = function(){
+currentDate.setMonth(currentDate.getMonth() - 1)
+loadCalendar()
+}
+
+document.getElementById("nextMonth").onclick = function(){
+currentDate.setMonth(currentDate.getMonth() + 1)
+loadCalendar()
+}
+
+
+// =============================
+// INIT
+// =============================
+
 loadEvents()
+loadCalendar()
