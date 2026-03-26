@@ -1,18 +1,38 @@
 const list = document.getElementById("revenueList")
 
-async function loadRevenue(){
+
+// =============================
+// GET CURRENT USER
+// =============================
+
+async function getCurrentUser(){
+
+const supabase = await window.getSupabase()
 
 const { data:{ user } } =
 await supabase.auth.getUser()
 
-if(!user) return
+return user
 
+}
+
+
+// =============================
+// LOAD REVENUE
+// =============================
+
+async function loadRevenue(){
+
+const supabase = await window.getSupabase()
+
+const user = await getCurrentUser()
+
+if(!user) return
 
 
 const now = new Date()
 const month = now.getMonth()
 const year = now.getFullYear()
-
 
 
 // =============================
@@ -27,8 +47,8 @@ await supabase
 .order("payment_date",{ascending:false})
 
 
-
 list.innerHTML = ""
+
 
 if(!payments || payments.length === 0){
 
@@ -38,7 +58,6 @@ list.innerHTML =
 return
 
 }
-
 
 
 // =============================
@@ -55,7 +74,6 @@ date.getFullYear() !== year
 ) continue
 
 
-
 // =============================
 // GET CLIENT NAME
 // =============================
@@ -68,17 +86,14 @@ await supabase
 .single()
 
 
-
 const clientName =
 quotation?.client_name || "Client"
-
 
 
 const card = document.createElement("div")
 
 card.className =
 "glass rounded-xl p-4"
-
 
 
 card.innerHTML = `
@@ -118,7 +133,6 @@ list.appendChild(card)
 }
 
 
-
 // =============================
 // EMPTY STATE CHECK
 // =============================
@@ -129,5 +143,10 @@ list.innerHTML =
 }
 
 }
+
+
+// =============================
+// INIT
+// =============================
 
 loadRevenue()
