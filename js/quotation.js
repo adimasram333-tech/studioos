@@ -4,9 +4,7 @@
 
 function getSupabase(){
 
-if(window.getSupabase){
-return window.getSupabase()
-}
+// ✅ FIX: recursion removed (ONLY CHANGE)
 
 if(window.supabaseClient){
 return window.supabaseClient
