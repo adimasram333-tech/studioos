@@ -4,6 +4,8 @@
 
 async function getCurrentUser(){
 
+const supabase = await window.getSupabase()
+
 const { data:{ user } } =
 await supabase.auth.getUser()
 
@@ -55,6 +57,8 @@ year:"numeric"
 // =============================
 
 async function loadClient(){
+
+const supabase = await window.getSupabase()
 
 const quotationId = getQuotationId()
 
