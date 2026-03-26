@@ -76,14 +76,14 @@ return parts[2] + "-" + parts[1] + "-" + parts[0]
 
 
 // ======================
-// WAIT FOR SUPABASE
+// WAIT FOR SUPABASE (UNCHANGED)
 // ======================
 
 async function waitForSupabase(){
 
 let tries = 0
 
-while(!window.supabase && tries < 50){
+while(!window.getSupabase && tries < 50){
 await new Promise(r => setTimeout(r,100))
 tries++
 }
@@ -99,15 +99,23 @@ async function loadProposal(){
 
 await waitForSupabase()
 
+// ✅ FIX: proper client
+const supabase = await window.getSupabase()
+
 let data = null
 
 
 // ======================
-// GET CURRENT USER
+// GET CURRENT USER (SAFE)
 // ======================
 
-const { data:{ user } } =
-await supabase.auth.getUser()
+let user = null
+try{
+const res = await supabase.auth.getUser()
+user = res?.data?.user || null
+}catch(e){
+console.log("User fetch error", e)
+}
 
 
 // ======================
@@ -172,7 +180,6 @@ let profile = null
 
 try{
 
-// FIX: use quotation user_id instead of logged user
 const { data: row } =
 await supabase
 .from("photographer_settings")
