@@ -13,10 +13,39 @@
 <div class="max-w-md mx-auto">
 
 <h1 class="text-2xl font-bold mb-6">
-Upcoming Events
+Smart Calendar
 </h1>
 
-<div id="eventList" class="space-y-4"></div>
+<!-- Month Navigation -->
+<div class="flex justify-between items-center mb-4">
+<button id="prevMonth" class="px-3 py-1 bg-slate-700 rounded">←</button>
+<h2 id="monthLabel" class="font-semibold"></h2>
+<button id="nextMonth" class="px-3 py-1 bg-slate-700 rounded">→</button>
+</div>
+
+<!-- Calendar Grid -->
+<div id="calendar" class="grid grid-cols-7 gap-2 text-center"></div>
+
+</div>
+
+<!-- Modal -->
+<div id="modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center">
+
+<div class="bg-slate-800 p-4 rounded w-full max-w-sm">
+
+<h3 id="selectedDate" class="mb-3 font-semibold"></h3>
+
+<textarea id="noteInput" class="w-full p-2 rounded bg-slate-700 mb-3" placeholder="Write note..."></textarea>
+
+<button id="saveNote" class="w-full bg-blue-600 py-2 rounded mb-2">
+Save Note
+</button>
+
+<button onclick="closeModal()" class="w-full bg-slate-600 py-2 rounded">
+Close
+</button>
+
+</div>
 
 </div>
 
