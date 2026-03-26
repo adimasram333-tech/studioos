@@ -17,7 +17,7 @@ check()
 
 
 // =============================
-// ✅ ADD THIS (MISSING FUNCTION)
+// GET CURRENT USER
 // =============================
 
 async function getCurrentUser(){
@@ -328,10 +328,10 @@ loadCalendar()
 
 
 // =============================
-// INIT
+// ✅ FINAL FIXED INIT
 // =============================
 
-window.addEventListener("DOMContentLoaded",async function(){
+async function init(){
 
 eventList = document.getElementById("eventList")
 calendar = document.getElementById("calendar")
@@ -340,4 +340,7 @@ monthLabel = document.getElementById("monthLabel")
 await loadEvents()
 await loadCalendar()
 
-})
+}
+
+// 🔥 RUN IMMEDIATELY (NO DOMContentLoaded)
+init()
