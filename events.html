@@ -49,34 +49,36 @@ Close
 
 </div>
 
-<!-- ✅ Supabase CDN -->
+<!-- Supabase CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- ✅ Supabase INIT -->
+<!-- Supabase INIT -->
 <script src="js/supabase.js"></script>
 
-<!-- ✅ FIXED LOADER (WAIT PROPERLY) -->
+<!-- ✅ FINAL FIXED LOADER -->
 <script>
 
 function loadEventsScript(){
 const script = document.createElement("script")
 script.src = "js/events.js"
+script.defer = true
 document.body.appendChild(script)
 }
 
-// 🔥 Proper wait (NO RACE CONDITION)
-window.addEventListener("load", function(){
+function waitForSupabaseAndLoad(){
 
-const check = () => {
-if(window.supabase){
+// Wait until getSupabase is available
+if(typeof window.getSupabase === "function"){
 loadEventsScript()
 } else {
-setTimeout(check, 100)
-}
+setTimeout(waitForSupabaseAndLoad, 50)
 }
 
-check()
+}
 
+// ✅ DOM READY FIRST
+document.addEventListener("DOMContentLoaded", function(){
+waitForSupabaseAndLoad()
 })
 
 </script>
