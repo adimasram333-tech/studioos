@@ -1,11 +1,12 @@
 // =============================
-// SAFE WAIT FOR SUPABASE
+// SAFE WAIT FOR SUPABASE (FIXED)
 // =============================
 
 async function waitForSupabase(){
 return new Promise(resolve=>{
 const check = ()=>{
-if(window.supabase){
+// ✅ FIX: use getSupabase instead of supabase
+if(typeof window.getSupabase === "function"){
 resolve()
 }else{
 setTimeout(check,100)
@@ -34,9 +35,10 @@ async function loadEvents(){
 await waitForSupabase()
 
 if(!eventList) return
-if(!window.supabase) return
 
-const user = await window.getCurrentUser()
+const supabase = await window.getSupabase()
+
+const user = await window.getCurrentUser?.()
 
 if(!user){
 console.log("No user found")
@@ -44,7 +46,7 @@ return
 }
 
 const { data , error } =
-await window.supabase
+await supabase
 .from("quotations")
 .select("*")
 .eq("user_id",user.id)
@@ -155,9 +157,10 @@ async function loadCalendar(){
 await waitForSupabase()
 
 if(!calendar) return
-if(!window.supabase) return
 
-const user = await window.getCurrentUser()
+const supabase = await window.getSupabase()
+
+const user = await window.getCurrentUser?.()
 
 if(!user){
 console.log("No user found")
@@ -166,7 +169,7 @@ return
 
 // FETCH EVENTS
 const { data } =
-await window.supabase
+await supabase
 .from("quotations")
 .select("*")
 .eq("user_id",user.id)
@@ -315,7 +318,6 @@ loadCalendar()
 
 window.addEventListener("DOMContentLoaded",async function(){
 
-// 🔥 FIX: elements yaha load honge
 eventList = document.getElementById("eventList")
 calendar = document.getElementById("calendar")
 monthLabel = document.getElementById("monthLabel")
