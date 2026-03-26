@@ -2,10 +2,10 @@
 // GET SUPABASE CLIENT SAFELY
 // =============================
 
-function getSupabase(){
+async function getSupabase(){
 
 if(window.getSupabase){
-return window.getSupabase()
+return await window.getSupabase()
 }
 
 if(window.supabaseClient){
@@ -24,7 +24,7 @@ throw new Error("Supabase client not initialized")
 
 export async function login(email,password){
 
-const supabase = getSupabase()
+const supabase = await getSupabase()
 
 const { error } =
 await supabase.auth.signInWithPassword({
@@ -53,7 +53,7 @@ window.location.replace("dashboard.html")
 
 export async function signup(email,password){
 
-const supabase = getSupabase()
+const supabase = await getSupabase()
 
 const { error } =
 await supabase.auth.signUp({
@@ -82,7 +82,7 @@ alert("Account created. Please login.")
 
 export async function protectPage(){
 
-const supabase = getSupabase()
+const supabase = await getSupabase()
 
 // immediate session check
 const { data:{ session } } =
@@ -129,7 +129,7 @@ window.location.replace("index.html")
 
 export async function logout(){
 
-const supabase = getSupabase()
+const supabase = await getSupabase()
 
 await supabase.auth.signOut()
 
