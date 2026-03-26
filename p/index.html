@@ -26,7 +26,10 @@ async function waitForSupabase(){
 
 let tries = 0
 
-while(!window.supabase && tries < 50){
+// ❌ OLD: window.supabase
+// ✅ FIX: window.getSupabase()
+
+while((!window.getSupabase || !window.getSupabase()) && tries < 50){
 await new Promise(r => setTimeout(r,100))
 tries++
 }
@@ -95,6 +98,10 @@ return id
 async function loadProposal(){
 
 await waitForSupabase()
+
+// ✅ FIX START (ONLY CHANGE)
+const supabase = window.getSupabase()
+// ✅ FIX END
 
 const status = document.getElementById("status")
 
