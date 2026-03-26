@@ -1,11 +1,4 @@
 // =============================
-// SAFE SUPABASE CLIENT FIX (NEW)
-// =============================
-
-const supabaseClient = window.supabase || null;
-
-
-// =============================
 // ORIGINAL EVENT LIST (UNCHANGED)
 // =============================
 
@@ -14,17 +7,17 @@ const eventList = document.getElementById("eventList")
 async function loadEvents(){
 
 if(!eventList) return
-if(!supabaseClient) return
+if(!window.supabase) return
 
 const { data:{ user } } =
-await supabaseClient.auth.getUser()
+await window.supabase.auth.getUser()
 
 if(!user) return
 
 
 // FETCH CONFIRMED EVENTS
 const { data , error } =
-await supabaseClient
+await window.supabase
 .from("quotations")
 .select("*")
 .eq("user_id",user.id)
@@ -162,16 +155,16 @@ return { firstDay, daysInMonth }
 async function loadCalendar(){
 
 if(!calendar) return
-if(!supabaseClient) return
+if(!window.supabase) return
 
 const { data:{ user } } =
-await supabaseClient.auth.getUser()
+await window.supabase.auth.getUser()
 
 if(!user) return
 
 // FETCH EVENTS
 const { data } =
-await supabaseClient
+await window.supabase
 .from("quotations")
 .select("*")
 .eq("user_id",user.id)
@@ -194,8 +187,10 @@ const { firstDay, daysInMonth } = getMonthData(year, month)
 
 calendar.innerHTML = ""
 
+if(monthLabel){
 monthLabel.innerText =
 currentDate.toLocaleString("default",{month:"long",year:"numeric"})
+}
 
 // EMPTY CELLS
 for(let i=0;i<firstDay;i++){
@@ -246,20 +241,28 @@ let activeDate = null
 
 function openModal(date){
 
+if(!modal) return
+
 activeDate = date
 
+if(selectedDate){
 selectedDate.innerText = date
+}
 
 const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
 
+if(noteInput){
 noteInput.value = notes[date] || ""
+}
 
 modal.classList.remove("hidden")
 
 }
 
 function closeModal(){
+if(modal){
 modal.classList.add("hidden")
+}
 }
 
 const saveBtn = document.getElementById("saveNote")
@@ -304,7 +307,7 @@ loadCalendar()
 
 
 // =============================
-// INIT (SAFE)
+// INIT
 // =============================
 
 window.addEventListener("DOMContentLoaded",function(){
