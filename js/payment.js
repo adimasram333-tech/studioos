@@ -4,6 +4,8 @@
 
 async function getCurrentUser(){
 
+const supabase = await window.getSupabase()
+
 const { data:{ user } } =
 await supabase.auth.getUser()
 
@@ -31,6 +33,8 @@ return params.get("quotation")
 // =============================
 
 async function loadSummary(){
+
+const supabase = await window.getSupabase()
 
 const quotationId = getQuotationId()
 
@@ -88,6 +92,8 @@ if(remainingEl) remainingEl.innerText = "₹" + remaining
 // =============================
 
 async function loadPayments(){
+
+const supabase = await window.getSupabase()
 
 const quotationId = getQuotationId()
 
@@ -181,6 +187,8 @@ let savingPayment = false
 async function savePayment(){
 
 if(savingPayment) return
+
+const supabase = await window.getSupabase()
 
 const user = await getCurrentUser()
 
