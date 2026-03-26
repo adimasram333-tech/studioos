@@ -1,10 +1,31 @@
 // =============================
+// SAFE WAIT FOR SUPABASE (ADDED - NO REMOVAL)
+// =============================
+
+async function waitForSupabase(){
+return new Promise(resolve=>{
+const check = ()=>{
+if(window.supabase){
+resolve()
+}else{
+setTimeout(check,100)
+}
+}
+check()
+})
+}
+
+
+// =============================
 // ORIGINAL EVENT LIST (UNCHANGED)
 // =============================
 
 const eventList = document.getElementById("eventList")
 
 async function loadEvents(){
+
+// 🔥 FIX: wait for supabase
+await waitForSupabase()
 
 if(!eventList) return
 if(!window.supabase) return
@@ -132,7 +153,7 @@ return data
 
 
 // =============================
-// 🔥 SMART CALENDAR SYSTEM (FIXED)
+// 🔥 SMART CALENDAR SYSTEM (UNCHANGED + FIXED)
 // =============================
 
 const calendar = document.getElementById("calendar")
@@ -154,6 +175,9 @@ return { firstDay, daysInMonth }
 
 async function loadCalendar(){
 
+// 🔥 FIX: wait for supabase
+await waitForSupabase()
+
 if(!calendar) return
 if(!window.supabase) return
 
@@ -173,9 +197,11 @@ await window.supabase
 // MAP EVENTS
 const eventDates = {}
 
+if(data){
 data.forEach(e=>{
 eventDates[e.event_date] = true
 })
+}
 
 // LOAD NOTES
 const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
@@ -230,7 +256,7 @@ ${d}
 
 
 // =============================
-// 📝 NOTES SYSTEM
+// 📝 NOTES SYSTEM (UNCHANGED)
 // =============================
 
 const modal = document.getElementById("modal")
@@ -285,7 +311,7 @@ loadCalendar()
 
 
 // =============================
-// 📅 MONTH NAVIGATION
+// 📅 MONTH NAVIGATION (UNCHANGED)
 // =============================
 
 const prevBtn = document.getElementById("prevMonth")
@@ -307,10 +333,12 @@ loadCalendar()
 
 
 // =============================
-// INIT
+// INIT (FIXED)
 // =============================
 
-window.addEventListener("DOMContentLoaded",function(){
-loadEvents()
-loadCalendar()
+window.addEventListener("DOMContentLoaded",async function(){
+
+await loadEvents()
+await loadCalendar()
+
 })
