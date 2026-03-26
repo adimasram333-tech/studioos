@@ -5,7 +5,6 @@
 async function waitForSupabase(){
 return new Promise(resolve=>{
 const check = ()=>{
-// ✅ FIX: use getSupabase instead of supabase
 if(typeof window.getSupabase === "function"){
 resolve()
 }else{
@@ -18,7 +17,23 @@ check()
 
 
 // =============================
-// GLOBAL ELEMENTS (FIX)
+// ✅ ADD THIS (MISSING FUNCTION)
+// =============================
+
+async function getCurrentUser(){
+
+const supabase = await window.getSupabase()
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+return user
+
+}
+
+
+// =============================
+// GLOBAL ELEMENTS
 // =============================
 
 let eventList = null
@@ -38,7 +53,7 @@ if(!eventList) return
 
 const supabase = await window.getSupabase()
 
-const user = await window.getCurrentUser?.()
+const user = await getCurrentUser()
 
 if(!user){
 console.log("No user found")
@@ -160,7 +175,7 @@ if(!calendar) return
 
 const supabase = await window.getSupabase()
 
-const user = await window.getCurrentUser?.()
+const user = await getCurrentUser()
 
 if(!user){
 console.log("No user found")
@@ -313,7 +328,7 @@ loadCalendar()
 
 
 // =============================
-// INIT (MAIN FIX HERE)
+// INIT
 // =============================
 
 window.addEventListener("DOMContentLoaded",async function(){
