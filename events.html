@@ -55,21 +55,27 @@ Close
 <!-- ✅ Supabase INIT -->
 <script src="js/supabase.js"></script>
 
-<!-- ✅ SAFE LOAD WRAPPER (IMPORTANT FIX) -->
+<!-- ✅ FIXED LOADER (WAIT PROPERLY) -->
 <script>
 
-window.addEventListener("DOMContentLoaded", function(){
-
-// 🔥 Wait until supabase is ready
-if(!window.supabase){
-console.error("Supabase not loaded")
-return
-}
-
-// Load events system
+function loadEventsScript(){
 const script = document.createElement("script")
 script.src = "js/events.js"
 document.body.appendChild(script)
+}
+
+// 🔥 Proper wait (NO RACE CONDITION)
+window.addEventListener("load", function(){
+
+const check = () => {
+if(window.supabase){
+loadEventsScript()
+} else {
+setTimeout(check, 100)
+}
+}
+
+check()
 
 })
 
