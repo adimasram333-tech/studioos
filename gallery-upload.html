@@ -45,13 +45,23 @@ class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-3 text-sm">
 <option value="">Select Event</option>
 </select>
 
-<!-- 🔥 CREATE EVENT -->
+<!-- 🔥 INLINE CREATE EVENT (HIDDEN) -->
+<div id="createEventBox" style="display:none;" class="mb-4">
+
 <input
 type="text"
-id="newEventInput"
-placeholder="Create new event (e.g. Rohit Wedding)"
-class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-4 text-sm"
+id="manualEventName"
+placeholder="Enter Event Name"
+class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-2 text-sm"
 />
+
+<input
+type="date"
+id="manualEventDate"
+class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 text-sm"
+/>
+
+</div>
 
 <input
 type="file"
@@ -140,14 +150,46 @@ const select = document.getElementById("eventSelect")
 
 if(!select) return
 
+// RESET
+select.innerHTML = `<option value="">Select Event</option>`
+
+// EXISTING EVENTS
 data?.forEach(e=>{
 const option = document.createElement("option")
 option.value = e.id
-option.textContent = e.event_name
+option.textContent = `${e.client_name} (${e.event_date})`
 select.appendChild(option)
 })
 
+// ADD CREATE OPTION
+const createOption = document.createElement("option")
+createOption.value = "create_new"
+createOption.textContent = "+ Create New Event"
+select.appendChild(createOption)
+
 }
+
+
+// =============================
+// SHOW / HIDE CREATE EVENT BOX
+// =============================
+
+document.addEventListener("change", function(e){
+
+if(e.target.id === "eventSelect"){
+
+const value = e.target.value
+const box = document.getElementById("createEventBox")
+
+if(value === "create_new"){
+box.style.display = "block"
+}else{
+box.style.display = "none"
+}
+
+}
+
+})
 
 
 // =============================
@@ -160,24 +202,29 @@ const supabase = await window.getSupabase()
 const user = await window.getCurrentUser()
 
 const select = document.getElementById("eventSelect")
-const newEventInput = document.getElementById("newEventInput")
 
 let eventId = select.value
 
-// 🔥 CREATE EVENT IF NOT SELECTED
-if(!eventId && newEventInput.value.trim()){
+// 🔥 CREATE NEW EVENT FLOW
+if(eventId === "create_new"){
 
-const eventName = newEventInput.value.trim()
+const name = document.getElementById("manualEventName").value.trim()
+const date = document.getElementById("manualEventDate").value
+
+if(!name || !date){
+alert("Enter event name and date")
+return
+}
 
 const { data, error } =
 await supabase
 .from("events")
 .insert([{
 user_id: user.id,
-client_name: eventName,
-event_name: eventName,
-event_type: eventName,
-event_date: new Date().toISOString().split('T')[0],
+client_name: name,
+event_name: name,
+event_type: name,
+event_date: date,
 status: "active"
 }])
 .select()
@@ -194,11 +241,11 @@ eventId = data.id
 
 // ❌ NO EVENT SELECTED
 if(!eventId){
-alert("Please select or create event")
+alert("Please select event")
 return
 }
 
-// 🔥 STORE EVENT FOR UPLOAD
+// STORE EVENT
 localStorage.setItem("current_event", eventId)
 
 // CALL ORIGINAL UPLOAD
