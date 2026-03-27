@@ -1,4 +1,3 @@
-```javascript
 // =============================
 // SAFE SUPABASE ACCESS
 // =============================
@@ -25,10 +24,21 @@ return await window.getCurrentUser()
 
 const supabase = getSupabase()
 
-const { data:{ user } } =
-await supabase.auth.getUser()
+try{
 
-return user
+const { data, error } = await supabase.auth.getUser()
+
+if(error){
+console.error("Auth error", error)
+return null
+}
+
+return data?.user || null
+
+}catch(err){
+console.error("Auth crash", err)
+return null
+}
 
 }
 
@@ -55,16 +65,19 @@ return
 }
 
 // ===== FETCH DATA =====
-const { data: quotations } = await supabase
+const { data: quotations, error: qError } = await supabase
 .from("quotations")
 .select("*")
 .eq("status","confirmed")
-.eq("user_id", user.id) // ✅ FIX
+.eq("user_id", user.id)
 
-const { data: events } = await supabase
+const { data: events, error: eError } = await supabase
 .from("events")
 .select("*")
 .eq("user_id", user.id)
+
+if(qError) console.error("Quotation error", qError)
+if(eError) console.error("Events error", eError)
 
 // RESET
 select.innerHTML = `<option value="">Select Event</option>`
@@ -72,7 +85,9 @@ select.innerHTML = `<option value="">Select Event</option>`
 const added = new Set()
 
 // quotations (MAIN SYSTEM)
-quotations?.forEach(q => {
+;(quotations || []).forEach(q => {
+
+if(!q || !q.id) return
 
 const key = q.client_name + "_" + q.event_date
 if(added.has(key)) return
@@ -87,7 +102,9 @@ select.appendChild(option)
 })
 
 // manual events (SAFE MODE - DISABLED VALUE)
-events?.forEach(e => {
+;(events || []).forEach(e => {
+
+if(!e) return
 
 const key = e.client_name + "_" + e.event_date
 if(added.has(key)) return
@@ -155,7 +172,7 @@ async function createManualEventIfNeeded(){
 
 const select = document.getElementById("eventSelect")
 
-if(select.value !== "create_new"){
+if(!select || select.value !== "create_new"){
 return null
 }
 
@@ -170,13 +187,15 @@ return null
 const supabase = getSupabase()
 const user = await getCurrentUser()
 
+if(!user) return null
+
 // duplicate check (FIXED)
 const { data: existing } = await supabase
 .from("quotations")
 .select("*")
 .eq("client_name", name)
 .eq("event_date", date)
-.eq("user_id", user.id) // ✅ FIX
+.eq("user_id", user.id)
 
 if(existing && existing.length > 0){
 return existing[0].id
@@ -233,7 +252,7 @@ return
 
 const files = input.files
 
-if(!files.length){
+if(!files || !files.length){
 
 status.innerText = "Please select images or folder"
 return
@@ -307,7 +326,7 @@ let urls = []
 // =============================
 
 const validFiles =
-[...files].filter(file => file.type.startsWith("image/"))
+[...files].filter(file => file && file.type && file.type.startsWith("image/"))
 
 if(validFiles.length === 0){
 
@@ -345,6 +364,8 @@ return url
 console.error("Upload error",err)
 
 }
+
+return null
 
 })
 
@@ -409,4 +430,3 @@ status.innerText =
 // =============================
 
 window.uploadImages = uploadImages
-```
