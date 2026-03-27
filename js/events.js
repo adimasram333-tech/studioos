@@ -42,7 +42,7 @@ let monthLabel = null
 
 
 // =============================
-// ORIGINAL EVENT LIST
+// ORIGINAL EVENT LIST (FIXED)
 // =============================
 
 async function loadEvents(){
@@ -60,12 +60,21 @@ console.log("No user found")
 return
 }
 
+// ✅ MONTH FILTER ADDED
+const year = currentDate.getFullYear()
+const month = currentDate.getMonth()
+
+const startDate = `${year}-${String(month+1).padStart(2,'0')}-01`
+const endDate = `${year}-${String(month+1).padStart(2,'0')}-31`
+
 const { data , error } =
 await supabase
 .from("quotations")
 .select("*")
 .eq("user_id",user.id)
 .eq("status","confirmed")
+.gte("event_date", startDate)
+.lte("event_date", endDate)
 .order("event_date",{ascending:true})
 
 if(error){
@@ -329,7 +338,7 @@ loadCalendar()
 
 
 // =============================
-// MONTH NAVIGATION
+// MONTH NAVIGATION (FIXED)
 // =============================
 
 const prevBtn = document.getElementById("prevMonth")
@@ -339,6 +348,7 @@ if(prevBtn){
 prevBtn.onclick = function(){
 currentDate.setMonth(currentDate.getMonth() - 1)
 loadCalendar()
+loadEvents() // ✅ added
 }
 }
 
@@ -346,6 +356,7 @@ if(nextBtn){
 nextBtn.onclick = function(){
 currentDate.setMonth(currentDate.getMonth() + 1)
 loadCalendar()
+loadEvents() // ✅ added
 }
 }
 
