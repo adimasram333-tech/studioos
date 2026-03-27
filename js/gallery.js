@@ -1,0 +1,66 @@
+// =============================
+// LOAD GALLERY
+// =============================
+
+async function loadGallery(){
+
+const supabase = await window.getSupabase()
+
+const user = await window.getCurrentUser()
+
+if(!user){
+console.error("User not found")
+return
+}
+
+const eventId = localStorage.getItem("current_event")
+
+if(!eventId){
+console.log("No event selected")
+return
+}
+
+const { data, error } =
+await supabase
+.from("gallery_photos")
+.select("*")
+.eq("event_id", eventId)
+.eq("user_id", user.id)
+.order("created_at",{ ascending:false })
+
+if(error){
+console.error("Gallery fetch error:",error)
+return
+}
+
+const grid = document.getElementById("galleryGrid")
+const empty = document.getElementById("emptyState")
+
+grid.innerHTML = ""
+
+if(!data || data.length === 0){
+empty.classList.remove("hidden")
+return
+}
+
+empty.classList.add("hidden")
+
+data.forEach(img=>{
+
+const div = document.createElement("div")
+
+div.className =
+"glass rounded-xl overflow-hidden"
+
+div.innerHTML = `
+<img src="${img.image_url}"
+class="w-full h-40 object-cover"/>
+`
+
+grid.appendChild(div)
+
+})
+
+}
+
+loadGallery()
