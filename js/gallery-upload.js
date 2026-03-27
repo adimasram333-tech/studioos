@@ -18,7 +18,8 @@ throw new Error("Supabase client not initialized")
 
 async function getCurrentUser(){
 
-if(window.getCurrentUser){
+// 🔥 FIX: prevent recursive self-call
+if(window.getCurrentUser && window.getCurrentUser !== getCurrentUser){
 return await window.getCurrentUser()
 }
 
