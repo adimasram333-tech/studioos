@@ -15,19 +15,23 @@ return
 
 
 // =============================
-// 🔥 GET EVENT ID (FIXED)
+// 🔥 GET EVENT ID (SAFE FIX)
 // =============================
 
-// 1. URL param
+// URL param
 const params = new URLSearchParams(window.location.search)
 let eventId = params.get("event")
 
-// 2. fallback to localStorage (SAFE USE)
+// localStorage fallback (SAFE)
 let storedEvent = localStorage.getItem("current_event")
 
-// ⚠️ FIX: Only use localStorage when explicitly needed
 if(!eventId && window.location.search.includes("useLocal=true")){
 eventId = storedEvent
+}
+
+// ❌ BLOCK INVALID / LEGACY IDs
+if(eventId && typeof eventId === "string" && eventId.startsWith("legacy_")){
+eventId = null
 }
 
 
@@ -38,11 +42,16 @@ eventId = storedEvent
 const grid = document.getElementById("galleryGrid")
 const empty = document.getElementById("emptyState")
 
+if(!grid || !empty){
+console.error("Gallery DOM missing")
+return
+}
+
 grid.innerHTML = ""
 
 
 // =============================
-// 🔥 MODE 1: EVENT LIST (NEW)
+// 🔥 MODE 1: EVENT LIST
 // =============================
 
 if(!eventId){
@@ -69,6 +78,8 @@ empty.classList.add("hidden")
 
 events.forEach(e=>{
 
+if(!e || !e.id) return
+
 const div = document.createElement("div")
 
 div.className =
@@ -78,16 +89,14 @@ const date =
 new Date(e.event_date).toLocaleDateString("en-IN")
 
 div.innerHTML = `
-<div class="text-sm font-semibold">${e.client_name}</div>
+<div class="text-sm font-semibold">${e.client_name || "Unnamed"}</div>
 <div class="text-xs text-gray-400">${date}</div>
 `
 
 div.onclick = () => {
 
-// Save for optional reuse
 localStorage.setItem("current_event", e.id)
 
-// Navigate
 window.location.href = `gallery.html?event=${e.id}`
 
 }
@@ -102,7 +111,7 @@ return
 
 
 // =============================
-// FETCH DATA (EXISTING)
+// 🔥 MODE 2: IMAGE VIEW
 // =============================
 
 const { data, error } =
@@ -120,7 +129,7 @@ return
 
 
 // =============================
-// UI RENDER (EXISTING)
+// UI RENDER
 // =============================
 
 if(!data || data.length === 0){
@@ -131,6 +140,8 @@ return
 empty.classList.add("hidden")
 
 data.forEach(img=>{
+
+if(!img || !img.image_url) return
 
 const div = document.createElement("div")
 
