@@ -42,7 +42,7 @@ let monthLabel = null
 
 
 // =============================
-// ORIGINAL EVENT LIST (FIXED)
+// LOAD EVENTS (UPDATED → EVENTS TABLE)
 // =============================
 
 async function loadEvents(){
@@ -60,7 +60,6 @@ console.log("No user found")
 return
 }
 
-// ✅ FIXED MONTH FILTER (NO INVALID DATE)
 const year = currentDate.getFullYear()
 const month = currentDate.getMonth()
 
@@ -70,12 +69,12 @@ const endDateObj = new Date(year, month + 1, 0)
 const startDate = startDateObj.toISOString().split('T')[0]
 const endDate = endDateObj.toISOString().split('T')[0]
 
+// 🔥 SWITCHED TO EVENTS TABLE
 const { data , error } =
 await supabase
-.from("quotations")
+.from("events")
 .select("*")
 .eq("user_id",user.id)
-.eq("status","confirmed")
 .gte("event_date", startDate)
 .lte("event_date", endDate)
 .order("event_date",{ascending:true})
@@ -86,7 +85,7 @@ return
 }
 
 if(!data || data.length === 0){
-eventList.innerHTML = "<p>No upcoming events</p>"
+eventList.innerHTML = "<p>No events found</p>"
 return
 }
 
@@ -140,11 +139,8 @@ ${busyLabel}
 
 <div class="space-y-1">
 ${events.map(e=>`
-<div 
-class="text-sm text-gray-300 cursor-pointer hover:text-white transition"
-onclick="location.href='client.html?id=${e.id}'"
->
-• ${e.client_name} — ₹${e.total}
+<div class="text-sm text-gray-300">
+• ${e.client_name} — ${e.event_name}
 </div>
 `).join("")}
 </div>
@@ -173,7 +169,7 @@ return { firstDay, daysInMonth }
 
 
 // =============================
-// LOAD CALENDAR
+// LOAD CALENDAR (UPDATED)
 // =============================
 
 async function loadCalendar(){
@@ -190,13 +186,12 @@ console.log("No user found")
 return
 }
 
-// FETCH EVENTS
+// 🔥 EVENTS TABLE USED
 const { data } =
 await supabase
-.from("quotations")
+.from("events")
 .select("*")
 .eq("user_id",user.id)
-.eq("status","confirmed")
 
 const eventDates = {}
 const eventDetails = {}
@@ -204,9 +199,11 @@ const eventDetails = {}
 if(data){
 data.forEach(e=>{
 eventDates[e.event_date] = true
+
+// 🔥 UPDATED TOOLTIP
 eventDetails[e.event_date] = {
 name: e.client_name,
-amount: e.total
+event: e.event_name
 }
 })
 }
@@ -263,7 +260,7 @@ classes += " ring-2 ring-green-400 shadow-lg"
 let tooltip = ""
 
 if(eventDetails[fullDate]){
-tooltip += `${eventDetails[fullDate].name} • ₹${eventDetails[fullDate].amount}`
+tooltip += `${eventDetails[fullDate].name} • ${eventDetails[fullDate].event}`
 }
 
 if(notes[fullDate]){
@@ -286,7 +283,7 @@ ${d}
 
 
 // =============================
-// NOTES SYSTEM
+// NOTES SYSTEM (UNCHANGED)
 // =============================
 
 const modal = document.getElementById("modal")
