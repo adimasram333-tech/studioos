@@ -48,22 +48,18 @@ check()
 
 async function initializeSupabase(){
 
-// already initialized
 if(window.supabaseClient){
 return window.supabaseClient
 }
 
-// prevent multiple init
 if(supabaseInitPromise){
 return supabaseInitPromise
 }
 
 supabaseInitPromise = (async ()=>{
 
-// wait for CDN
 await waitForSupabaseCDN()
 
-// create client
 supabaseClient =
 window.supabase.createClient(
 SUPABASE_URL,
@@ -77,10 +73,8 @@ detectSessionInUrl:true
 }
 )
 
-// expose globally
 window.supabaseClient = supabaseClient
 
-// 🔥 CRITICAL FIX (bridge old + new system)
 window.supabase = supabaseClient
 
 return supabaseClient
@@ -93,7 +87,7 @@ return supabaseInitPromise
 
 
 // ================================
-// SAFE SUPABASE ACCESS (ALWAYS WORKS)
+// SAFE SUPABASE ACCESS
 // ================================
 
 window.getSupabase = async function(){
@@ -108,7 +102,7 @@ return await initializeSupabase()
 
 
 // ================================
-// SAFE CURRENT USER (NO CRASH)
+// SAFE CURRENT USER
 // ================================
 
 window.getCurrentUser = async function(){
@@ -134,7 +128,7 @@ return null
 
 
 // ================================
-// PRELOAD SUPABASE (FASTER)
+// PRELOAD SUPABASE
 // ================================
 
 initializeSupabase()
@@ -335,10 +329,18 @@ if(!supabase) return false
 
 try{
 
+// 🔥 SAFE USER ATTACH (NO BREAK)
+const user = await window.getCurrentUser()
+
+const safeImages = images.map(img => ({
+...img,
+user_id: img.user_id || user?.id || null
+}))
+
 const { error } =
 await supabase
 .from("gallery_photos")
-.insert(images)
+.insert(safeImages)
 
 if(error){
 
@@ -356,4 +358,4 @@ return false
 
 }
 
-} // ✅ THIS WAS MISSING
+}
