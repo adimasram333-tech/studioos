@@ -154,12 +154,9 @@ return data
 let currentDate = new Date()
 
 function getMonthData(year, month){
-
 const firstDay = new Date(year, month, 1).getDay()
 const daysInMonth = new Date(year, month + 1, 0).getDate()
-
 return { firstDay, daysInMonth }
-
 }
 
 
@@ -174,7 +171,6 @@ await waitForSupabase()
 if(!calendar) return
 
 const supabase = await window.getSupabase()
-
 const user = await getCurrentUser()
 
 if(!user){
@@ -191,10 +187,15 @@ await supabase
 .eq("status","confirmed")
 
 const eventDates = {}
+const eventDetails = {}
 
 if(data){
 data.forEach(e=>{
 eventDates[e.event_date] = true
+eventDetails[e.event_date] = {
+name: e.client_name,
+amount: e.total
+}
 })
 }
 
@@ -204,7 +205,6 @@ const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
 const year = currentDate.getFullYear()
 const month = currentDate.getMonth()
 
-// TODAY
 const today = new Date()
 const todayStr =
 `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
@@ -231,29 +231,37 @@ const fullDate =
 
 let classes = "p-2 rounded cursor-pointer transition hover:scale-105"
 
-// ✅ PRIORITY LOGIC FIXED
-
-// Event
+// PRIORITY LOGIC
 if(eventDates[fullDate]){
 classes += " bg-red-600"
 }
-// Note (only if no event)
 else if(notes[fullDate]){
 classes += " bg-blue-600"
 }
-// Default
 else{
 classes += " bg-slate-800"
 }
 
-// Today highlight
+// TODAY
 if(fullDate === todayStr){
 classes += " ring-2 ring-green-400 shadow-lg"
+}
+
+// TOOLTIP
+let tooltip = ""
+
+if(eventDetails[fullDate]){
+tooltip += `${eventDetails[fullDate].name} • ₹${eventDetails[fullDate].amount}`
+}
+
+if(notes[fullDate]){
+tooltip += tooltip ? " | Note added" : "Note added"
 }
 
 calendar.innerHTML += `
 <div 
 class="${classes}"
+title="${tooltip}"
 onclick="openModal('${fullDate}')"
 >
 ${d}
