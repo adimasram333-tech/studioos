@@ -60,12 +60,15 @@ console.log("No user found")
 return
 }
 
-// ✅ MONTH FILTER ADDED
+// ✅ FIXED MONTH FILTER (NO INVALID DATE)
 const year = currentDate.getFullYear()
 const month = currentDate.getMonth()
 
-const startDate = `${year}-${String(month+1).padStart(2,'0')}-01`
-const endDate = `${year}-${String(month+1).padStart(2,'0')}-31`
+const startDateObj = new Date(year, month, 1)
+const endDateObj = new Date(year, month + 1, 0)
+
+const startDate = startDateObj.toISOString().split('T')[0]
+const endDate = endDateObj.toISOString().split('T')[0]
 
 const { data , error } =
 await supabase
@@ -348,7 +351,7 @@ if(prevBtn){
 prevBtn.onclick = function(){
 currentDate.setMonth(currentDate.getMonth() - 1)
 loadCalendar()
-loadEvents() // ✅ added
+loadEvents()
 }
 }
 
@@ -356,7 +359,7 @@ if(nextBtn){
 nextBtn.onclick = function(){
 currentDate.setMonth(currentDate.getMonth() + 1)
 loadCalendar()
-loadEvents() // ✅ added
+loadEvents()
 }
 }
 
