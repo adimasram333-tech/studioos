@@ -4,7 +4,6 @@
 
 function getSupabase(){
 
-// 🔥 FIX: prevent recursive self-call
 if(window.getSupabase && window.getSupabase !== getSupabase){
 return window.getSupabase()
 }
@@ -19,7 +18,6 @@ throw new Error("Supabase client not initialized")
 
 async function getCurrentUser(){
 
-// 🔥 FIX: prevent recursive self-call
 if(window.getCurrentUser && window.getCurrentUser !== getCurrentUser){
 return await window.getCurrentUser()
 }
@@ -198,7 +196,7 @@ try{
 const rows = urls.map(url => ({
 event_id:eventId,
 image_url:url,
-uploaded_by:user.id
+user_id:user.id // 🔥 FIXED (was uploaded_by)
 }))
 
 const success =
