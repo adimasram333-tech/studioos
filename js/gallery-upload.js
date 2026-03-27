@@ -33,7 +33,7 @@ return user
 
 
 // =============================
-// 🔥 LOAD CONFIRMED + MANUAL EVENTS (UPDATED)
+// 🔥 LOAD CONFIRMED + MANUAL EVENTS (FIXED)
 // =============================
 
 async function loadConfirmedEvents(){
@@ -47,36 +47,38 @@ return
 }
 
 const supabase = getSupabase()
-
 const user = await getCurrentUser()
 
 if(!user){
 return
 }
 
-// ===== CONFIRMED QUOTATIONS =====
+// ===== FETCH DATA =====
 const { data: quotations } = await supabase
 .from("quotations")
 .select("*")
 .eq("status","confirmed")
 
-// ===== MANUAL EVENTS =====
 const { data: events } = await supabase
 .from("events")
 .select("*")
 .eq("user_id", user.id)
 
+// RESET
 select.innerHTML = `<option value="">Select Event</option>`
+
+const added = new Set()
 
 // quotations
 quotations?.forEach(q => {
 
+const key = q.client_name + "_" + q.event_date
+if(added.has(key)) return
+added.add(key)
+
 const option = document.createElement("option")
-
-option.value = "q_" + q.id
-
-option.textContent =
-`${q.client_name} (${q.event_date})`
+option.value = q.id
+option.textContent = `${q.client_name} (${q.event_date})`
 
 select.appendChild(option)
 
@@ -85,16 +87,23 @@ select.appendChild(option)
 // manual events
 events?.forEach(e => {
 
+const key = e.client_name + "_" + e.event_date
+if(added.has(key)) return
+added.add(key)
+
 const option = document.createElement("option")
-
-option.value = "e_" + e.id
-
-option.textContent =
-`${e.event_name} (${e.event_date})`
+option.value = e.id
+option.textContent = `${e.event_name} (${e.event_date})`
 
 select.appendChild(option)
 
 })
+
+// 🔥 CREATE OPTION ADD
+const createOption = document.createElement("option")
+createOption.value = "create_new"
+createOption.textContent = "+ Create New Event"
+select.appendChild(createOption)
 
 }catch(err){
 console.error("Dropdown load error",err)
@@ -116,7 +125,7 @@ loadConfirmedEvents()
 
 
 // =============================
-// 🔥 GET EVENT ID (UPDATED HYBRID)
+// 🔥 GET EVENT ID
 // =============================
 
 function getEventId(){
@@ -134,41 +143,51 @@ return select.value
 
 
 // =============================
-// 🔥 CREATE MANUAL EVENT (NEW)
+// 🔥 CREATE MANUAL EVENT (FIXED)
 // =============================
 
 async function createManualEventIfNeeded(){
 
-const input = document.getElementById("newEventInput")
+const select = document.getElementById("eventSelect")
 
-if(!input || !input.value.trim()){
+if(select.value !== "create_new"){
 return null
 }
 
-const eventName = input.value.trim()
+const name = document.getElementById("manualEventName")?.value?.trim()
+const date = document.getElementById("manualEventDate")?.value
+
+if(!name || !date){
+alert("Enter event name and date")
+return null
+}
 
 const supabase = getSupabase()
 const user = await getCurrentUser()
 
-// ⚠️ IMPORTANT: date required
-const eventDate = prompt("Enter event date (YYYY-MM-DD)")
+// duplicate check
+const { data: existing } = await supabase
+.from("events")
+.select("*")
+.eq("client_name", name)
+.eq("event_date", date)
 
-if(!eventDate){
-alert("Event date required")
-return null
+if(existing && existing.length > 0){
+return existing[0].id
 }
 
 const { data, error } = await supabase
 .from("events")
 .insert([{
 user_id: user.id,
-event_name: eventName,
-client_name: eventName,
+event_name: name,
+client_name: name,
 event_type: "manual",
-event_date: eventDate,
+event_date: date,
 status: "active"
 }])
 .select()
+.single()
 
 if(error){
 console.error(error)
@@ -176,10 +195,10 @@ alert("Event create failed")
 return null
 }
 
-// reload dropdown
+// refresh dropdown
 await loadConfirmedEvents()
 
-return "e_" + data[0].id
+return data.id
 
 }
 
@@ -226,13 +245,13 @@ return
 
 
 // =============================
-// 🔥 EVENT LOGIC (UPDATED)
+// 🔥 EVENT LOGIC (SAFE FIX)
 // =============================
 
 let eventId = getEventId()
 
 // manual create
-if(!eventId){
+if(eventId === "create_new" || !eventId){
 
 eventId = await createManualEventIfNeeded()
 
@@ -241,14 +260,6 @@ status.innerText = "Please select or create event"
 return
 }
 
-}
-
-// clean ID (remove prefix)
-if(eventId.startsWith("q_")){
-eventId = eventId.replace("q_","")
-}
-if(eventId.startsWith("e_")){
-eventId = eventId.replace("e_","")
 }
 
 
