@@ -2,9 +2,58 @@
 // CLOUDINARY CONFIG
 // =============================
 
-// IMPORTANT: replace with your real cloudinary details
 const CLOUD_NAME = "dlu9ozif2"
-const UPLOAD_PRESET = "studioos_gallery" // 🔥 FIXED
+const UPLOAD_PRESET = "studioos_gallery"
+
+
+// =============================
+// IMAGE COMPRESSOR (NEW)
+// =============================
+
+async function compressImage(file){
+
+return new Promise((resolve)=>{
+
+const img = new Image()
+const reader = new FileReader()
+
+reader.onload = (e)=>{
+img.src = e.target.result
+}
+
+img.onload = ()=>{
+
+const canvas = document.createElement("canvas")
+const ctx = canvas.getContext("2d")
+
+let width = img.width
+let height = img.height
+
+// 🔥 resize large images
+const MAX_WIDTH = 1600
+
+if(width > MAX_WIDTH){
+height = height * (MAX_WIDTH / width)
+width = MAX_WIDTH
+}
+
+canvas.width = width
+canvas.height = height
+
+ctx.drawImage(img, 0, 0, width, height)
+
+// 🔥 compress quality
+canvas.toBlob((blob)=>{
+resolve(blob)
+}, "image/jpeg", 0.7)
+
+}
+
+reader.readAsDataURL(file)
+
+})
+
+}
 
 
 // =============================
@@ -20,9 +69,12 @@ console.error("Cloudinary config missing")
 return null
 }
 
+// 🔥 COMPRESS IMAGE BEFORE UPLOAD
+const compressedFile = await compressImage(file)
+
 const formData = new FormData()
 
-formData.append("file", file)
+formData.append("file", compressedFile)
 formData.append("upload_preset", UPLOAD_PRESET)
 formData.append("folder", "studioos/" + eventId)
 
@@ -36,10 +88,8 @@ body:formData
 
 const data = await res.json()
 
-// DEBUG LOG
 console.log("Cloudinary response:", data)
 
-// check if upload success
 if(!data || !data.secure_url){
 
 console.error("Cloudinary upload failed:", data)
@@ -65,7 +115,7 @@ return null
 
 
 // =============================
-// GLOBAL EXPORT (IMPORTANT)
+// GLOBAL EXPORT
 // =============================
 
 window.uploadToCloudinary = uploadToCloudinary
