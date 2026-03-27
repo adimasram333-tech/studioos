@@ -84,7 +84,7 @@ select.appendChild(option)
 
 })
 
-// manual events
+// manual events (legacy support - keep)
 events?.forEach(e => {
 
 const key = e.client_name + "_" + e.event_date
@@ -165,9 +165,9 @@ return null
 const supabase = getSupabase()
 const user = await getCurrentUser()
 
-// duplicate check
+// duplicate check (in quotations now)
 const { data: existing } = await supabase
-.from("events")
+.from("quotations")
 .select("*")
 .eq("client_name", name)
 .eq("event_date", date)
@@ -176,15 +176,21 @@ if(existing && existing.length > 0){
 return existing[0].id
 }
 
+// 🔥 CREATE IN QUOTATIONS (FIXED CORE)
 const { data, error } = await supabase
-.from("events")
+.from("quotations")
 .insert([{
 user_id: user.id,
-event_name: name,
 client_name: name,
-event_type: "manual",
+phone: "",
 event_date: date,
-status: "active"
+package: "Manual Event",
+services: {},
+deliverables: {},
+total: 0,
+advance: 0,
+balance: 0,
+status: "confirmed"
 }])
 .select()
 .single()
