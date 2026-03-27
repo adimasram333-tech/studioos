@@ -32,6 +32,71 @@ return user
 }
 
 
+// =============================
+// 🔥 LOAD CONFIRMED QUOTATIONS INTO DROPDOWN (ADDED)
+// =============================
+
+async function loadConfirmedEvents(){
+
+try{
+
+const select = document.getElementById("eventSelect")
+
+if(!select){
+return
+}
+
+const supabase = getSupabase()
+
+const user = await getCurrentUser()
+
+if(!user){
+return
+}
+
+const { data, error } = await supabase
+.from("quotations")
+.select("*")
+.eq("status","confirmed")
+
+if(error){
+console.error("Fetch error",error)
+return
+}
+
+select.innerHTML = `<option value="">Select Event</option>`
+
+data.forEach(q => {
+
+const option = document.createElement("option")
+
+option.value = q.id
+
+option.textContent =
+`${q.client_name} (${q.event_date})`
+
+select.appendChild(option)
+
+})
+
+}catch(err){
+console.error("Dropdown load error",err)
+}
+
+}
+
+
+// =============================
+// 🔥 AUTO INIT (ADDED)
+// =============================
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+loadConfirmedEvents()
+
+})
+
+
 
 // =============================
 // 🔥 GET EVENT ID FROM DROPDOWN (FIXED)
