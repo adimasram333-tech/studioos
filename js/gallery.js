@@ -27,14 +27,73 @@ if(!eventId){
 eventId = localStorage.getItem("current_event")
 }
 
+
+// =============================
+// ELEMENTS
+// =============================
+
+const grid = document.getElementById("galleryGrid")
+const empty = document.getElementById("emptyState")
+
+grid.innerHTML = ""
+
+
+// =============================
+// 🔥 MODE 1: EVENT LIST (NEW)
+// =============================
+
 if(!eventId){
-console.log("No event selected")
+
+const { data: events, error } =
+await supabase
+.from("quotations")
+.select("id, client_name, event_date")
+.eq("user_id", user.id)
+.eq("status","confirmed")
+.order("event_date",{ascending:false})
+
+if(error){
+console.error("Event fetch error:", error)
 return
+}
+
+if(!events || events.length === 0){
+empty.classList.remove("hidden")
+return
+}
+
+empty.classList.add("hidden")
+
+events.forEach(e=>{
+
+const div = document.createElement("div")
+
+div.className =
+"glass rounded-xl p-3 cursor-pointer hover:scale-105 transition"
+
+const date =
+new Date(e.event_date).toLocaleDateString("en-IN")
+
+div.innerHTML = `
+<div class="text-sm font-semibold">${e.client_name}</div>
+<div class="text-xs text-gray-400">${date}</div>
+`
+
+div.onclick = () => {
+window.location.href = `gallery.html?event=${e.id}`
+}
+
+grid.appendChild(div)
+
+})
+
+return
+
 }
 
 
 // =============================
-// FETCH DATA
+// FETCH DATA (EXISTING)
 // =============================
 
 const { data, error } =
@@ -52,13 +111,8 @@ return
 
 
 // =============================
-// UI RENDER
+// UI RENDER (EXISTING)
 // =============================
-
-const grid = document.getElementById("galleryGrid")
-const empty = document.getElementById("emptyState")
-
-grid.innerHTML = ""
 
 if(!data || data.length === 0){
 empty.classList.remove("hidden")
