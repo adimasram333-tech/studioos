@@ -2,9 +2,9 @@
 // CLOUDINARY CONFIG
 // =============================
 
-// IMPORTANT: replace YOUR_CLOUD_NAME with your real cloudinary cloud name
+// IMPORTANT: replace with your real cloudinary details
 const CLOUD_NAME = "dlu9ozif2"
-const UPLOAD_PRESET = "studioos_upload"
+const UPLOAD_PRESET = "studioos_gallery" // 🔥 FIXED
 
 
 // =============================
@@ -15,26 +15,39 @@ async function uploadToCloudinary(file, eventId){
 
 try{
 
+if(!CLOUD_NAME || !UPLOAD_PRESET){
+console.error("Cloudinary config missing")
+return null
+}
+
 const formData = new FormData()
 
 formData.append("file", file)
 formData.append("upload_preset", UPLOAD_PRESET)
 formData.append("folder", "studioos/" + eventId)
 
-const res = await fetch(
-`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-{
+const url =
+`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`
+
+const res = await fetch(url,{
 method:"POST",
 body:formData
-}
-)
+})
 
 const data = await res.json()
+
+// DEBUG LOG
+console.log("Cloudinary response:", data)
 
 // check if upload success
 if(!data || !data.secure_url){
 
 console.error("Cloudinary upload failed:", data)
+
+if(data?.error){
+console.error("Cloudinary error message:", data.error.message)
+}
+
 return null
 
 }
