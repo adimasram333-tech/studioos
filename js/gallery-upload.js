@@ -4,7 +4,8 @@
 
 function getSupabase(){
 
-if(window.getSupabase){
+// 🔥 FIX: prevent recursive self-call
+if(window.getSupabase && window.getSupabase !== getSupabase){
 return window.getSupabase()
 }
 
