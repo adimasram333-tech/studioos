@@ -1,3 +1,4 @@
+```javascript
 // =============================
 // SAFE SUPABASE ACCESS
 // =============================
@@ -58,6 +59,7 @@ const { data: quotations } = await supabase
 .from("quotations")
 .select("*")
 .eq("status","confirmed")
+.eq("user_id", user.id) // ✅ FIX
 
 const { data: events } = await supabase
 .from("events")
@@ -69,7 +71,7 @@ select.innerHTML = `<option value="">Select Event</option>`
 
 const added = new Set()
 
-// quotations
+// quotations (MAIN SYSTEM)
 quotations?.forEach(q => {
 
 const key = q.client_name + "_" + q.event_date
@@ -77,14 +79,14 @@ if(added.has(key)) return
 added.add(key)
 
 const option = document.createElement("option")
-option.value = q.id
+option.value = q.id // ✅ UUID ONLY
 option.textContent = `${q.client_name} (${q.event_date})`
 
 select.appendChild(option)
 
 })
 
-// manual events (legacy support - keep)
+// manual events (SAFE MODE - DISABLED VALUE)
 events?.forEach(e => {
 
 const key = e.client_name + "_" + e.event_date
@@ -92,7 +94,10 @@ if(added.has(key)) return
 added.add(key)
 
 const option = document.createElement("option")
-option.value = e.id
+
+// ❌ DO NOT USE event.id (BREAKS GALLERY)
+option.value = "legacy_" + e.id
+
 option.textContent = `${e.event_name} (${e.event_date})`
 
 select.appendChild(option)
@@ -165,18 +170,19 @@ return null
 const supabase = getSupabase()
 const user = await getCurrentUser()
 
-// duplicate check (in quotations now)
+// duplicate check (FIXED)
 const { data: existing } = await supabase
 .from("quotations")
 .select("*")
 .eq("client_name", name)
 .eq("event_date", date)
+.eq("user_id", user.id) // ✅ FIX
 
 if(existing && existing.length > 0){
 return existing[0].id
 }
 
-// 🔥 CREATE IN QUOTATIONS (FIXED CORE)
+// 🔥 CREATE IN QUOTATIONS
 const { data, error } = await supabase
 .from("quotations")
 .insert([{
@@ -244,17 +250,22 @@ const user = await getCurrentUser()
 if(!user){
 
 status.innerText = "Login required"
-console.error("User not authenticated")
 return
 
 }
 
 
 // =============================
-// 🔥 EVENT LOGIC (SAFE FIX)
+// 🔥 EVENT LOGIC (CRITICAL FIX)
 // =============================
 
 let eventId = getEventId()
+
+// ❌ block legacy events
+if(eventId && eventId.startsWith("legacy_")){
+status.innerText = "Please create a new event for uploads"
+return
+}
 
 // manual create
 if(eventId === "create_new" || !eventId){
@@ -274,19 +285,13 @@ return
 // =============================
 
 if(typeof window.uploadToCloudinary !== "function"){
-
-console.error("Cloudinary uploader missing")
 status.innerText = "Upload system not loaded"
 return
-
 }
 
 if(typeof window.saveGalleryImages !== "function"){
-
-console.error("Supabase save function missing")
 status.innerText = "Database system not loaded"
 return
-
 }
 
 
@@ -366,7 +371,7 @@ return
 try{
 
 const rows = urls.map(url => ({
-event_id:eventId,
+event_id:eventId, // ✅ ALWAYS UUID
 image_url:url,
 user_id:user.id
 }))
@@ -386,8 +391,6 @@ return
 status.innerText = "Upload Complete"
 progress.innerText = "All photos uploaded"
 
-console.log("Uploaded URLs",urls)
-
 }catch(err){
 
 console.error("Database save error",err)
@@ -406,3 +409,4 @@ status.innerText =
 // =============================
 
 window.uploadImages = uploadImages
+```
