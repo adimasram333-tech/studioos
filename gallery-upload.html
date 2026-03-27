@@ -39,6 +39,20 @@ border:1px solid rgba(255,255,255,0.1);
 Upload Event Photos
 </h2>
 
+<!-- 🔥 EVENT SELECT -->
+<select id="eventSelect"
+class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-3 text-sm">
+<option value="">Select Event</option>
+</select>
+
+<!-- 🔥 CREATE EVENT -->
+<input
+type="text"
+id="newEventInput"
+placeholder="Create new event (e.g. Rohit Wedding)"
+class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-4 text-sm"
+/>
+
 <input
 type="file"
 id="images"
@@ -66,14 +80,14 @@ Select Images
 </div>
 
 <button
-onclick="uploadImages()"
+onclick="handleUpload()"
 class="w-full bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm font-medium"
 >
 Upload Photos
 </button>
 
 <p id="status" class="text-center text-sm mt-3 text-gray-400">
-Please select images or folder
+Please select event and images
 </p>
 
 <div id="progress" class="text-center text-sm mt-2 text-green-400"></div>
@@ -84,27 +98,122 @@ Please select images or folder
 
 <script>
 
+// =============================
+// SELECT INPUT CONTROL
+// =============================
+
 function selectFolder(){
-
 const input = document.getElementById("images")
-
 if(!input) return
-
 input.setAttribute("webkitdirectory","")
 input.click()
-
 }
 
 function selectImages(){
-
 const input = document.getElementById("images")
-
 if(!input) return
-
 input.removeAttribute("webkitdirectory")
 input.click()
+}
+
+
+// =============================
+// LOAD EVENTS INTO DROPDOWN
+// =============================
+
+async function loadEventOptions(){
+
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!user) return
+
+const { data } =
+await supabase
+.from("events")
+.select("*")
+.eq("user_id",user.id)
+.eq("status","active")
+.order("created_at",{ascending:false})
+
+const select = document.getElementById("eventSelect")
+
+if(!select) return
+
+data?.forEach(e=>{
+const option = document.createElement("option")
+option.value = e.id
+option.textContent = e.event_name
+select.appendChild(option)
+})
 
 }
+
+
+// =============================
+// HANDLE UPLOAD FLOW
+// =============================
+
+async function handleUpload(){
+
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+const select = document.getElementById("eventSelect")
+const newEventInput = document.getElementById("newEventInput")
+
+let eventId = select.value
+
+// 🔥 CREATE EVENT IF NOT SELECTED
+if(!eventId && newEventInput.value.trim()){
+
+const eventName = newEventInput.value.trim()
+
+const { data, error } =
+await supabase
+.from("events")
+.insert([{
+user_id: user.id,
+client_name: eventName,
+event_name: eventName,
+event_type: eventName,
+event_date: new Date().toISOString().split('T')[0],
+status: "active"
+}])
+.select()
+.single()
+
+if(error){
+alert("Event create failed")
+return
+}
+
+eventId = data.id
+
+}
+
+// ❌ NO EVENT SELECTED
+if(!eventId){
+alert("Please select or create event")
+return
+}
+
+// 🔥 STORE EVENT FOR UPLOAD
+localStorage.setItem("current_event", eventId)
+
+// CALL ORIGINAL UPLOAD
+window.uploadImages()
+
+}
+
+
+// =============================
+// INIT
+// =============================
+
+document.addEventListener("DOMContentLoaded", function(){
+setTimeout(loadEventOptions,500)
+})
 
 </script>
 
