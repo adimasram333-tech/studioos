@@ -34,21 +34,18 @@ return user
 
 
 // =============================
-// GET EVENT ID
+// 🔥 GET EVENT ID FROM DROPDOWN (FIXED)
 // =============================
 
 function getEventId(){
 
-let eventId = localStorage.getItem("current_event")
+const select = document.getElementById("eventSelect")
 
-if(!eventId){
-
-eventId = "event_" + Date.now()
-localStorage.setItem("current_event",eventId)
-
+if(!select || !select.value){
+return null
 }
 
-return eventId
+return select.value
 
 }
 
@@ -95,6 +92,20 @@ return
 
 
 // =============================
+// 🔥 EVENT CHECK (NEW FIX)
+// =============================
+
+const eventId = getEventId()
+
+if(!eventId){
+
+status.innerText = "Please select event"
+return
+
+}
+
+
+// =============================
 // SYSTEM CHECKS
 // =============================
 
@@ -117,8 +128,6 @@ return
 
 status.innerText = "Uploading photos..."
 progress.innerText = ""
-
-const eventId = getEventId()
 
 let uploaded = 0
 let urls = []
@@ -196,7 +205,7 @@ try{
 const rows = urls.map(url => ({
 event_id:eventId,
 image_url:url,
-user_id:user.id // 🔥 FIXED (was uploaded_by)
+user_id:user.id
 }))
 
 const success =
