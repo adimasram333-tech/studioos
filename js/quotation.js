@@ -4,8 +4,6 @@
 
 function getSupabase(){
 
-// ✅ FIX: recursion removed (ONLY CHANGE)
-
 if(window.supabaseClient){
 return window.supabaseClient
 }
@@ -15,8 +13,6 @@ throw new Error("Supabase client not initialized")
 }
 
 async function getCurrentUser(){
-
-// ✅ FIX: recursion removed
 
 const supabase = getSupabase()
 
@@ -292,6 +288,52 @@ return data?.length || 0
 
 
 // =============================
+// 🔥 AUTO CREATE EVENT (NEW)
+// =============================
+
+async function createEventIfConfirmed(quotation){
+
+try{
+
+if(quotation.status !== "confirmed") return
+
+const supabase = getSupabase()
+
+// CHECK EXISTING EVENT (avoid duplicate)
+
+const { data: existing } =
+await supabase
+.from("events")
+.select("id")
+.eq("user_id",quotation.user_id)
+.eq("event_date",quotation.event_date)
+.eq("client_name",quotation.client_name)
+
+if(existing && existing.length > 0){
+return
+}
+
+// INSERT EVENT
+
+await supabase
+.from("events")
+.insert([{
+user_id: quotation.user_id,
+client_name: quotation.client_name,
+event_name: quotation.client_name,
+event_type: quotation.event_category || "event",
+event_date: quotation.event_date,
+status: "active"
+}])
+
+}catch(err){
+console.error("Event create error:",err)
+}
+
+}
+
+
+// =============================
 // SAVE / UPDATE QUOTATION
 // =============================
 
@@ -317,6 +359,9 @@ console.error(error)
 return null
 }
 
+// 🔥 EVENT CREATE ON UPDATE
+await createEventIfConfirmed({ ...data, user_id: user.id })
+
 return { id: editId }
 
 }else{
@@ -332,6 +377,9 @@ if(error){
 console.error(error)
 return null
 }
+
+// 🔥 EVENT CREATE ON INSERT
+await createEventIfConfirmed(inserted)
 
 return inserted
 
