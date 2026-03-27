@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Event Gallery</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+}
+
+.glass{
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+</style>
+
+</head>
+
+<body class="text-white min-h-screen p-4">
+
+<div class="max-w-md mx-auto mt-10">
+
+<div class="glass rounded-2xl p-4 mb-4 flex justify-between items-center">
+
+<h2 class="text-lg font-semibold">Event Gallery</h2>
+
+<button onclick="location.href='gallery-upload.html'"
+class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg text-sm">
+Upload
+</button>
+
+</div>
+
+<div id="galleryGrid" class="grid grid-cols-2 gap-3"></div>
+
+<p id="emptyState" class="text-center text-gray-400 mt-6 hidden">
+No photos uploaded
+</p>
+
+</div>
+
+<script src="js/supabase.js"></script>
+<script src="js/gallery.js"></script>
+
+</body>
+</html>
