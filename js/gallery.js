@@ -22,9 +22,12 @@ return
 const params = new URLSearchParams(window.location.search)
 let eventId = params.get("event")
 
-// 2. fallback to localStorage
-if(!eventId){
-eventId = localStorage.getItem("current_event")
+// 2. fallback to localStorage (SAFE USE)
+let storedEvent = localStorage.getItem("current_event")
+
+// ⚠️ FIX: Only use localStorage when explicitly needed
+if(!eventId && window.location.search.includes("useLocal=true")){
+eventId = storedEvent
 }
 
 
@@ -80,7 +83,13 @@ div.innerHTML = `
 `
 
 div.onclick = () => {
+
+// Save for optional reuse
+localStorage.setItem("current_event", e.id)
+
+// Navigate
 window.location.href = `gallery.html?event=${e.id}`
+
 }
 
 grid.appendChild(div)
