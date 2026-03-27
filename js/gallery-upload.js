@@ -33,7 +33,7 @@ return user
 
 
 // =============================
-// 🔥 LOAD CONFIRMED QUOTATIONS INTO DROPDOWN (ADDED)
+// 🔥 LOAD CONFIRMED + MANUAL EVENTS (UPDATED)
 // =============================
 
 async function loadConfirmedEvents(){
@@ -54,26 +54,43 @@ if(!user){
 return
 }
 
-const { data, error } = await supabase
+// ===== CONFIRMED QUOTATIONS =====
+const { data: quotations } = await supabase
 .from("quotations")
 .select("*")
 .eq("status","confirmed")
 
-if(error){
-console.error("Fetch error",error)
-return
-}
+// ===== MANUAL EVENTS =====
+const { data: events } = await supabase
+.from("events")
+.select("*")
+.eq("user_id", user.id)
 
 select.innerHTML = `<option value="">Select Event</option>`
 
-data.forEach(q => {
+// quotations
+quotations?.forEach(q => {
 
 const option = document.createElement("option")
 
-option.value = q.id
+option.value = "q_" + q.id
 
 option.textContent =
 `${q.client_name} (${q.event_date})`
+
+select.appendChild(option)
+
+})
+
+// manual events
+events?.forEach(e => {
+
+const option = document.createElement("option")
+
+option.value = "e_" + e.id
+
+option.textContent =
+`${e.event_name} (${e.event_date})`
 
 select.appendChild(option)
 
@@ -87,7 +104,7 @@ console.error("Dropdown load error",err)
 
 
 // =============================
-// 🔥 AUTO INIT (ADDED)
+// 🔥 AUTO INIT
 // =============================
 
 document.addEventListener("DOMContentLoaded",()=>{
@@ -99,7 +116,7 @@ loadConfirmedEvents()
 
 
 // =============================
-// 🔥 GET EVENT ID FROM DROPDOWN (FIXED)
+// 🔥 GET EVENT ID (UPDATED HYBRID)
 // =============================
 
 function getEventId(){
@@ -111,6 +128,58 @@ return null
 }
 
 return select.value
+
+}
+
+
+
+// =============================
+// 🔥 CREATE MANUAL EVENT (NEW)
+// =============================
+
+async function createManualEventIfNeeded(){
+
+const input = document.getElementById("newEventInput")
+
+if(!input || !input.value.trim()){
+return null
+}
+
+const eventName = input.value.trim()
+
+const supabase = getSupabase()
+const user = await getCurrentUser()
+
+// ⚠️ IMPORTANT: date required
+const eventDate = prompt("Enter event date (YYYY-MM-DD)")
+
+if(!eventDate){
+alert("Event date required")
+return null
+}
+
+const { data, error } = await supabase
+.from("events")
+.insert([{
+user_id: user.id,
+event_name: eventName,
+client_name: eventName,
+event_type: "manual",
+event_date: eventDate,
+status: "active"
+}])
+.select()
+
+if(error){
+console.error(error)
+alert("Event create failed")
+return null
+}
+
+// reload dropdown
+await loadConfirmedEvents()
+
+return "e_" + data[0].id
 
 }
 
@@ -157,16 +226,29 @@ return
 
 
 // =============================
-// 🔥 EVENT CHECK (NEW FIX)
+// 🔥 EVENT LOGIC (UPDATED)
 // =============================
 
-const eventId = getEventId()
+let eventId = getEventId()
 
+// manual create
 if(!eventId){
 
-status.innerText = "Please select event"
-return
+eventId = await createManualEventIfNeeded()
 
+if(!eventId){
+status.innerText = "Please select or create event"
+return
+}
+
+}
+
+// clean ID (remove prefix)
+if(eventId.startsWith("q_")){
+eventId = eventId.replace("q_","")
+}
+if(eventId.startsWith("e_")){
+eventId = eventId.replace("e_","")
 }
 
 
@@ -243,7 +325,6 @@ console.error("Upload error",err)
 }
 
 })
-
 
 
 urls =
