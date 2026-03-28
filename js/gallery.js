@@ -55,7 +55,7 @@ if(!eventId){
 
 const { data: events, error } =
 await supabase
-.from("events") // ✅ FIX
+.from("events")
 .select("*")
 .eq("user_id", user.id)
 .order("created_at",{ascending:false})
@@ -65,12 +65,14 @@ console.error("Event fetch error:", error)
 return
 }
 
+// 🔥 FIX: clear both states
+grid.innerHTML = ""
+empty.classList.add("hidden")
+
 if(!events || events.length === 0){
 empty.classList.remove("hidden")
 return
 }
-
-empty.classList.add("hidden")
 
 events.forEach(e=>{
 
@@ -84,8 +86,15 @@ div.className =
 const date =
 new Date(e.event_date).toLocaleDateString("en-IN")
 
+// 🔥 CLEAN NAME FIX
+let displayName = e.client_name || e.event_name || "Unnamed"
+
+if(displayName && displayName.startsWith("Q_")){
+displayName = e.client_name || "Booking Event"
+}
+
 div.innerHTML = `
-<div class="text-sm font-semibold">${e.client_name || e.event_name || "Unnamed"}</div>
+<div class="text-sm font-semibold">${displayName}</div>
 <div class="text-xs text-gray-400">${date}</div>
 `
 
@@ -110,11 +119,17 @@ return
 // 🔥 MODE 2: IMAGE VIEW (SAFE)
 // =============================
 
+// 🔥 INVALID EVENT GUARD
+if(!eventId){
+empty.classList.remove("hidden")
+return
+}
+
 const { data, error } =
 await supabase
 .from("gallery_photos")
 .select("*")
-.eq("event_id", eventId) // ✅ SAME ID SYSTEM
+.eq("event_id", eventId)
 .eq("user_id", user.id)
 .order("created_at",{ ascending:false })
 
@@ -128,12 +143,17 @@ return
 // UI RENDER
 // =============================
 
+grid.innerHTML = ""
+empty.classList.add("hidden")
+
 if(!data || data.length === 0){
+
+// 🔥 BETTER EMPTY MESSAGE
+empty.innerText = "No photos uploaded for this event"
 empty.classList.remove("hidden")
 return
-}
 
-empty.classList.add("hidden")
+}
 
 data.forEach(img=>{
 
