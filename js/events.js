@@ -42,7 +42,7 @@ let monthLabel = null
 
 
 // =============================
-// ORIGINAL EVENT LIST (FIXED)
+// 🔥 LOAD EVENTS (FINAL FIX)
 // =============================
 
 async function loadEvents(){
@@ -69,34 +69,58 @@ const endDateObj = new Date(year, month + 1, 0)
 const startDate = startDateObj.toISOString().split('T')[0]
 const endDate = endDateObj.toISOString().split('T')[0]
 
-// 🔥 FIX: USE EVENTS TABLE
-const { data , error } =
+// 🔥 FETCH EVENTS
+const { data: events } =
 await supabase
 .from("events")
 .select("*")
 .eq("user_id",user.id)
 .gte("event_date", startDate)
 .lte("event_date", endDate)
-.order("event_date",{ascending:true})
 
-if(error){
-eventList.innerHTML = "<p>Error loading events</p>"
-return
+// 🔥 FETCH GALLERY EVENTS (CRITICAL)
+const { data: galleryEvents } =
+await supabase
+.from("gallery_photos")
+.select("event_id, created_at")
+.eq("user_id", user.id)
+
+const map = new Map()
+
+;(events || []).forEach(e=>{
+if(e?.id){
+map.set(e.id,e)
 }
+})
 
-if(!data || data.length === 0){
+// ADD MISSING EVENTS FROM GALLERY
+;(galleryEvents || []).forEach(g=>{
+if(g?.event_id && !map.has(g.event_id)){
+map.set(g.event_id,{
+id: g.event_id,
+client_name:"Gallery Event",
+event_name:"Gallery Event",
+event_date: g.created_at?.split("T")[0] || ""
+})
+}
+})
+
+const allEvents = Array.from(map.values())
+
+if(!allEvents.length){
 eventList.innerHTML = "<p>No upcoming events</p>"
 return
 }
 
+// GROUP
 const grouped = {}
 
-data.forEach(e=>{
-const date = e.event_date
-if(!grouped[date]){
-grouped[date] = []
+allEvents.forEach(e=>{
+if(!e.event_date) return
+if(!grouped[e.event_date]){
+grouped[e.event_date] = []
 }
-grouped[date].push(e)
+grouped[e.event_date].push(e)
 })
 
 eventList.innerHTML = ""
@@ -142,7 +166,6 @@ ${events.map(e=>{
 
 let name = e.client_name || e.event_name || "Event"
 
-// CLEAN NAME
 if(name.startsWith("Q_")){
 name = e.client_name || "Booking Event"
 }
@@ -164,8 +187,6 @@ onclick="location.href='client.html?id=${e.id}'"
 
 })
 
-return data
-
 }
 
 
@@ -183,7 +204,7 @@ return { firstDay, daysInMonth }
 
 
 // =============================
-// LOAD CALENDAR
+// 🔥 LOAD CALENDAR (FIXED)
 // =============================
 
 async function loadCalendar(){
@@ -200,18 +221,24 @@ console.log("No user found")
 return
 }
 
-// 🔥 FIX: USE EVENTS
-const { data } =
+// EVENTS
+const { data: events } =
 await supabase
 .from("events")
 .select("*")
 .eq("user_id",user.id)
 
+// GALLERY EVENTS
+const { data: galleryEvents } =
+await supabase
+.from("gallery_photos")
+.select("event_id, created_at")
+.eq("user_id", user.id)
+
 const eventDates = {}
 const eventDetails = {}
 
-if(data){
-data.forEach(e=>{
+;(events || []).forEach(e=>{
 
 eventDates[e.event_date] = true
 
@@ -221,15 +248,24 @@ if(name && name.startsWith("Q_")){
 name = e.client_name || "Booking Event"
 }
 
-eventDetails[e.event_date] = {
-name: name,
-amount: e.total || ""
-}
+eventDetails[e.event_date] = eventDetails[e.event_date] || []
+eventDetails[e.event_date].push(name)
 
 })
-}
 
-// LOAD NOTES
+// ADD GALLERY EVENTS
+;(galleryEvents || []).forEach(g=>{
+
+const date = g.created_at?.split("T")[0]
+if(!date) return
+
+eventDates[date] = true
+
+eventDetails[date] = eventDetails[date] || []
+eventDetails[date].push("Gallery Event")
+
+})
+
 const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
 
 const year = currentDate.getFullYear()
@@ -248,12 +284,10 @@ monthLabel.innerText =
 currentDate.toLocaleString("default",{month:"long",year:"numeric"})
 }
 
-// EMPTY CELLS
 for(let i=0;i<firstDay;i++){
 calendar.innerHTML += `<div></div>`
 }
 
-// DAYS
 for(let d=1; d<=daysInMonth; d++){
 
 const fullDate =
@@ -261,7 +295,6 @@ const fullDate =
 
 let classes = "p-2 rounded cursor-pointer transition hover:scale-105"
 
-// PRIORITY
 if(eventDates[fullDate]){
 classes += " bg-red-600"
 }
@@ -272,16 +305,14 @@ else{
 classes += " bg-slate-800"
 }
 
-// TODAY
 if(fullDate === todayStr){
 classes += " ring-2 ring-green-400 shadow-lg"
 }
 
-// TOOLTIP
 let tooltip = ""
 
 if(eventDetails[fullDate]){
-tooltip += `${eventDetails[fullDate].name}`
+tooltip += eventDetails[fullDate].join(", ")
 }
 
 if(notes[fullDate]){
@@ -304,7 +335,7 @@ ${d}
 
 
 // =============================
-// NOTES SYSTEM (UNCHANGED)
+// बाकी code SAME (UNCHANGED)
 // =============================
 
 const modal = document.getElementById("modal")
@@ -357,11 +388,6 @@ loadCalendar()
 })
 }
 
-
-// =============================
-// MONTH NAVIGATION (UNCHANGED)
-// =============================
-
 const prevBtn = document.getElementById("prevMonth")
 const nextBtn = document.getElementById("nextMonth")
 
@@ -380,11 +406,6 @@ loadCalendar()
 loadEvents()
 }
 }
-
-
-// =============================
-// INIT
-// =============================
 
 async function init(){
 
