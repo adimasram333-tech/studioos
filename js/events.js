@@ -1,5 +1,5 @@
 // =============================
-// SAFE WAIT FOR SUPABASE (FIXED)
+// SAFE WAIT FOR SUPABASE
 // =============================
 
 async function waitForSupabase(){
@@ -21,14 +21,9 @@ check()
 // =============================
 
 async function getCurrentUser(){
-
 const supabase = await window.getSupabase()
-
-const { data:{ user } } =
-await supabase.auth.getUser()
-
+const { data:{ user } } = await supabase.auth.getUser()
 return user
-
 }
 
 
@@ -42,7 +37,7 @@ let monthLabel = null
 
 
 // =============================
-// 🔥 LOAD EVENTS (FULL FIX)
+// 🔥 LOAD EVENTS (FIXED)
 // =============================
 
 async function loadEvents(){
@@ -54,24 +49,15 @@ if(!eventList) return
 const supabase = await window.getSupabase()
 const user = await getCurrentUser()
 
-if(!user){
-console.log("No user found")
-return
-}
+if(!user) return
 
 const year = currentDate.getFullYear()
 const month = currentDate.getMonth()
 
-const startDateObj = new Date(year, month, 1)
-const endDateObj = new Date(year, month + 1, 0)
+const startDate = new Date(year, month, 1).toISOString().split('T')[0]
+const endDate = new Date(year, month + 1, 0).toISOString().split('T')[0]
 
-const startDate = startDateObj.toISOString().split('T')[0]
-const endDate = endDateObj.toISOString().split('T')[0]
-
-// =============================
-// EVENTS TABLE
-// =============================
-
+// ✅ ONLY EVENTS TABLE
 const { data: events } =
 await supabase
 .from("events")
@@ -80,72 +66,27 @@ await supabase
 .gte("event_date", startDate)
 .lte("event_date", endDate)
 
-// =============================
-// GALLERY EVENTS
-// =============================
-
-const { data: galleryEvents } =
-await supabase
-.from("gallery_photos")
-.select("event_id, created_at")
-.eq("user_id", user.id)
-
-const map = new Map()
-
-// 🔥 FIX: force string id
-;(events || []).forEach(e=>{
-if(e?.id){
-map.set(String(e.id), e)
-}
-})
-
-// 🔥 FIX: add gallery events safely
-;(galleryEvents || []).forEach(g=>{
-const id = String(g.event_id)
-
-if(g?.event_id && !map.has(id)){
-map.set(id,{
-id: id,
-client_name:"Gallery Event",
-event_name:"Gallery Event",
-event_date: g.created_at?.split("T")[0] || startDate
-})
-}
-})
-
-const allEvents = Array.from(map.values())
-
-if(!allEvents.length){
+if(!events || events.length === 0){
 eventList.innerHTML = "<p>No upcoming events</p>"
 return
 }
 
-// =============================
-// GROUPING SAFE
-// =============================
-
+// GROUP
 const grouped = {}
 
-allEvents.forEach(e=>{
-const date = e.event_date || startDate
-
-if(!grouped[date]){
-grouped[date] = []
-}
-
+events.forEach(e=>{
+const date = e.event_date
+if(!grouped[date]) grouped[date] = []
 grouped[date].push(e)
 })
 
 eventList.innerHTML = ""
 
-const sortedDates =
-Object.keys(grouped).sort(
-(a,b)=> new Date(a) - new Date(b)
-)
+Object.keys(grouped)
+.sort((a,b)=> new Date(a)-new Date(b))
+.forEach(date=>{
 
-sortedDates.forEach(date=>{
-
-const events = grouped[date]
+const items = grouped[date]
 
 const eventDate =
 new Date(date).toLocaleDateString("en-IN",{
@@ -154,39 +95,25 @@ month:"long",
 year:"numeric"
 })
 
-let busyLabel = ""
-
-if(events.length >= 8){
-busyLabel = "<span class='text-red-400 text-xs ml-2'>🔥 Very Busy Day</span>"
-}
-else if(events.length >= 5){
-busyLabel = "<span class='text-yellow-400 text-xs ml-2'>⚡ Busy Day</span>"
-}
-
 eventList.innerHTML += `
 <div class="glass p-4 rounded-xl">
 
 <p class="text-lg font-semibold mb-2">
 ${eventDate}
 <span class="text-gray-400 text-sm">
-(${events.length} events)
+(${items.length} events)
 </span>
-${busyLabel}
 </p>
 
 <div class="space-y-1">
-${events.map(e=>{
+${items.map(e=>{
 
 let name = e.client_name || e.event_name || "Event"
-
-if(name.startsWith("Q_")){
-name = e.client_name || "Booking Event"
-}
 
 return `
 <div 
 class="text-sm text-gray-300 cursor-pointer hover:text-white transition"
-onclick="location.href='client.html?id=${e.id}'"
+onclick="location.href='gallery.html?event_id=${e.id}'"
 >
 • ${name}
 </div>
@@ -204,15 +131,16 @@ onclick="location.href='client.html?id=${e.id}'"
 
 
 // =============================
-// CALENDAR (SAFE FIX)
+// CALENDAR (FIXED)
 // =============================
 
 let currentDate = new Date()
 
 function getMonthData(year, month){
-const firstDay = new Date(year, month, 1).getDay()
-const daysInMonth = new Date(year, month + 1, 0).getDate()
-return { firstDay, daysInMonth }
+return {
+firstDay: new Date(year, month, 1).getDay(),
+daysInMonth: new Date(year, month + 1, 0).getDate()
+}
 }
 
 async function loadCalendar(){
@@ -226,59 +154,23 @@ const user = await getCurrentUser()
 
 if(!user) return
 
+// ✅ ONLY EVENTS TABLE
 const { data: events } =
 await supabase
 .from("events")
 .select("*")
 .eq("user_id",user.id)
 
-const { data: galleryEvents } =
-await supabase
-.from("gallery_photos")
-.select("event_id, created_at")
-.eq("user_id", user.id)
-
 const eventDates = {}
-const eventDetails = {}
 
 ;(events || []).forEach(e=>{
-
-const date = e.event_date
-eventDates[date] = true
-
-let name = e.client_name || e.event_name
-
-if(name?.startsWith("Q_")){
-name = e.client_name || "Booking Event"
+if(e.event_date){
+eventDates[e.event_date] = true
 }
-
-eventDetails[date] = eventDetails[date] || []
-eventDetails[date].push(name)
-
 })
 
-;(galleryEvents || []).forEach(g=>{
-
-const date = g.created_at?.split("T")[0]
-if(!date) return
-
-eventDates[date] = true
-
-eventDetails[date] = eventDetails[date] || []
-eventDetails[date].push("Gallery Event")
-
-})
-
-const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
-
-const year = currentDate.getFullYear()
-const month = currentDate.getMonth()
-
-const today = new Date()
-const todayStr =
-`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
-
-const { firstDay, daysInMonth } = getMonthData(year, month)
+const { firstDay, daysInMonth } =
+getMonthData(currentDate.getFullYear(), currentDate.getMonth())
 
 calendar.innerHTML = ""
 
@@ -294,40 +186,18 @@ calendar.innerHTML += `<div></div>`
 for(let d=1; d<=daysInMonth; d++){
 
 const fullDate =
-`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+`${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
 
-let classes = "p-2 rounded cursor-pointer transition hover:scale-105"
+let cls = "p-2 rounded cursor-pointer transition hover:scale-105"
 
 if(eventDates[fullDate]){
-classes += " bg-red-600"
-}
-else if(notes[fullDate]){
-classes += " bg-blue-600"
-}
-else{
-classes += " bg-slate-800"
-}
-
-if(fullDate === todayStr){
-classes += " ring-2 ring-green-400 shadow-lg"
-}
-
-let tooltip = ""
-
-if(eventDetails[fullDate]){
-tooltip += eventDetails[fullDate].join(", ")
-}
-
-if(notes[fullDate]){
-tooltip += tooltip ? " | Note added" : "Note added"
+cls += " bg-red-600"
+}else{
+cls += " bg-slate-800"
 }
 
 calendar.innerHTML += `
-<div 
-class="${classes}"
-title="${tooltip}"
-onclick="openModal('${fullDate}')"
->
+<div class="${cls}">
 ${d}
 </div>
 `
@@ -338,77 +208,8 @@ ${d}
 
 
 // =============================
-// बाकी unchanged
+// INIT
 // =============================
-
-const modal = document.getElementById("modal")
-const noteInput = document.getElementById("noteInput")
-const selectedDate = document.getElementById("selectedDate")
-
-let activeDate = null
-
-function openModal(date){
-
-if(!modal) return
-
-activeDate = date
-
-if(selectedDate){
-selectedDate.innerText = date
-}
-
-const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
-
-if(noteInput){
-noteInput.value = notes[date] || ""
-}
-
-modal.classList.remove("hidden")
-
-}
-
-function closeModal(){
-if(modal){
-modal.classList.add("hidden")
-}
-}
-
-const saveBtn = document.getElementById("saveNote")
-
-if(saveBtn){
-saveBtn.addEventListener("click",function(){
-
-const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
-
-notes[activeDate] = noteInput.value
-
-localStorage.setItem("calendar_notes",JSON.stringify(notes))
-
-closeModal()
-
-loadCalendar()
-
-})
-}
-
-const prevBtn = document.getElementById("prevMonth")
-const nextBtn = document.getElementById("nextMonth")
-
-if(prevBtn){
-prevBtn.onclick = function(){
-currentDate.setMonth(currentDate.getMonth() - 1)
-loadCalendar()
-loadEvents()
-}
-}
-
-if(nextBtn){
-nextBtn.onclick = function(){
-currentDate.setMonth(currentDate.getMonth() + 1)
-loadCalendar()
-loadEvents()
-}
-}
 
 async function init(){
 
