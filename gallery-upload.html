@@ -10,7 +10,6 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- SUPABASE CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -39,13 +38,11 @@ border:1px solid rgba(255,255,255,0.1);
 Upload Event Photos
 </h2>
 
-<!-- 🔥 EVENT SELECT -->
 <select id="eventSelect"
 class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-3 text-sm">
 <option value="">Select Event</option>
 </select>
 
-<!-- 🔥 INLINE CREATE EVENT (HIDDEN) -->
 <div id="createEventBox" style="display:none;" class="mb-4">
 
 <input
@@ -73,26 +70,20 @@ class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-4 text-sm"
 
 <div class="flex gap-2 mb-4">
 
-<button
-onclick="selectFolder()"
-class="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-xl text-xs"
->
+<button onclick="selectFolder()"
+class="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-xl text-xs">
 Select Folder
 </button>
 
-<button
-onclick="selectImages()"
-class="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-xl text-xs"
->
+<button onclick="selectImages()"
+class="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-xl text-xs">
 Select Images
 </button>
 
 </div>
 
-<button
-onclick="handleUpload()"
-class="w-full bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm font-medium"
->
+<button onclick="handleUpload()"
+class="w-full bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm font-medium">
 Upload Photos
 </button>
 
@@ -128,23 +119,17 @@ input.click()
 
 
 // =============================
-// 🔥 NEW: GET EVENT FROM URL (ADDED)
+// 🔥 GET EVENT FROM URL (FIXED)
 // =============================
 
 function getEventFromURL(){
 const params = new URLSearchParams(window.location.search)
-let eventId = params.get("event")
-
-if(!eventId){
-eventId = localStorage.getItem("current_event")
-}
-
-return eventId
+return params.get("event_id") // ✅ FIXED
 }
 
 
 // =============================
-// LOAD EVENTS INTO DROPDOWN (UNCHANGED)
+// LOAD EVENTS INTO DROPDOWN
 // =============================
 
 async function loadEventOptions(){
@@ -175,7 +160,7 @@ option.textContent = `${e.client_name} (${e.event_date})`
 select.appendChild(option)
 })
 
-// ADD CREATE OPTION
+// CREATE OPTION
 const createOption = document.createElement("option")
 createOption.value = "create_new"
 createOption.textContent = "+ Create New Event"
@@ -183,21 +168,20 @@ select.appendChild(createOption)
 
 
 // =============================
-// 🔥 NEW: AUTO SELECT EVENT (ADDED)
+// 🔥 AUTO SELECT FROM URL ONLY
 // =============================
 
 const urlEvent = getEventFromURL()
 
 if(urlEvent){
 select.value = String(urlEvent)
-localStorage.setItem("current_event", urlEvent)
 }
 
 }
 
 
 // =============================
-// SHOW / HIDE CREATE EVENT BOX (UNCHANGED)
+// SHOW / HIDE CREATE EVENT BOX
 // =============================
 
 document.addEventListener("change", function(e){
@@ -219,7 +203,7 @@ box.style.display = "none"
 
 
 // =============================
-// HANDLE UPLOAD FLOW (SAFE FIX)
+// HANDLE UPLOAD FLOW (FIXED)
 // =============================
 
 async function handleUpload(){
@@ -227,7 +211,6 @@ async function handleUpload(){
 const supabase = await window.getSupabase()
 const user = await window.getCurrentUser()
 
-// 🔥 NEW SAFETY
 if(!user){
 alert("Login required")
 return
@@ -237,12 +220,11 @@ const select = document.getElementById("eventSelect")
 
 let eventId = select.value
 
-// 🔥 NEW: fallback URL
+// ✅ fallback URL ONLY
 if(!eventId){
 eventId = getEventFromURL()
 }
 
-// 🔥 CREATE NEW EVENT FLOW (UNCHANGED)
 if(eventId === "create_new"){
 
 const name = document.getElementById("manualEventName").value.trim()
@@ -276,23 +258,22 @@ eventId = data.id
 
 }
 
-// ❌ NO EVENT SELECTED
 if(!eventId){
 alert("Please select event")
 return
 }
 
-// STORE EVENT
-localStorage.setItem("current_event", eventId)
+// ✅ CALL UPLOAD
+await window.uploadImages()
 
-// CALL ORIGINAL UPLOAD
-window.uploadImages()
+// ✅ REDIRECT BACK (CRITICAL FIX)
+window.location.href = `gallery.html?event_id=${eventId}`
 
 }
 
 
 // =============================
-// INIT (SAFE)
+// INIT
 // =============================
 
 document.addEventListener("DOMContentLoaded", function(){
@@ -300,8 +281,6 @@ setTimeout(loadEventOptions,500)
 })
 
 </script>
-
-<!-- REQUIRED MODULE FILES -->
 
 <script src="js/cloudinary.js"></script>
 <script src="js/supabase.js"></script>
