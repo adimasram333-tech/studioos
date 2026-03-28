@@ -44,7 +44,7 @@ return null
 
 
 // =============================
-// 🔥 LOAD CONFIRMED + MANUAL EVENTS (FIXED)
+// 🔥 LOAD EVENTS (FINAL FIX)
 // =============================
 
 async function loadConfirmedEvents(){
@@ -64,64 +64,36 @@ if(!user){
 return
 }
 
-// ===== FETCH DATA =====
-const { data: quotations, error: qError } = await supabase
-.from("quotations")
-.select("*")
-.eq("status","confirmed")
-.eq("user_id", user.id)
-
-const { data: events, error: eError } = await supabase
+// ===== FETCH ONLY EVENTS TABLE =====
+const { data: events, error } = await supabase
 .from("events")
 .select("*")
 .eq("user_id", user.id)
+.order("created_at",{ascending:false})
 
-if(qError) console.error("Quotation error", qError)
-if(eError) console.error("Events error", eError)
+if(error){
+console.error("Events error", error)
+}
 
 // RESET
 select.innerHTML = `<option value="">Select Event</option>`
 
-const added = new Set()
-
-// quotations (MAIN SYSTEM)
-;(quotations || []).forEach(q => {
-
-if(!q || !q.id) return
-
-const key = q.client_name + "_" + q.event_date
-if(added.has(key)) return
-added.add(key)
-
-const option = document.createElement("option")
-option.value = q.id // ✅ UUID ONLY
-option.textContent = `${q.client_name} (${q.event_date})`
-
-select.appendChild(option)
-
-})
-
-// manual events (SAFE MODE - DISABLED VALUE)
 ;(events || []).forEach(e => {
 
-if(!e) return
-
-const key = e.client_name + "_" + e.event_date
-if(added.has(key)) return
-added.add(key)
+if(!e || !e.id) return
 
 const option = document.createElement("option")
 
-// ❌ DO NOT USE event.id (BREAKS GALLERY)
-option.value = "legacy_" + e.id
+// ✅ ALWAYS USE EVENTS.ID
+option.value = e.id
 
-option.textContent = `${e.event_name} (${e.event_date})`
+option.textContent = `${e.client_name || e.event_name} (${e.event_date})`
 
 select.appendChild(option)
 
 })
 
-// 🔥 CREATE OPTION ADD
+// CREATE OPTION
 const createOption = document.createElement("option")
 createOption.value = "create_new"
 createOption.textContent = "+ Create New Event"
@@ -135,7 +107,7 @@ console.error("Dropdown load error",err)
 
 
 // =============================
-// 🔥 AUTO INIT
+// AUTO INIT
 // =============================
 
 document.addEventListener("DOMContentLoaded",()=>{
@@ -145,9 +117,8 @@ loadConfirmedEvents()
 })
 
 
-
 // =============================
-// 🔥 GET EVENT ID
+// GET EVENT ID
 // =============================
 
 function getEventId(){
@@ -163,9 +134,8 @@ return select.value
 }
 
 
-
 // =============================
-// 🔥 CREATE MANUAL EVENT (FIXED)
+// CREATE MANUAL EVENT (FIXED)
 // =============================
 
 async function createManualEventIfNeeded(){
@@ -189,33 +159,15 @@ const user = await getCurrentUser()
 
 if(!user) return null
 
-// duplicate check (FIXED)
-const { data: existing } = await supabase
-.from("quotations")
-.select("*")
-.eq("client_name", name)
-.eq("event_date", date)
-.eq("user_id", user.id)
-
-if(existing && existing.length > 0){
-return existing[0].id
-}
-
-// 🔥 CREATE IN QUOTATIONS
+// 🔥 CREATE DIRECTLY IN EVENTS TABLE
 const { data, error } = await supabase
-.from("quotations")
+.from("events")
 .insert([{
 user_id: user.id,
 client_name: name,
-phone: "",
+event_name: name,
 event_date: date,
-package: "Manual Event",
-services: {},
-deliverables: {},
-total: 0,
-advance: 0,
-balance: 0,
-status: "confirmed"
+status: "active"
 }])
 .select()
 .single()
@@ -234,9 +186,8 @@ return data.id
 }
 
 
-
 // =============================
-// UPLOAD IMAGES (FAST PARALLEL)
+// UPLOAD IMAGES (FIXED)
 // =============================
 
 async function uploadImages(){
@@ -259,34 +210,18 @@ return
 
 }
 
-
-// =============================
 // USER CHECK
-// =============================
-
 const user = await getCurrentUser()
 
 if(!user){
-
 status.innerText = "Login required"
 return
-
 }
 
-
-// =============================
-// 🔥 EVENT LOGIC (CRITICAL FIX)
-// =============================
-
+// EVENT
 let eventId = getEventId()
 
-// ❌ block legacy events
-if(eventId && eventId.startsWith("legacy_")){
-status.innerText = "Please create a new event for uploads"
-return
-}
-
-// manual create
+// CREATE IF NEEDED
 if(eventId === "create_new" || !eventId){
 
 eventId = await createManualEventIfNeeded()
@@ -298,11 +233,7 @@ return
 
 }
 
-
-// =============================
-// SYSTEM CHECKS
-// =============================
-
+// SYSTEM CHECK
 if(typeof window.uploadToCloudinary !== "function"){
 status.innerText = "Upload system not loaded"
 return
@@ -313,34 +244,22 @@ status.innerText = "Database system not loaded"
 return
 }
 
-
 status.innerText = "Uploading photos..."
 progress.innerText = ""
 
 let uploaded = 0
 let urls = []
 
-
-// =============================
-// FILTER VALID IMAGES
-// =============================
-
+// FILTER IMAGES
 const validFiles =
 [...files].filter(file => file && file.type && file.type.startsWith("image/"))
 
 if(validFiles.length === 0){
-
 status.innerText = "No valid images selected"
 return
-
 }
 
-
-
-// =============================
-// PARALLEL UPLOAD
-// =============================
-
+// UPLOAD
 const uploadPromises = validFiles.map(async (file)=>{
 
 try{
@@ -360,39 +279,27 @@ return url
 }
 
 }catch(err){
-
 console.error("Upload error",err)
-
 }
 
 return null
 
 })
 
-
 urls =
 (await Promise.all(uploadPromises))
 .filter(Boolean)
 
-
-
 if(!urls.length){
-
 status.innerText = "Upload failed"
 return
-
 }
 
-
-
-// =============================
-// SAVE TO DATABASE
-// =============================
-
+// SAVE
 try{
 
 const rows = urls.map(url => ({
-event_id:eventId, // ✅ ALWAYS UUID
+event_id:eventId, // ✅ FINAL FIX
 image_url:url,
 user_id:user.id
 }))
@@ -423,10 +330,5 @@ status.innerText =
 
 }
 
-
-
-// =============================
-// GLOBAL EXPORT
-// =============================
-
+// EXPORT
 window.uploadImages = uploadImages
