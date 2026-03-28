@@ -10,10 +10,10 @@
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- FIXED: Absolute path for GitHub Pages -->
-  <script src="./supabase.js"></script>
+  <!-- ✅ FIXED PATH -->
+  <script src="./js/supabase.js"></script>
 
-  <!-- PREVENT JS FAIL SILENT -->
+  <!-- DEBUG -->
   <script>
     window.addEventListener("error", function (e) {
       console.error("Global JS Error:", e.message);
@@ -58,15 +58,14 @@
 
     </form>
 
-    <!-- LOADING STATE -->
     <p id="loadingText" class="text-center text-sm text-gray-400 mt-3 hidden">
       Processing...
     </p>
 
   </div>
 
-  <!-- FIXED: load after DOM -->
-  <script defer src="./access.js"></script>
+  <!-- ✅ FIXED PATH -->
+  <script defer src="./js/access.js"></script>
 
 </body>
 </html>
