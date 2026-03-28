@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Access Gallery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+
+  <div class="bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md">
+
+```
+<h2 class="text-2xl font-bold text-center mb-6">
+  Enter Details to View Gallery
+</h2>
+
+<form id="accessForm" class="space-y-4">
+
+  <input 
+    type="text"
+    id="name"
+    placeholder="Your Name"
+    class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600"
+    required
+  >
+
+  <input 
+    type="text"
+    id="phone"
+    placeholder="Mobile Number"
+    class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600"
+    required
+  >
+
+  <button 
+    type="submit"
+    class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-lg font-semibold"
+  >
+    View Gallery
+  </button>
+
+</form>
+```
+
+  </div>
+
+  <!-- IMPORTANT: SAME NAME -->
+
+  <script src="access.js"></script>
+
+</body>
+</html>
