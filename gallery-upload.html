@@ -9,21 +9,17 @@
 <title>Upload Event Photos</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-
 body{
 background: radial-gradient(circle at top,#1e293b,#0f172a);
 }
-
 .glass{
 background: rgba(255,255,255,0.05);
 backdrop-filter: blur(15px);
 border:1px solid rgba(255,255,255,0.1);
 }
-
 </style>
 
 </head>
@@ -119,64 +115,12 @@ input.click()
 
 
 // =============================
-// 🔥 GET EVENT FROM URL (FIXED)
+// GET EVENT FROM URL
 // =============================
 
 function getEventFromURL(){
 const params = new URLSearchParams(window.location.search)
-return params.get("event_id") // ✅ FIXED
-}
-
-
-// =============================
-// LOAD EVENTS INTO DROPDOWN
-// =============================
-
-async function loadEventOptions(){
-
-const supabase = await window.getSupabase()
-const user = await window.getCurrentUser()
-
-if(!user) return
-
-const { data } =
-await supabase
-.from("events")
-.select("*")
-.eq("user_id",user.id)
-.eq("status","active")
-.order("created_at",{ascending:false})
-
-const select = document.getElementById("eventSelect")
-
-if(!select) return
-
-select.innerHTML = `<option value="">Select Event</option>`
-
-data?.forEach(e=>{
-const option = document.createElement("option")
-option.value = String(e.id)
-option.textContent = `${e.client_name} (${e.event_date})`
-select.appendChild(option)
-})
-
-// CREATE OPTION
-const createOption = document.createElement("option")
-createOption.value = "create_new"
-createOption.textContent = "+ Create New Event"
-select.appendChild(createOption)
-
-
-// =============================
-// 🔥 AUTO SELECT FROM URL ONLY
-// =============================
-
-const urlEvent = getEventFromURL()
-
-if(urlEvent){
-select.value = String(urlEvent)
-}
-
+return params.get("event_id") || params.get("event") // ✅ backward support
 }
 
 
@@ -203,7 +147,7 @@ box.style.display = "none"
 
 
 // =============================
-// HANDLE UPLOAD FLOW (FIXED)
+// HANDLE UPLOAD FLOW
 // =============================
 
 async function handleUpload(){
@@ -220,7 +164,6 @@ const select = document.getElementById("eventSelect")
 
 let eventId = select.value
 
-// ✅ fallback URL ONLY
 if(!eventId){
 eventId = getEventFromURL()
 }
@@ -263,22 +206,11 @@ alert("Please select event")
 return
 }
 
-// ✅ CALL UPLOAD
 await window.uploadImages()
 
-// ✅ REDIRECT BACK (CRITICAL FIX)
 window.location.href = `gallery.html?event_id=${eventId}`
 
 }
-
-
-// =============================
-// INIT
-// =============================
-
-document.addEventListener("DOMContentLoaded", function(){
-setTimeout(loadEventOptions,500)
-})
 
 </script>
 
