@@ -42,7 +42,7 @@ let monthLabel = null
 
 
 // =============================
-// ORIGINAL EVENT LIST (FIXED)
+// EVENT LIST (FIXED TO EVENTS TABLE)
 // =============================
 
 async function loadEvents(){
@@ -52,7 +52,6 @@ await waitForSupabase()
 if(!eventList) return
 
 const supabase = await window.getSupabase()
-
 const user = await getCurrentUser()
 
 if(!user){
@@ -60,7 +59,7 @@ console.log("No user found")
 return
 }
 
-// ✅ FIXED MONTH FILTER (NO INVALID DATE)
+// DATE RANGE
 const year = currentDate.getFullYear()
 const month = currentDate.getMonth()
 
@@ -70,12 +69,12 @@ const endDateObj = new Date(year, month + 1, 0)
 const startDate = startDateObj.toISOString().split('T')[0]
 const endDate = endDateObj.toISOString().split('T')[0]
 
+// ✅ FIXED SOURCE
 const { data , error } =
 await supabase
-.from("quotations")
+.from("events")
 .select("*")
 .eq("user_id",user.id)
-.eq("status","confirmed")
 .gte("event_date", startDate)
 .lte("event_date", endDate)
 .order("event_date",{ascending:true})
@@ -141,10 +140,9 @@ ${busyLabel}
 <div class="space-y-1">
 ${events.map(e=>`
 <div 
-class="text-sm text-gray-300 cursor-pointer hover:text-white transition"
-onclick="location.href='client.html?id=${e.id}'"
+class="text-sm text-gray-300"
 >
-• ${e.client_name} — ₹${e.total}
+• ${e.client_name || e.event_name}
 </div>
 `).join("")}
 </div>
@@ -173,7 +171,7 @@ return { firstDay, daysInMonth }
 
 
 // =============================
-// LOAD CALENDAR
+// LOAD CALENDAR (FIXED)
 // =============================
 
 async function loadCalendar(){
@@ -190,13 +188,12 @@ console.log("No user found")
 return
 }
 
-// FETCH EVENTS
+// ✅ FIXED SOURCE
 const { data } =
 await supabase
-.from("quotations")
+.from("events")
 .select("*")
 .eq("user_id",user.id)
-.eq("status","confirmed")
 
 const eventDates = {}
 const eventDetails = {}
@@ -205,13 +202,12 @@ if(data){
 data.forEach(e=>{
 eventDates[e.event_date] = true
 eventDetails[e.event_date] = {
-name: e.client_name,
-amount: e.total
+name: e.client_name || e.event_name
 }
 })
 }
 
-// LOAD NOTES
+// NOTES
 const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
 
 const year = currentDate.getFullYear()
@@ -230,7 +226,7 @@ monthLabel.innerText =
 currentDate.toLocaleString("default",{month:"long",year:"numeric"})
 }
 
-// EMPTY CELLS
+// EMPTY
 for(let i=0;i<firstDay;i++){
 calendar.innerHTML += `<div></div>`
 }
@@ -243,7 +239,6 @@ const fullDate =
 
 let classes = "p-2 rounded cursor-pointer transition hover:scale-105"
 
-// PRIORITY LOGIC
 if(eventDates[fullDate]){
 classes += " bg-red-600"
 }
@@ -254,16 +249,14 @@ else{
 classes += " bg-slate-800"
 }
 
-// TODAY
 if(fullDate === todayStr){
 classes += " ring-2 ring-green-400 shadow-lg"
 }
 
-// TOOLTIP
 let tooltip = ""
 
 if(eventDetails[fullDate]){
-tooltip += `${eventDetails[fullDate].name} • ₹${eventDetails[fullDate].amount}`
+tooltip += `${eventDetails[fullDate].name}`
 }
 
 if(notes[fullDate]){
@@ -286,7 +279,7 @@ ${d}
 
 
 // =============================
-// NOTES SYSTEM
+// NOTES SYSTEM (UNCHANGED)
 // =============================
 
 const modal = document.getElementById("modal")
@@ -333,7 +326,6 @@ notes[activeDate] = noteInput.value
 localStorage.setItem("calendar_notes",JSON.stringify(notes))
 
 closeModal()
-
 loadCalendar()
 
 })
@@ -341,7 +333,7 @@ loadCalendar()
 
 
 // =============================
-// MONTH NAVIGATION (FIXED)
+// MONTH NAVIGATION
 // =============================
 
 const prevBtn = document.getElementById("prevMonth")
