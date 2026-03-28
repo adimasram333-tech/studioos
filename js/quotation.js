@@ -288,7 +288,7 @@ return data?.length || 0
 
 
 // =============================
-// 🔥 AUTO CREATE EVENT (NEW)
+// 🔥 AUTO CREATE EVENT (FIXED ONLY HERE)
 // =============================
 
 async function createEventIfConfirmed(quotation){
@@ -299,28 +299,27 @@ if(quotation.status !== "confirmed") return
 
 const supabase = getSupabase()
 
-// CHECK EXISTING EVENT (avoid duplicate)
+// 🔥 UNIQUE EVENT LINK USING QUOTATION ID
+const uniqueName = "Q_" + quotation.id
 
+// CHECK EXISTING EVENT
 const { data: existing } =
 await supabase
 .from("events")
 .select("id")
-.eq("user_id",quotation.user_id)
-.eq("event_date",quotation.event_date)
-.eq("client_name",quotation.client_name)
+.eq("event_name", uniqueName)
 
 if(existing && existing.length > 0){
 return
 }
 
 // INSERT EVENT
-
 await supabase
 .from("events")
 .insert([{
 user_id: quotation.user_id,
 client_name: quotation.client_name,
-event_name: quotation.client_name,
+event_name: uniqueName,
 event_type: quotation.event_category || "event",
 event_date: quotation.event_date,
 status: "active"
@@ -360,7 +359,7 @@ return null
 }
 
 // 🔥 EVENT CREATE ON UPDATE
-await createEventIfConfirmed({ ...data, user_id: user.id })
+await createEventIfConfirmed({ ...data, id: editId, user_id: user.id })
 
 return { id: editId }
 
