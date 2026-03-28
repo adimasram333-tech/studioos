@@ -14,20 +14,17 @@ return
 
 
 // =============================
-// 🔥 FINAL PARAM FIX
+// PARAMS
 // =============================
 
 const params = new URLSearchParams(window.location.search)
 
-// ✅ NEW PARAM
 let eventId = params.get("event_id")
 
-// ✅ BACKWARD SUPPORT (CRITICAL)
 if(!eventId){
 eventId = params.get("event")
 }
 
-// 🔒 LEGACY BLOCK
 if(eventId && typeof eventId === "string" && eventId.startsWith("legacy_")){
 eventId = null
 }
@@ -51,7 +48,7 @@ grid.innerHTML = ""
 
 
 // =============================
-// 🔥 MODE 1: EVENT LIST
+// MODE 1: EVENT LIST
 // =============================
 
 if(!eventId){
@@ -60,7 +57,8 @@ const { data: events, error } =
 await supabase
 .from("events")
 .select("*")
-.order("event_date",{ ascending:false })   // ✅ REMOVED user_id filter
+.eq("user_id", user.id)   // ✅ FIXED
+.order("event_date",{ ascending:false })
 
 if(error){
 console.error("Events fetch error:", error)
@@ -115,17 +113,35 @@ return
 
 
 // =============================
-// 🔥 MODE 2: IMAGE VIEW
+// MODE 2: IMAGE VIEW
 // =============================
 
 const safeEventId = String(eventId)
+
+
+// ✅ VALIDATE EVENT BELONGS TO USER
+const { data: eventCheck } =
+await supabase
+.from("events")
+.select("id")
+.eq("id", safeEventId)
+.eq("user_id", user.id)
+.single()
+
+if(!eventCheck){
+empty.innerText = "Invalid or unauthorized event"
+empty.classList.remove("hidden")
+return
+}
+
 
 const { data, error } =
 await supabase
 .from("gallery_photos")
 .select("*")
 .eq("event_id", safeEventId)
-.order("created_at",{ ascending:false })   // ✅ REMOVED user_id filter
+.eq("user_id", user.id)   // ✅ FIXED
+.order("created_at",{ ascending:false })
 
 if(error){
 console.error("Gallery fetch error:",error)
