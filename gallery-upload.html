@@ -128,7 +128,23 @@ input.click()
 
 
 // =============================
-// LOAD EVENTS INTO DROPDOWN
+// 🔥 NEW: GET EVENT FROM URL (ADDED)
+// =============================
+
+function getEventFromURL(){
+const params = new URLSearchParams(window.location.search)
+let eventId = params.get("event")
+
+if(!eventId){
+eventId = localStorage.getItem("current_event")
+}
+
+return eventId
+}
+
+
+// =============================
+// LOAD EVENTS INTO DROPDOWN (UNCHANGED)
 // =============================
 
 async function loadEventOptions(){
@@ -150,13 +166,11 @@ const select = document.getElementById("eventSelect")
 
 if(!select) return
 
-// RESET
 select.innerHTML = `<option value="">Select Event</option>`
 
-// EXISTING EVENTS
 data?.forEach(e=>{
 const option = document.createElement("option")
-option.value = e.id
+option.value = String(e.id)
 option.textContent = `${e.client_name} (${e.event_date})`
 select.appendChild(option)
 })
@@ -167,11 +181,23 @@ createOption.value = "create_new"
 createOption.textContent = "+ Create New Event"
 select.appendChild(createOption)
 
+
+// =============================
+// 🔥 NEW: AUTO SELECT EVENT (ADDED)
+// =============================
+
+const urlEvent = getEventFromURL()
+
+if(urlEvent){
+select.value = String(urlEvent)
+localStorage.setItem("current_event", urlEvent)
+}
+
 }
 
 
 // =============================
-// SHOW / HIDE CREATE EVENT BOX
+// SHOW / HIDE CREATE EVENT BOX (UNCHANGED)
 // =============================
 
 document.addEventListener("change", function(e){
@@ -193,7 +219,7 @@ box.style.display = "none"
 
 
 // =============================
-// HANDLE UPLOAD FLOW
+// HANDLE UPLOAD FLOW (SAFE FIX)
 // =============================
 
 async function handleUpload(){
@@ -201,11 +227,22 @@ async function handleUpload(){
 const supabase = await window.getSupabase()
 const user = await window.getCurrentUser()
 
+// 🔥 NEW SAFETY
+if(!user){
+alert("Login required")
+return
+}
+
 const select = document.getElementById("eventSelect")
 
 let eventId = select.value
 
-// 🔥 CREATE NEW EVENT FLOW
+// 🔥 NEW: fallback URL
+if(!eventId){
+eventId = getEventFromURL()
+}
+
+// 🔥 CREATE NEW EVENT FLOW (UNCHANGED)
 if(eventId === "create_new"){
 
 const name = document.getElementById("manualEventName").value.trim()
@@ -255,7 +292,7 @@ window.uploadImages()
 
 
 // =============================
-// INIT
+// INIT (SAFE)
 // =============================
 
 document.addEventListener("DOMContentLoaded", function(){
