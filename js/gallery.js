@@ -14,22 +14,30 @@ return
 
 
 // =============================
-// 🔥 GET EVENT ID (SAFE FIX)
+// 🔥 GET EVENT ID (SUPER SAFE FIX)
 // =============================
 
 const params = new URLSearchParams(window.location.search)
 let eventId = params.get("event")
 
-let storedEvent = localStorage.getItem("current_event")
+const storedEvent = localStorage.getItem("current_event")
 
-if(!eventId && window.location.search.includes("useLocal=true")){
+// ✅ FIX 1: Always fallback if missing
+if(!eventId && storedEvent){
 eventId = storedEvent
 }
 
-// ❌ REMOVE legacy सिस्टम पूरी तरह
+// ✅ FIX 2: Save again if URL has it
+if(eventId){
+localStorage.setItem("current_event", eventId)
+}
+
+// ❌ REMOVE legacy सिस्टम
 if(eventId && typeof eventId === "string" && eventId.startsWith("legacy_")){
 eventId = null
 }
+
+console.log("FINAL EVENT ID:", eventId)
 
 
 // =============================
@@ -48,19 +56,17 @@ grid.innerHTML = ""
 
 
 // =============================
-// 🔥 MODE 1: EVENT LIST (FINAL FIX)
+// 🔥 MODE 1: EVENT LIST
 // =============================
 
 if(!eventId){
 
-// 🔥 EVENTS TABLE
 const { data: events } =
 await supabase
 .from("events")
 .select("*")
 .eq("user_id", user.id)
 
-// 🔥 GALLERY TABLE EVENTS (IMPORTANT FIX)
 const { data: galleryEvents } =
 await supabase
 .from("gallery_photos")
@@ -70,20 +76,20 @@ await supabase
 const eventIdsFromGallery =
 [...new Set((galleryEvents || []).map(g=>g.event_id))]
 
-// 🔥 MERGE BOTH
 const map = new Map()
 
 ;(events || []).forEach(e=>{
 if(e?.id){
-map.set(e.id,e)
+map.set(String(e.id), e)
 }
 })
 
-// add missing gallery events
+// ✅ FIX: ensure type consistency
 eventIdsFromGallery.forEach(id=>{
-if(!map.has(id)){
-map.set(id,{
-id:id,
+const safeId = String(id)
+if(!map.has(safeId)){
+map.set(safeId,{
+id: safeId,
 client_name:"Gallery Event",
 event_name:"Gallery Event",
 event_date:""
@@ -93,7 +99,6 @@ event_date:""
 
 const allEvents = Array.from(map.values())
 
-// UI
 grid.innerHTML = ""
 empty.classList.add("hidden")
 
@@ -114,7 +119,6 @@ div.className =
 const date =
 e.event_date ? new Date(e.event_date).toLocaleDateString("en-IN") : ""
 
-// CLEAN NAME
 let displayName = e.client_name || e.event_name || "Event"
 
 if(displayName && displayName.startsWith("Q_")){
@@ -128,8 +132,9 @@ div.innerHTML = `
 
 div.onclick = () => {
 
-localStorage.setItem("current_event", e.id)
+localStorage.setItem("current_event", String(e.id))
 
+// ✅ FIX: force correct navigation
 window.location.href = `gallery.html?event=${e.id}`
 
 }
@@ -144,7 +149,7 @@ return
 
 
 // =============================
-// 🔥 MODE 2: IMAGE VIEW (SAFE)
+// 🔥 MODE 2: IMAGE VIEW
 // =============================
 
 if(!eventId){
@@ -152,11 +157,14 @@ empty.classList.remove("hidden")
 return
 }
 
+// ✅ FIX: convert to string always
+const safeEventId = String(eventId)
+
 const { data, error } =
 await supabase
 .from("gallery_photos")
 .select("*")
-.eq("event_id", eventId)
+.eq("event_id", safeEventId)
 .eq("user_id", user.id)
 .order("created_at",{ ascending:false })
 
