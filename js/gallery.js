@@ -60,8 +60,7 @@ const { data: events, error } =
 await supabase
 .from("events")
 .select("*")
-.eq("user_id", user.id)
-.order("event_date",{ ascending:false })
+.order("event_date",{ ascending:false })   // ✅ REMOVED user_id filter
 
 if(error){
 console.error("Events fetch error:", error)
@@ -126,8 +125,7 @@ await supabase
 .from("gallery_photos")
 .select("*")
 .eq("event_id", safeEventId)
-.eq("user_id", user.id)
-.order("created_at",{ ascending:false })
+.order("created_at",{ ascending:false })   // ✅ REMOVED user_id filter
 
 if(error){
 console.error("Gallery fetch error:",error)
