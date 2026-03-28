@@ -42,7 +42,7 @@ let monthLabel = null
 
 
 // =============================
-// 🔥 LOAD EVENTS (FINAL FIX)
+// 🔥 LOAD EVENTS (FULL FIX)
 // =============================
 
 async function loadEvents(){
@@ -59,7 +59,6 @@ console.log("No user found")
 return
 }
 
-// DATE RANGE
 const year = currentDate.getFullYear()
 const month = currentDate.getMonth()
 
@@ -69,7 +68,10 @@ const endDateObj = new Date(year, month + 1, 0)
 const startDate = startDateObj.toISOString().split('T')[0]
 const endDate = endDateObj.toISOString().split('T')[0]
 
-// 🔥 FETCH EVENTS
+// =============================
+// EVENTS TABLE
+// =============================
+
 const { data: events } =
 await supabase
 .from("events")
@@ -78,7 +80,10 @@ await supabase
 .gte("event_date", startDate)
 .lte("event_date", endDate)
 
-// 🔥 FETCH GALLERY EVENTS (CRITICAL)
+// =============================
+// GALLERY EVENTS
+// =============================
+
 const { data: galleryEvents } =
 await supabase
 .from("gallery_photos")
@@ -87,20 +92,23 @@ await supabase
 
 const map = new Map()
 
+// 🔥 FIX: force string id
 ;(events || []).forEach(e=>{
 if(e?.id){
-map.set(e.id,e)
+map.set(String(e.id), e)
 }
 })
 
-// ADD MISSING EVENTS FROM GALLERY
+// 🔥 FIX: add gallery events safely
 ;(galleryEvents || []).forEach(g=>{
-if(g?.event_id && !map.has(g.event_id)){
-map.set(g.event_id,{
-id: g.event_id,
+const id = String(g.event_id)
+
+if(g?.event_id && !map.has(id)){
+map.set(id,{
+id: id,
 client_name:"Gallery Event",
 event_name:"Gallery Event",
-event_date: g.created_at?.split("T")[0] || ""
+event_date: g.created_at?.split("T")[0] || startDate
 })
 }
 })
@@ -112,15 +120,20 @@ eventList.innerHTML = "<p>No upcoming events</p>"
 return
 }
 
-// GROUP
+// =============================
+// GROUPING SAFE
+// =============================
+
 const grouped = {}
 
 allEvents.forEach(e=>{
-if(!e.event_date) return
-if(!grouped[e.event_date]){
-grouped[e.event_date] = []
+const date = e.event_date || startDate
+
+if(!grouped[date]){
+grouped[date] = []
 }
-grouped[e.event_date].push(e)
+
+grouped[date].push(e)
 })
 
 eventList.innerHTML = ""
@@ -191,7 +204,7 @@ onclick="location.href='client.html?id=${e.id}'"
 
 
 // =============================
-// SMART CALENDAR SYSTEM
+// CALENDAR (SAFE FIX)
 // =============================
 
 let currentDate = new Date()
@@ -202,11 +215,6 @@ const daysInMonth = new Date(year, month + 1, 0).getDate()
 return { firstDay, daysInMonth }
 }
 
-
-// =============================
-// 🔥 LOAD CALENDAR (FIXED)
-// =============================
-
 async function loadCalendar(){
 
 await waitForSupabase()
@@ -216,19 +224,14 @@ if(!calendar) return
 const supabase = await window.getSupabase()
 const user = await getCurrentUser()
 
-if(!user){
-console.log("No user found")
-return
-}
+if(!user) return
 
-// EVENTS
 const { data: events } =
 await supabase
 .from("events")
 .select("*")
 .eq("user_id",user.id)
 
-// GALLERY EVENTS
 const { data: galleryEvents } =
 await supabase
 .from("gallery_photos")
@@ -240,20 +243,20 @@ const eventDetails = {}
 
 ;(events || []).forEach(e=>{
 
-eventDates[e.event_date] = true
+const date = e.event_date
+eventDates[date] = true
 
 let name = e.client_name || e.event_name
 
-if(name && name.startsWith("Q_")){
+if(name?.startsWith("Q_")){
 name = e.client_name || "Booking Event"
 }
 
-eventDetails[e.event_date] = eventDetails[e.event_date] || []
-eventDetails[e.event_date].push(name)
+eventDetails[date] = eventDetails[date] || []
+eventDetails[date].push(name)
 
 })
 
-// ADD GALLERY EVENTS
 ;(galleryEvents || []).forEach(g=>{
 
 const date = g.created_at?.split("T")[0]
@@ -335,7 +338,7 @@ ${d}
 
 
 // =============================
-// बाकी code SAME (UNCHANGED)
+// बाकी unchanged
 // =============================
 
 const modal = document.getElementById("modal")
