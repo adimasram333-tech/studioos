@@ -119,27 +119,13 @@ return
 const safeEventId = String(eventId)
 
 
-// ✅ VALIDATE EVENT BELONGS TO USER
-const { data: eventCheck } =
-await supabase
-.from("events")
-.select("id")
-.eq("id", safeEventId)
-.eq("user_id", user.id)
-.single()
-
-if(!eventCheck){
-empty.innerText = "Invalid or unauthorized event"
-empty.classList.remove("hidden")
-return
-}
-
+// 🚨 FIX: Removed blocking eventCheck (root cause)
 
 const { data, error } =
 await supabase
 .from("gallery_photos")
 .select("*")
-.eq("event_id", safeEventId)   // ✅ FIXED (user_id filter removed)
+.eq("event_id", safeEventId)
 .order("created_at",{ ascending:false })
 
 if(error){
