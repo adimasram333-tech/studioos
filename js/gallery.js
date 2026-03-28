@@ -5,7 +5,6 @@
 async function loadGallery(){
 
 const supabase = await window.getSupabase()
-
 const user = await window.getCurrentUser()
 
 if(!user){
@@ -18,18 +17,16 @@ return
 // 🔥 GET EVENT ID (SAFE FIX)
 // =============================
 
-// URL param
 const params = new URLSearchParams(window.location.search)
 let eventId = params.get("event")
 
-// localStorage fallback (SAFE)
 let storedEvent = localStorage.getItem("current_event")
 
 if(!eventId && window.location.search.includes("useLocal=true")){
 eventId = storedEvent
 }
 
-// ❌ BLOCK INVALID / LEGACY IDs
+// ❌ REMOVE legacy सिस्टम पूरी तरह
 if(eventId && typeof eventId === "string" && eventId.startsWith("legacy_")){
 eventId = null
 }
@@ -51,18 +48,17 @@ grid.innerHTML = ""
 
 
 // =============================
-// 🔥 MODE 1: EVENT LIST
+// 🔥 MODE 1: EVENT LIST (FIXED)
 // =============================
 
 if(!eventId){
 
 const { data: events, error } =
 await supabase
-.from("quotations")
-.select("id, client_name, event_date")
+.from("events") // ✅ FIX
+.select("*")
 .eq("user_id", user.id)
-.eq("status","confirmed")
-.order("event_date",{ascending:false})
+.order("created_at",{ascending:false})
 
 if(error){
 console.error("Event fetch error:", error)
@@ -89,7 +85,7 @@ const date =
 new Date(e.event_date).toLocaleDateString("en-IN")
 
 div.innerHTML = `
-<div class="text-sm font-semibold">${e.client_name || "Unnamed"}</div>
+<div class="text-sm font-semibold">${e.client_name || e.event_name || "Unnamed"}</div>
 <div class="text-xs text-gray-400">${date}</div>
 `
 
@@ -111,14 +107,14 @@ return
 
 
 // =============================
-// 🔥 MODE 2: IMAGE VIEW
+// 🔥 MODE 2: IMAGE VIEW (SAFE)
 // =============================
 
 const { data, error } =
 await supabase
 .from("gallery_photos")
 .select("*")
-.eq("event_id", eventId)
+.eq("event_id", eventId) // ✅ SAME ID SYSTEM
 .eq("user_id", user.id)
 .order("created_at",{ ascending:false })
 
