@@ -154,6 +154,14 @@ createOption.value = "create_new"
 createOption.textContent = "+ Create New Event"
 select.appendChild(createOption)
 
+
+// =============================
+// 🔥 CRITICAL FIX (ADDED, NOTHING REMOVED)
+// =============================
+
+// ❗ NO AUTO SELECT (browser default हटाने के लिए)
+select.value = ""
+
 }catch(err){
 console.error("Dropdown load error",err)
 }
