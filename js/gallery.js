@@ -118,9 +118,6 @@ return
 
 const safeEventId = String(eventId)
 
-
-// 🚨 FIX: Removed blocking eventCheck (root cause)
-
 const { data, error } =
 await supabase
 .from("gallery_photos")
@@ -149,6 +146,45 @@ empty.classList.remove("hidden")
 return
 }
 
+
+// =============================
+// IMAGE MODAL (NEW)
+// =============================
+
+function openImage(url){
+let modal = document.getElementById("imageModal")
+
+if(!modal){
+modal = document.createElement("div")
+modal.id = "imageModal"
+modal.style.position = "fixed"
+modal.style.top = 0
+modal.style.left = 0
+modal.style.width = "100%"
+modal.style.height = "100%"
+modal.style.background = "rgba(0,0,0,0.9)"
+modal.style.display = "flex"
+modal.style.alignItems = "center"
+modal.style.justifyContent = "center"
+modal.style.zIndex = 9999
+
+modal.innerHTML = `
+<img src="${url}" style="max-width:90%; max-height:90%; border-radius:12px;" />
+`
+
+modal.onclick = () => modal.remove()
+
+document.body.appendChild(modal)
+}else{
+modal.querySelector("img").src = url
+}
+}
+
+
+// =============================
+// RENDER IMAGES
+// =============================
+
 data.forEach(img=>{
 
 if(!img || !img.image_url) return
@@ -162,6 +198,9 @@ div.innerHTML = `
 <img src="${img.image_url}"
 class="w-full h-40 object-cover hover:scale-105 transition"/>
 `
+
+// 🔥 CLICK FIX
+div.onclick = () => openImage(img.image_url)
 
 grid.appendChild(div)
 
