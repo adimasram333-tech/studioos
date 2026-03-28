@@ -35,7 +35,6 @@ border:1px solid rgba(255,255,255,0.1);
 
 <h2 class="text-lg font-semibold">Event Gallery</h2>
 
-<!-- 🔥 FIXED BUTTON -->
 <button id="uploadBtn"
 class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg text-sm">
 Upload
@@ -54,7 +53,6 @@ No photos uploaded
 <script src="js/supabase.js"></script>
 <script src="js/gallery.js"></script>
 
-<!-- 🔥 FIX SCRIPT -->
 <script>
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -64,20 +62,17 @@ const btn = document.getElementById("uploadBtn")
 btn.addEventListener("click", () => {
 
 const params = new URLSearchParams(window.location.search)
-let eventId = params.get("event")
 
-// fallback
-if(!eventId){
-eventId = localStorage.getItem("current_event")
-}
+// ✅ FIX: correct param
+const eventId = params.get("event_id")
 
 if(!eventId){
 alert("Please select an event first")
 return
 }
 
-// 🔥 FIX: pass event_id
-window.location.href = `gallery-upload.html?event=${eventId}`
+// ✅ FIX: correct redirect
+window.location.href = `gallery-upload.html?event_id=${eventId}`
 
 })
 
