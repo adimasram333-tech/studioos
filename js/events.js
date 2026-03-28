@@ -35,9 +35,12 @@ let eventList = null
 let calendar = null
 let monthLabel = null
 
+// 🔥 NEW (restore state)
+let selectedDate = null
+
 
 // =============================
-// 🔥 LOAD EVENTS (FIXED)
+// 🔥 LOAD EVENTS (UNCHANGED)
 // =============================
 
 async function loadEvents(){
@@ -57,7 +60,6 @@ const month = currentDate.getMonth()
 const startDate = new Date(year, month, 1).toISOString().split('T')[0]
 const endDate = new Date(year, month + 1, 0).toISOString().split('T')[0]
 
-// ✅ ONLY EVENTS TABLE
 const { data: events } =
 await supabase
 .from("events")
@@ -71,7 +73,6 @@ eventList.innerHTML = "<p>No upcoming events</p>"
 return
 }
 
-// GROUP
 const grouped = {}
 
 events.forEach(e=>{
@@ -154,7 +155,6 @@ const user = await getCurrentUser()
 
 if(!user) return
 
-// ✅ ONLY EVENTS TABLE
 const { data: events } =
 await supabase
 .from("events")
@@ -168,6 +168,9 @@ if(e.event_date){
 eventDates[e.event_date] = true
 }
 })
+
+const today = new Date()
+const todayStr = today.toISOString().split("T")[0]
 
 const { firstDay, daysInMonth } =
 getMonthData(currentDate.getFullYear(), currentDate.getMonth())
@@ -190,20 +193,41 @@ const fullDate =
 
 let cls = "p-2 rounded cursor-pointer transition hover:scale-105"
 
+// 🔥 EVENT
 if(eventDates[fullDate]){
 cls += " bg-red-600"
 }else{
 cls += " bg-slate-800"
 }
 
+// 🔥 TODAY HIGHLIGHT (RESTORED)
+if(fullDate === todayStr){
+cls += " border-2 border-green-400"
+}
+
+// 🔥 SELECTED DATE
+if(selectedDate === fullDate){
+cls += " ring-2 ring-blue-400"
+}
+
 calendar.innerHTML += `
-<div class="${cls}">
+<div class="${cls}" onclick="selectDate('${fullDate}')">
 ${d}
 </div>
 `
 
 }
 
+}
+
+
+// =============================
+// 🔥 DATE CLICK HANDLER (RESTORED)
+// =============================
+
+function selectDate(date){
+selectedDate = date
+loadCalendar()
 }
 
 
