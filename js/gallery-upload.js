@@ -38,13 +38,14 @@ return data?.user || null
 }catch(err){
 console.error("Auth crash", err)
 return null
+
 }
 
 }
 
 
 // =============================
-// 🔥 LOAD EVENTS (FINAL FIX)
+// 🔥 LOAD EVENTS (FIXED WITHOUT BREAKING)
 // =============================
 
 async function loadConfirmedEvents(){
@@ -65,7 +66,7 @@ return
 }
 
 // =============================
-// 🔥 STEP 1: FETCH EVENTS TABLE
+// FETCH EVENTS TABLE
 // =============================
 
 const { data: events, error } = await supabase
@@ -79,7 +80,7 @@ console.error("Events error", error)
 }
 
 // =============================
-// 🔥 STEP 2: FETCH EVENTS FROM GALLERY (CRITICAL FIX)
+// FETCH GALLERY EVENTS
 // =============================
 
 const { data: galleryEvents } = await supabase
@@ -87,22 +88,22 @@ const { data: galleryEvents } = await supabase
 .select("event_id")
 .eq("user_id", user.id)
 
-// unique event ids
-const galleryEventIds = [...new Set((galleryEvents || []).map(g=>g.event_id))]
+// UNIQUE IDS
+const galleryEventIds =
+[...new Set((galleryEvents || []).map(g=>String(g.event_id)))]
 
 // =============================
-// 🔥 STEP 3: MERGE EVENTS
+// MERGE EVENTS (SAFE)
 // =============================
 
 const allEventsMap = new Map()
 
 ;(events || []).forEach(e=>{
 if(e?.id){
-allEventsMap.set(e.id,e)
+allEventsMap.set(String(e.id),e)
 }
 })
 
-// 👉 add missing gallery events
 galleryEventIds.forEach(id=>{
 if(!allEventsMap.has(id)){
 allEventsMap.set(id,{
@@ -129,11 +130,12 @@ Array.from(allEventsMap.values()).forEach(e=>{
 if(!e || !e.id) return
 
 const option = document.createElement("option")
-option.value = e.id
+
+// 🔥 FIX: ALWAYS STRING
+option.value = String(e.id)
 
 let displayName = e.client_name || e.event_name || "Event"
 
-// clean name
 if(displayName && displayName.startsWith("Q_")){
 displayName = e.client_name || "Booking Event"
 }
@@ -171,7 +173,7 @@ loadConfirmedEvents()
 
 
 // =============================
-// GET EVENT ID
+// GET EVENT ID (SAFE FIX)
 // =============================
 
 function getEventId(){
@@ -182,13 +184,14 @@ if(!select || !select.value){
 return null
 }
 
-return select.value
+// 🔥 FIX
+return String(select.value)
 
 }
 
 
 // =============================
-// CREATE MANUAL EVENT (SAFE)
+// CREATE MANUAL EVENT (UNCHANGED)
 // =============================
 
 async function createManualEventIfNeeded(){
@@ -212,7 +215,6 @@ const user = await getCurrentUser()
 
 if(!user) return null
 
-// DUPLICATE CHECK
 const { data: existing } = await supabase
 .from("events")
 .select("id")
@@ -221,7 +223,7 @@ const { data: existing } = await supabase
 .eq("client_name", name)
 
 if(existing && existing.length > 0){
-return existing[0].id
+return String(existing[0].id)
 }
 
 // CREATE
@@ -243,16 +245,15 @@ alert("Event create failed")
 return null
 }
 
-// refresh dropdown
 await loadConfirmedEvents()
 
-return data.id
+return String(data.id)
 
 }
 
 
 // =============================
-// UPLOAD IMAGES (FINAL SAFE)
+// UPLOAD IMAGES (FULL SAFE VERSION)
 // =============================
 
 async function uploadImages(){
@@ -293,8 +294,10 @@ return
 
 }
 
-// 🔥 SAFETY: ensure UUID
-if(!eventId || typeof eventId !== "string"){
+// 🔥 FIX: force string
+eventId = String(eventId)
+
+if(!eventId){
 status.innerText = "Invalid event selected"
 return
 }
