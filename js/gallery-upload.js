@@ -55,7 +55,7 @@ return params.get("event_id") || params.get("event")
 
 
 // =============================
-// LOAD EVENTS (UNCHANGED)
+// LOAD EVENTS (FIXED)
 // =============================
 
 async function loadConfirmedEvents(){
@@ -75,11 +75,11 @@ if(!user){
 return
 }
 
-// ✅ ONLY EVENTS TABLE (NO MERGE)
+
+// 🔥 FIX: REMOVE STRICT FILTER TEMPORARILY
 const { data: events, error } = await supabase
 .from("events")
 .select("*")
-.eq("user_id", user.id)
 .order("created_at",{ascending:false})
 
 if(error){
@@ -93,6 +93,11 @@ select.innerHTML = `<option value="">Select Event</option>`
 ;(events || []).forEach(e=>{
 
 if(!e || !e.id) return
+
+// 🔥 SAFE FILTER (CLIENT SIDE)
+if(user && e.user_id && e.user_id !== user.id){
+return
+}
 
 const option = document.createElement("option")
 
@@ -114,7 +119,7 @@ createOption.textContent = "+ Create New Event"
 select.appendChild(createOption)
 
 
-// ✅ KEEP ORIGINAL AUTO SELECT
+// AUTO SELECT
 const urlEvent = getEventFromURL()
 
 if(urlEvent){
@@ -155,7 +160,7 @@ return String(select.value)
 
 
 // =============================
-// 🔥 UPLOAD IMAGES (FIXED WITHOUT REMOVAL)
+// UPLOAD IMAGES (UNCHANGED)
 // =============================
 
 async function uploadImages(finalEventId){
@@ -183,11 +188,8 @@ status.innerText = "Login required"
 return
 }
 
-
-// 🔥 FIX: USE PASSED EVENT FIRST
 let eventId = finalEventId
 
-// fallback (only if not provided)
 if(!eventId){
 eventId = getEventId()
 }
@@ -196,7 +198,6 @@ if(!eventId){
 eventId = getEventFromURL()
 }
 
-// ❌ prevent invalid value
 if(eventId === "create_new"){
 status.innerText = "Invalid event selection"
 return
@@ -209,8 +210,6 @@ return
 
 eventId = String(eventId)
 
-
-// SYSTEM CHECK
 if(typeof window.uploadToCloudinary !== "function"){
 status.innerText = "Upload system not loaded"
 return
