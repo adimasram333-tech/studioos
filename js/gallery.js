@@ -32,6 +32,12 @@ if(eventId){
 localStorage.setItem("current_event", eventId)
 }
 
+// ❗ NEW FIX: अगर URL empty है तो stale event हटाओ
+if(!params.get("event")){
+localStorage.removeItem("current_event")
+eventId = null
+}
+
 // ❌ REMOVE legacy सिस्टम
 if(eventId && typeof eventId === "string" && eventId.startsWith("legacy_")){
 eventId = null
@@ -61,11 +67,13 @@ grid.innerHTML = ""
 
 if(!eventId){
 
+// ❗ FIX: सिर्फ events table से fetch करो
 const { data: events } =
 await supabase
 .from("events")
 .select("*")
 .eq("user_id", user.id)
+.order("event_date",{ ascending:false })
 
 const { data: galleryEvents } =
 await supabase
@@ -74,7 +82,7 @@ await supabase
 .eq("user_id", user.id)
 
 const eventIdsFromGallery =
-[...new Set((galleryEvents || []).map(g=>g.event_id))]
+[...new Set((galleryEvents || []).map(g=>String(g.event_id)))]
 
 const map = new Map()
 
@@ -84,12 +92,11 @@ map.set(String(e.id), e)
 }
 })
 
-// ✅ FIX: ensure type consistency
+// ✅ FIX: ensure gallery-only events also visible
 eventIdsFromGallery.forEach(id=>{
-const safeId = String(id)
-if(!map.has(safeId)){
-map.set(safeId,{
-id: safeId,
+if(!map.has(id)){
+map.set(id,{
+id: id,
 client_name:"Gallery Event",
 event_name:"Gallery Event",
 event_date:""
@@ -134,7 +141,6 @@ div.onclick = () => {
 
 localStorage.setItem("current_event", String(e.id))
 
-// ✅ FIX: force correct navigation
 window.location.href = `gallery.html?event=${e.id}`
 
 }
@@ -152,6 +158,7 @@ return
 // 🔥 MODE 2: IMAGE VIEW
 // =============================
 
+// ❗ SAFETY: अगर अभी भी eventId नहीं है
 if(!eventId){
 empty.classList.remove("hidden")
 return
