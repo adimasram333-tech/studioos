@@ -1,15 +1,33 @@
+// ================================
+// ACCESS SYSTEM (FULL FIXED VERSION)
+// ================================
+
 async function initAccess() {
 
-  const supabase = await window.getSupabase();
+  // =============================
+  // SUPABASE INIT (FIXED - NO DEPENDENCY ISSUE)
+  // =============================
+
+  let supabase;
+
+  if (window.getSupabase) {
+    supabase = await window.getSupabase();
+  } else if (window.supabase) {
+    // fallback (important)
+    supabase = window.supabase;
+  } else {
+    console.error("Supabase not found");
+    alert("System error: Supabase not initialized");
+    return;
+  }
 
   // =============================
-  // GET EVENT ID (FIXED)
+  // GET EVENT ID (SAFE + FIXED)
   // =============================
 
   const params = new URLSearchParams(window.location.search);
   let eventId = params.get("event_id");
 
-  // 🔥 fallback (अगर URL में missing हो)
   if (!eventId) {
     eventId = localStorage.getItem("last_event_id");
   }
@@ -22,8 +40,10 @@ async function initAccess() {
   // store for safety
   localStorage.setItem("last_event_id", eventId);
 
+  console.log("FINAL EVENT ID:", eventId);
+
   // =============================
-  // FORM SUBMIT
+  // FORM HANDLE (SAFE INIT)
   // =============================
 
   const form = document.getElementById("accessForm");
@@ -33,7 +53,15 @@ async function initAccess() {
     return;
   }
 
-  form.addEventListener("submit", async function (e) {
+  // prevent duplicate listeners
+  form.removeEventListener("submit", handleSubmit);
+  form.addEventListener("submit", handleSubmit);
+
+  // =============================
+  // SUBMIT FUNCTION
+  // =============================
+
+  async function handleSubmit(e) {
 
     e.preventDefault();
 
@@ -41,7 +69,7 @@ async function initAccess() {
     const phone = document.getElementById("phone").value.trim();
 
     // =============================
-    // VALIDATION (ADDED)
+    // VALIDATION
     // =============================
 
     if (!name || !phone) {
@@ -54,45 +82,59 @@ async function initAccess() {
       return;
     }
 
-    // =============================
-    // SAVE VISITOR
-    // =============================
+    try {
 
-    const { error } = await supabase
-      .from("event_visitors")
-      .insert([
-        {
-          event_id: eventId,
-          name: name,
-          phone: phone
-        }
-      ]);
+      // =============================
+      // SAVE VISITOR (STABLE)
+      // =============================
 
-    if (error) {
-      console.error("Insert error:", error);
-      alert("Failed to save data");
-      return;
+      const { data, error } = await supabase
+        .from("event_visitors")
+        .insert([
+          {
+            event_id: eventId,
+            name: name,
+            phone: phone
+          }
+        ])
+        .select();
+
+      if (error) {
+        console.error("Insert error:", error);
+        alert("Failed to save data");
+        return;
+      }
+
+      console.log("Visitor saved:", data);
+
+      // =============================
+      // ACCESS CONTROL FLAG
+      // =============================
+
+      sessionStorage.setItem("gallery_access", "true");
+      sessionStorage.setItem("event_id", eventId);
+
+      // =============================
+      // REDIRECT (DELAY FIX)
+      // =============================
+
+      setTimeout(() => {
+        window.location.href = `gallery.html?event_id=${eventId}`;
+      }, 300);
+
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      alert("Something went wrong");
     }
 
-    // =============================
-    // 🔒 ACCESS FLAG
-    // =============================
-
-    sessionStorage.setItem("gallery_access", "true");
-    sessionStorage.setItem("event_id", eventId);
-
-    // =============================
-    // REDIRECT (FIXED SAFE)
-    // =============================
-
-    window.location.href = `gallery.html?event_id=${eventId}`;
-
-  });
+  }
 
 }
 
 // =============================
-// INIT
+// INIT (SAFE)
 // =============================
 
-document.addEventListener("DOMContentLoaded", initAccess);
+document.addEventListener("DOMContentLoaded", () => {
+  initAccess();
+});
