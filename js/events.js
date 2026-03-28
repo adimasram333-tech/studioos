@@ -52,7 +52,6 @@ await waitForSupabase()
 if(!eventList) return
 
 const supabase = await window.getSupabase()
-
 const user = await getCurrentUser()
 
 if(!user){
@@ -60,7 +59,7 @@ console.log("No user found")
 return
 }
 
-// ✅ FIXED MONTH FILTER (NO INVALID DATE)
+// DATE RANGE
 const year = currentDate.getFullYear()
 const month = currentDate.getMonth()
 
@@ -70,12 +69,12 @@ const endDateObj = new Date(year, month + 1, 0)
 const startDate = startDateObj.toISOString().split('T')[0]
 const endDate = endDateObj.toISOString().split('T')[0]
 
+// 🔥 FIX: USE EVENTS TABLE
 const { data , error } =
 await supabase
-.from("quotations")
+.from("events")
 .select("*")
 .eq("user_id",user.id)
-.eq("status","confirmed")
 .gte("event_date", startDate)
 .lte("event_date", endDate)
 .order("event_date",{ascending:true})
@@ -139,14 +138,25 @@ ${busyLabel}
 </p>
 
 <div class="space-y-1">
-${events.map(e=>`
+${events.map(e=>{
+
+let name = e.client_name || e.event_name || "Event"
+
+// CLEAN NAME
+if(name.startsWith("Q_")){
+name = e.client_name || "Booking Event"
+}
+
+return `
 <div 
 class="text-sm text-gray-300 cursor-pointer hover:text-white transition"
 onclick="location.href='client.html?id=${e.id}'"
 >
-• ${e.client_name} — ₹${e.total}
+• ${name}
 </div>
-`).join("")}
+`
+
+}).join("")}
 </div>
 
 </div>
@@ -190,24 +200,32 @@ console.log("No user found")
 return
 }
 
-// FETCH EVENTS
+// 🔥 FIX: USE EVENTS
 const { data } =
 await supabase
-.from("quotations")
+.from("events")
 .select("*")
 .eq("user_id",user.id)
-.eq("status","confirmed")
 
 const eventDates = {}
 const eventDetails = {}
 
 if(data){
 data.forEach(e=>{
+
 eventDates[e.event_date] = true
-eventDetails[e.event_date] = {
-name: e.client_name,
-amount: e.total
+
+let name = e.client_name || e.event_name
+
+if(name && name.startsWith("Q_")){
+name = e.client_name || "Booking Event"
 }
+
+eventDetails[e.event_date] = {
+name: name,
+amount: e.total || ""
+}
+
 })
 }
 
@@ -243,7 +261,7 @@ const fullDate =
 
 let classes = "p-2 rounded cursor-pointer transition hover:scale-105"
 
-// PRIORITY LOGIC
+// PRIORITY
 if(eventDates[fullDate]){
 classes += " bg-red-600"
 }
@@ -263,7 +281,7 @@ classes += " ring-2 ring-green-400 shadow-lg"
 let tooltip = ""
 
 if(eventDetails[fullDate]){
-tooltip += `${eventDetails[fullDate].name} • ₹${eventDetails[fullDate].amount}`
+tooltip += `${eventDetails[fullDate].name}`
 }
 
 if(notes[fullDate]){
@@ -286,7 +304,7 @@ ${d}
 
 
 // =============================
-// NOTES SYSTEM
+// NOTES SYSTEM (UNCHANGED)
 // =============================
 
 const modal = document.getElementById("modal")
@@ -341,7 +359,7 @@ loadCalendar()
 
 
 // =============================
-// MONTH NAVIGATION (FIXED)
+// MONTH NAVIGATION (UNCHANGED)
 // =============================
 
 const prevBtn = document.getElementById("prevMonth")
