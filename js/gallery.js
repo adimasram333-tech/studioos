@@ -14,31 +14,15 @@ return
 
 
 // =============================
-// 🔥 GET EVENT ID (SUPER SAFE FIX)
+// 🔥 GET EVENT ID (CONTROLLED FIX)
 // =============================
 
 const params = new URLSearchParams(window.location.search)
-let eventId = params.get("event")
 
-const storedEvent = localStorage.getItem("current_event")
+// ✅ FIX: standard param
+let eventId = params.get("event_id")
 
-// ✅ FIX 1: Always fallback if missing
-if(!eventId && storedEvent){
-eventId = storedEvent
-}
-
-// ✅ FIX 2: Save again if URL has it
-if(eventId){
-localStorage.setItem("current_event", eventId)
-}
-
-// ❗ NEW FIX: अगर URL empty है तो stale event हटाओ
-if(!params.get("event")){
-localStorage.removeItem("current_event")
-eventId = null
-}
-
-// ❌ REMOVE legacy सिस्टम
+// 🔒 KEEP: legacy protection (safe)
 if(eventId && typeof eventId === "string" && eventId.startsWith("legacy_")){
 eventId = null
 }
@@ -67,54 +51,31 @@ grid.innerHTML = ""
 
 if(!eventId){
 
-// ❗ FIX: सिर्फ events table से fetch करो
-const { data: events } =
+// ✅ ONLY events table (REMOVE fake merge)
+const { data: events, error } =
 await supabase
 .from("events")
 .select("*")
 .eq("user_id", user.id)
 .order("event_date",{ ascending:false })
 
-const { data: galleryEvents } =
-await supabase
-.from("gallery_photos")
-.select("event_id")
-.eq("user_id", user.id)
-
-const eventIdsFromGallery =
-[...new Set((galleryEvents || []).map(g=>String(g.event_id)))]
-
-const map = new Map()
-
-;(events || []).forEach(e=>{
-if(e?.id){
-map.set(String(e.id), e)
+if(error){
+console.error("Events fetch error:", error)
+empty.classList.remove("hidden")
+empty.innerText = "Failed to load events"
+return
 }
-})
-
-// ✅ FIX: ensure gallery-only events also visible
-eventIdsFromGallery.forEach(id=>{
-if(!map.has(id)){
-map.set(id,{
-id: id,
-client_name:"Gallery Event",
-event_name:"Gallery Event",
-event_date:""
-})
-}
-})
-
-const allEvents = Array.from(map.values())
 
 grid.innerHTML = ""
 empty.classList.add("hidden")
 
-if(!allEvents.length){
+if(!events || events.length === 0){
+empty.innerText = "No events found"
 empty.classList.remove("hidden")
 return
 }
 
-allEvents.forEach(e=>{
+events.forEach(e=>{
 
 if(!e || !e.id) return
 
@@ -137,11 +98,10 @@ div.innerHTML = `
 <div class="text-xs text-gray-400">${date}</div>
 `
 
+// ✅ FIX: only URL navigation
 div.onclick = () => {
 
-localStorage.setItem("current_event", String(e.id))
-
-window.location.href = `gallery.html?event=${e.id}`
+window.location.href = `gallery.html?event_id=${e.id}`
 
 }
 
@@ -158,13 +118,13 @@ return
 // 🔥 MODE 2: IMAGE VIEW
 // =============================
 
-// ❗ SAFETY: अगर अभी भी eventId नहीं है
+// ❗ SAFETY
 if(!eventId){
 empty.classList.remove("hidden")
 return
 }
 
-// ✅ FIX: convert to string always
+// ✅ SAFE STRING
 const safeEventId = String(eventId)
 
 const { data, error } =
@@ -177,6 +137,8 @@ await supabase
 
 if(error){
 console.error("Gallery fetch error:",error)
+empty.classList.remove("hidden")
+empty.innerText = "Failed to load photos"
 return
 }
 
