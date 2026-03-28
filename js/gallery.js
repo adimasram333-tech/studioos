@@ -4,6 +4,23 @@
 
 async function loadGallery(){
 
+// 🔒 SECURITY CHECK (NEW)
+const params = new URLSearchParams(window.location.search)
+let eventIdCheck = params.get("event_id") || params.get("event")
+
+const accessGranted = sessionStorage.getItem("gallery_access")
+
+if(eventIdCheck && accessGranted !== "true"){
+console.warn("⚠️ Unauthorized access blocked")
+
+window.location.href = `access.html?event_id=${eventIdCheck}`
+return
+}
+
+// =============================
+// CONTINUE NORMAL FLOW
+// =============================
+
 const supabase = await window.getSupabase()
 const user = await window.getCurrentUser()
 
@@ -16,8 +33,6 @@ return
 // =============================
 // PARAMS
 // =============================
-
-const params = new URLSearchParams(window.location.search)
 
 let eventId = params.get("event_id")
 
@@ -148,7 +163,7 @@ return
 
 
 // =============================
-// IMAGE MODAL (NEW)
+// IMAGE MODAL
 // =============================
 
 function openImage(url){
@@ -199,7 +214,6 @@ div.innerHTML = `
 class="w-full h-40 object-cover hover:scale-105 transition"/>
 `
 
-// 🔥 CLICK FIX
 div.onclick = () => openImage(img.image_url)
 
 grid.appendChild(div)
