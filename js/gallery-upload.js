@@ -44,7 +44,7 @@ return null
 
 
 // =============================
-// 🔥 LOAD EVENTS (FIXED + ENHANCED)
+// 🔥 LOAD EVENTS (FINAL FIX)
 // =============================
 
 async function loadConfirmedEvents(){
@@ -64,7 +64,10 @@ if(!user){
 return
 }
 
-// ===== FETCH EVENTS =====
+// =============================
+// 🔥 STEP 1: FETCH EVENTS TABLE
+// =============================
+
 const { data: events, error } = await supabase
 .from("events")
 .select("*")
@@ -75,26 +78,69 @@ if(error){
 console.error("Events error", error)
 }
 
-// RESET
+// =============================
+// 🔥 STEP 2: FETCH EVENTS FROM GALLERY (CRITICAL FIX)
+// =============================
+
+const { data: galleryEvents } = await supabase
+.from("gallery_photos")
+.select("event_id")
+.eq("user_id", user.id)
+
+// unique event ids
+const galleryEventIds = [...new Set((galleryEvents || []).map(g=>g.event_id))]
+
+// =============================
+// 🔥 STEP 3: MERGE EVENTS
+// =============================
+
+const allEventsMap = new Map()
+
+;(events || []).forEach(e=>{
+if(e?.id){
+allEventsMap.set(e.id,e)
+}
+})
+
+// 👉 add missing gallery events
+galleryEventIds.forEach(id=>{
+if(!allEventsMap.has(id)){
+allEventsMap.set(id,{
+id:id,
+client_name:"Gallery Event",
+event_name:"Gallery Event",
+event_date:""
+})
+}
+})
+
+// =============================
+// RESET DROPDOWN
+// =============================
+
 select.innerHTML = `<option value="">Select Event</option>`
 
-;(events || []).forEach(e => {
+// =============================
+// RENDER
+// =============================
+
+Array.from(allEventsMap.values()).forEach(e=>{
 
 if(!e || !e.id) return
 
 const option = document.createElement("option")
-
 option.value = e.id
 
-// 🔥 CLEAN DISPLAY NAME FIX
-let displayName = e.client_name || e.event_name
+let displayName = e.client_name || e.event_name || "Event"
 
-// अगर system generated name है
+// clean name
 if(displayName && displayName.startsWith("Q_")){
 displayName = e.client_name || "Booking Event"
 }
 
-option.textContent = `${displayName} (${e.event_date})`
+const dateText = e.event_date ? ` (${e.event_date})` : ""
+
+option.textContent = `${displayName}${dateText}`
 
 select.appendChild(option)
 
@@ -166,7 +212,7 @@ const user = await getCurrentUser()
 
 if(!user) return null
 
-// 🔥 DUPLICATE CHECK (NEW)
+// DUPLICATE CHECK
 const { data: existing } = await supabase
 .from("events")
 .select("id")
@@ -206,7 +252,7 @@ return data.id
 
 
 // =============================
-// UPLOAD IMAGES (STABLE)
+// UPLOAD IMAGES (FINAL SAFE)
 // =============================
 
 async function uploadImages(){
@@ -245,6 +291,12 @@ status.innerText = "Please select or create event"
 return
 }
 
+}
+
+// 🔥 SAFETY: ensure UUID
+if(!eventId || typeof eventId !== "string"){
+status.innerText = "Invalid event selected"
+return
 }
 
 // SYSTEM CHECK
