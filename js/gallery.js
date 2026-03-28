@@ -57,7 +57,7 @@ const { data: events, error } =
 await supabase
 .from("events")
 .select("*")
-.eq("user_id", user.id)   // ✅ FIXED
+.eq("user_id", user.id)
 .order("event_date",{ ascending:false })
 
 if(error){
@@ -139,8 +139,7 @@ const { data, error } =
 await supabase
 .from("gallery_photos")
 .select("*")
-.eq("event_id", safeEventId)
-.eq("user_id", user.id)   // ✅ FIXED
+.eq("event_id", safeEventId)   // ✅ FIXED (user_id filter removed)
 .order("created_at",{ ascending:false })
 
 if(error){
