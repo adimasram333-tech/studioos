@@ -14,15 +14,20 @@ return
 
 
 // =============================
-// 🔥 GET EVENT ID (CONTROLLED FIX)
+// 🔥 FINAL PARAM FIX
 // =============================
 
 const params = new URLSearchParams(window.location.search)
 
-// ✅ FIX: standard param
+// ✅ NEW PARAM
 let eventId = params.get("event_id")
 
-// 🔒 KEEP: legacy protection (safe)
+// ✅ BACKWARD SUPPORT (CRITICAL)
+if(!eventId){
+eventId = params.get("event")
+}
+
+// 🔒 LEGACY BLOCK
 if(eventId && typeof eventId === "string" && eventId.startsWith("legacy_")){
 eventId = null
 }
@@ -51,7 +56,6 @@ grid.innerHTML = ""
 
 if(!eventId){
 
-// ✅ ONLY events table (REMOVE fake merge)
 const { data: events, error } =
 await supabase
 .from("events")
@@ -66,14 +70,14 @@ empty.innerText = "Failed to load events"
 return
 }
 
-grid.innerHTML = ""
-empty.classList.add("hidden")
-
 if(!events || events.length === 0){
 empty.innerText = "No events found"
 empty.classList.remove("hidden")
 return
 }
+
+grid.innerHTML = ""
+empty.classList.add("hidden")
 
 events.forEach(e=>{
 
@@ -98,11 +102,8 @@ div.innerHTML = `
 <div class="text-xs text-gray-400">${date}</div>
 `
 
-// ✅ FIX: only URL navigation
 div.onclick = () => {
-
 window.location.href = `gallery.html?event_id=${e.id}`
-
 }
 
 grid.appendChild(div)
@@ -118,13 +119,6 @@ return
 // 🔥 MODE 2: IMAGE VIEW
 // =============================
 
-// ❗ SAFETY
-if(!eventId){
-empty.classList.remove("hidden")
-return
-}
-
-// ✅ SAFE STRING
 const safeEventId = String(eventId)
 
 const { data, error } =
@@ -151,11 +145,9 @@ grid.innerHTML = ""
 empty.classList.add("hidden")
 
 if(!data || data.length === 0){
-
 empty.innerText = "No photos uploaded for this event"
 empty.classList.remove("hidden")
 return
-
 }
 
 data.forEach(img=>{
@@ -184,7 +176,5 @@ grid.appendChild(div)
 // =============================
 
 document.addEventListener("DOMContentLoaded",()=>{
-
 loadGallery()
-
 })
