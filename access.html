@@ -10,8 +10,15 @@
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- IMPORTANT: load config BEFORE access.js -->
-  <script src="supabase.js"></script>
+  <!-- FIXED: Absolute path for GitHub Pages -->
+  <script src="./supabase.js"></script>
+
+  <!-- PREVENT JS FAIL SILENT -->
+  <script>
+    window.addEventListener("error", function (e) {
+      console.error("Global JS Error:", e.message);
+    });
+  </script>
 
 </head>
 
@@ -43,6 +50,7 @@
 
       <button 
         type="submit"
+        id="submitBtn"
         class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-lg font-semibold"
       >
         View Gallery
@@ -50,10 +58,15 @@
 
     </form>
 
+    <!-- LOADING STATE -->
+    <p id="loadingText" class="text-center text-sm text-gray-400 mt-3 hidden">
+      Processing...
+    </p>
+
   </div>
 
-  <!-- ACCESS LOGIC -->
-  <script src="access.js"></script>
+  <!-- FIXED: load after DOM -->
+  <script defer src="./access.js"></script>
 
 </body>
 </html>
