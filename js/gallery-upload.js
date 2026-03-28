@@ -45,7 +45,7 @@ return null
 
 
 // =============================
-// GET EVENT FROM URL (SINGLE SOURCE)
+// GET EVENT FROM URL
 // =============================
 
 function getEventFromURL(){
@@ -55,7 +55,7 @@ return params.get("event_id") || params.get("event")
 
 
 // =============================
-// LOAD EVENTS (CLEAN FIX)
+// LOAD EVENTS
 // =============================
 
 async function loadConfirmedEvents(){
@@ -63,45 +63,30 @@ async function loadConfirmedEvents(){
 try{
 
 const select = document.getElementById("eventSelect")
-
-if(!select){
-return
-}
+if(!select) return
 
 const supabase = getSupabase()
 const user = await getCurrentUser()
 
-if(!user){
-return
-}
+if(!user) return
 
-// ✅ ONLY EVENTS TABLE (NO MERGE)
-const { data: events, error } = await supabase
+const { data: events } = await supabase
 .from("events")
 .select("*")
 .eq("user_id", user.id)
 .order("created_at",{ascending:false})
 
-if(error){
-console.error("Events error", error)
-}
-
-// RESET
 select.innerHTML = `<option value="">Select Event</option>`
 
-// RENDER
 ;(events || []).forEach(e=>{
 
-if(!e || !e.id) return
-
 const option = document.createElement("option")
-
 option.value = String(e.id)
 
-const displayName = e.client_name || e.event_name || "Event"
-const dateText = e.event_date ? ` (${e.event_date})` : ""
+const name = e.client_name || e.event_name || "Event"
+const date = e.event_date ? ` (${e.event_date})` : ""
 
-option.textContent = `${displayName}${dateText}`
+option.textContent = `${name}${date}`
 
 select.appendChild(option)
 
@@ -114,10 +99,7 @@ createOption.textContent = "+ Create New Event"
 select.appendChild(createOption)
 
 
-// =============================
-// ✅ AUTO SELECT FROM URL
-// =============================
-
+// ✅ RESTORED: AUTO SELECT FROM URL
 const urlEvent = getEventFromURL()
 
 if(urlEvent){
@@ -125,57 +107,33 @@ select.value = String(urlEvent)
 }
 
 }catch(err){
-console.error("Dropdown load error",err)
+console.error(err)
 }
 
 }
 
-
-// =============================
-// AUTO INIT
-// =============================
-
-document.addEventListener("DOMContentLoaded",()=>{
-loadConfirmedEvents()
-})
+document.addEventListener("DOMContentLoaded", loadConfirmedEvents)
 
 
 // =============================
-// GET EVENT ID
+// UPLOAD IMAGES (FINAL FIX)
 // =============================
 
-function getEventId(){
-
-const select = document.getElementById("eventSelect")
-
-if(!select || !select.value){
-return null
-}
-
-return String(select.value)
-
-}
-
-
-// =============================
-// UPLOAD IMAGES (FIXED)
-// =============================
-
-async function uploadImages(){
+async function uploadImages(finalEventId){
 
 const input = document.getElementById("images")
 const status = document.getElementById("status")
 const progress = document.getElementById("progress")
 
-if(!input){
-console.error("Image input missing")
+if(!finalEventId){
+status.innerText = "Invalid event"
 return
 }
 
 const files = input.files
 
 if(!files || !files.length){
-status.innerText = "Please select images or folder"
+status.innerText = "Please select images"
 return
 }
 
@@ -186,101 +144,54 @@ status.innerText = "Login required"
 return
 }
 
-let eventId = getEventId()
-
-// ✅ fallback URL
-if(!eventId){
-eventId = getEventFromURL()
-}
-
-if(!eventId){
-status.innerText = "Please select event"
-return
-}
-
-eventId = String(eventId)
-
-// SYSTEM CHECK
-if(typeof window.uploadToCloudinary !== "function"){
-status.innerText = "Upload system not loaded"
-return
-}
-
-if(typeof window.saveGalleryImages !== "function"){
-status.innerText = "Database system not loaded"
-return
-}
-
-status.innerText = "Uploading photos..."
+status.innerText = "Uploading..."
 progress.innerText = ""
 
 let uploaded = 0
 
 const validFiles =
-[...files].filter(file => file && file.type && file.type.startsWith("image/"))
+[...files].filter(f=>f.type.startsWith("image/"))
 
-if(validFiles.length === 0){
-status.innerText = "No valid images selected"
-return
-}
+const urls = []
 
-const uploadPromises = validFiles.map(async (file)=>{
+for(const file of validFiles){
 
 try{
 
-const url =
-await window.uploadToCloudinary(file,eventId)
+const url = await window.uploadToCloudinary(file,finalEventId)
 
 if(url){
-
 uploaded++
-progress.innerText = `${uploaded} / ${validFiles.length}`
-
-return url
-
+progress.innerText = `${uploaded}/${validFiles.length}`
+urls.push(url)
 }
 
-}catch(err){
-console.error("Upload error",err)
+}catch(e){
+console.error(e)
 }
 
-return null
-
-})
-
-const urls =
-(await Promise.all(uploadPromises)).filter(Boolean)
+}
 
 if(!urls.length){
 status.innerText = "Upload failed"
 return
 }
 
-try{
-
-const rows = urls.map(url => ({
-event_id:eventId,
+const rows = urls.map(url=>({
+event_id:finalEventId,
 image_url:url,
 user_id:user.id
 }))
 
-const success =
-await window.saveGalleryImages(rows)
+const success = await window.saveGalleryImages(rows)
 
 if(!success){
-status.innerText = "Upload complete but database save failed"
+status.innerText = "DB save failed"
 return
 }
 
 status.innerText = "Upload Complete"
-progress.innerText = "All photos uploaded"
-
-}catch(err){
-
-console.error("Database save error",err)
-status.innerText = "Upload complete but database save failed"
-
-}
+progress.innerText = "Done"
 
 }
 
