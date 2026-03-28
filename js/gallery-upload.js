@@ -44,7 +44,7 @@ return null
 
 
 // =============================
-// 🔥 LOAD EVENTS (FINAL FIX)
+// 🔥 LOAD EVENTS (FIXED + ENHANCED)
 // =============================
 
 async function loadConfirmedEvents(){
@@ -64,7 +64,7 @@ if(!user){
 return
 }
 
-// ===== FETCH ONLY EVENTS TABLE =====
+// ===== FETCH EVENTS =====
 const { data: events, error } = await supabase
 .from("events")
 .select("*")
@@ -84,10 +84,17 @@ if(!e || !e.id) return
 
 const option = document.createElement("option")
 
-// ✅ ALWAYS USE EVENTS.ID
 option.value = e.id
 
-option.textContent = `${e.client_name || e.event_name} (${e.event_date})`
+// 🔥 CLEAN DISPLAY NAME FIX
+let displayName = e.client_name || e.event_name
+
+// अगर system generated name है
+if(displayName && displayName.startsWith("Q_")){
+displayName = e.client_name || "Booking Event"
+}
+
+option.textContent = `${displayName} (${e.event_date})`
 
 select.appendChild(option)
 
@@ -135,7 +142,7 @@ return select.value
 
 
 // =============================
-// CREATE MANUAL EVENT (FIXED)
+// CREATE MANUAL EVENT (SAFE)
 // =============================
 
 async function createManualEventIfNeeded(){
@@ -159,7 +166,19 @@ const user = await getCurrentUser()
 
 if(!user) return null
 
-// 🔥 CREATE DIRECTLY IN EVENTS TABLE
+// 🔥 DUPLICATE CHECK (NEW)
+const { data: existing } = await supabase
+.from("events")
+.select("id")
+.eq("user_id", user.id)
+.eq("event_date", date)
+.eq("client_name", name)
+
+if(existing && existing.length > 0){
+return existing[0].id
+}
+
+// CREATE
 const { data, error } = await supabase
 .from("events")
 .insert([{
@@ -187,7 +206,7 @@ return data.id
 
 
 // =============================
-// UPLOAD IMAGES (FIXED)
+// UPLOAD IMAGES (STABLE)
 // =============================
 
 async function uploadImages(){
@@ -204,13 +223,10 @@ return
 const files = input.files
 
 if(!files || !files.length){
-
 status.innerText = "Please select images or folder"
 return
-
 }
 
-// USER CHECK
 const user = await getCurrentUser()
 
 if(!user){
@@ -218,10 +234,8 @@ status.innerText = "Login required"
 return
 }
 
-// EVENT
 let eventId = getEventId()
 
-// CREATE IF NEEDED
 if(eventId === "create_new" || !eventId){
 
 eventId = await createManualEventIfNeeded()
@@ -248,9 +262,7 @@ status.innerText = "Uploading photos..."
 progress.innerText = ""
 
 let uploaded = 0
-let urls = []
 
-// FILTER IMAGES
 const validFiles =
 [...files].filter(file => file && file.type && file.type.startsWith("image/"))
 
@@ -259,7 +271,6 @@ status.innerText = "No valid images selected"
 return
 }
 
-// UPLOAD
 const uploadPromises = validFiles.map(async (file)=>{
 
 try{
@@ -270,9 +281,7 @@ await window.uploadToCloudinary(file,eventId)
 if(url){
 
 uploaded++
-
-progress.innerText =
-`${uploaded} / ${validFiles.length}`
+progress.innerText = `${uploaded} / ${validFiles.length}`
 
 return url
 
@@ -286,20 +295,18 @@ return null
 
 })
 
-urls =
-(await Promise.all(uploadPromises))
-.filter(Boolean)
+const urls =
+(await Promise.all(uploadPromises)).filter(Boolean)
 
 if(!urls.length){
 status.innerText = "Upload failed"
 return
 }
 
-// SAVE
 try{
 
 const rows = urls.map(url => ({
-event_id:eventId, // ✅ FINAL FIX
+event_id:eventId,
 image_url:url,
 user_id:user.id
 }))
@@ -308,12 +315,8 @@ const success =
 await window.saveGalleryImages(rows)
 
 if(!success){
-
-status.innerText =
-"Upload complete but database save failed"
-
+status.innerText = "Upload complete but database save failed"
 return
-
 }
 
 status.innerText = "Upload Complete"
@@ -322,13 +325,10 @@ progress.innerText = "All photos uploaded"
 }catch(err){
 
 console.error("Database save error",err)
-
-status.innerText =
-"Upload complete but database save failed"
+status.innerText = "Upload complete but database save failed"
 
 }
 
 }
 
-// EXPORT
 window.uploadImages = uploadImages
