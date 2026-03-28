@@ -48,33 +48,61 @@ grid.innerHTML = ""
 
 
 // =============================
-// 🔥 MODE 1: EVENT LIST (FIXED)
+// 🔥 MODE 1: EVENT LIST (FINAL FIX)
 // =============================
 
 if(!eventId){
 
-const { data: events, error } =
+// 🔥 EVENTS TABLE
+const { data: events } =
 await supabase
 .from("events")
 .select("*")
 .eq("user_id", user.id)
-.order("created_at",{ascending:false})
 
-if(error){
-console.error("Event fetch error:", error)
-return
+// 🔥 GALLERY TABLE EVENTS (IMPORTANT FIX)
+const { data: galleryEvents } =
+await supabase
+.from("gallery_photos")
+.select("event_id")
+.eq("user_id", user.id)
+
+const eventIdsFromGallery =
+[...new Set((galleryEvents || []).map(g=>g.event_id))]
+
+// 🔥 MERGE BOTH
+const map = new Map()
+
+;(events || []).forEach(e=>{
+if(e?.id){
+map.set(e.id,e)
 }
+})
 
-// 🔥 FIX: clear both states
+// add missing gallery events
+eventIdsFromGallery.forEach(id=>{
+if(!map.has(id)){
+map.set(id,{
+id:id,
+client_name:"Gallery Event",
+event_name:"Gallery Event",
+event_date:""
+})
+}
+})
+
+const allEvents = Array.from(map.values())
+
+// UI
 grid.innerHTML = ""
 empty.classList.add("hidden")
 
-if(!events || events.length === 0){
+if(!allEvents.length){
 empty.classList.remove("hidden")
 return
 }
 
-events.forEach(e=>{
+allEvents.forEach(e=>{
 
 if(!e || !e.id) return
 
@@ -84,10 +112,10 @@ div.className =
 "glass rounded-xl p-3 cursor-pointer hover:scale-105 transition"
 
 const date =
-new Date(e.event_date).toLocaleDateString("en-IN")
+e.event_date ? new Date(e.event_date).toLocaleDateString("en-IN") : ""
 
-// 🔥 CLEAN NAME FIX
-let displayName = e.client_name || e.event_name || "Unnamed"
+// CLEAN NAME
+let displayName = e.client_name || e.event_name || "Event"
 
 if(displayName && displayName.startsWith("Q_")){
 displayName = e.client_name || "Booking Event"
@@ -119,7 +147,6 @@ return
 // 🔥 MODE 2: IMAGE VIEW (SAFE)
 // =============================
 
-// 🔥 INVALID EVENT GUARD
 if(!eventId){
 empty.classList.remove("hidden")
 return
@@ -148,7 +175,6 @@ empty.classList.add("hidden")
 
 if(!data || data.length === 0){
 
-// 🔥 BETTER EMPTY MESSAGE
 empty.innerText = "No photos uploaded for this event"
 empty.classList.remove("hidden")
 return
