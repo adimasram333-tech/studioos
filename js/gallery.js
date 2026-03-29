@@ -77,6 +77,10 @@ alert("Link copied")
 
 window.showQR = function(id){
 
+// ✅ FIX: CLOSE MENU FIRST
+const existingMenu = document.getElementById("floatingMenu")
+if(existingMenu) existingMenu.remove()
+
 const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
 
 let modal = document.createElement("div")
