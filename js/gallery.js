@@ -154,7 +154,6 @@ user = await window.getCurrentUser()
 user = null
 }
 
-// ✅ NEW ROLE LOGIC
 const role = sessionStorage.getItem("role") || "guest"
 
 const accessGranted = sessionStorage.getItem("gallery_access")
@@ -331,10 +330,17 @@ modal.style.justifyContent = "center"
 modal.style.zIndex = 9999
 
 modal.innerHTML = `
-<img src="${url}" style="max-width:90%; max-height:90%; border-radius:12px;" />
+<div style="text-align:center">
+<img src="${url}" style="max-width:90%; max-height:80%; border-radius:12px;" />
+
+<button onclick="handleDownload('${url}')"
+style="margin-top:10px; background:#4f46e5; color:white; padding:8px 16px; border-radius:8px;">
+Download
+</button>
+</div>
 `
 
-modal.onclick = () => modal.remove()
+modal.onclick = (e)=>{ if(e.target === modal) modal.remove() }
 
 document.body.appendChild(modal)
 }else{
@@ -356,7 +362,6 @@ div.innerHTML = `
 class="w-full h-40 object-cover hover:scale-105 transition"/>
 `
 
-// ✅ ROLE BASED CLICK CONTROL (future-ready)
 div.onclick = () => openImage(img.image_url)
 
 grid.appendChild(div)
