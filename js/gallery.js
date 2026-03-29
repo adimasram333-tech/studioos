@@ -331,9 +331,9 @@ modal.style.zIndex = 9999
 
 modal.innerHTML = `
 <div style="text-align:center">
-<img src="${url}" style="max-width:90%; max-height:80%; border-radius:12px;" />
+<img id="modalImg" src="${url}" style="max-width:90%; max-height:80vh; border-radius:12px;" />
 
-<button onclick="handleDownload('${url}')"
+<button id="downloadBtn"
 style="margin-top:10px; background:#4f46e5; color:white; padding:8px 16px; border-radius:8px;">
 Download
 </button>
@@ -343,8 +343,23 @@ Download
 modal.onclick = (e)=>{ if(e.target === modal) modal.remove() }
 
 document.body.appendChild(modal)
+
+// ✅ FIXED DOWNLOAD HANDLER
+const btn = document.getElementById("downloadBtn")
+
+btn.onclick = function(){
+if(typeof handleDownload === "function"){
+handleDownload(url)
 }else{
-modal.querySelector("img").src = url
+const a = document.createElement("a")
+a.href = url
+a.download = "image.jpg"
+a.click()
+}
+}
+
+}else{
+document.getElementById("modalImg").src = url
 }
 }
 
