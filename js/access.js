@@ -1,5 +1,5 @@
 // ================================
-// ACCESS SYSTEM + DEMO OTP + TOKEN SYSTEM (FINAL)
+// ACCESS SYSTEM + SMART DEMO OTP + TOKEN SYSTEM (FINAL)
 // ================================
 
 async function initAccess() {
@@ -38,7 +38,7 @@ async function initAccess() {
   }
 
   // =============================
-  // DEVICE ID (NEW)
+  // DEVICE ID
   // =============================
 
   let deviceId = localStorage.getItem("device_id");
@@ -48,13 +48,17 @@ async function initAccess() {
   }
 
   let generatedOTP = null;
+  let otpGenerated = false;
+  let otpAttempts = 0;
+  const maxAttempts = 3;
+
   let currentPhone = null;
   let currentName = null;
   let existingVisitor = null;
   let userRole = "guest";
 
   // =============================
-  // TOKEN INPUT (NEW UI)
+  // TOKEN INPUT
   // =============================
 
   if (!document.getElementById("tokenInput")) {
@@ -100,10 +104,6 @@ async function initAccess() {
       >
         Verify OTP
       </button>
-
-      <p class="text-xs text-gray-400 text-center">
-        Demo OTP: <span>${generatedOTP}</span>
-      </p>
     `;
 
     form.appendChild(otpDiv);
@@ -125,10 +125,18 @@ async function initAccess() {
       return;
     }
 
+    if (otpAttempts >= maxAttempts) {
+      alert("Too many attempts. Try again later.");
+      return;
+    }
+
     if (entered !== String(generatedOTP)) {
+      otpAttempts++;
       alert("Invalid OTP");
       return;
     }
+
+    otpAttempts = 0;
 
     try {
 
@@ -180,7 +188,7 @@ async function initAccess() {
       }
 
       // =============================
-      // TOKEN VERIFY (NEW CORE LOGIC)
+      // TOKEN VERIFY
       // =============================
 
       const token = document.getElementById("tokenInput").value.trim();
@@ -228,7 +236,7 @@ async function initAccess() {
       }
 
       // =============================
-      // SESSION STORE (UPDATED)
+      // SESSION STORE
       // =============================
 
       sessionStorage.setItem("gallery_access", "true");
@@ -251,6 +259,8 @@ async function initAccess() {
   form.addEventListener("submit", async function (e) {
 
     e.preventDefault();
+
+    if (otpGenerated) return;
 
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
@@ -296,9 +306,12 @@ async function initAccess() {
       }
     }
 
-    generatedOTP = Math.floor(1000 + Math.random() * 9000);
+    alert("Sending OTP...");
 
-    alert("Demo OTP: " + generatedOTP);
+    await new Promise(res => setTimeout(res, 1200));
+
+    generatedOTP = Math.floor(1000 + Math.random() * 9000);
+    otpGenerated = true;
 
     showOTPInput();
 
