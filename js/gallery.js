@@ -26,31 +26,23 @@ const accessGranted = sessionStorage.getItem("gallery_access")
 const sessionEventId = sessionStorage.getItem("event_id")
 const visitorId = sessionStorage.getItem("visitor_id")
 
-// 👤 PHOTOGRAPHER → FULL ACCESS
 if(user){
 console.log("👤 Photographer access")
 }else{
 
-// 👥 GUEST FLOW
 if(eventIdCheck){
 
-// ❌ No access flag
 if(accessGranted !== "true"){
-console.warn("❌ Guest not verified")
 window.location.href = `access.html?event_id=${eventIdCheck}`
 return
 }
 
-// ❌ Event mismatch
 if(!sessionEventId || sessionEventId !== eventIdCheck){
-console.warn("❌ Event mismatch")
 window.location.href = `access.html?event_id=${eventIdCheck}`
 return
 }
 
-// ❌ No visitor identity
 if(!visitorId){
-console.warn("❌ Missing visitor ID")
 window.location.href = `access.html?event_id=${eventIdCheck}`
 return
 }
@@ -66,7 +58,6 @@ console.log("✅ Guest verified")
 // =============================
 
 const supabase = await window.getSupabase()
-
 
 // =============================
 // PARAMS
@@ -84,7 +75,6 @@ eventId = null
 
 console.log("FINAL EVENT ID:", eventId)
 
-
 // =============================
 // ELEMENTS
 // =============================
@@ -93,12 +83,10 @@ const grid = document.getElementById("galleryGrid")
 const empty = document.getElementById("emptyState")
 
 if(!grid || !empty){
-console.error("Gallery DOM missing")
 return
 }
 
 grid.innerHTML = ""
-
 
 // =============================
 // MODE 1: EVENT LIST (ONLY USER)
@@ -106,9 +94,7 @@ grid.innerHTML = ""
 
 if(!eventId){
 
-// ❌ Guest should never see events list
 if(!user){
-console.warn("❌ Guest blocked from event list")
 window.location.href = "access.html"
 return
 }
@@ -121,7 +107,6 @@ await supabase
 .order("event_date",{ ascending:false })
 
 if(error){
-console.error("Events fetch error:", error)
 empty.classList.remove("hidden")
 empty.innerText = "Failed to load events"
 return
@@ -143,7 +128,11 @@ if(!e || !e.id) return
 const div = document.createElement("div")
 
 div.className =
-"glass rounded-xl p-3 cursor-pointer hover:scale-105 transition"
+"glass rounded-xl p-3 relative hover:scale-105 transition"
+
+// =============================
+// EVENT DATA
+// =============================
 
 const date =
 e.event_date ? new Date(e.event_date).toLocaleDateString("en-IN") : ""
@@ -154,13 +143,85 @@ if(displayName && displayName.startsWith("Q_")){
 displayName = e.client_name || "Booking Event"
 }
 
+// =============================
+// 3 DOT MENU HTML
+// =============================
+
 div.innerHTML = `
-<div class="text-sm font-semibold">${displayName}</div>
-<div class="text-xs text-gray-400">${date}</div>
+<div class="flex justify-between items-start">
+  <div>
+    <div class="text-sm font-semibold">${displayName}</div>
+    <div class="text-xs text-gray-400">${date}</div>
+  </div>
+
+  <div class="relative">
+    <button class="menuBtn text-xl px-2">⋮</button>
+
+    <div class="menu hidden absolute right-0 mt-2 w-40 glass rounded-lg p-2 z-50">
+      <div class="menuItem cursor-pointer p-2 hover:bg-white/10">Open</div>
+      <div class="menuItem cursor-pointer p-2 hover:bg-white/10">Share Link</div>
+      <div class="menuItem cursor-pointer p-2 hover:bg-white/10">Show QR</div>
+    </div>
+  </div>
+</div>
 `
 
-div.onclick = () => {
+// =============================
+// ACTIONS
+// =============================
+
+const menuBtn = div.querySelector(".menuBtn")
+const menu = div.querySelector(".menu")
+const items = div.querySelectorAll(".menuItem")
+
+menuBtn.onclick = (ev)=>{
+ev.stopPropagation()
+document.querySelectorAll(".menu").forEach(m=>m.classList.add("hidden"))
+menu.classList.toggle("hidden")
+}
+
+// CLOSE MENU GLOBAL
+document.addEventListener("click",()=>{
+menu.classList.add("hidden")
+})
+
+// OPEN
+items[0].onclick = ()=>{
 window.location.href = `gallery.html?event_id=${e.id}`
+}
+
+// SHARE LINK
+items[1].onclick = ()=>{
+const link = `${window.location.origin}/studioos/access.html?event_id=${e.id}`
+navigator.clipboard.writeText(link)
+alert("Link copied")
+}
+
+// SHOW QR
+items[2].onclick = ()=>{
+const link = `${window.location.origin}/studioos/access.html?event_id=${e.id}`
+
+let modal = document.createElement("div")
+modal.style.position = "fixed"
+modal.style.top = 0
+modal.style.left = 0
+modal.style.width = "100%"
+modal.style.height = "100%"
+modal.style.background = "rgba(0,0,0,0.9)"
+modal.style.display = "flex"
+modal.style.alignItems = "center"
+modal.style.justifyContent = "center"
+modal.style.zIndex = 9999
+
+modal.innerHTML = `
+<div style="background:#111; padding:20px; border-radius:12px; text-align:center">
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}"/>
+  <div style="margin-top:10px; font-size:12px; color:#aaa">Scan to access gallery</div>
+</div>
+`
+
+modal.onclick = ()=> modal.remove()
+document.body.appendChild(modal)
 }
 
 grid.appendChild(div)
@@ -171,9 +232,8 @@ return
 
 }
 
-
 // =============================
-// MODE 2: IMAGE VIEW
+// MODE 2: IMAGE VIEW (UNCHANGED)
 // =============================
 
 const safeEventId = String(eventId)
@@ -186,16 +246,10 @@ await supabase
 .order("created_at",{ ascending:false })
 
 if(error){
-console.error("Gallery fetch error:",error)
 empty.classList.remove("hidden")
 empty.innerText = "Failed to load photos"
 return
 }
-
-
-// =============================
-// UI RENDER
-// =============================
 
 grid.innerHTML = ""
 empty.classList.add("hidden")
@@ -205,7 +259,6 @@ empty.innerText = "No photos uploaded for this event"
 empty.classList.remove("hidden")
 return
 }
-
 
 // =============================
 // IMAGE MODAL
@@ -240,7 +293,6 @@ modal.querySelector("img").src = url
 }
 }
 
-
 // =============================
 // RENDER IMAGES
 // =============================
@@ -266,7 +318,6 @@ grid.appendChild(div)
 })
 
 }
-
 
 // =============================
 // AUTO INIT
