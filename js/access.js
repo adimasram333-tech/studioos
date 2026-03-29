@@ -1,12 +1,8 @@
 // ================================
-// ACCESS SYSTEM + DEMO OTP (FINAL)
+// ACCESS SYSTEM + DEMO OTP (FINAL FIXED)
 // ================================
 
 async function initAccess() {
-
-  // =============================
-  // SUPABASE INIT
-  // =============================
 
   let supabase;
 
@@ -19,10 +15,6 @@ async function initAccess() {
     alert("System error: Supabase not initialized");
     return;
   }
-
-  // =============================
-  // GET EVENT ID
-  // =============================
 
   const params = new URLSearchParams(window.location.search);
   let eventId = params.get("event_id");
@@ -38,8 +30,6 @@ async function initAccess() {
 
   localStorage.setItem("last_event_id", eventId);
 
-  console.log("FINAL EVENT ID:", eventId);
-
   const form = document.getElementById("accessForm");
 
   if (!form) {
@@ -47,16 +37,13 @@ async function initAccess() {
     return;
   }
 
-  // =============================
-  // OTP STATE
-  // =============================
-
   let generatedOTP = null;
   let currentPhone = null;
   let currentName = null;
+  let existingVisitor = null;
 
   // =============================
-  // CREATE OTP INPUT UI (DYNAMIC)
+  // OTP UI
   // =============================
 
   function showOTPInput() {
@@ -83,7 +70,7 @@ async function initAccess() {
       </button>
 
       <p class="text-xs text-gray-400 text-center">
-        Demo OTP: <span id="otpPreview">${generatedOTP}</span>
+        Demo OTP: <span>${generatedOTP}</span>
       </p>
     `;
 
@@ -111,40 +98,67 @@ async function initAccess() {
       return;
     }
 
-    console.log("OTP VERIFIED");
-
     try {
 
-      // SAVE VERIFIED VISITOR
-      const { data, error } = await supabase
-        .from("event_visitors")
-        .insert([
-          {
-            event_id: eventId,
-            name: currentName,
-            phone: currentPhone
-          }
-        ])
-        .select();
+      let visitorId;
 
-      if (error) {
-        console.error(error);
-        alert("Failed to save");
-        return;
+      // 👉 UPDATE if exists
+      if (existingVisitor) {
+
+        const { data, error } = await supabase
+          .from("event_visitors")
+          .update({ verified: true })
+          .eq("id", existingVisitor.id)
+          .select()
+          .single();
+
+        if (error) {
+          console.error(error);
+          alert("Update failed");
+          return;
+        }
+
+        visitorId = data.id;
+
+      } else {
+
+        // 👉 INSERT new
+        const { data, error } = await supabase
+          .from("event_visitors")
+          .insert([
+            {
+              event_id: eventId,
+              name: currentName,
+              phone: currentPhone,
+              verified: true
+            }
+          ])
+          .select()
+          .single();
+
+        if (error) {
+          console.error(error);
+          alert("Insert failed");
+          return;
+        }
+
+        visitorId = data.id;
       }
 
-      // ACCESS FLAG
+      // =============================
+      // SESSION STORE (STRONG)
+      // =============================
+
       sessionStorage.setItem("gallery_access", "true");
       sessionStorage.setItem("event_id", eventId);
+      sessionStorage.setItem("visitor_id", visitorId);
 
-      // REDIRECT
       window.location.href = `gallery.html?event_id=${eventId}`;
 
     } catch (err) {
       console.error(err);
       alert("Something went wrong");
     }
-
   }
 
   // =============================
@@ -172,33 +186,37 @@ async function initAccess() {
     currentPhone = phone;
 
     // =============================
-    // CHECK EXISTING VERIFIED USER
+    // CHECK EXISTING USER
     // =============================
 
-    const { data: existing } = await supabase
+    const { data } = await supabase
       .from("event_visitors")
       .select("*")
       .eq("event_id", eventId)
       .eq("phone", phone)
       .limit(1);
 
-    if (existing && existing.length > 0) {
-      console.log("Already verified → skip OTP");
+    if (data && data.length > 0) {
 
-      sessionStorage.setItem("gallery_access", "true");
-      sessionStorage.setItem("event_id", eventId);
+      existingVisitor = data[0];
 
-      window.location.href = `gallery.html?event_id=${eventId}`;
-      return;
+      // 👉 Already verified → direct access
+      if (existingVisitor.verified) {
+
+        sessionStorage.setItem("gallery_access", "true");
+        sessionStorage.setItem("event_id", eventId);
+        sessionStorage.setItem("visitor_id", existingVisitor.id);
+
+        window.location.href = `gallery.html?event_id=${eventId}`;
+        return;
+      }
     }
 
     // =============================
-    // GENERATE DEMO OTP
+    // GENERATE OTP
     // =============================
 
     generatedOTP = Math.floor(1000 + Math.random() * 9000);
-
-    console.log("DEMO OTP:", generatedOTP);
 
     alert("Demo OTP: " + generatedOTP);
 
