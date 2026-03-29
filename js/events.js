@@ -42,66 +42,7 @@ let monthLabel = null
 
 
 // =============================
-// 🔥 QR FUNCTION (ADDED ONLY)
-// =============================
-
-function generateQR(eventId){
-
-const link = `${window.location.origin}/studioos/access.html?event_id=${eventId}`
-
-const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`
-
-let modal = document.getElementById("qrModal")
-
-if(!modal){
-modal = document.createElement("div")
-modal.id = "qrModal"
-modal.style.position = "fixed"
-modal.style.top = 0
-modal.style.left = 0
-modal.style.width = "100%"
-modal.style.height = "100%"
-modal.style.background = "rgba(0,0,0,0.85)"
-modal.style.display = "flex"
-modal.style.alignItems = "center"
-modal.style.justifyContent = "center"
-modal.style.zIndex = 9999
-
-modal.innerHTML = `
-<div style="background:#111;padding:20px;border-radius:12px;text-align:center;width:300px">
-
-<h3 style="color:white;margin-bottom:10px">Share Gallery</h3>
-
-<img src="${qrUrl}" style="margin-bottom:10px"/>
-
-<p style="color:#aaa;font-size:11px;word-break:break-all">${link}</p>
-
-<button onclick="navigator.clipboard.writeText('${link}')"
-style="margin-top:10px;padding:10px;width:100%;background:#4f46e5;color:white;border:none;border-radius:6px">
-Copy Link
-</button>
-
-<a href="${qrUrl}" download="gallery-qr.png"
-style="display:block;margin-top:10px;padding:10px;background:#16a34a;color:white;border-radius:6px;text-decoration:none">
-Download QR
-</a>
-
-<button onclick="document.getElementById('qrModal').remove()"
-style="margin-top:10px;padding:8px;width:100%;background:#444;color:white;border:none;border-radius:6px">
-Close
-</button>
-
-</div>
-`
-
-document.body.appendChild(modal)
-}
-
-}
-
-
-// =============================
-// EVENT LIST (ORIGINAL + QR ADD)
+// EVENT LIST (FIXED TO EVENTS TABLE)
 // =============================
 
 async function loadEvents(){
@@ -128,7 +69,7 @@ const endDateObj = new Date(year, month + 1, 0)
 const startDate = startDateObj.toISOString().split('T')[0]
 const endDate = endDateObj.toISOString().split('T')[0]
 
-// FETCH EVENTS
+// ✅ FIXED SOURCE
 const { data , error } =
 await supabase
 .from("events")
@@ -198,19 +139,10 @@ ${busyLabel}
 
 <div class="space-y-1">
 ${events.map(e=>`
-<div class="text-sm text-gray-300">
+<div 
+class="text-sm text-gray-300"
+>
 • ${e.client_name || e.event_name}
-
-<button onclick="window.location.href='gallery.html?event_id=${e.id}'"
-style="margin-left:10px;font-size:10px;background:#4f46e5;padding:3px 6px;border-radius:4px">
-Open
-</button>
-
-<button onclick="generateQR('${e.id}')"
-style="margin-left:5px;font-size:10px;background:#16a34a;padding:3px 6px;border-radius:4px">
-QR
-</button>
-
 </div>
 `).join("")}
 </div>
@@ -256,7 +188,7 @@ console.log("No user found")
 return
 }
 
-// ORIGINAL CODE SAME (UNCHANGED)
+// ✅ FIXED SOURCE
 const { data } =
 await supabase
 .from("events")
@@ -275,6 +207,7 @@ name: e.client_name || e.event_name
 })
 }
 
+// NOTES
 const notes = JSON.parse(localStorage.getItem("calendar_notes") || "{}")
 
 const year = currentDate.getFullYear()
@@ -293,10 +226,12 @@ monthLabel.innerText =
 currentDate.toLocaleString("default",{month:"long",year:"numeric"})
 }
 
+// EMPTY
 for(let i=0;i<firstDay;i++){
 calendar.innerHTML += `<div></div>`
 }
 
+// DAYS
 for(let d=1; d<=daysInMonth; d++){
 
 const fullDate =
