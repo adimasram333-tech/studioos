@@ -1,4 +1,62 @@
 // =============================
+// GLOBAL MENU FUNCTIONS (FIXED)
+// =============================
+
+window.toggleMenu = function(id){
+
+document.querySelectorAll('[id^="menu-"]').forEach(m=>{
+m.classList.add("hidden")
+})
+
+const menu = document.getElementById("menu-" + id)
+if(menu){
+menu.classList.toggle("hidden")
+}
+
+}
+
+window.openEvent = function(id){
+window.location.href = `gallery.html?event_id=${id}`
+}
+
+window.shareEvent = function(id){
+const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
+navigator.clipboard.writeText(link)
+alert("Link copied")
+}
+
+window.showQR = function(id){
+
+const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
+
+let modal = document.createElement("div")
+
+modal.style.position = "fixed"
+modal.style.top = 0
+modal.style.left = 0
+modal.style.width = "100%"
+modal.style.height = "100%"
+modal.style.background = "rgba(0,0,0,0.9)"
+modal.style.display = "flex"
+modal.style.alignItems = "center"
+modal.style.justifyContent = "center"
+modal.style.zIndex = 9999
+
+modal.innerHTML = `
+<div style="background:#111; padding:20px; border-radius:12px; text-align:center">
+<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}"/>
+<div style="margin-top:10px; font-size:12px; color:#aaa">Scan to access gallery</div>
+</div>
+`
+
+modal.onclick = ()=> modal.remove()
+
+document.body.appendChild(modal)
+
+}
+
+
+// =============================
 // LOAD GALLERY
 // =============================
 
@@ -139,10 +197,6 @@ if(displayName && displayName.startsWith("Q_")){
 displayName = e.client_name || "Booking Event"
 }
 
-// =============================
-// CARD HTML (QUOTATION STYLE)
-// =============================
-
 div.innerHTML = `
 
 <div class="flex justify-between items-center">
@@ -183,63 +237,6 @@ grid.appendChild(div)
 })
 
 return
-
-}
-
-// =============================
-// MENU FUNCTIONS (GLOBAL)
-// =============================
-
-function toggleMenu(id){
-
-document.querySelectorAll('[id^="menu-"]').forEach(m=>{
-m.classList.add("hidden")
-})
-
-const menu = document.getElementById("menu-" + id)
-menu.classList.toggle("hidden")
-
-}
-
-window.toggleMenu = toggleMenu
-
-window.openEvent = function(id){
-window.location.href = `gallery.html?event_id=${id}`
-}
-
-window.shareEvent = function(id){
-const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
-navigator.clipboard.writeText(link)
-alert("Link copied")
-}
-
-window.showQR = function(id){
-
-const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
-
-let modal = document.createElement("div")
-
-modal.style.position = "fixed"
-modal.style.top = 0
-modal.style.left = 0
-modal.style.width = "100%"
-modal.style.height = "100%"
-modal.style.background = "rgba(0,0,0,0.9)"
-modal.style.display = "flex"
-modal.style.alignItems = "center"
-modal.style.justifyContent = "center"
-modal.style.zIndex = 9999
-
-modal.innerHTML = `
-<div style="background:#111; padding:20px; border-radius:12px; text-align:center">
-<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}"/>
-<div style="margin-top:10px; font-size:12px; color:#aaa">Scan to access gallery</div>
-</div>
-`
-
-modal.onclick = ()=> modal.remove()
-
-document.body.appendChild(modal)
 
 }
 
