@@ -89,7 +89,7 @@ return
 grid.innerHTML = ""
 
 // =============================
-// MODE 1: EVENT LIST (ONLY USER)
+// MODE 1: EVENT LIST
 // =============================
 
 if(!eventId){
@@ -128,11 +128,7 @@ if(!e || !e.id) return
 const div = document.createElement("div")
 
 div.className =
-"glass rounded-xl p-3 relative hover:scale-105 transition"
-
-// =============================
-// EVENT DATA
-// =============================
+"glass rounded-xl p-3 relative overflow-visible hover:scale-105 transition"
 
 const date =
 e.event_date ? new Date(e.event_date).toLocaleDateString("en-IN") : ""
@@ -144,64 +140,85 @@ displayName = e.client_name || "Booking Event"
 }
 
 // =============================
-// 3 DOT MENU HTML
+// CARD HTML (QUOTATION STYLE)
 // =============================
 
 div.innerHTML = `
-<div class="flex justify-between items-start">
-  <div>
-    <div class="text-sm font-semibold">${displayName}</div>
-    <div class="text-xs text-gray-400">${date}</div>
-  </div>
 
-  <div class="relative">
-    <button class="menuBtn text-xl px-2">⋮</button>
+<div class="flex justify-between items-center">
 
-    <div class="menu hidden absolute right-0 mt-2 w-40 glass rounded-lg p-2 z-50">
-      <div class="menuItem cursor-pointer p-2 hover:bg-white/10">Open</div>
-      <div class="menuItem cursor-pointer p-2 hover:bg-white/10">Share Link</div>
-      <div class="menuItem cursor-pointer p-2 hover:bg-white/10">Show QR</div>
-    </div>
-  </div>
+<div>
+<div class="text-sm font-semibold">${displayName}</div>
+<div class="text-xs text-gray-400">${date}</div>
 </div>
+
+<button onclick="toggleMenu('${e.id}')" class="text-xl px-2">⋮</button>
+
+</div>
+
+<div id="menu-${e.id}"
+class="hidden absolute right-3 top-12 bg-[#1a1f2e] border border-white/10 rounded-md text-xs shadow-lg z-[9999] overflow-hidden">
+
+<div onclick="openEvent('${e.id}')"
+class="px-3 py-1 hover:bg-white/10 cursor-pointer">
+Open
+</div>
+
+<div onclick="shareEvent('${e.id}')"
+class="px-3 py-1 hover:bg-white/10 cursor-pointer">
+Share Link
+</div>
+
+<div onclick="showQR('${e.id}')"
+class="px-3 py-1 hover:bg-white/10 cursor-pointer">
+Show QR
+</div>
+
+</div>
+
 `
 
-// =============================
-// ACTIONS
-// =============================
+grid.appendChild(div)
 
-const menuBtn = div.querySelector(".menuBtn")
-const menu = div.querySelector(".menu")
-const items = div.querySelectorAll(".menuItem")
-
-menuBtn.onclick = (ev)=>{
-ev.stopPropagation()
-document.querySelectorAll(".menu").forEach(m=>m.classList.add("hidden"))
-menu.classList.toggle("hidden")
-}
-
-// CLOSE MENU GLOBAL
-document.addEventListener("click",()=>{
-menu.classList.add("hidden")
 })
 
-// OPEN
-items[0].onclick = ()=>{
-window.location.href = `gallery.html?event_id=${e.id}`
+return
+
 }
 
-// SHARE LINK
-items[1].onclick = ()=>{
-const link = `${window.location.origin}/studioos/access.html?event_id=${e.id}`
+// =============================
+// MENU FUNCTIONS (GLOBAL)
+// =============================
+
+function toggleMenu(id){
+
+document.querySelectorAll('[id^="menu-"]').forEach(m=>{
+m.classList.add("hidden")
+})
+
+const menu = document.getElementById("menu-" + id)
+menu.classList.toggle("hidden")
+
+}
+
+window.toggleMenu = toggleMenu
+
+window.openEvent = function(id){
+window.location.href = `gallery.html?event_id=${id}`
+}
+
+window.shareEvent = function(id){
+const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
 navigator.clipboard.writeText(link)
 alert("Link copied")
 }
 
-// SHOW QR
-items[2].onclick = ()=>{
-const link = `${window.location.origin}/studioos/access.html?event_id=${e.id}`
+window.showQR = function(id){
+
+const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
 
 let modal = document.createElement("div")
+
 modal.style.position = "fixed"
 modal.style.top = 0
 modal.style.left = 0
@@ -215,20 +232,14 @@ modal.style.zIndex = 9999
 
 modal.innerHTML = `
 <div style="background:#111; padding:20px; border-radius:12px; text-align:center">
-  <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}"/>
-  <div style="margin-top:10px; font-size:12px; color:#aaa">Scan to access gallery</div>
+<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}"/>
+<div style="margin-top:10px; font-size:12px; color:#aaa">Scan to access gallery</div>
 </div>
 `
 
 modal.onclick = ()=> modal.remove()
+
 document.body.appendChild(modal)
-}
-
-grid.appendChild(div)
-
-})
-
-return
 
 }
 
@@ -260,10 +271,6 @@ empty.classList.remove("hidden")
 return
 }
 
-// =============================
-// IMAGE MODAL
-// =============================
-
 function openImage(url){
 let modal = document.getElementById("imageModal")
 
@@ -292,10 +299,6 @@ document.body.appendChild(modal)
 modal.querySelector("img").src = url
 }
 }
-
-// =============================
-// RENDER IMAGES
-// =============================
 
 data.forEach(img=>{
 
