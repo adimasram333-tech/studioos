@@ -1,5 +1,5 @@
 // ================================
-// ACCESS SYSTEM + SMART DEMO OTP + TOKEN SYSTEM (FINAL)
+// ACCESS SYSTEM + PHONE OTP (FINAL CLEAN)
 // ================================
 
 async function initAccess() {
@@ -47,8 +47,6 @@ async function initAccess() {
     localStorage.setItem("device_id", deviceId);
   }
 
-  let generatedOTP = null;
-  let otpGenerated = false;
   let otpAttempts = 0;
   const maxAttempts = 3;
 
@@ -94,7 +92,7 @@ async function initAccess() {
       <input 
         type="text"
         id="otpInput"
-        placeholder="Enter OTP"
+        placeholder="Enter last 4 digits of your phone number"
         class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600"
       >
 
@@ -102,7 +100,7 @@ async function initAccess() {
         id="verifyOtpBtn"
         class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg font-semibold"
       >
-        Verify OTP
+        Verify & Continue
       </button>
     `;
 
@@ -113,7 +111,7 @@ async function initAccess() {
   }
 
   // =============================
-  // VERIFY OTP
+  // VERIFY OTP (PHONE BASED)
   // =============================
 
   async function verifyOTP() {
@@ -130,7 +128,10 @@ async function initAccess() {
       return;
     }
 
-    if (entered !== String(generatedOTP)) {
+    // ✅ OTP = last 4 digits
+    const expectedOTP = currentPhone.slice(-4);
+
+    if (entered !== expectedOTP) {
       otpAttempts++;
       alert("Invalid OTP");
       return;
@@ -260,8 +261,6 @@ async function initAccess() {
 
     e.preventDefault();
 
-    if (otpGenerated) return;
-
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
 
@@ -306,12 +305,9 @@ async function initAccess() {
       }
     }
 
-    alert("Sending OTP...");
+    alert("Verifying...");
 
-    await new Promise(res => setTimeout(res, 1200));
-
-    generatedOTP = Math.floor(1000 + Math.random() * 9000);
-    otpGenerated = true;
+    await new Promise(res => setTimeout(res, 800));
 
     showOTPInput();
 
