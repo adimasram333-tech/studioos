@@ -8,20 +8,16 @@ window.toggleMenu = function(id, btn){
 
 const existing = document.getElementById("floatingMenu")
 
-// SAME menu clicked → close
 if(existing && existing.dataset.id === id){
 existing.remove()
 activeMenu = null
 return
 }
 
-// remove previous
 if(existing) existing.remove()
 
-// get button position
 const rect = btn.getBoundingClientRect()
 
-// create floating menu
 const menu = document.createElement("div")
 menu.id = "floatingMenu"
 menu.dataset.id = id
@@ -49,7 +45,6 @@ activeMenu = menu
 
 }
 
-// outside click close
 document.addEventListener("click",(e)=>{
 
 if(!e.target.closest("#floatingMenu") && !e.target.closest("button")){
@@ -72,12 +67,11 @@ alert("Link copied")
 
 
 // =============================
-// QR (FINAL FIX - DOWNLOAD WORKING)
+// QR
 // =============================
 
 window.showQR = function(id){
 
-// ✅ FIX: CLOSE MENU FIRST
 const existingMenu = document.getElementById("floatingMenu")
 if(existingMenu) existingMenu.remove()
 
@@ -116,7 +110,6 @@ modal.remove()
 
 document.body.appendChild(modal)
 
-// generate QR on canvas
 const qr = new Image()
 qr.crossOrigin = "anonymous"
 qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`
@@ -129,7 +122,6 @@ canvas.height = 200
 ctx.drawImage(qr,0,0)
 }
 
-// download fix
 document.getElementById("downloadQR").onclick = function(){
 
 const canvas = document.getElementById("qrCanvas")
@@ -162,6 +154,9 @@ user = await window.getCurrentUser()
 user = null
 }
 
+// ✅ NEW ROLE LOGIC
+const role = sessionStorage.getItem("role") || "guest"
+
 const accessGranted = sessionStorage.getItem("gallery_access")
 const sessionEventId = sessionStorage.getItem("event_id")
 const visitorId = sessionStorage.getItem("visitor_id")
@@ -187,7 +182,7 @@ window.location.href = `access.html?event_id=${eventIdCheck}`
 return
 }
 
-console.log("✅ Guest verified")
+console.log("✅ Guest verified | Role:", role)
 
 }
 
@@ -291,7 +286,7 @@ return
 }
 
 // =============================
-// MODE 2: IMAGE VIEW (UNCHANGED)
+// MODE 2: IMAGE VIEW
 // =============================
 
 const safeEventId = String(eventId)
@@ -361,6 +356,7 @@ div.innerHTML = `
 class="w-full h-40 object-cover hover:scale-105 transition"/>
 `
 
+// ✅ ROLE BASED CLICK CONTROL (future-ready)
 div.onclick = () => openImage(img.image_url)
 
 grid.appendChild(div)
