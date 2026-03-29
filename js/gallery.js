@@ -2,18 +2,42 @@
 // GLOBAL MENU FUNCTIONS (FIXED)
 // =============================
 
+let activeMenu = null
+
 window.toggleMenu = function(id){
 
+const menu = document.getElementById("menu-" + id)
+if(!menu) return
+
+// if same menu clicked → toggle
+if(activeMenu === menu){
+menu.classList.add("hidden")
+activeMenu = null
+return
+}
+
+// close all
 document.querySelectorAll('[id^="menu-"]').forEach(m=>{
 m.classList.add("hidden")
 })
 
-const menu = document.getElementById("menu-" + id)
-if(menu){
-menu.classList.toggle("hidden")
-}
+// open current
+menu.classList.remove("hidden")
+activeMenu = menu
 
 }
+
+// outside click close
+document.addEventListener("click",(e)=>{
+
+if(!e.target.closest("[id^='menu-']") && !e.target.closest("button")){
+document.querySelectorAll('[id^="menu-"]').forEach(m=>{
+m.classList.add("hidden")
+})
+activeMenu = null
+}
+
+})
 
 window.openEvent = function(id){
 window.location.href = `gallery.html?event_id=${id}`
@@ -44,14 +68,36 @@ modal.style.zIndex = 9999
 
 modal.innerHTML = `
 <div style="background:#111; padding:20px; border-radius:12px; text-align:center">
-<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}"/>
+<img id="qrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}"/>
 <div style="margin-top:10px; font-size:12px; color:#aaa">Scan to access gallery</div>
+
+<button id="downloadQR"
+style="margin-top:12px; background:#4f46e5; color:white; padding:6px 12px; border-radius:8px; font-size:12px">
+Download QR
+</button>
+
 </div>
 `
 
-modal.onclick = ()=> modal.remove()
+modal.onclick = (e)=>{
+if(e.target === modal){
+modal.remove()
+}
+}
 
 document.body.appendChild(modal)
+
+// download logic
+document.getElementById("downloadQR").onclick = function(){
+
+const img = document.getElementById("qrImage")
+
+const a = document.createElement("a")
+a.href = img.src
+a.download = "event-qr.png"
+a.click()
+
+}
 
 }
 
@@ -191,7 +237,7 @@ div.innerHTML = `
 </div>
 
 <div id="menu-${e.id}"
-class="hidden absolute right-2 top-10 bg-[#1a1f2e] border border-white/10 rounded-md text-xs shadow-xl z-[99999] backdrop-blur-md overflow-hidden">
+class="hidden absolute right-2 top-10 bg-[#1a1f2e] border border-white/10 rounded-md text-xs shadow-xl z-[99999] backdrop-blur-md overflow-visible">
 
 <div onclick="openEvent('${e.id}')"
 class="px-3 py-1 hover:bg-white/10 cursor-pointer">
