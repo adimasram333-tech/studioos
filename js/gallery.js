@@ -329,9 +329,9 @@ modal.style.alignItems = "center"
 modal.style.justifyContent = "center"
 modal.style.zIndex = 9999
 
-// ✅ FIXED
+// ✅ FIXED ONLY THIS LINE
 modal.innerHTML = `
-<img id="modalImg" src="${url}" style="max-width:90%; max-height:90%; border-radius:12px;" />
+<img id="modalImg" src="${url}" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:12px;" />
 
 <button id="downloadBtn"
 style="position:absolute; bottom:30px; background:#4f46e5; color:white; padding:8px 16px; border-radius:8px;">
