@@ -1,28 +1,50 @@
 // =============================
-// GLOBAL MENU FUNCTIONS (FIXED)
+// GLOBAL MENU SYSTEM (FINAL FIX)
 // =============================
 
 let activeMenu = null
 
-window.toggleMenu = function(id){
+window.toggleMenu = function(id, btn){
 
-const menu = document.getElementById("menu-" + id)
-if(!menu) return
+const existing = document.getElementById("floatingMenu")
 
-// if same menu clicked → toggle
-if(activeMenu === menu){
-menu.classList.add("hidden")
+// SAME menu clicked → close
+if(existing && existing.dataset.id === id){
+existing.remove()
 activeMenu = null
 return
 }
 
-// close all
-document.querySelectorAll('[id^="menu-"]').forEach(m=>{
-m.classList.add("hidden")
-})
+// remove previous
+if(existing) existing.remove()
 
-// open current
-menu.classList.remove("hidden")
+// get button position
+const rect = btn.getBoundingClientRect()
+
+// create floating menu
+const menu = document.createElement("div")
+menu.id = "floatingMenu"
+menu.dataset.id = id
+
+menu.style.position = "fixed"
+menu.style.top = rect.bottom + "px"
+menu.style.left = (rect.right - 120) + "px"
+menu.style.background = "#1a1f2e"
+menu.style.border = "1px solid rgba(255,255,255,0.1)"
+menu.style.borderRadius = "8px"
+menu.style.fontSize = "12px"
+menu.style.zIndex = 99999
+menu.style.backdropFilter = "blur(10px)"
+menu.style.overflow = "hidden"
+menu.style.minWidth = "120px"
+
+menu.innerHTML = `
+<div onclick="openEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Open</div>
+<div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
+<div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
+`
+
+document.body.appendChild(menu)
 activeMenu = menu
 
 }
@@ -30,10 +52,9 @@ activeMenu = menu
 // outside click close
 document.addEventListener("click",(e)=>{
 
-if(!e.target.closest("[id^='menu-']") && !e.target.closest("button")){
-document.querySelectorAll('[id^="menu-"]').forEach(m=>{
-m.classList.add("hidden")
-})
+if(!e.target.closest("#floatingMenu") && !e.target.closest("button")){
+const existing = document.getElementById("floatingMenu")
+if(existing) existing.remove()
 activeMenu = null
 }
 
@@ -48,6 +69,11 @@ const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
 navigator.clipboard.writeText(link)
 alert("Link copied")
 }
+
+
+// =============================
+// QR (FINAL FIX - DOWNLOAD WORKING)
+// =============================
 
 window.showQR = function(id){
 
@@ -68,14 +94,13 @@ modal.style.zIndex = 9999
 
 modal.innerHTML = `
 <div style="background:#111; padding:20px; border-radius:12px; text-align:center">
-<img id="qrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}"/>
+<canvas id="qrCanvas"></canvas>
 <div style="margin-top:10px; font-size:12px; color:#aaa">Scan to access gallery</div>
 
 <button id="downloadQR"
 style="margin-top:12px; background:#4f46e5; color:white; padding:6px 12px; border-radius:8px; font-size:12px">
 Download QR
 </button>
-
 </div>
 `
 
@@ -87,15 +112,30 @@ modal.remove()
 
 document.body.appendChild(modal)
 
-// download logic
+// generate QR on canvas
+const qr = new Image()
+qr.crossOrigin = "anonymous"
+qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`
+
+qr.onload = function(){
+const canvas = document.getElementById("qrCanvas")
+const ctx = canvas.getContext("2d")
+canvas.width = 200
+canvas.height = 200
+ctx.drawImage(qr,0,0)
+}
+
+// download fix
 document.getElementById("downloadQR").onclick = function(){
 
-const img = document.getElementById("qrImage")
+const canvas = document.getElementById("qrCanvas")
 
+canvas.toBlob(function(blob){
 const a = document.createElement("a")
-a.href = img.src
+a.href = URL.createObjectURL(blob)
 a.download = "event-qr.png"
 a.click()
+})
 
 }
 
@@ -232,27 +272,7 @@ div.innerHTML = `
 <div class="text-xs text-gray-400">${date}</div>
 </div>
 
-<button onclick="toggleMenu('${e.id}')" class="text-xl px-2">⋮</button>
-
-</div>
-
-<div id="menu-${e.id}"
-class="hidden absolute right-2 top-10 bg-[#1a1f2e] border border-white/10 rounded-md text-xs shadow-xl z-[99999] backdrop-blur-md overflow-visible">
-
-<div onclick="openEvent('${e.id}')"
-class="px-3 py-1 hover:bg-white/10 cursor-pointer">
-Open
-</div>
-
-<div onclick="shareEvent('${e.id}')"
-class="px-3 py-1 hover:bg-white/10 cursor-pointer">
-Share Link
-</div>
-
-<div onclick="showQR('${e.id}')"
-class="px-3 py-1 hover:bg-white/10 cursor-pointer">
-Show QR
-</div>
+<button onclick="toggleMenu('${e.id}', this)" class="text-xl px-2">⋮</button>
 
 </div>
 
@@ -267,7 +287,7 @@ return
 }
 
 // =============================
-// MODE 2: IMAGE VIEW
+// MODE 2: IMAGE VIEW (UNCHANGED)
 // =============================
 
 const safeEventId = String(eventId)
