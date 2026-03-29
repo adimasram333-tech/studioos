@@ -1,11 +1,11 @@
 // ================================
-// ACCESS SYSTEM (FULL FIXED VERSION)
+// ACCESS SYSTEM + DEMO OTP (FINAL)
 // ================================
 
 async function initAccess() {
 
   // =============================
-  // SUPABASE INIT (FIXED - NO DEPENDENCY ISSUE)
+  // SUPABASE INIT
   // =============================
 
   let supabase;
@@ -13,7 +13,6 @@ async function initAccess() {
   if (window.getSupabase) {
     supabase = await window.getSupabase();
   } else if (window.supabase) {
-    // fallback (important)
     supabase = window.supabase;
   } else {
     console.error("Supabase not found");
@@ -22,7 +21,7 @@ async function initAccess() {
   }
 
   // =============================
-  // GET EVENT ID (SAFE + FIXED)
+  // GET EVENT ID
   // =============================
 
   const params = new URLSearchParams(window.location.search);
@@ -37,14 +36,9 @@ async function initAccess() {
     return;
   }
 
-  // store for safety
   localStorage.setItem("last_event_id", eventId);
 
   console.log("FINAL EVENT ID:", eventId);
-
-  // =============================
-  // FORM HANDLE (SAFE INIT)
-  // =============================
 
   const form = document.getElementById("accessForm");
 
@@ -53,24 +47,116 @@ async function initAccess() {
     return;
   }
 
-  // prevent duplicate listeners
-  form.removeEventListener("submit", handleSubmit);
-  form.addEventListener("submit", handleSubmit);
-
   // =============================
-  // SUBMIT FUNCTION
+  // OTP STATE
   // =============================
 
-  async function handleSubmit(e) {
+  let generatedOTP = null;
+  let currentPhone = null;
+  let currentName = null;
+
+  // =============================
+  // CREATE OTP INPUT UI (DYNAMIC)
+  // =============================
+
+  function showOTPInput() {
+
+    if (document.getElementById("otpBox")) return;
+
+    const otpDiv = document.createElement("div");
+    otpDiv.id = "otpBox";
+    otpDiv.className = "mt-4 space-y-3";
+
+    otpDiv.innerHTML = `
+      <input 
+        type="text"
+        id="otpInput"
+        placeholder="Enter OTP"
+        class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600"
+      >
+
+      <button 
+        id="verifyOtpBtn"
+        class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg font-semibold"
+      >
+        Verify OTP
+      </button>
+
+      <p class="text-xs text-gray-400 text-center">
+        Demo OTP: <span id="otpPreview">${generatedOTP}</span>
+      </p>
+    `;
+
+    form.appendChild(otpDiv);
+
+    document.getElementById("verifyOtpBtn")
+      .addEventListener("click", verifyOTP);
+  }
+
+  // =============================
+  // VERIFY OTP
+  // =============================
+
+  async function verifyOTP() {
+
+    const entered = document.getElementById("otpInput").value.trim();
+
+    if (!entered) {
+      alert("Enter OTP");
+      return;
+    }
+
+    if (entered !== String(generatedOTP)) {
+      alert("Invalid OTP");
+      return;
+    }
+
+    console.log("OTP VERIFIED");
+
+    try {
+
+      // SAVE VERIFIED VISITOR
+      const { data, error } = await supabase
+        .from("event_visitors")
+        .insert([
+          {
+            event_id: eventId,
+            name: currentName,
+            phone: currentPhone
+          }
+        ])
+        .select();
+
+      if (error) {
+        console.error(error);
+        alert("Failed to save");
+        return;
+      }
+
+      // ACCESS FLAG
+      sessionStorage.setItem("gallery_access", "true");
+      sessionStorage.setItem("event_id", eventId);
+
+      // REDIRECT
+      window.location.href = `gallery.html?event_id=${eventId}`;
+
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    }
+
+  }
+
+  // =============================
+  // SUBMIT HANDLER
+  // =============================
+
+  form.addEventListener("submit", async function (e) {
 
     e.preventDefault();
 
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
-
-    // =============================
-    // VALIDATION
-    // =============================
 
     if (!name || !phone) {
       alert("Please fill all details");
@@ -82,57 +168,48 @@ async function initAccess() {
       return;
     }
 
-    try {
+    currentName = name;
+    currentPhone = phone;
 
-      // =============================
-      // SAVE VISITOR (STABLE)
-      // =============================
+    // =============================
+    // CHECK EXISTING VERIFIED USER
+    // =============================
 
-      const { data, error } = await supabase
-        .from("event_visitors")
-        .insert([
-          {
-            event_id: eventId,
-            name: name,
-            phone: phone
-          }
-        ])
-        .select();
+    const { data: existing } = await supabase
+      .from("event_visitors")
+      .select("*")
+      .eq("event_id", eventId)
+      .eq("phone", phone)
+      .limit(1);
 
-      if (error) {
-        console.error("Insert error:", error);
-        alert("Failed to save data");
-        return;
-      }
-
-      console.log("Visitor saved:", data);
-
-      // =============================
-      // ACCESS CONTROL FLAG
-      // =============================
+    if (existing && existing.length > 0) {
+      console.log("Already verified → skip OTP");
 
       sessionStorage.setItem("gallery_access", "true");
       sessionStorage.setItem("event_id", eventId);
 
-      // =============================
-      // REDIRECT (DELAY FIX)
-      // =============================
-
-      setTimeout(() => {
-        window.location.href = `gallery.html?event_id=${eventId}`;
-      }, 300);
-
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      alert("Something went wrong");
+      window.location.href = `gallery.html?event_id=${eventId}`;
+      return;
     }
 
-  }
+    // =============================
+    // GENERATE DEMO OTP
+    // =============================
+
+    generatedOTP = Math.floor(1000 + Math.random() * 9000);
+
+    console.log("DEMO OTP:", generatedOTP);
+
+    alert("Demo OTP: " + generatedOTP);
+
+    showOTPInput();
+
+  });
 
 }
 
 // =============================
-// INIT (SAFE)
+// INIT
 // =============================
 
 document.addEventListener("DOMContentLoaded", () => {
