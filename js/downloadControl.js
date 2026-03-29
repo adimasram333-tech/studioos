@@ -1,21 +1,23 @@
 // =============================
-// DOWNLOAD CONTROL MODULE (FINAL)
+// DOWNLOAD + PAYMENT CONTROL (FINAL)
 // =============================
 
-// get role safely
+// get role
 function getUserRole() {
   return sessionStorage.getItem("role") || "guest";
 }
 
-// show upgrade message
-function showUpgradeMessage() {
+// =============================
+// PAYMENT MODAL
+// =============================
 
-  let modal = document.getElementById("upgradeModal");
+function showPaymentModal() {
 
+  let modal = document.getElementById("paymentModal");
   if (modal) return;
 
   modal = document.createElement("div");
-  modal.id = "upgradeModal";
+  modal.id = "paymentModal";
 
   modal.style.position = "fixed";
   modal.style.top = 0;
@@ -29,30 +31,61 @@ function showUpgradeMessage() {
   modal.style.zIndex = 9999;
 
   modal.innerHTML = `
-    <div style="background:#111; padding:20px; border-radius:12px; text-align:center">
-      <div style="font-size:16px; margin-bottom:10px">🔒 Download Locked</div>
-      <div style="font-size:12px; color:#aaa">Contact photographer to unlock downloads</div>
+    <div style="background:#111; padding:20px; border-radius:12px; text-align:center; max-width:300px">
 
-      <button 
-        style="margin-top:12px; background:#4f46e5; color:white; padding:6px 12px; border-radius:8px; font-size:12px"
-        onclick="document.getElementById('upgradeModal').remove()"
-      >
-        OK
+      <div style="font-size:16px; margin-bottom:10px">Unlock Full Gallery</div>
+
+      <div style="font-size:12px; color:#aaa">
+        Get access to download all photos
+      </div>
+
+      <div style="margin-top:10px; font-size:18px; font-weight:bold">
+        ₹99
+      </div>
+
+      <button id="payNowBtn"
+        style="margin-top:12px; background:#22c55e; color:white; padding:8px 16px; border-radius:8px;">
+        Unlock Now
       </button>
+
+      <button onclick="document.getElementById('paymentModal').remove()"
+        style="margin-top:8px; background:#333; color:white; padding:6px 12px; border-radius:8px;">
+        Cancel
+      </button>
+
     </div>
   `;
 
   document.body.appendChild(modal);
+
+  document.getElementById("payNowBtn").onclick = simulatePaymentSuccess;
 }
 
-// main download handler
+// =============================
+// SIMULATE PAYMENT (TEMP)
+// =============================
+
+function simulatePaymentSuccess() {
+
+  alert("Payment Successful 🎉");
+
+  // upgrade user to client
+  sessionStorage.setItem("role", "client");
+
+  // close modal
+  const modal = document.getElementById("paymentModal");
+  if (modal) modal.remove();
+}
+
+// =============================
+// DOWNLOAD HANDLER
+// =============================
+
 window.handleDownload = function(imageUrl) {
 
   const role = getUserRole();
 
-  // =============================
-  // CLIENT → ALLOW DOWNLOAD
-  // =============================
+  // CLIENT → allow
   if (role === "client") {
 
     const a = document.createElement("a");
@@ -65,8 +98,6 @@ window.handleDownload = function(imageUrl) {
     return;
   }
 
-  // =============================
-  // GUEST → BLOCK DOWNLOAD
-  // =============================
-  showUpgradeMessage();
+  // GUEST → show payment
+  showPaymentModal();
 };
