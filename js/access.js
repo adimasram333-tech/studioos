@@ -102,12 +102,14 @@ async function initAccess() {
 
       let visitorId;
 
-      // 👉 UPDATE if exists
       if (existingVisitor) {
 
         const { data, error } = await supabase
           .from("event_visitors")
-          .update({ verified: true })
+          .update({
+            verified: true,
+            last_visit: new Date().toISOString()
+          })
           .eq("id", existingVisitor.id)
           .select()
           .single();
@@ -122,7 +124,6 @@ async function initAccess() {
 
       } else {
 
-        // 👉 INSERT new
         const { data, error } = await supabase
           .from("event_visitors")
           .insert([
@@ -130,7 +131,8 @@ async function initAccess() {
               event_id: eventId,
               name: currentName,
               phone: currentPhone,
-              verified: true
+              verified: true,
+              last_visit: new Date().toISOString()
             }
           ])
           .select()
@@ -146,7 +148,7 @@ async function initAccess() {
       }
 
       // =============================
-      // SESSION STORE (STRONG)
+      // SESSION STORE (STRICT)
       // =============================
 
       sessionStorage.setItem("gallery_access", "true");
@@ -200,15 +202,24 @@ async function initAccess() {
 
       existingVisitor = data[0];
 
-      // 👉 Already verified → direct access
       if (existingVisitor.verified) {
 
-        sessionStorage.setItem("gallery_access", "true");
-        sessionStorage.setItem("event_id", eventId);
-        sessionStorage.setItem("visitor_id", existingVisitor.id);
+        // 🔐 strict match
+        if (existingVisitor.event_id === eventId) {
 
-        window.location.href = `gallery.html?event_id=${eventId}`;
-        return;
+          sessionStorage.setItem("gallery_access", "true");
+          sessionStorage.setItem("event_id", eventId);
+          sessionStorage.setItem("visitor_id", existingVisitor.id);
+
+          // update visit time
+          await supabase
+            .from("event_visitors")
+            .update({ last_visit: new Date().toISOString() })
+            .eq("id", existingVisitor.id);
+
+          window.location.href = `gallery.html?event_id=${eventId}`;
+          return;
+        }
       }
     }
 
