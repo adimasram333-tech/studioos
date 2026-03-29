@@ -1,5 +1,5 @@
 // ================================
-// ACCESS SYSTEM + DEMO OTP (FINAL FIXED)
+// ACCESS SYSTEM + DEMO OTP + TOKEN SYSTEM (FINAL)
 // ================================
 
 async function initAccess() {
@@ -37,10 +37,42 @@ async function initAccess() {
     return;
   }
 
+  // =============================
+  // DEVICE ID (NEW)
+  // =============================
+
+  let deviceId = localStorage.getItem("device_id");
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem("device_id", deviceId);
+  }
+
   let generatedOTP = null;
   let currentPhone = null;
   let currentName = null;
   let existingVisitor = null;
+  let userRole = "guest";
+
+  // =============================
+  // TOKEN INPUT (NEW UI)
+  // =============================
+
+  if (!document.getElementById("tokenInput")) {
+
+    const tokenDiv = document.createElement("div");
+    tokenDiv.className = "mt-3";
+
+    tokenDiv.innerHTML = `
+      <input 
+        type="text"
+        id="tokenInput"
+        placeholder="Access Code (optional for client)"
+        class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600"
+      >
+    `;
+
+    form.insertBefore(tokenDiv, form.firstChild);
+  }
 
   // =============================
   // OTP UI
@@ -148,12 +180,61 @@ async function initAccess() {
       }
 
       // =============================
-      // SESSION STORE (STRICT)
+      // TOKEN VERIFY (NEW CORE LOGIC)
+      // =============================
+
+      const token = document.getElementById("tokenInput").value.trim();
+
+      if (token) {
+
+        const { data: tokenData } = await supabase
+          .from("event_tokens")
+          .select("*")
+          .eq("event_id", eventId)
+          .eq("token", token)
+          .limit(1);
+
+        if (tokenData && tokenData.length > 0) {
+
+          const t = tokenData[0];
+
+          if (!t.used) {
+
+            await supabase
+              .from("event_tokens")
+              .update({
+                used: true,
+                used_by: visitorId,
+                device_id: deviceId
+              })
+              .eq("id", t.id);
+
+            userRole = "client";
+
+          } else {
+
+            if (t.device_id === deviceId) {
+              userRole = "client";
+            } else {
+              alert("Token already used on another device");
+              return;
+            }
+          }
+
+        } else {
+          alert("Invalid access code");
+          return;
+        }
+      }
+
+      // =============================
+      // SESSION STORE (UPDATED)
       // =============================
 
       sessionStorage.setItem("gallery_access", "true");
       sessionStorage.setItem("event_id", eventId);
       sessionStorage.setItem("visitor_id", visitorId);
+      sessionStorage.setItem("role", userRole);
 
       window.location.href = `gallery.html?event_id=${eventId}`;
 
@@ -187,10 +268,6 @@ async function initAccess() {
     currentName = name;
     currentPhone = phone;
 
-    // =============================
-    // CHECK EXISTING USER
-    // =============================
-
     const { data } = await supabase
       .from("event_visitors")
       .select("*")
@@ -204,28 +281,20 @@ async function initAccess() {
 
       if (existingVisitor.verified) {
 
-        // 🔐 strict match
-        if (existingVisitor.event_id === eventId) {
+        sessionStorage.setItem("gallery_access", "true");
+        sessionStorage.setItem("event_id", eventId);
+        sessionStorage.setItem("visitor_id", existingVisitor.id);
+        sessionStorage.setItem("role", "guest");
 
-          sessionStorage.setItem("gallery_access", "true");
-          sessionStorage.setItem("event_id", eventId);
-          sessionStorage.setItem("visitor_id", existingVisitor.id);
+        await supabase
+          .from("event_visitors")
+          .update({ last_visit: new Date().toISOString() })
+          .eq("id", existingVisitor.id);
 
-          // update visit time
-          await supabase
-            .from("event_visitors")
-            .update({ last_visit: new Date().toISOString() })
-            .eq("id", existingVisitor.id);
-
-          window.location.href = `gallery.html?event_id=${eventId}`;
-          return;
-        }
+        window.location.href = `gallery.html?event_id=${eventId}`;
+        return;
       }
     }
-
-    // =============================
-    // GENERATE OTP
-    // =============================
 
     generatedOTP = Math.floor(1000 + Math.random() * 9000);
 
