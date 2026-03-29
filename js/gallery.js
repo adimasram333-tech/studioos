@@ -65,20 +65,12 @@ async function loadGallery(){
 const params = new URLSearchParams(window.location.search)
 let eventIdCheck = params.get("event_id") || params.get("event")
 
-// =============================
-// GET USER (SAFE)
-// =============================
-
 let user = null
 try{
 user = await window.getCurrentUser()
 }catch(e){
 user = null
 }
-
-// =============================
-// 🔒 ACCESS CONTROL
-// =============================
 
 const accessGranted = sessionStorage.getItem("gallery_access")
 const sessionEventId = sessionStorage.getItem("event_id")
@@ -111,15 +103,7 @@ console.log("✅ Guest verified")
 
 }
 
-// =============================
-// CONTINUE NORMAL FLOW
-// =============================
-
 const supabase = await window.getSupabase()
-
-// =============================
-// PARAMS
-// =============================
 
 let eventId = params.get("event_id")
 
@@ -132,10 +116,6 @@ eventId = null
 }
 
 console.log("FINAL EVENT ID:", eventId)
-
-// =============================
-// ELEMENTS
-// =============================
 
 const grid = document.getElementById("galleryGrid")
 const empty = document.getElementById("emptyState")
@@ -211,7 +191,7 @@ div.innerHTML = `
 </div>
 
 <div id="menu-${e.id}"
-class="hidden absolute right-3 top-12 bg-[#1a1f2e] border border-white/10 rounded-md text-xs shadow-lg z-[9999] overflow-hidden">
+class="hidden absolute right-2 top-10 bg-[#1a1f2e] border border-white/10 rounded-md text-xs shadow-xl z-[99999] backdrop-blur-md overflow-hidden">
 
 <div onclick="openEvent('${e.id}')"
 class="px-3 py-1 hover:bg-white/10 cursor-pointer">
@@ -241,7 +221,7 @@ return
 }
 
 // =============================
-// MODE 2: IMAGE VIEW (UNCHANGED)
+// MODE 2: IMAGE VIEW
 // =============================
 
 const safeEventId = String(eventId)
