@@ -10,14 +10,32 @@
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- ✅ FIXED PATH -->
-  <script src="./js/supabase.js"></script>
+  <!-- ✅ FIXED: ensure proper load -->
+  <script defer src="./js/supabase.js"></script>
 
   <!-- DEBUG -->
   <script>
     window.addEventListener("error", function (e) {
       console.error("Global JS Error:", e.message);
+      alert("System error occurred. Please refresh.");
     });
+
+    // 🚨 VALIDATE EVENT ID EARLY
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const eventId = params.get("event_id");
+
+      if (!eventId) {
+        document.body.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#111;color:white;font-family:sans-serif">
+            <div style="text-align:center">
+              <h2 style="font-size:20px;margin-bottom:10px">Invalid Link</h2>
+              <p>This gallery link is not valid.</p>
+            </div>
+          </div>
+        `;
+      }
+    })();
   </script>
 
 </head>
@@ -64,7 +82,7 @@
 
   </div>
 
-  <!-- ✅ FIXED PATH -->
+  <!-- ✅ ACCESS LOGIC -->
   <script defer src="./js/access.js"></script>
 
 </body>
