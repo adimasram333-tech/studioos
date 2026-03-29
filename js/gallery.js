@@ -4,17 +4,61 @@
 
 async function loadGallery(){
 
-// 🔒 SECURITY CHECK (NEW)
 const params = new URLSearchParams(window.location.search)
 let eventIdCheck = params.get("event_id") || params.get("event")
 
+// =============================
+// GET USER (SAFE)
+// =============================
+
+let user = null
+try{
+user = await window.getCurrentUser()
+}catch(e){
+user = null
+}
+
+// =============================
+// 🔒 ACCESS CONTROL
+// =============================
+
 const accessGranted = sessionStorage.getItem("gallery_access")
+const sessionEventId = sessionStorage.getItem("event_id")
+const visitorId = sessionStorage.getItem("visitor_id")
 
-if(eventIdCheck && accessGranted !== "true"){
-console.warn("⚠️ Unauthorized access blocked")
+// 👤 PHOTOGRAPHER → FULL ACCESS
+if(user){
+console.log("👤 Photographer access")
+}else{
 
+// 👥 GUEST FLOW
+if(eventIdCheck){
+
+// ❌ No access flag
+if(accessGranted !== "true"){
+console.warn("❌ Guest not verified")
 window.location.href = `access.html?event_id=${eventIdCheck}`
 return
+}
+
+// ❌ Event mismatch
+if(!sessionEventId || sessionEventId !== eventIdCheck){
+console.warn("❌ Event mismatch")
+window.location.href = `access.html?event_id=${eventIdCheck}`
+return
+}
+
+// ❌ No visitor identity
+if(!visitorId){
+console.warn("❌ Missing visitor ID")
+window.location.href = `access.html?event_id=${eventIdCheck}`
+return
+}
+
+console.log("✅ Guest verified")
+
+}
+
 }
 
 // =============================
@@ -22,12 +66,6 @@ return
 // =============================
 
 const supabase = await window.getSupabase()
-const user = await window.getCurrentUser()
-
-if(!user){
-console.error("User not found")
-return
-}
 
 
 // =============================
@@ -63,10 +101,17 @@ grid.innerHTML = ""
 
 
 // =============================
-// MODE 1: EVENT LIST
+// MODE 1: EVENT LIST (ONLY USER)
 // =============================
 
 if(!eventId){
+
+// ❌ Guest should never see events list
+if(!user){
+console.warn("❌ Guest blocked from event list")
+window.location.href = "access.html"
+return
+}
 
 const { data: events, error } =
 await supabase
