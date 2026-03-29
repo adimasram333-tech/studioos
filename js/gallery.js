@@ -329,32 +329,36 @@ modal.style.alignItems = "center"
 modal.style.justifyContent = "center"
 modal.style.zIndex = 9999
 
+// ✅ FIXED
 modal.innerHTML = `
-<div style="text-align:center">
-<img id="modalImg" src="${url}" style="max-width:90%; max-height:80vh; border-radius:12px;" />
+<img id="modalImg" src="${url}" style="max-width:90%; max-height:90%; border-radius:12px;" />
 
 <button id="downloadBtn"
-style="margin-top:10px; background:#4f46e5; color:white; padding:8px 16px; border-radius:8px;">
+style="position:absolute; bottom:30px; background:#4f46e5; color:white; padding:8px 16px; border-radius:8px;">
 Download
 </button>
-</div>
 `
 
 modal.onclick = (e)=>{ if(e.target === modal) modal.remove() }
 
 document.body.appendChild(modal)
 
-// ✅ FIXED DOWNLOAD HANDLER
 const btn = document.getElementById("downloadBtn")
 
-btn.onclick = function(){
-if(typeof handleDownload === "function"){
-handleDownload(url)
-}else{
+btn.onclick = async function(){
+try{
+const res = await fetch(url)
+const blob = await res.blob()
+const blobUrl = URL.createObjectURL(blob)
+
 const a = document.createElement("a")
-a.href = url
-a.download = "image.jpg"
+a.href = blobUrl
+a.download = "photo.jpg"
 a.click()
+
+URL.revokeObjectURL(blobUrl)
+}catch(e){
+alert("Download failed")
 }
 }
 
@@ -384,10 +388,6 @@ grid.appendChild(div)
 })
 
 }
-
-// =============================
-// AUTO INIT
-// =============================
 
 document.addEventListener("DOMContentLoaded",()=>{
 loadGallery()
