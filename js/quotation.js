@@ -288,7 +288,7 @@ return data?.length || 0
 
 
 // =============================
-// 🔥 AUTO CREATE EVENT (FIXED ONLY HERE)
+// 🔥 AUTO CREATE EVENT (UPDATED WITH TOKEN)
 // =============================
 
 async function createEventIfConfirmed(quotation){
@@ -313,7 +313,8 @@ if(existing && existing.length > 0){
 return
 }
 
-// INSERT EVENT
+// INSERT EVENT (UPDATED TO GET ID)
+const { data: insertedEvent, error: insertError } =
 await supabase
 .from("events")
 .insert([{
@@ -323,6 +324,28 @@ event_name: uniqueName,
 event_type: quotation.event_category || "event",
 event_date: quotation.event_date,
 status: "active"
+}])
+.select()
+.single()
+
+if(insertError){
+console.error("Event insert error:", insertError)
+return
+}
+
+// =============================
+// 🔥 TOKEN GENERATION (ADDED)
+// =============================
+
+const token =
+Math.random().toString(36).substring(2,10).toUpperCase()
+
+await supabase
+.from("event_tokens")
+.insert([{
+event_id: insertedEvent.id,
+token: token,
+used: false
 }])
 
 }catch(err){
