@@ -306,7 +306,7 @@ loadQuotations()
 
 
 // =============================
-// CONFIRM BOOKING
+// CONFIRM BOOKING (FIXED)
 // =============================
 
 async function confirmBooking(id){
@@ -314,11 +314,11 @@ async function confirmBooking(id){
 if(!confirm("Confirm this booking?")) return
 
 const user = await getCurrentUser()
-
 if(!user) return
 
 const supabase = getSupabase()
 
+// 🔥 Update status
 const { error } =
 await supabase
 .from("quotations")
@@ -327,11 +327,29 @@ await supabase
 .eq("user_id",user.id)
 
 if(error){
-
 console.error("Confirm error:",error)
 alert("Error confirming booking")
 return
+}
 
+// =============================
+// 🔥 FETCH QUOTATION + CREATE EVENT & TOKEN
+// =============================
+
+const { data: quotation, error: fetchError } =
+await supabase
+.from("quotations")
+.select("*")
+.eq("id", id)
+.single()
+
+if(fetchError){
+console.error("Fetch quotation error:", fetchError)
+}
+
+// 🔥 call existing logic (NO DUPLICATE CODE)
+if(window.createEventIfConfirmed){
+await window.createEventIfConfirmed(quotation)
 }
 
 loadQuotations()
