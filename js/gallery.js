@@ -38,6 +38,7 @@ menu.innerHTML = `
 <div onclick="openEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Open</div>
 <div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
+<div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
 `
 
 document.body.appendChild(menu)
@@ -63,6 +64,84 @@ window.shareEvent = function(id){
 const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
 navigator.clipboard.writeText(link)
 alert("Link copied")
+}
+
+
+// =============================
+// 🔥 SHOW TOKEN (NEW FEATURE)
+// =============================
+
+window.showToken = async function(id){
+
+const existingMenu = document.getElementById("floatingMenu")
+if(existingMenu) existingMenu.remove()
+
+const supabase = await window.getSupabase()
+
+let { data, error } = await supabase
+.from("event_tokens")
+.select("*")
+.eq("event_id", id)
+.single()
+
+let token = null
+
+if(data){
+token = data.token
+}
+
+// MODAL
+let modal = document.createElement("div")
+
+modal.style.position = "fixed"
+modal.style.top = 0
+modal.style.left = 0
+modal.style.width = "100%"
+modal.style.height = "100%"
+modal.style.background = "rgba(0,0,0,0.9)"
+modal.style.display = "flex"
+modal.style.alignItems = "center"
+modal.style.justifyContent = "center"
+modal.style.zIndex = 9999
+
+modal.innerHTML = `
+<div style="background:#111; padding:20px; border-radius:12px; text-align:center; min-width:250px">
+
+<div style="font-size:14px; margin-bottom:10px">Event Token</div>
+
+<div id="tokenText" style="font-size:18px; font-weight:bold; margin-bottom:12px">
+${token || "No token found"}
+</div>
+
+<button id="copyTokenBtn"
+style="background:#4f46e5; color:white; padding:6px 12px; border-radius:8px; font-size:12px">
+Copy Token
+</button>
+
+</div>
+`
+
+modal.onclick = (e)=>{
+if(e.target === modal){
+modal.remove()
+}
+}
+
+document.body.appendChild(modal)
+
+// COPY
+document.getElementById("copyTokenBtn").onclick = function(){
+
+if(!token){
+alert("No token to copy")
+return
+}
+
+navigator.clipboard.writeText(token)
+alert("Token copied")
+
+}
+
 }
 
 
