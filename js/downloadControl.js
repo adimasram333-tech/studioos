@@ -7,6 +7,9 @@ function getUserRole() {
   return sessionStorage.getItem("role") || "guest";
 }
 
+// store last image
+window.lastDownloadedImage = null;
+
 // =============================
 // PAYMENT MODAL
 // =============================
@@ -75,6 +78,35 @@ function simulatePaymentSuccess() {
   // close modal
   const modal = document.getElementById("paymentModal");
   if (modal) modal.remove();
+
+  // ✅ AUTO DOWNLOAD AFTER PAYMENT
+  if (window.lastDownloadedImage) {
+    triggerDownload(window.lastDownloadedImage);
+  }
+}
+
+// =============================
+// FORCE DOWNLOAD (FIXED)
+// =============================
+
+function triggerDownload(imageUrl) {
+  fetch(imageUrl)
+    .then(res => res.blob())
+    .then(blob => {
+      const blobUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = "photo.jpg";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(blobUrl);
+    })
+    .catch(() => {
+      alert("Download failed");
+    });
 }
 
 // =============================
@@ -83,18 +115,14 @@ function simulatePaymentSuccess() {
 
 window.handleDownload = function(imageUrl) {
 
+  // store last clicked image
+  window.lastDownloadedImage = imageUrl;
+
   const role = getUserRole();
 
   // CLIENT → allow
   if (role === "client") {
-
-    const a = document.createElement("a");
-    a.href = imageUrl;
-    a.download = "photo.jpg";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
+    triggerDownload(imageUrl);
     return;
   }
 
