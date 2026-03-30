@@ -312,10 +312,8 @@ empty.classList.remove("hidden")
 return
 }
 
-// =============================
-// ✅ GUEST RESTRICTION (ADDED)
-// =============================
-if(role === "guest"){
+// ✅ FIXED CONDITION
+if(!user && role === "guest"){
 data = data.filter((_, index) => index % 5 === 0)
 }
 
@@ -351,9 +349,6 @@ document.body.appendChild(modal)
 
 const btn = document.getElementById("downloadBtn")
 
-// =============================
-// ✅ DOWNLOAD CONTROL FIX (ADDED)
-// =============================
 btn.onclick = function(){
 window.handleDownload(url)
 }
