@@ -120,7 +120,7 @@ input.click()
 
 function getEventFromURL(){
 const params = new URLSearchParams(window.location.search)
-return params.get("event_id") || params.get("event") // ✅ backward support
+return params.get("event_id") || params.get("event")
 }
 
 
@@ -198,6 +198,21 @@ return
 }
 
 eventId = data.id
+
+// =============================
+// 🔥 TOKEN GENERATION (ADDED)
+// =============================
+
+const token =
+Math.random().toString(36).substring(2,10).toUpperCase()
+
+await supabase
+.from("event_tokens")
+.insert([{
+event_id: eventId,
+token: token,
+used: false
+}])
 
 }
 
