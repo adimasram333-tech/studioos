@@ -77,7 +77,7 @@ async function initAccess() {
   }
 
   // =============================
-  // TOKEN VERIFY FUNCTION (NEW)
+  // TOKEN VERIFY FUNCTION (UPDATED - 2 DEVICE LIMIT)
   // =============================
 
   async function verifyToken(visitorId) {
@@ -97,6 +97,7 @@ async function initAccess() {
 
       const t = tokenData[0];
 
+      // 🔥 CASE 1: FIRST TIME USE
       if (!t.used) {
 
         await supabase
@@ -109,16 +110,29 @@ async function initAccess() {
           .eq("id", t.id);
 
         return true;
-
-      } else {
-
-        if (t.device_id === deviceId) {
-          return true;
-        } else {
-          alert("Token already used on another device");
-          return null;
-        }
       }
+
+      // 🔥 CASE 2: SAME DEVICE
+      if (t.device_id === deviceId) {
+        return true;
+      }
+
+      // 🔥 CASE 3: SECOND DEVICE ALLOW
+      if (!t.device_id_2) {
+
+        await supabase
+          .from("event_tokens")
+          .update({
+            device_id_2: deviceId
+          })
+          .eq("id", t.id);
+
+        return true;
+      }
+
+      // 🔴 CASE 4: THIRD DEVICE BLOCK
+      alert("Token limit reached (only 2 devices allowed)");
+      return null;
 
     } else {
       alert("Invalid access code");
@@ -161,7 +175,7 @@ async function initAccess() {
   }
 
   // =============================
-  // VERIFY OTP (PHONE BASED)
+  // VERIFY OTP
   // =============================
 
   async function verifyOTP() {
@@ -237,7 +251,6 @@ async function initAccess() {
         visitorId = data.id;
       }
 
-      // 🔥 TOKEN CHECK AFTER OTP
       const tokenResult = await verifyToken(visitorId);
 
       if (tokenResult === null) return;
@@ -245,10 +258,6 @@ async function initAccess() {
       if (tokenResult === true) {
         userRole = "client";
       }
-
-      // =============================
-      // SESSION STORE
-      // =============================
 
       sessionStorage.setItem("gallery_access", "true");
       sessionStorage.setItem("event_id", eventId);
@@ -298,7 +307,6 @@ async function initAccess() {
 
       existingVisitor = data[0];
 
-      // 🔥 FIX: TOKEN CHECK BEFORE DIRECT ACCESS
       const tokenResult = await verifyToken(existingVisitor.id);
 
       if (tokenResult === null) return;
