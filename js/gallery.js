@@ -313,7 +313,7 @@ return
 }
 
 // ✅ FIXED CONDITION
-if(!user && role === "guest"){
+if(!user && (role === "guest" || role === "paid_guest")){
 data = data.filter((_, index) => index % 5 === 0)
 }
 
