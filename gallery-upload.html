@@ -193,6 +193,7 @@ status: "active"
 .single()
 
 if(error){
+console.error("EVENT ERROR:", error)
 alert("Event create failed")
 return
 }
@@ -200,19 +201,25 @@ return
 eventId = data.id
 
 // =============================
-// 🔥 TOKEN GENERATION (ADDED)
+// 🔥 TOKEN GENERATION (FIXED)
 // =============================
 
 const token =
 Math.random().toString(36).substring(2,10).toUpperCase()
 
-await supabase
+const { error: tokenError } = await supabase
 .from("event_tokens")
 .insert([{
-event_id: eventId,
+event_id: data.id,
 token: token,
 used: false
 }])
+
+if(tokenError){
+console.error("TOKEN ERROR:", tokenError)
+alert("Token creation failed")
+return
+}
 
 }
 
