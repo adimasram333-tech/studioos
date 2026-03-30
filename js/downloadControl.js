@@ -39,7 +39,7 @@ function showPaymentModal() {
       <div style="font-size:16px; margin-bottom:10px">Unlock Full Gallery</div>
 
       <div style="font-size:12px; color:#aaa">
-        Get access to download all photos
+        Get access to download your photos
       </div>
 
       <div style="margin-top:10px; font-size:18px; font-weight:bold">
@@ -65,28 +65,28 @@ function showPaymentModal() {
 }
 
 // =============================
-// SIMULATE PAYMENT (TEMP)
+// SIMULATE PAYMENT (UPDATED)
 // =============================
 
 function simulatePaymentSuccess() {
 
   alert("Payment Successful 🎉");
 
-  // upgrade user to client
-  sessionStorage.setItem("role", "client");
+  // ✅ IMPORTANT CHANGE: guest → paid_guest
+  sessionStorage.setItem("role", "paid_guest");
 
   // close modal
   const modal = document.getElementById("paymentModal");
   if (modal) modal.remove();
 
-  // ✅ AUTO DOWNLOAD AFTER PAYMENT
+  // auto download
   if (window.lastDownloadedImage) {
     triggerDownload(window.lastDownloadedImage);
   }
 }
 
 // =============================
-// FORCE DOWNLOAD (FIXED)
+// FORCE DOWNLOAD
 // =============================
 
 function triggerDownload(imageUrl) {
@@ -120,12 +120,12 @@ window.handleDownload = function(imageUrl) {
 
   const role = getUserRole();
 
-  // CLIENT → allow
-  if (role === "client") {
+  // ✅ allow for client + paid_guest
+  if (role === "client" || role === "paid_guest") {
     triggerDownload(imageUrl);
     return;
   }
 
-  // GUEST → show payment
+  // guest → payment
   showPaymentModal();
 };
