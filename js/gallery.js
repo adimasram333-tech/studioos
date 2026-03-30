@@ -290,7 +290,7 @@ return
 
 const safeEventId = String(eventId)
 
-const { data, error } =
+let { data, error } =
 await supabase
 .from("gallery_photos")
 .select("*")
@@ -312,6 +312,13 @@ empty.classList.remove("hidden")
 return
 }
 
+// =============================
+// ✅ GUEST RESTRICTION (ADDED)
+// =============================
+if(role === "guest"){
+data = data.filter((_, index) => index % 5 === 0)
+}
+
 function openImage(url){
 let modal = document.getElementById("imageModal")
 
@@ -329,7 +336,6 @@ modal.style.alignItems = "center"
 modal.style.justifyContent = "center"
 modal.style.zIndex = 9999
 
-// ✅ FIXED ONLY THIS LINE
 modal.innerHTML = `
 <img id="modalImg" src="${url}" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:12px;" />
 
@@ -345,21 +351,11 @@ document.body.appendChild(modal)
 
 const btn = document.getElementById("downloadBtn")
 
-btn.onclick = async function(){
-try{
-const res = await fetch(url)
-const blob = await res.blob()
-const blobUrl = URL.createObjectURL(blob)
-
-const a = document.createElement("a")
-a.href = blobUrl
-a.download = "photo.jpg"
-a.click()
-
-URL.revokeObjectURL(blobUrl)
-}catch(e){
-alert("Download failed")
-}
+// =============================
+// ✅ DOWNLOAD CONTROL FIX (ADDED)
+// =============================
+btn.onclick = function(){
+window.handleDownload(url)
 }
 
 }else{
