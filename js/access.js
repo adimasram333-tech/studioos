@@ -77,6 +77,56 @@ async function initAccess() {
   }
 
   // =============================
+  // TOKEN VERIFY FUNCTION (NEW)
+  // =============================
+
+  async function verifyToken(visitorId) {
+
+    const token = document.getElementById("tokenInput").value.trim();
+
+    if (!token) return false;
+
+    const { data: tokenData } = await supabase
+      .from("event_tokens")
+      .select("*")
+      .eq("event_id", eventId)
+      .eq("token", token)
+      .limit(1);
+
+    if (tokenData && tokenData.length > 0) {
+
+      const t = tokenData[0];
+
+      if (!t.used) {
+
+        await supabase
+          .from("event_tokens")
+          .update({
+            used: true,
+            used_by: visitorId,
+            device_id: deviceId
+          })
+          .eq("id", t.id);
+
+        return true;
+
+      } else {
+
+        if (t.device_id === deviceId) {
+          return true;
+        } else {
+          alert("Token already used on another device");
+          return null;
+        }
+      }
+
+    } else {
+      alert("Invalid access code");
+      return null;
+    }
+  }
+
+  // =============================
   // OTP UI
   // =============================
 
@@ -128,7 +178,6 @@ async function initAccess() {
       return;
     }
 
-    // ✅ OTP = last 4 digits
     const expectedOTP = currentPhone.slice(-4);
 
     if (entered !== expectedOTP) {
@@ -188,52 +237,13 @@ async function initAccess() {
         visitorId = data.id;
       }
 
-      // =============================
-      // TOKEN VERIFY
-      // =============================
+      // 🔥 TOKEN CHECK AFTER OTP
+      const tokenResult = await verifyToken(visitorId);
 
-      const token = document.getElementById("tokenInput").value.trim();
+      if (tokenResult === null) return;
 
-      if (token) {
-
-        const { data: tokenData } = await supabase
-          .from("event_tokens")
-          .select("*")
-          .eq("event_id", eventId)
-          .eq("token", token)
-          .limit(1);
-
-        if (tokenData && tokenData.length > 0) {
-
-          const t = tokenData[0];
-
-          if (!t.used) {
-
-            await supabase
-              .from("event_tokens")
-              .update({
-                used: true,
-                used_by: visitorId,
-                device_id: deviceId
-              })
-              .eq("id", t.id);
-
-            userRole = "client";
-
-          } else {
-
-            if (t.device_id === deviceId) {
-              userRole = "client";
-            } else {
-              alert("Token already used on another device");
-              return;
-            }
-          }
-
-        } else {
-          alert("Invalid access code");
-          return;
-        }
+      if (tokenResult === true) {
+        userRole = "client";
       }
 
       // =============================
@@ -287,6 +297,22 @@ async function initAccess() {
     if (data && data.length > 0) {
 
       existingVisitor = data[0];
+
+      // 🔥 FIX: TOKEN CHECK BEFORE DIRECT ACCESS
+      const tokenResult = await verifyToken(existingVisitor.id);
+
+      if (tokenResult === null) return;
+
+      if (tokenResult === true) {
+
+        sessionStorage.setItem("gallery_access", "true");
+        sessionStorage.setItem("event_id", eventId);
+        sessionStorage.setItem("visitor_id", existingVisitor.id);
+        sessionStorage.setItem("role", "client");
+
+        window.location.href = `gallery.html?event_id=${eventId}`;
+        return;
+      }
 
       if (existingVisitor.verified) {
 
