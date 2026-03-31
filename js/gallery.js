@@ -39,7 +39,7 @@ menu.innerHTML = `
 <div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
 <div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
-<div onclick="deleteEvent('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">Delete</div>
+<div onclick="deleteEvent('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">Delete Gallery</div>
 `
 
 document.body.appendChild(menu)
@@ -69,12 +69,12 @@ alert("Link copied")
 
 
 // =============================
-// DELETE EVENT (NEW)
+// 🔥 DELETE GALLERY (SAFE FIX)
 // =============================
 
 window.deleteEvent = async function(id){
 
-const confirmDelete = confirm("Delete this event permanently?")
+const confirmDelete = confirm("Delete gallery only? (Client & booking safe)")
 
 if(!confirmDelete) return
 
@@ -82,11 +82,32 @@ const supabase = await window.getSupabase()
 
 try{
 
-await supabase.from("gallery_photos").delete().eq("event_id", id)
-await supabase.from("event_tokens").delete().eq("event_id", id)
-await supabase.from("events").delete().eq("id", id)
+// 🔥 Cloudinary delete (Edge Function)
+await fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/smart-processor", {
+method: "POST",
+headers: {
+"Content-Type": "application/json"
+},
+body: JSON.stringify({
+event_id: id
+})
+})
 
-alert("Event deleted")
+// ✅ Delete only gallery photos
+await supabase
+.from("gallery_photos")
+.delete()
+.eq("event_id", id)
+
+// ✅ Delete tokens (cleanup)
+await supabase
+.from("event_tokens")
+.delete()
+.eq("event_id", id)
+
+// ❌ DO NOT DELETE EVENTS (IMPORTANT)
+
+alert("Gallery deleted successfully")
 location.reload()
 
 }catch(err){
@@ -118,15 +139,12 @@ let token = null
 
 if(data && data.length > 0){
 
-// ✅ Existing token
 token = data[0].token
 
 }else{
 
-// 🔥 Generate new token
 const newToken = Math.random().toString(36).substring(2,8).toUpperCase()
 
-// 🔥 Try insert
 const { data: inserted, error: insertError } = await supabase
 .from("event_tokens")
 .insert([{ event_id: id, token: newToken }])
@@ -135,9 +153,6 @@ const { data: inserted, error: insertError } = await supabase
 
 if(insertError){
 
-console.warn("Token insert failed, retry fetch", insertError)
-
-// 🔁 Retry fetch (handles duplicate constraint case)
 const { data: retryData } = await supabase
 .from("event_tokens")
 .select("*")
@@ -148,7 +163,6 @@ token = retryData?.[0]?.token || null
 
 }else{
 
-// ✅ Insert success
 token = inserted?.[0]?.token || newToken
 
 }
@@ -194,7 +208,6 @@ modal.remove()
 
 document.body.appendChild(modal)
 
-// COPY
 document.getElementById("copyTokenBtn").onclick = function(){
 
 if(!token){
@@ -283,7 +296,7 @@ a.click()
 
 
 // =============================
-// LOAD GALLERY (UNCHANGED)
+// LOAD GALLERY
 // =============================
 
 async function loadGallery(){
