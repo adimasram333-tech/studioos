@@ -1,107 +1,69 @@
-```javascript
-// gallery-token.js
-// PURPOSE:
-// Fix random token issue permanently
-// Ensure ONLY ONE token per event (stable token)
-
 // =============================
-// TOKEN GENERATOR
+// TOKEN MODULE (FINAL CLEAN)
 // =============================
-function generateToken(length = 8) {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-  let token = "";
+window.showToken = async function(eventId){
 
-  for (let i = 0; i < length; i++) {
-    token += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
+const supabase = await window.getSupabase()
 
-  return token;
+let { data } = await supabase
+.from("event_tokens")
+.select("*")
+.eq("event_id", eventId)
+.order("created_at",{ ascending:true })
+.limit(1)
+
+let token = null
+
+if(data && data.length > 0){
+token = data[0].token
+}else{
+
+const newToken = Math.random().toString(36).substring(2,8).toUpperCase()
+
+const { data: inserted } = await supabase
+.from("event_tokens")
+.insert([{ event_id:eventId, token:newToken }])
+.select()
+.limit(1)
+
+token = inserted?.[0]?.token || newToken
 }
 
-// =============================
-// GET / CREATE TOKEN
-// =============================
-export async function getEventToken(eventId) {
-  if (!eventId) {
-    console.error("❌ getEventToken: eventId missing");
-    return null;
-  }
+// 🔥 CLEAN MODAL
 
-  try {
-    const supabase = await window.getSupabase();
+const modal = document.createElement("div")
 
-    // =============================
-    // STEP 1: FETCH TOKENS (ORDERED)
-    // =============================
-    const { data: tokens, error } = await supabase
-      .from("event_tokens")
-      .select("id, token, created_at")
-      .eq("event_id", eventId)
-      .order("created_at", { ascending: true });
+modal.style.position = "fixed"
+modal.style.top = 0
+modal.style.left = 0
+modal.style.width = "100%"
+modal.style.height = "100%"
+modal.style.background = "rgba(0,0,0,0.85)"
+modal.style.display = "flex"
+modal.style.alignItems = "center"
+modal.style.justifyContent = "center"
+modal.style.zIndex = 9999
 
-    if (error) {
-      console.error("❌ Token fetch error:", error.message);
-      return null;
-    }
+modal.innerHTML = `
+<div style="background:#111; padding:20px; border-radius:12px; text-align:center">
+<div style="font-size:14px">Event Token</div>
+<div style="font-size:22px; font-weight:bold; color:#4f46e5">${token}</div>
 
-    // =============================
-    // STEP 2: IF TOKEN EXISTS
-    // =============================
-    if (tokens && tokens.length > 0) {
-      const mainToken = tokens[0];
+<button style="margin-top:15px; padding:6px 12px; background:#4f46e5; color:white; border-radius:6px">
+Copy
+</button>
+</div>
+`
 
-      // =============================
-      // CLEAN DUPLICATES (SAFE)
-      // =============================
-      if (tokens.length > 1) {
-        const duplicateIds = tokens.slice(1).map((t) => t.id);
-
-        if (duplicateIds.length > 0) {
-          const { error: deleteError } = await supabase
-            .from("event_tokens")
-            .delete()
-            .in("id", duplicateIds);
-
-          if (deleteError) {
-            console.warn("⚠️ Duplicate delete failed:", deleteError.message);
-          } else {
-            console.log("⚠️ Duplicate tokens cleaned");
-          }
-        }
-      }
-
-      return mainToken.token;
-    }
-
-    // =============================
-    // STEP 3: CREATE NEW TOKEN
-    // =============================
-    const newToken = generateToken();
-
-    const { data: inserted, error: insertError } = await supabase
-      .from("event_tokens")
-      .insert([
-        {
-          event_id: eventId,
-          token: newToken,
-        },
-      ])
-      .select("token")
-      .single();
-
-    if (insertError) {
-      console.error("❌ Token creation failed:", insertError.message);
-      return null;
-    }
-
-    console.log("✅ New token created");
-
-    return inserted.token;
-  } catch (err) {
-    console.error("❌ getEventToken crashed:", err.message);
-    return null;
-  }
+modal.onclick = (e)=>{
+if(e.target === modal) modal.remove()
 }
-```
+
+modal.querySelector("button").onclick = ()=>{
+navigator.clipboard.writeText(token)
+}
+
+document.body.appendChild(modal)
+
+}
