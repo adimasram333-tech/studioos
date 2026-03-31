@@ -45,7 +45,7 @@ return null
 
 
 // =============================
-// 🔥 AUTO FIX OLD BOOKINGS (NEW)
+// 🔥 AUTO FIX OLD BOOKINGS (SAFE ONE-TIME)
 // =============================
 
 async function autoFixOldBookings(){
@@ -152,8 +152,11 @@ if(!user){
 return
 }
 
-// 🔥 RUN AUTO FIX (ONLY FIRST TIME)
+// 🔥 SAFE ONE-TIME EXECUTION
+if(!localStorage.getItem("oldBookingsFixed")){
 await autoFixOldBookings()
+localStorage.setItem("oldBookingsFixed","true")
+}
 
 const { data: events, error } = await supabase
 .from("events")
