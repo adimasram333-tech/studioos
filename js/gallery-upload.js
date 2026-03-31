@@ -45,7 +45,84 @@ return null
 
 
 // =============================
-// GET EVENT FROM URL (SINGLE SOURCE)
+// 🔥 AUTO FIX OLD BOOKINGS (NEW)
+// =============================
+
+async function autoFixOldBookings(){
+
+try{
+
+const supabase = getSupabase()
+const user = await getCurrentUser()
+
+if(!user) return
+
+const { data: quotations } = await supabase
+.from("quotations")
+.select("*")
+.eq("user_id", user.id)
+.eq("status", "confirmed")
+
+if(!quotations) return
+
+for(const q of quotations){
+
+const eventName = "Q_" + q.id
+
+// check existing
+const { data: existing } = await supabase
+.from("events")
+.select("id")
+.eq("event_name", eventName)
+
+if(existing && existing.length > 0){
+continue
+}
+
+// create event
+const { data: eventData, error } = await supabase
+.from("events")
+.insert([{
+user_id: user.id,
+client_name: q.client_name,
+event_name: eventName,
+event_type: q.event_category || "event",
+event_date: q.event_date,
+status: "active"
+}])
+.select()
+.single()
+
+if(error){
+console.error("AUTO EVENT ERROR", error)
+continue
+}
+
+// create token
+const token =
+Math.random().toString(36).substring(2,10).toUpperCase()
+
+await supabase
+.from("event_tokens")
+.insert([{
+event_id: eventData.id,
+token: token,
+used: false
+}])
+
+}
+
+console.log("Old bookings auto-fixed ✅")
+
+}catch(err){
+console.error("Auto fix error", err)
+}
+
+}
+
+
+// =============================
+// GET EVENT FROM URL
 // =============================
 
 function getEventFromURL(){
@@ -55,7 +132,7 @@ return params.get("event_id") || params.get("event")
 
 
 // =============================
-// LOAD EVENTS (FIXED)
+// LOAD EVENTS
 // =============================
 
 async function loadConfirmedEvents(){
@@ -75,8 +152,9 @@ if(!user){
 return
 }
 
+// 🔥 RUN AUTO FIX (ONLY FIRST TIME)
+await autoFixOldBookings()
 
-// 🔥 FIX: REMOVE STRICT FILTER TEMPORARILY
 const { data: events, error } = await supabase
 .from("events")
 .select("*")
@@ -86,15 +164,12 @@ if(error){
 console.error("Events error", error)
 }
 
-// RESET
 select.innerHTML = `<option value="">Select Event</option>`
 
-// RENDER
 ;(events || []).forEach(e=>{
 
 if(!e || !e.id) return
 
-// 🔥 SAFE FILTER (CLIENT SIDE)
 if(user && e.user_id && e.user_id !== user.id){
 return
 }
@@ -112,14 +187,11 @@ select.appendChild(option)
 
 })
 
-// CREATE OPTION
 const createOption = document.createElement("option")
 createOption.value = "create_new"
 createOption.textContent = "+ Create New Event"
 select.appendChild(createOption)
 
-
-// AUTO SELECT
 const urlEvent = getEventFromURL()
 
 if(urlEvent){
@@ -134,7 +206,7 @@ console.error("Dropdown load error",err)
 
 
 // =============================
-// AUTO INIT
+// INIT
 // =============================
 
 document.addEventListener("DOMContentLoaded",()=>{
@@ -143,25 +215,16 @@ loadConfirmedEvents()
 
 
 // =============================
-// GET EVENT ID (UNCHANGED)
+// बाकी code unchanged
 // =============================
 
 function getEventId(){
-
 const select = document.getElementById("eventSelect")
-
 if(!select || !select.value){
 return null
 }
-
 return String(select.value)
-
 }
-
-
-// =============================
-// UPLOAD IMAGES (UPDATED FIX)
-// =============================
 
 async function uploadImages(finalEventId){
 
@@ -284,11 +347,7 @@ return
 status.innerText = "Upload Complete"
 progress.innerText = "All photos uploaded"
 
-// =============================
-// 🔥 FINAL FIX: REFRESH EVENTS
-// =============================
-
-await loadConfirmedEvents()   // 🔥 reload dropdown
+await loadConfirmedEvents()
 
 }catch(err){
 
