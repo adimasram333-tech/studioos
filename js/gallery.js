@@ -38,8 +38,6 @@ menu.innerHTML = `
 <div onclick="openEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Open</div>
 <div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
-<div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
-<div onclick="deleteEvent('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">Delete Gallery</div>
 `
 
 document.body.appendChild(menu)
@@ -69,155 +67,7 @@ alert("Link copied")
 
 
 // =============================
-// 🔥 DELETE GALLERY (ONLY FIXED THIS)
-// =============================
-
-window.deleteEvent = async function(id){
-
-const confirmDelete = confirm("Delete gallery only? (Client & booking safe)")
-if(!confirmDelete) return
-
-const supabase = await window.getSupabase()
-
-try{
-
-// 🔥 FAIL-SAFE: Cloudinary call (ignore if blocked by CORS)
-try{
-await fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/smart-processor", {
-method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
-body: JSON.stringify({ event_id: id })
-})
-}catch(e){
-console.warn("Cloudinary delete failed (ignored):", e)
-}
-
-// ✅ ALWAYS DELETE DB DATA
-await supabase.from("gallery_photos").delete().eq("event_id", id)
-await supabase.from("event_tokens").delete().eq("event_id", id)
-
-// ❌ DO NOT DELETE EVENTS
-
-alert("Gallery deleted successfully")
-location.reload()
-
-}catch(err){
-console.error(err)
-alert("Delete failed")
-}
-
-}
-
-
-// =============================
-// 🔥 SHOW TOKEN (FINAL FIX)
-// =============================
-
-window.showToken = async function(id){
-
-const existingMenu = document.getElementById("floatingMenu")
-if(existingMenu) existingMenu.remove()
-
-const supabase = await window.getSupabase()
-
-let { data, error } = await supabase
-.from("event_tokens")
-.select("*")
-.eq("event_id", id)
-.limit(1)
-
-let token = null
-
-if(data && data.length > 0){
-
-token = data[0].token
-
-}else{
-
-const newToken = Math.random().toString(36).substring(2,8).toUpperCase()
-
-const { data: inserted, error: insertError } = await supabase
-.from("event_tokens")
-.insert([{ event_id: id, token: newToken }])
-.select()
-.limit(1)
-
-if(insertError){
-
-const { data: retryData } = await supabase
-.from("event_tokens")
-.select("*")
-.eq("event_id", id)
-.limit(1)
-
-token = retryData?.[0]?.token || null
-
-}else{
-
-token = inserted?.[0]?.token || newToken
-
-}
-
-}
-
-// MODAL
-let modal = document.createElement("div")
-
-modal.style.position = "fixed"
-modal.style.top = 0
-modal.style.left = 0
-modal.style.width = "100%"
-modal.style.height = "100%"
-modal.style.background = "rgba(0,0,0,0.9)"
-modal.style.display = "flex"
-modal.style.alignItems = "center"
-modal.style.justifyContent = "center"
-modal.style.zIndex = 9999
-
-modal.innerHTML = `
-<div style="background:#111; padding:20px; border-radius:12px; text-align:center; min-width:250px">
-
-<div style="font-size:14px; margin-bottom:10px">Event Token</div>
-
-<div id="tokenText" style="font-size:18px; font-weight:bold; margin-bottom:12px">
-${token || "No token found"}
-</div>
-
-<button id="copyTokenBtn"
-style="background:#4f46e5; color:white; padding:6px 12px; border-radius:8px; font-size:12px">
-Copy Token
-</button>
-
-</div>
-`
-
-modal.onclick = (e)=>{
-if(e.target === modal){
-modal.remove()
-}
-}
-
-document.body.appendChild(modal)
-
-document.getElementById("copyTokenBtn").onclick = function(){
-
-if(!token){
-alert("No token to copy")
-return
-}
-
-navigator.clipboard.writeText(token)
-alert("Token copied")
-
-}
-
-}
-
-
-// =============================
-// QR (UNCHANGED)
+// QR
 // =============================
 
 window.showQR = function(id){
@@ -297,10 +147,6 @@ async function loadGallery(){
 const params = new URLSearchParams(window.location.search)
 let eventIdCheck = params.get("event_id") || params.get("event")
 
-if(eventIdCheck === "null" || eventIdCheck === "undefined"){
-eventIdCheck = null
-}
-
 let user = null
 try{
 user = await window.getCurrentUser()
@@ -347,10 +193,6 @@ let eventId = params.get("event_id")
 
 if(!eventId){
 eventId = params.get("event")
-}
-
-if(eventId === "null" || eventId === "undefined"){
-eventId = null
 }
 
 if(eventId && typeof eventId === "string" && eventId.startsWith("legacy_")){
@@ -448,7 +290,7 @@ return
 
 const safeEventId = String(eventId)
 
-let { data, error } =
+const { data, error } =
 await supabase
 .from("gallery_photos")
 .select("*")
@@ -470,11 +312,6 @@ empty.classList.remove("hidden")
 return
 }
 
-// ✅ FIXED CONDITION
-if(!user && (role === "guest" || role === "paid_guest")){
-data = data.filter((_, index) => index % 5 === 0)
-}
-
 function openImage(url){
 let modal = document.getElementById("imageModal")
 
@@ -492,6 +329,7 @@ modal.style.alignItems = "center"
 modal.style.justifyContent = "center"
 modal.style.zIndex = 9999
 
+// ✅ FIXED ONLY THIS LINE
 modal.innerHTML = `
 <img id="modalImg" src="${url}" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:12px;" />
 
@@ -507,8 +345,21 @@ document.body.appendChild(modal)
 
 const btn = document.getElementById("downloadBtn")
 
-btn.onclick = function(){
-window.handleDownload(url)
+btn.onclick = async function(){
+try{
+const res = await fetch(url)
+const blob = await res.blob()
+const blobUrl = URL.createObjectURL(blob)
+
+const a = document.createElement("a")
+a.href = blobUrl
+a.download = "photo.jpg"
+a.click()
+
+URL.revokeObjectURL(blobUrl)
+}catch(e){
+alert("Download failed")
+}
 }
 
 }else{
