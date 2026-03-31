@@ -69,7 +69,6 @@ for(const q of quotations){
 
 const eventName = "Q_" + q.id
 
-// check existing
 const { data: existing } = await supabase
 .from("events")
 .select("id")
@@ -79,7 +78,6 @@ if(existing && existing.length > 0){
 continue
 }
 
-// create event
 const { data: eventData, error } = await supabase
 .from("events")
 .insert([{
@@ -98,7 +96,6 @@ console.error("AUTO EVENT ERROR", error)
 continue
 }
 
-// create token
 const token =
 Math.random().toString(36).substring(2,10).toUpperCase()
 
@@ -152,7 +149,6 @@ if(!user){
 return
 }
 
-// 🔥 SAFE ONE-TIME EXECUTION
 if(!localStorage.getItem("oldBookingsFixed")){
 await autoFixOldBookings()
 localStorage.setItem("oldBookingsFixed","true")
@@ -276,6 +272,9 @@ return
 
 eventId = String(eventId)
 
+// 🔥 REQUIRED FIX (PRODUCTION SAFE FOLDER STRUCTURE)
+const cloudinaryFolderId = `events/${eventId}`
+
 if(typeof window.uploadToCloudinary !== "function"){
 status.innerText = "Upload system not loaded"
 return
@@ -303,8 +302,9 @@ const uploadPromises = validFiles.map(async (file)=>{
 
 try{
 
+// 🔥 FIX APPLIED HERE
 const url =
-await window.uploadToCloudinary(file,eventId)
+await window.uploadToCloudinary(file, cloudinaryFolderId)
 
 if(url){
 
