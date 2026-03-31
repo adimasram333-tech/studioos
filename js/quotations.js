@@ -306,7 +306,7 @@ loadQuotations()
 
 
 // =============================
-// CONFIRM BOOKING (FIXED)
+// 🔥 CONFIRM BOOKING (FIXED PROPERLY)
 // =============================
 
 async function confirmBooking(id){
@@ -332,10 +332,7 @@ alert("Error confirming booking")
 return
 }
 
-// =============================
-// 🔥 FETCH QUOTATION + CREATE EVENT & TOKEN
-// =============================
-
+// 🔥 GET QUOTATION DATA
 const { data: quotation, error: fetchError } =
 await supabase
 .from("quotations")
@@ -343,13 +340,46 @@ await supabase
 .eq("id", id)
 .single()
 
-if(fetchError){
+if(fetchError || !quotation){
 console.error("Fetch quotation error:", fetchError)
+return
 }
 
-// 🔥 call existing logic (NO DUPLICATE CODE)
-if(window.createEventIfConfirmed){
-await window.createEventIfConfirmed(quotation)
+// 🔥 CREATE EVENT
+const { data: eventData, error: eventError } =
+await supabase
+.from("events")
+.insert([{
+user_id: user.id,
+client_name: quotation.client_name,
+event_name: "Q_" + quotation.id,
+event_type: quotation.event_category || "event",
+event_date: quotation.event_date,
+status: "active"
+}])
+.select()
+.single()
+
+if(eventError){
+console.error("EVENT ERROR:", eventError)
+return
+}
+
+// 🔥 CREATE TOKEN
+const token =
+Math.random().toString(36).substring(2,10).toUpperCase()
+
+const { error: tokenError } =
+await supabase
+.from("event_tokens")
+.insert([{
+event_id: eventData.id,
+token: token,
+used: false
+}])
+
+if(tokenError){
+console.error("TOKEN ERROR:", tokenError)
 }
 
 loadQuotations()
