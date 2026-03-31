@@ -1,36 +1,54 @@
 // =============================
-// TOKEN MODULE (FINAL CLEAN)
+// TOKEN MODULE (FINAL CLEAN FIXED)
 // =============================
 
 window.showToken = async function(eventId){
 
+// 🔥 MENU CLOSE FIX
+const menu = document.getElementById("floatingMenu")
+if(menu) menu.remove()
+
 const supabase = await window.getSupabase()
 
-let { data } = await supabase
+// =============================
+// ✅ STEP 1: GET EXISTING TOKEN (NO DUPLICATE)
+// =============================
+
+let { data, error } = await supabase
 .from("event_tokens")
 .select("*")
 .eq("event_id", eventId)
-.order("created_at",{ ascending:true })
 .limit(1)
+.single()
 
 let token = null
 
-if(data && data.length > 0){
-token = data[0].token
+// =============================
+// ✅ STEP 2: IF EXISTS → USE SAME TOKEN
+// =============================
+
+if(data && data.token){
+token = data.token
 }else{
+
+// =============================
+// 🔥 STEP 3: CREATE NEW TOKEN (ONLY ONCE)
+// =============================
 
 const newToken = Math.random().toString(36).substring(2,8).toUpperCase()
 
-const { data: inserted } = await supabase
+const { data: inserted, error: insertError } = await supabase
 .from("event_tokens")
 .insert([{ event_id:eventId, token:newToken }])
 .select()
-.limit(1)
+.single()
 
-token = inserted?.[0]?.token || newToken
+token = inserted?.token || newToken
 }
 
-// 🔥 CLEAN MODAL
+// =============================
+// 🎨 CLEAN MODAL UI
+// =============================
 
 const modal = document.createElement("div")
 
@@ -56,13 +74,26 @@ Copy
 </div>
 `
 
+// =============================
+// ❌ CLOSE ON OUTSIDE CLICK
+// =============================
+
 modal.onclick = (e)=>{
 if(e.target === modal) modal.remove()
 }
 
+// =============================
+// 📋 COPY BUTTON
+// =============================
+
 modal.querySelector("button").onclick = ()=>{
 navigator.clipboard.writeText(token)
+alert("Token copied")
 }
+
+// =============================
+// ADD TO BODY
+// =============================
 
 document.body.appendChild(modal)
 
