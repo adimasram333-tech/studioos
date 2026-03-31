@@ -38,6 +38,9 @@ menu.innerHTML = `
 <div onclick="openEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Open</div>
 <div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
+
+<div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
+<div onclick="deleteEvent('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">Delete Gallery</div>
 `
 
 document.body.appendChild(menu)
@@ -63,6 +66,80 @@ window.shareEvent = function(id){
 const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
 navigator.clipboard.writeText(link)
 alert("Link copied")
+}
+
+
+// =============================
+// TOKEN SYSTEM (ADDED)
+// =============================
+
+window.showToken = async function(id){
+
+const supabase = await window.getSupabase()
+
+let { data } = await supabase
+.from("event_tokens")
+.select("*")
+.eq("event_id", id)
+.order("created_at",{ ascending:true })
+.limit(1)
+
+let token = null
+
+if(data && data.length > 0){
+token = data[0].token
+}else{
+
+const newToken = Math.random().toString(36).substring(2,8).toUpperCase()
+
+const { data: inserted } = await supabase
+.from("event_tokens")
+.insert([{ event_id:id, token:newToken }])
+.select()
+.limit(1)
+
+token = inserted?.[0]?.token || newToken
+}
+
+alert("Token: " + token)
+
+}
+
+
+// =============================
+// DELETE SYSTEM (ADDED)
+// =============================
+
+window.deleteEvent = async function(id){
+
+const confirmDelete = confirm("Delete gallery permanently?")
+if(!confirmDelete) return
+
+try{
+
+await fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/smart-processor", {
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE",
+"apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE"
+},
+body: JSON.stringify({ event_id: id })
+})
+
+const supabase = await window.getSupabase()
+
+await supabase.from("gallery_photos").delete().eq("event_id", id)
+await supabase.from("event_tokens").delete().eq("event_id", id)
+
+alert("Gallery deleted successfully")
+location.reload()
+
+}catch(err){
+console.error(err)
+alert("Delete failed")
+}
+
 }
 
 
@@ -146,7 +223,6 @@ async function loadGallery(){
 
 const params = new URLSearchParams(window.location.search)
 
-// ✅ FIXED EVENT ID HANDLING (ONLY CHANGE)
 let eventId = params.get("event_id") || params.get("event") || ""
 
 if(eventId){
@@ -210,10 +286,6 @@ return
 }
 
 grid.innerHTML = ""
-
-// =============================
-// MODE 1: EVENT LIST
-// =============================
 
 if(!eventId){
 
@@ -279,10 +351,6 @@ grid.appendChild(div)
 return
 
 }
-
-// =============================
-// MODE 2: IMAGE VIEW
-// =============================
 
 const safeEventId = String(eventId)
 
