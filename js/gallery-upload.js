@@ -272,9 +272,6 @@ return
 
 eventId = String(eventId)
 
-// 🔥 REQUIRED FIX (PRODUCTION SAFE FOLDER STRUCTURE)
-const cloudinaryFolderId = `events/${eventId}`
-
 if(typeof window.uploadToCloudinary !== "function"){
 status.innerText = "Upload system not loaded"
 return
@@ -302,9 +299,9 @@ const uploadPromises = validFiles.map(async (file)=>{
 
 try{
 
-// 🔥 FIX APPLIED HERE
+// 🔥 ROLLBACK FIX APPLIED
 const url =
-await window.uploadToCloudinary(file, cloudinaryFolderId)
+await window.uploadToCloudinary(file, eventId)
 
 if(url){
 
