@@ -39,6 +39,11 @@ menu.innerHTML = `
 <div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
 <div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
+
+<!-- ✅ ADDED DELETE -->
+<div onclick="deleteEvent('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">
+Delete
+</div>
 `
 
 document.body.appendChild(menu)
@@ -64,6 +69,38 @@ window.shareEvent = function(id){
 const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
 navigator.clipboard.writeText(link)
 alert("Link copied")
+}
+
+
+// =============================
+// 🔥 DELETE EVENT (ONLY ADDED PART)
+// =============================
+
+window.deleteEvent = async function(eventId){
+
+const confirmDelete = confirm("Delete this event?\nAll photos will be permanently removed.")
+
+if(!confirmDelete) return
+
+const supabase = await window.getSupabase()
+
+try{
+
+await supabase.from("gallery_photos").delete().eq("event_id", eventId)
+
+await supabase.from("event_tokens").delete().eq("event_id", eventId)
+
+await supabase.from("events").delete().eq("id", eventId)
+
+alert("Event deleted")
+
+location.reload()
+
+}catch(err){
+console.error(err)
+alert("Delete failed")
+}
+
 }
 
 
