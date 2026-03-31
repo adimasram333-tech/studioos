@@ -1,4 +1,3 @@
-```javascript
 // =============================
 // GLOBAL MENU SYSTEM (FINAL FIX)
 // =============================
@@ -40,7 +39,6 @@ menu.innerHTML = `
 <div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
 <div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
-<div onclick="deleteEvent('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">Delete</div>
 `
 
 document.body.appendChild(menu)
@@ -49,11 +47,13 @@ activeMenu = menu
 }
 
 document.addEventListener("click",(e)=>{
+
 if(!e.target.closest("#floatingMenu") && !e.target.closest("button")){
 const existing = document.getElementById("floatingMenu")
 if(existing) existing.remove()
 activeMenu = null
 }
+
 })
 
 window.openEvent = function(id){
@@ -68,35 +68,7 @@ alert("Link copied")
 
 
 // =============================
-// DELETE EVENT
-// =============================
-
-window.deleteEvent = async function(eventId){
-
-const confirmDelete = confirm("Delete this event?\nAll photos will be permanently removed.")
-if(!confirmDelete) return
-
-const supabase = await window.getSupabase()
-
-try{
-
-await supabase.from("gallery_photos").delete().eq("event_id", eventId)
-await supabase.from("event_tokens").delete().eq("event_id", eventId)
-await supabase.from("events").delete().eq("id", eventId)
-
-alert("Event deleted")
-location.reload()
-
-}catch(err){
-console.error(err)
-alert("Delete failed")
-}
-
-}
-
-
-// =============================
-// 🔥 SHOW TOKEN (FIXED + UNIQUE)
+// 🔥 SHOW TOKEN (NEW FEATURE)
 // =============================
 
 window.showToken = async function(id){
@@ -106,66 +78,19 @@ if(existingMenu) existingMenu.remove()
 
 const supabase = await window.getSupabase()
 
-let token = null
-
-// STEP 1: FETCH TOKEN
-let { data } = await supabase
+let { data, error } = await supabase
 .from("event_tokens")
 .select("*")
 .eq("event_id", id)
-.maybeSingle()
+.single()
 
-if(data && data.token){
+let token = null
+
+if(data){
 token = data.token
-}else{
-
-// STEP 2: GENERATE UNIQUE TOKEN
-const generateToken = () => {
-return Math.random().toString(36).substring(2,8).toUpperCase()
 }
 
-let newToken = ""
-let isUnique = false
-
-while(!isUnique){
-
-newToken = generateToken()
-
-const { data: check } = await supabase
-.from("event_tokens")
-.select("id")
-.eq("token", newToken)
-.maybeSingle()
-
-if(!check){
-isUnique = true
-}
-
-}
-
-// STEP 3: INSERT TOKEN
-const { error } = await supabase
-.from("event_tokens")
-.insert({
-event_id: id,
-token: newToken,
-used: false
-})
-
-if(error){
-console.error(error)
-alert("Token generation failed")
-return
-}
-
-token = newToken
-
-}
-
-// =============================
 // MODAL
-// =============================
-
 let modal = document.createElement("div")
 
 modal.style.position = "fixed"
@@ -185,7 +110,7 @@ modal.innerHTML = `
 <div style="font-size:14px; margin-bottom:10px">Event Token</div>
 
 <div id="tokenText" style="font-size:18px; font-weight:bold; margin-bottom:12px">
-${token}
+${token || "No token found"}
 </div>
 
 <button id="copyTokenBtn"
@@ -204,9 +129,17 @@ modal.remove()
 
 document.body.appendChild(modal)
 
+// COPY
 document.getElementById("copyTokenBtn").onclick = function(){
+
+if(!token){
+alert("No token to copy")
+return
+}
+
 navigator.clipboard.writeText(token)
 alert("Token copied")
+
 }
 
 }
@@ -269,20 +202,23 @@ ctx.drawImage(qr,0,0)
 }
 
 document.getElementById("downloadQR").onclick = function(){
+
 const canvas = document.getElementById("qrCanvas")
+
 canvas.toBlob(function(blob){
 const a = document.createElement("a")
 a.href = URL.createObjectURL(blob)
 a.download = "event-qr.png"
 a.click()
 })
+
 }
 
 }
 
 
 // =============================
-// LOAD GALLERY (UNCHANGED)
+// LOAD GALLERY
 // =============================
 
 async function loadGallery(){
@@ -405,13 +341,18 @@ displayName = e.client_name || "Booking Event"
 }
 
 div.innerHTML = `
+
 <div class="flex justify-between items-center">
+
 <div>
 <div class="text-sm font-semibold">${displayName}</div>
 <div class="text-xs text-gray-400">${date}</div>
 </div>
+
 <button onclick="toggleMenu('${e.id}', this)" class="text-xl px-2">⋮</button>
+
 </div>
+
 `
 
 grid.appendChild(div)
@@ -450,6 +391,7 @@ empty.classList.remove("hidden")
 return
 }
 
+// ✅ FIXED CONDITION
 if(!user && (role === "guest" || role === "paid_guest")){
 data = data.filter((_, index) => index % 5 === 0)
 }
@@ -473,6 +415,7 @@ modal.style.zIndex = 9999
 
 modal.innerHTML = `
 <img id="modalImg" src="${url}" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:12px;" />
+
 <button id="downloadBtn"
 style="position:absolute; bottom:30px; background:#4f46e5; color:white; padding:8px 16px; border-radius:8px;">
 Download
@@ -519,4 +462,3 @@ grid.appendChild(div)
 document.addEventListener("DOMContentLoaded",()=>{
 loadGallery()
 })
-```
