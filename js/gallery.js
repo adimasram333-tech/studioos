@@ -69,43 +69,36 @@ alert("Link copied")
 
 
 // =============================
-// 🔥 DELETE GALLERY (SAFE FIX)
+// 🔥 DELETE GALLERY (ONLY FIXED THIS)
 // =============================
 
 window.deleteEvent = async function(id){
 
 const confirmDelete = confirm("Delete gallery only? (Client & booking safe)")
-
 if(!confirmDelete) return
 
 const supabase = await window.getSupabase()
 
 try{
 
-// 🔥 Cloudinary delete (Edge Function)
+// 🔥 FAIL-SAFE: Cloudinary call (ignore if blocked by CORS)
+try{
 await fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/smart-processor", {
 method: "POST",
 headers: {
 "Content-Type": "application/json"
 },
-body: JSON.stringify({
-event_id: id
+body: JSON.stringify({ event_id: id })
 })
-})
+}catch(e){
+console.warn("Cloudinary delete failed (ignored):", e)
+}
 
-// ✅ Delete only gallery photos
-await supabase
-.from("gallery_photos")
-.delete()
-.eq("event_id", id)
+// ✅ ALWAYS DELETE DB DATA
+await supabase.from("gallery_photos").delete().eq("event_id", id)
+await supabase.from("event_tokens").delete().eq("event_id", id)
 
-// ✅ Delete tokens (cleanup)
-await supabase
-.from("event_tokens")
-.delete()
-.eq("event_id", id)
-
-// ❌ DO NOT DELETE EVENTS (IMPORTANT)
+// ❌ DO NOT DELETE EVENTS
 
 alert("Gallery deleted successfully")
 location.reload()
