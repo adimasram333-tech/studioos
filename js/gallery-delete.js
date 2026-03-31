@@ -1,5 +1,5 @@
 // =============================
-// DELETE MODULE (FINAL CLEAN)
+// DELETE MODULE (FINAL FIXED)
 // =============================
 
 window.deleteGallery = async function(eventId){
@@ -9,7 +9,7 @@ if(!confirmDelete) return
 
 try{
 
-// 🔥 CALL EDGE FUNCTION (Cloudinary delete)
+// 🔥 CALL EDGE FUNCTION
 const res = await fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/smart-processor", {
 method: "POST",
 headers: {
@@ -20,11 +20,14 @@ headers: {
 body: JSON.stringify({ event_id: eventId })
 })
 
+// 🔥 IMPORTANT: response check
 const result = await res.json()
 
-if(!res.ok){
-console.error("Cloudinary delete failed:", result)
-alert("Cloudinary delete failed")
+console.log("DELETE RESPONSE:", result)
+
+// ❌ अगर backend fail हुआ
+if(!res.ok || !result.success){
+alert("Delete failed (backend)")
 return
 }
 
@@ -34,9 +37,13 @@ const supabase = await window.getSupabase()
 await supabase.from("gallery_photos").delete().eq("event_id", eventId)
 await supabase.from("event_tokens").delete().eq("event_id", eventId)
 
-// ❗ events table untouched
-
+// ✅ UI FIX
 alert("Gallery deleted successfully")
+
+// menu close
+const menu = document.getElementById("floatingMenu")
+if(menu) menu.remove()
+
 location.reload()
 
 }catch(err){
