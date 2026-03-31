@@ -160,7 +160,7 @@ return String(select.value)
 
 
 // =============================
-// UPLOAD IMAGES (UNCHANGED)
+// UPLOAD IMAGES (UPDATED FIX)
 // =============================
 
 async function uploadImages(finalEventId){
@@ -283,6 +283,12 @@ return
 
 status.innerText = "Upload Complete"
 progress.innerText = "All photos uploaded"
+
+// =============================
+// 🔥 FINAL FIX: REFRESH EVENTS
+// =============================
+
+await loadConfirmedEvents()   // 🔥 reload dropdown
 
 }catch(err){
 
