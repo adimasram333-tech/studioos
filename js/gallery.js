@@ -39,6 +39,7 @@ menu.innerHTML = `
 <div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
 <div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
+<div onclick="deleteEvent('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">Delete</div>
 `
 
 document.body.appendChild(menu)
@@ -68,7 +69,36 @@ alert("Link copied")
 
 
 // =============================
-// 🔥 SHOW TOKEN (NEW FEATURE)
+// DELETE EVENT (NEW)
+// =============================
+
+window.deleteEvent = async function(id){
+
+const confirmDelete = confirm("Delete this event permanently?")
+
+if(!confirmDelete) return
+
+const supabase = await window.getSupabase()
+
+try{
+
+await supabase.from("gallery_photos").delete().eq("event_id", id)
+await supabase.from("event_tokens").delete().eq("event_id", id)
+await supabase.from("events").delete().eq("id", id)
+
+alert("Event deleted")
+location.reload()
+
+}catch(err){
+console.error(err)
+alert("Delete failed")
+}
+
+}
+
+
+// =============================
+// 🔥 SHOW TOKEN (FIXED)
 // =============================
 
 window.showToken = async function(id){
@@ -82,12 +112,23 @@ let { data, error } = await supabase
 .from("event_tokens")
 .select("*")
 .eq("event_id", id)
-.single()
+.limit(1)
 
 let token = null
 
-if(data){
-token = data.token
+if(data && data.length > 0){
+token = data[0].token
+}else{
+
+const newToken = Math.random().toString(36).substring(2,8).toUpperCase()
+
+const { data: inserted } = await supabase
+.from("event_tokens")
+.insert([{ event_id: id, token: newToken }])
+.select()
+.limit(1)
+
+token = inserted?.[0]?.token || newToken
 }
 
 // MODAL
@@ -146,7 +187,7 @@ alert("Token copied")
 
 
 // =============================
-// QR
+// QR (UNCHANGED)
 // =============================
 
 window.showQR = function(id){
@@ -226,6 +267,10 @@ async function loadGallery(){
 const params = new URLSearchParams(window.location.search)
 let eventIdCheck = params.get("event_id") || params.get("event")
 
+if(eventIdCheck === "null" || eventIdCheck === "undefined"){
+eventIdCheck = null
+}
+
 let user = null
 try{
 user = await window.getCurrentUser()
@@ -272,6 +317,10 @@ let eventId = params.get("event_id")
 
 if(!eventId){
 eventId = params.get("event")
+}
+
+if(eventId === "null" || eventId === "undefined"){
+eventId = null
 }
 
 if(eventId && typeof eventId === "string" && eventId.startsWith("legacy_")){
