@@ -98,7 +98,7 @@ alert("Delete failed")
 
 
 // =============================
-// 🔥 SHOW TOKEN (FIXED)
+// 🔥 SHOW TOKEN (FINAL FIX)
 // =============================
 
 window.showToken = async function(id){
@@ -117,18 +117,42 @@ let { data, error } = await supabase
 let token = null
 
 if(data && data.length > 0){
+
+// ✅ Existing token
 token = data[0].token
+
 }else{
 
+// 🔥 Generate new token
 const newToken = Math.random().toString(36).substring(2,8).toUpperCase()
 
-const { data: inserted } = await supabase
+// 🔥 Try insert
+const { data: inserted, error: insertError } = await supabase
 .from("event_tokens")
 .insert([{ event_id: id, token: newToken }])
 .select()
 .limit(1)
 
+if(insertError){
+
+console.warn("Token insert failed, retry fetch", insertError)
+
+// 🔁 Retry fetch (handles duplicate constraint case)
+const { data: retryData } = await supabase
+.from("event_tokens")
+.select("*")
+.eq("event_id", id)
+.limit(1)
+
+token = retryData?.[0]?.token || null
+
+}else{
+
+// ✅ Insert success
 token = inserted?.[0]?.token || newToken
+
+}
+
 }
 
 // MODAL
@@ -259,7 +283,7 @@ a.click()
 
 
 // =============================
-// LOAD GALLERY
+// LOAD GALLERY (UNCHANGED)
 // =============================
 
 async function loadGallery(){
