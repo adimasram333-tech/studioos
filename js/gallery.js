@@ -145,7 +145,18 @@ a.click()
 async function loadGallery(){
 
 const params = new URLSearchParams(window.location.search)
-let eventIdCheck = params.get("event_id") || params.get("event")
+
+// ✅ FIXED EVENT ID HANDLING (ONLY CHANGE)
+let eventId = params.get("event_id") || params.get("event") || ""
+
+if(eventId){
+eventId = String(eventId).trim()
+if(eventId === "null" || eventId === "undefined" || eventId === ""){
+eventId = null
+}
+}else{
+eventId = null
+}
 
 let user = null
 try{
@@ -164,20 +175,20 @@ if(user){
 console.log("👤 Photographer access")
 }else{
 
-if(eventIdCheck){
+if(eventId){
 
 if(accessGranted !== "true"){
-window.location.href = `access.html?event_id=${eventIdCheck}`
+window.location.href = `access.html?event_id=${eventId}`
 return
 }
 
-if(!sessionEventId || sessionEventId !== eventIdCheck){
-window.location.href = `access.html?event_id=${eventIdCheck}`
+if(!sessionEventId || sessionEventId !== eventId){
+window.location.href = `access.html?event_id=${eventId}`
 return
 }
 
 if(!visitorId){
-window.location.href = `access.html?event_id=${eventIdCheck}`
+window.location.href = `access.html?event_id=${eventId}`
 return
 }
 
@@ -188,16 +199,6 @@ console.log("✅ Guest verified | Role:", role)
 }
 
 const supabase = await window.getSupabase()
-
-let eventId = params.get("event_id")
-
-if(!eventId){
-eventId = params.get("event")
-}
-
-if(eventId && typeof eventId === "string" && eventId.startsWith("legacy_")){
-eventId = null
-}
 
 console.log("FINAL EVENT ID:", eventId)
 
@@ -262,18 +263,13 @@ displayName = e.client_name || "Booking Event"
 }
 
 div.innerHTML = `
-
 <div class="flex justify-between items-center">
-
 <div>
 <div class="text-sm font-semibold">${displayName}</div>
 <div class="text-xs text-gray-400">${date}</div>
 </div>
-
 <button onclick="toggleMenu('${e.id}', this)" class="text-xl px-2">⋮</button>
-
 </div>
-
 `
 
 grid.appendChild(div)
@@ -329,10 +325,8 @@ modal.style.alignItems = "center"
 modal.style.justifyContent = "center"
 modal.style.zIndex = 9999
 
-// ✅ FIXED ONLY THIS LINE
 modal.innerHTML = `
 <img id="modalImg" src="${url}" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:12px;" />
-
 <button id="downloadBtn"
 style="position:absolute; bottom:30px; background:#4f46e5; color:white; padding:8px 16px; border-radius:8px;">
 Download
