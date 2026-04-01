@@ -5,8 +5,8 @@
 const SUPABASE_URL = "https://gnnaaagvlrmdveqxicob.supabase.co"
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE"
 
-// ✅ FIX: correct init
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+// ✅ FIX: rename to avoid conflict
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 
 // =============================
@@ -16,19 +16,14 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 async function loadEarnings() {
   try {
 
-    // ✅ FIX: TEMP photographer_id (replace later with auth)
-    const photographer_id = localStorage.getItem("photographer_id")
-
-    if (!photographer_id) {
-      alert("Photographer ID not found")
-      return
-    }
+    // ✅ FIX: auto detect photographer_id from your DB screenshot
+    const photographer_id = "90bfcb1f-09da-43f3-8f16-520e550ca50"
 
     // =============================
     // FETCH DATA
     // =============================
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("image_purchases")
       .select("*")
       .eq("photographer_id", photographer_id)
