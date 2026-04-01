@@ -1,63 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Earnings - StudioOS</title>
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Earnings - StudioOS</title>
 
-  <style>
-    body {
-      background: linear-gradient(to bottom, #0f172a, #020617);
-      color: white;
-      font-family: system-ui;
-    }
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    .card {
-      background: rgba(255,255,255,0.05);
-      border-radius: 16px;
-      padding: 16px;
-    }
-  </style>
+<style>
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+color:white;
+font-family:system-ui;
+}
+
+.glass{
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+</style>
+
 </head>
 
-<body class="p-4">
 
-  <h1 class="text-xl font-semibold mb-4">💰 Earnings Dashboard</h1>
+<body class="min-h-screen p-4">
 
-  <!-- SUMMARY -->
-  <div class="grid grid-cols-2 gap-4 mb-6">
+<div class="max-w-md mx-auto">
 
-    <div class="card">
-      <p class="text-sm text-gray-400">Total Earnings</p>
-      <h2 id="totalEarnings" class="text-xl font-bold">₹0</h2>
-    </div>
+<h1 class="text-xl font-semibold mb-6">💰 Earnings Dashboard</h1>
 
-    <div class="card">
-      <p class="text-sm text-gray-400">This Month</p>
-      <h2 id="monthlyEarnings" class="text-xl font-bold">₹0</h2>
-    </div>
 
-    <div class="card">
-      <p class="text-sm text-gray-400">Total Sales</p>
-      <h2 id="totalSales" class="text-xl font-bold">0</h2>
-    </div>
+<!-- SUMMARY -->
+<div class="grid grid-cols-2 gap-4 mb-6">
 
-  </div>
+<div class="glass rounded-2xl p-4">
+<p class="text-gray-400 text-sm">Total Earnings</p>
+<h2 id="totalEarnings" class="text-2xl font-bold">₹0</h2>
+</div>
 
-  <!-- TRANSACTIONS -->
-  <div>
-    <h2 class="text-lg mb-2">📄 Transactions</h2>
-    <div id="transactionsList" class="space-y-2"></div>
-  </div>
+<div class="glass rounded-2xl p-4">
+<p class="text-gray-400 text-sm">This Month</p>
+<h2 id="monthlyEarnings" class="text-2xl font-bold">₹0</h2>
+</div>
 
-  <!-- ✅ REQUIRED FIX (ONLY ADD THIS LINE) -->
-  <script src="js/earnings.js"></script>
+<div class="glass rounded-2xl p-4 col-span-2">
+<p class="text-gray-400 text-sm">Total Sales</p>
+<h2 id="totalSales" class="text-2xl font-bold">0</h2>
+</div>
+
+</div>
+
+
+<!-- TRANSACTIONS -->
+<div class="glass rounded-2xl p-4">
+
+<h2 class="text-lg mb-3">📄 Transactions</h2>
+
+<div id="transactionsList" class="space-y-3 text-sm text-gray-300">
+
+<p class="text-gray-400">No earnings yet</p>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="js/earnings.js"></script>
 
 </body>
 </html>
