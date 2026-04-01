@@ -5,23 +5,9 @@
 const SUPABASE_URL = "https://gnnaaagvlrmdveqxicob.supabase.co"
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE"
 
-// FIX: Proper client init
-const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+// ✅ FIX: correct init
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// =============================
-// GET USER (Photographer)
-// =============================
-
-async function getUserId() {
-  const { data, error } = await supabase.auth.getUser()
-
-  if (error) {
-    console.error("Auth error:", error)
-    return null
-  }
-
-  return data?.user?.id || null
-}
 
 // =============================
 // LOAD EARNINGS
@@ -30,10 +16,11 @@ async function getUserId() {
 async function loadEarnings() {
   try {
 
-    const photographer_id = await getUserId()
+    // ✅ FIX: TEMP photographer_id (replace later with auth)
+    const photographer_id = localStorage.getItem("photographer_id")
 
     if (!photographer_id) {
-      alert("User not logged in")
+      alert("Photographer ID not found")
       return
     }
 
@@ -91,6 +78,7 @@ async function loadEarnings() {
   }
 }
 
+
 // =============================
 // RENDER TRANSACTIONS
 // =============================
@@ -125,6 +113,7 @@ function renderTransactions(data) {
     container.appendChild(div)
   })
 }
+
 
 // =============================
 // START
