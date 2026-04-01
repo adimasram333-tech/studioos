@@ -6,6 +6,10 @@
 const EDGE_FUNCTION_URL =
   "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/process-image-payment";
 
+// ✅ SUPABASE ANON KEY (ADDED)
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE";
+
 // get role
 function getUserRole() {
   return sessionStorage.getItem("role") || "guest";
@@ -138,7 +142,9 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
       const res = await fetch(EDGE_FUNCTION_URL, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_KEY, // ✅ FIX
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}` // ✅ FIX
         },
         body: JSON.stringify({
           event_id: eventId,
