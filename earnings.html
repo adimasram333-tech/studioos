@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Earnings - StudioOS</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background: linear-gradient(to bottom, #0f172a, #020617);
+      color: white;
+      font-family: system-ui;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 16px;
+    }
+  </style>
+</head>
+
+<body class="p-4">
+
+  <h1 class="text-xl font-semibold mb-4">💰 Earnings Dashboard</h1>
+
+  <!-- SUMMARY -->
+  <div class="grid grid-cols-2 gap-4 mb-6">
+
+    <div class="card">
+      <p class="text-sm text-gray-400">Total Earnings</p>
+      <h2 id="totalEarnings" class="text-xl font-bold">₹0</h2>
+    </div>
+
+    <div class="card">
+      <p class="text-sm text-gray-400">This Month</p>
+      <h2 id="monthlyEarnings" class="text-xl font-bold">₹0</h2>
+    </div>
+
+    <div class="card">
+      <p class="text-sm text-gray-400">Total Sales</p>
+      <h2 id="totalSales" class="text-xl font-bold">0</h2>
+    </div>
+
+  </div>
+
+  <!-- TRANSACTIONS -->
+  <div>
+    <h2 class="text-lg mb-2">📄 Transactions</h2>
+    <div id="transactionsList" class="space-y-2"></div>
+  </div>
+
+  <script src="earnings.js"></script>
+
+</body>
+</html>
