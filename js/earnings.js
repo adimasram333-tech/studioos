@@ -1,33 +1,55 @@
-// =============================
-// INIT SUPABASE
-// =============================
+// ===============================
+// EARNINGS LOGIC (FIXED)
+// ===============================
 
-const SUPABASE_URL = "https://gnnaaagvlrmdveqxicob.supabase.co"
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE"
+import { protectPage } from "./auth.js"
 
-// ✅ FIX: rename to avoid conflict
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+let supabase = null
 
+// ===============================
+// INIT
+// ===============================
 
-// =============================
-// LOAD EARNINGS
-// =============================
+async function init() {
+  await protectPage()
+
+  supabase = await window.getSupabase()
+
+  loadEarnings()
+}
+
+// ===============================
+// LOAD EARNINGS (FIXED)
+// ===============================
 
 async function loadEarnings() {
   try {
 
-    // ✅ FIX: auto detect photographer_id from your DB screenshot
-    const photographer_id = "90bfcb1f-09da-43f3-8f16-520e550ca50"
+    // ✅ ALWAYS GET LOGGED IN USER (NO MANUAL ID)
+    const {
+      data: { user },
+      error: userError
+    } = await supabase.auth.getUser()
 
-    // =============================
-    // FETCH DATA
-    // =============================
+    if (userError || !user) {
+      console.error("User error:", userError)
+      alert("User not found")
+      return
+    }
 
-    const { data, error } = await supabaseClient
+    const photographer_id = user.id
+
+    // 🔥 DEBUG (IMPORTANT)
+    console.log("Photographer ID:", photographer_id)
+
+    // ===============================
+    // FETCH PURCHASES
+    // ===============================
+
+    const { data, error } = await supabase
       .from("image_purchases")
       .select("*")
       .eq("photographer_id", photographer_id)
-      .order("created_at", { ascending: false })
 
     if (error) {
       console.error("Fetch error:", error)
@@ -35,83 +57,72 @@ async function loadEarnings() {
       return
     }
 
-    // =============================
+    // ===============================
     // CALCULATIONS
-    // =============================
+    // ===============================
 
     let total = 0
-    let monthly = 0
+    let totalSales = data.length
 
-    const currentMonth = new Date().getMonth()
+    const now = new Date()
+    let thisMonth = 0
 
     data.forEach(item => {
+      total += item.photographer_amount || 0
 
-      const amount = Number(item.photographer_amount || 0)
+      const created = new Date(item.created_at)
 
-      total += amount
-
-      const date = new Date(item.created_at)
-
-      if (date.getMonth() === currentMonth) {
-        monthly += amount
+      if (
+        created.getMonth() === now.getMonth() &&
+        created.getFullYear() === now.getFullYear()
+      ) {
+        thisMonth += item.photographer_amount || 0
       }
     })
 
-    // =============================
+    // ===============================
     // UPDATE UI
-    // =============================
+    // ===============================
 
-    document.getElementById("totalEarnings").innerText = `₹${Math.round(total)}`
-    document.getElementById("monthlyEarnings").innerText = `₹${Math.round(monthly)}`
-    document.getElementById("totalSales").innerText = data.length
+    document.getElementById("totalEarnings").innerText = "₹" + total.toFixed(0)
+    document.getElementById("totalSales").innerText = totalSales
+    document.getElementById("thisMonth").innerText = "₹" + thisMonth.toFixed(0)
 
     renderTransactions(data)
 
   } catch (err) {
-    console.error("Load error:", err)
-    alert("Error loading earnings")
+    console.error("Fatal error:", err)
+    alert("Something went wrong")
   }
 }
 
-
-// =============================
+// ===============================
 // RENDER TRANSACTIONS
-// =============================
+// ===============================
 
 function renderTransactions(data) {
-
   const container = document.getElementById("transactionsList")
-  container.innerHTML = ""
 
-  if (!data || data.length === 0) {
-    container.innerHTML = `<p class="text-gray-400 text-sm">No earnings yet</p>`
+  if (!data.length) {
+    container.innerHTML = `<p class="text-gray-400">No earnings yet</p>`
     return
   }
 
-  data.forEach(item => {
-
-    const div = document.createElement("div")
-
-    div.className = "card flex justify-between items-center"
-
-    div.innerHTML = `
+  container.innerHTML = data.map(item => `
+    <div class="glass p-3 rounded-xl flex justify-between items-center">
       <div>
-        <p class="text-sm text-gray-300">Photo Sale</p>
-        <p class="text-xs text-gray-500">${new Date(item.created_at).toLocaleDateString()}</p>
+        <p class="text-sm text-gray-300">Image Purchase</p>
+        <p class="text-xs text-gray-500">${new Date(item.created_at).toLocaleString()}</p>
       </div>
-
       <div class="text-green-400 font-semibold">
-        ₹${Math.round(item.photographer_amount || 0)}
+        ₹${(item.photographer_amount || 0).toFixed(0)}
       </div>
-    `
-
-    container.appendChild(div)
-  })
+    </div>
+  `).join("")
 }
 
-
-// =============================
+// ===============================
 // START
-// =============================
+// ===============================
 
-loadEarnings()
+init()
