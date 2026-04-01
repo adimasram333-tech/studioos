@@ -6,9 +6,11 @@
 const EDGE_FUNCTION_URL =
   "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/process-image-payment";
 
-// ✅ SUPABASE ANON KEY (ADDED)
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE";
+// ✅ IMPORTANT: DO NOT redeclare if already exists
+if (typeof SUPABASE_ANON_KEY === "undefined") {
+  var SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE";
+}
 
 // get role
 function getUserRole() {
@@ -80,7 +82,7 @@ function triggerDownload(imageUrl) {
 }
 
 // =============================
-// PAYMENT MODAL (UPDATED)
+// PAYMENT MODAL
 // =============================
 
 function showPaymentModal(imageUrl, eventId, photographerId) {
@@ -133,7 +135,7 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
     modal.remove();
   };
 
-  // PAID DOWNLOAD (EDGE FUNCTION CALL)
+  // PAID DOWNLOAD
   document.getElementById("payNowBtn").onclick = async function () {
     try {
       const visitor_id =
@@ -143,8 +145,8 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": SUPABASE_ANON_KEY, // ✅ FIX
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}` // ✅ FIX
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
           event_id: eventId,
@@ -162,7 +164,6 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
         return;
       }
 
-      // mark purchased
       markImagePurchased(imageUrl);
 
       alert("Payment Successful 🎉");
@@ -177,7 +178,6 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
     }
   };
 
-  // CLOSE
   document.getElementById("closeModal").onclick = function () {
     modal.remove();
   };
@@ -192,18 +192,15 @@ window.handleDownload = function (imageUrl, eventId, photographerId) {
 
   const role = getUserRole();
 
-  // client → full access
   if (role === "client") {
     triggerDownload(imageUrl);
     return;
   }
 
-  // already purchased
   if (isPurchased(imageUrl)) {
     triggerDownload(imageUrl);
     return;
   }
 
-  // guest flow
   showPaymentModal(imageUrl, eventId, photographerId);
 };
