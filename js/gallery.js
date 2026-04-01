@@ -122,7 +122,7 @@ method: "POST",
 headers: {
 "Content-Type": "application/json",
 "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE",
-"apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+"apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE"
 },
 body: JSON.stringify({ event_id: id })
 })
@@ -361,7 +361,7 @@ await supabase
 .eq("event_id", safeEventId)
 .order("created_at",{ ascending:false })
 
-// 🔥 ONLY ADD
+// ✅ ONLY ADD
 const photographerId = data && data.length > 0 ? data[0].user_id : null
 
 if(error){
@@ -410,7 +410,7 @@ document.body.appendChild(modal)
 
 const btn = document.getElementById("downloadBtn")
 
-// 🔥 ONLY FIX
+// ✅ ONLY FIX
 btn.onclick = function(){
   window.handleDownload(url, eventId, photographerId)
 }
