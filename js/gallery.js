@@ -122,7 +122,7 @@ method: "POST",
 headers: {
 "Content-Type": "application/json",
 "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE",
-"apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE"
+"apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 },
 body: JSON.stringify({ event_id: id })
 })
@@ -361,6 +361,9 @@ await supabase
 .eq("event_id", safeEventId)
 .order("created_at",{ ascending:false })
 
+// 🔥 ONLY ADD
+const photographerId = data && data.length > 0 ? data[0].user_id : null
+
 if(error){
 empty.classList.remove("hidden")
 empty.innerText = "Failed to load photos"
@@ -407,21 +410,9 @@ document.body.appendChild(modal)
 
 const btn = document.getElementById("downloadBtn")
 
-btn.onclick = async function(){
-try{
-const res = await fetch(url)
-const blob = await res.blob()
-const blobUrl = URL.createObjectURL(blob)
-
-const a = document.createElement("a")
-a.href = blobUrl
-a.download = "photo.jpg"
-a.click()
-
-URL.revokeObjectURL(blobUrl)
-}catch(e){
-alert("Download failed")
-}
+// 🔥 ONLY FIX
+btn.onclick = function(){
+  window.handleDownload(url, eventId, photographerId)
 }
 
 }else{
