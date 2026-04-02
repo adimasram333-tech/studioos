@@ -38,7 +38,7 @@ async function loadEventsMap() {
 
   if (!error && data) {
     data.forEach(e => {
-      eventsMap[e.id] = e.event_name || "Unknown Event"
+      eventsMap[e.id] = e.event_name || e.client_name || "Event"
       eventsClientMap[e.id] = e.client_name || ""
     })
   }
@@ -58,7 +58,7 @@ async function loadEarnings() {
       .from("image_purchases")
       .select("*")
       .eq("photographer_id", user.id)
-      .order("created_at", { ascending: false }) // ✅ FIX
+      .order("created_at", { ascending: false })
 
     if (error) {
       alert("Failed to fetch earnings")
@@ -238,7 +238,7 @@ function exportCSV(data) {
   const rows = [
     ["Event", "Buyer", "Amount"],
     ...data.map(d => [
-      eventsMap[d.event_id] || "Unknown Event",
+      eventsMap[d.event_id] || "Event",
       d.buyer_name || "Guest",
       d.photographer_amount || 0
     ])
@@ -277,7 +277,7 @@ function renderTopEvents(data) {
 
   container.innerHTML = sorted.map(([id, amount]) => `
     <div class="flex justify-between">
-      <span>${eventsMap[id] || "Unknown Event"}</span>
+      <span>${eventsMap[id] || "Event"}</span>
       <span class="text-green-400">₹${amount.toFixed(0)}</span>
     </div>
   `).join("")
@@ -297,7 +297,7 @@ function renderTransactions(data) {
     <div onclick="window.location.href='transactions.html'"
          class="glass p-3 rounded-xl flex justify-between cursor-pointer">
       <div>
-        <p>${eventsMap[item.event_id] || "Unknown Event"} (${item.buyer_name || "Guest"})</p>
+        <p>${eventsMap[item.event_id] || "Event"} (${item.buyer_name || "Guest"})</p>
         <p>${new Date(item.created_at).toLocaleString()}</p>
       </div>
       <div>₹${(item.photographer_amount || 0).toFixed(0)}</div>
@@ -349,7 +349,7 @@ function renderClientEarnings(data) {
 
   container.innerHTML = last2.map(item => `
     <div class="flex justify-between">
-      <span>${eventsMap[item.event_id] || "Unknown Event"} (${item.buyer_name || "Guest"})</span>
+      <span>${eventsMap[item.event_id] || "Event"} (${item.buyer_name || "Guest"})</span>
       <span class="text-green-400">₹${(item.photographer_amount || 0).toFixed(0)}</span>
     </div>
   `).join("")
