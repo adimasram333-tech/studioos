@@ -64,6 +64,24 @@ border:1px solid rgba(255,255,255,0.1);
 <canvas id="monthlyChart"></canvas>
 </div>
 
+<!-- 🔍 FILTERS (ADDED - REQUIRED FIX) -->
+<div class="glass rounded-2xl p-4 mb-6">
+<h2 class="text-lg mb-3">🔍 Filters</h2>
+
+<input type="date" id="filterDate" class="w-full mb-2 p-2 rounded bg-black/30">
+
+<input type="text" id="filterEvent" placeholder="Event ID"
+class="w-full p-2 rounded bg-black/30">
+</div>
+
+<!-- 📤 EXPORT (ADDED - REQUIRED FIX) -->
+<div class="glass rounded-2xl p-4 mb-6">
+<button id="exportBtn"
+class="w-full bg-green-500 hover:bg-green-600 p-2 rounded-xl font-semibold">
+Export Report
+</button>
+</div>
+
 <!-- 🏆 TOP EVENTS -->
 <div class="glass rounded-2xl p-4 mb-6">
 <h2 class="text-lg mb-3">🏆 Top Events</h2>
