@@ -295,7 +295,7 @@ function renderTransactions(data) {
     <div onclick="window.location.href='transactions.html'"
          class="glass p-3 rounded-xl flex justify-between cursor-pointer">
       <div>
-        <p>${item.buyer_name || "Guest"}</p>
+        <p>${eventsMap[item.event_id] || "Event"} (${item.buyer_name || "Guest"})</p>
         <p>${new Date(item.created_at).toLocaleString()}</p>
       </div>
       <div>₹${(item.photographer_amount || 0).toFixed(0)}</div>
@@ -347,7 +347,7 @@ function renderClientEarnings(data) {
 
   container.innerHTML = last2.map(item => `
     <div class="flex justify-between">
-      <span>${item.buyer_name || "Guest"}</span>
+      <span>${eventsMap[item.event_id] || "Event"} (${item.buyer_name || "Guest"})</span>
       <span class="text-green-400">₹${(item.photographer_amount || 0).toFixed(0)}</span>
     </div>
   `).join("")
