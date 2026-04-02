@@ -33,7 +33,6 @@ function isValidUUID(id) {
 async function loadEarnings() {
   try {
 
-    // ✅ GET USER SAFELY
     const {
       data: { user },
       error: userError
@@ -49,7 +48,6 @@ async function loadEarnings() {
 
     console.log("Photographer ID:", photographer_id)
 
-    // ✅ UUID VALIDATION (CRITICAL FIX)
     if (!photographer_id || !isValidUUID(photographer_id)) {
       console.error("Invalid UUID:", photographer_id)
       alert("Invalid user ID")
@@ -95,12 +93,16 @@ async function loadEarnings() {
     })
 
     // ===============================
-    // UPDATE UI
+    // SAFE UI UPDATE (FINAL FIX)
     // ===============================
 
-    document.getElementById("totalEarnings").innerText = "₹" + total.toFixed(0)
-    document.getElementById("totalSales").innerText = totalSales
-    document.getElementById("thisMonth").innerText = "₹" + thisMonth.toFixed(0)
+    const totalEl = document.getElementById("totalEarnings")
+    const salesEl = document.getElementById("totalSales")
+    const monthEl = document.getElementById("monthlyEarnings") // ✅ FIXED ID
+
+    if (totalEl) totalEl.innerText = "₹" + total.toFixed(0)
+    if (salesEl) salesEl.innerText = totalSales
+    if (monthEl) monthEl.innerText = "₹" + thisMonth.toFixed(0)
 
     renderTransactions(data)
 
@@ -116,6 +118,8 @@ async function loadEarnings() {
 
 function renderTransactions(data) {
   const container = document.getElementById("transactionsList")
+
+  if (!container) return
 
   if (!data.length) {
     container.innerHTML = `<p class="text-gray-400">No earnings yet</p>`
