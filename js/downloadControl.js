@@ -102,6 +102,15 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
 
       <div style="font-size:16px; margin-bottom:10px">Download Photo</div>
 
+      <input id="buyerName" placeholder="Your Name"
+        style="width:100%; padding:8px; margin-bottom:6px; border-radius:6px;" />
+
+      <input id="buyerUpi" placeholder="UPI ID (example@upi)"
+        style="width:100%; padding:8px; margin-bottom:6px; border-radius:6px;" />
+
+      <input id="buyerUpiName" placeholder="UPI Name"
+        style="width:100%; padding:8px; margin-bottom:10px; border-radius:6px;" />
+
       <button id="freeDownloadBtn"
         style="margin-top:10px; width:100%; background:#333; color:white; padding:8px; border-radius:8px;">
         Free (Low Quality)
@@ -132,6 +141,15 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
   // PAID DOWNLOAD
   document.getElementById("payNowBtn").onclick = async function () {
     try {
+      const buyer_name = document.getElementById("buyerName").value;
+      const buyer_upi_id = document.getElementById("buyerUpi").value;
+      const buyer_upi_name = document.getElementById("buyerUpiName").value;
+
+      if (!buyer_name || !buyer_upi_id || !buyer_upi_name) {
+        alert("Please fill all details");
+        return;
+      }
+
       const visitor_id =
         sessionStorage.getItem("visitor_id") || "guest_user";
 
@@ -147,7 +165,10 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
           image_url: imageUrl,
           photographer_id: photographerId,
           visitor_id: visitor_id,
-          amount: 49
+          amount: 49,
+          buyer_name: buyer_name,
+          buyer_upi_id: buyer_upi_id,
+          buyer_upi_name: buyer_upi_name
         })
       });
 
