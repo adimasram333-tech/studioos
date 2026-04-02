@@ -5,11 +5,15 @@
 import { protectPage } from "./auth.js"
 
 let supabase = null
+let originalData = [] // ✅ store original data
 
 async function init() {
   await protectPage()
   supabase = await window.getSupabase()
   loadEarnings()
+
+  setupFilters()     // ✅ NEW
+  setupExport()      // ✅ NEW
 }
 
 function isValidUUID(id) {
@@ -47,50 +51,131 @@ async function loadEarnings() {
       return
     }
 
-    // ===============================
-    // CALC
-    // ===============================
+    originalData = data // ✅ store original
 
-    let total = 0
-    let totalSales = data.length
-    let thisMonth = 0
-    let platformTotal = 0
-
-    const now = new Date()
-
-    data.forEach(item => {
-      total += item.photographer_amount || 0
-      platformTotal += item.platform_amount || 0
-
-      const d = new Date(item.created_at)
-
-      if (
-        d.getMonth() === now.getMonth() &&
-        d.getFullYear() === now.getFullYear()
-      ) {
-        thisMonth += item.photographer_amount || 0
-      }
-    })
-
-    // ===============================
-    // UI UPDATE
-    // ===============================
-
-    document.getElementById("totalEarnings").innerText = "₹" + total.toFixed(0)
-    document.getElementById("totalSales").innerText = totalSales
-    document.getElementById("monthlyEarnings").innerText = "₹" + thisMonth.toFixed(0)
-
-    renderTransactions(data)
-
-    renderMonthlyAnalytics(data)
-    renderTopEvents(data)
-    renderClientEarnings(data)
-    renderProfitSplit(total, platformTotal)
+    processAndRender(data)
 
   } catch (err) {
     console.error(err)
     alert("Something went wrong")
   }
+}
+
+// ===============================
+// PROCESS + RENDER (NEW CENTRAL)
+// ===============================
+
+function processAndRender(data) {
+
+  let total = 0
+  let totalSales = data.length
+  let thisMonth = 0
+  let platformTotal = 0
+
+  const now = new Date()
+
+  data.forEach(item => {
+    total += item.photographer_amount || 0
+    platformTotal += item.platform_amount || 0
+
+    const d = new Date(item.created_at)
+
+    if (
+      d.getMonth() === now.getMonth() &&
+      d.getFullYear() === now.getFullYear()
+    ) {
+      thisMonth += item.photographer_amount || 0
+    }
+  })
+
+  document.getElementById("totalEarnings").innerText = "₹" + total.toFixed(0)
+  document.getElementById("totalSales").innerText = totalSales
+  document.getElementById("monthlyEarnings").innerText = "₹" + thisMonth.toFixed(0)
+
+  renderTransactions(data)
+  renderMonthlyAnalytics(data)
+  renderTopEvents(data)
+  renderClientEarnings(data)
+  renderProfitSplit(total, platformTotal)
+}
+
+// ===============================
+// FILTERS (NEW)
+// ===============================
+
+function setupFilters() {
+  const dateInput = document.getElementById("filterDate")
+  const eventInput = document.getElementById("filterEvent")
+
+  if (!dateInput || !eventInput) return
+
+  dateInput.addEventListener("change", applyFilters)
+  eventInput.addEventListener("input", applyFilters)
+}
+
+function applyFilters() {
+  const dateVal = document.getElementById("filterDate").value
+  const eventVal = document.getElementById("filterEvent").value.toLowerCase()
+
+  let filtered = [...originalData]
+
+  if (dateVal) {
+    filtered = filtered.filter(item => {
+      const d = new Date(item.created_at).toISOString().split("T")[0]
+      return d === dateVal
+    })
+  }
+
+  if (eventVal) {
+    filtered = filtered.filter(item =>
+      (item.event_id || "").toLowerCase().includes(eventVal)
+    )
+  }
+
+  processAndRender(filtered)
+}
+
+// ===============================
+// EXPORT (NEW)
+// ===============================
+
+function setupExport() {
+  const btn = document.getElementById("exportBtn")
+  if (!btn) return
+
+  btn.addEventListener("click", exportCSV)
+}
+
+function exportCSV() {
+
+  if (!originalData.length) {
+    alert("No data to export")
+    return
+  }
+
+  const rows = [
+    ["Date", "Event ID", "Amount"]
+  ]
+
+  originalData.forEach(item => {
+    rows.push([
+      new Date(item.created_at).toLocaleString(),
+      item.event_id || "-",
+      item.photographer_amount || 0
+    ])
+  })
+
+  const csvContent = rows.map(e => e.join(",")).join("\n")
+
+  const blob = new Blob([csvContent], { type: "text/csv" })
+  const url = URL.createObjectURL(blob)
+
+  const a = document.createElement("a")
+  a.href = url
+  a.download = "earnings_report.csv"
+  a.click()
+
+  URL.revokeObjectURL(url)
 }
 
 // ===============================
@@ -136,7 +221,6 @@ function renderMonthlyAnalytics(data) {
   const values = Object.values(months)
 
   const ctx = document.getElementById("monthlyChart")
-
   if (!ctx) return
 
   new Chart(ctx, {
