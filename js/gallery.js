@@ -276,6 +276,20 @@ console.log("✅ Guest verified | Role:", role)
 
 const supabase = await window.getSupabase()
 
+let eventName = "Event"
+
+if(eventId){
+  const { data: ev } = await supabase
+    .from("events")
+    .select("event_name, client_name")
+    .eq("id", eventId)
+    .single()
+
+  if(ev){
+    eventName = ev.event_name || ev.client_name || "Event"
+  }
+}
+
 console.log("FINAL EVENT ID:", eventId)
 
 const grid = document.getElementById("galleryGrid")
@@ -412,7 +426,7 @@ const btn = document.getElementById("downloadBtn")
 
 // ✅ ONLY FIX
 btn.onclick = function(){
-  window.handleDownload(url, eventId, photographerId)
+  window.handleDownload(url, eventId, photographerId, eventName)
 }
 
 }else{
