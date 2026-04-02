@@ -1,14 +1,10 @@
 // ===============================
-// EARNINGS LOGIC (FIXED + ADVANCED SAFE)
+// EARNINGS LOGIC (FIXED + FULL UI)
 // ===============================
 
 import { protectPage } from "./auth.js"
 
 let supabase = null
-
-// ===============================
-// INIT
-// ===============================
 
 async function init() {
   await protectPage()
@@ -16,45 +12,30 @@ async function init() {
   loadEarnings()
 }
 
-// ===============================
-// UUID VALIDATOR (UNCHANGED)
-// ===============================
-
 function isValidUUID(id) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id)
 }
 
 // ===============================
-// LOAD EARNINGS
+// MAIN
 // ===============================
 
 async function loadEarnings() {
   try {
 
-    const {
-      data: { user },
-      error: userError
-    } = await supabase.auth.getUser()
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
 
     if (userError || !user) {
-      console.error("User error:", userError)
       alert("User not found")
       return
     }
 
     const photographer_id = user.id
 
-    console.log("Photographer ID:", photographer_id)
-
     if (!photographer_id || !isValidUUID(photographer_id)) {
-      console.error("Invalid UUID:", photographer_id)
       alert("Invalid user ID")
       return
     }
-
-    // ===============================
-    // FETCH PURCHASES
-    // ===============================
 
     const { data, error } = await supabase
       .from("image_purchases")
@@ -62,13 +43,12 @@ async function loadEarnings() {
       .eq("photographer_id", photographer_id)
 
     if (error) {
-      console.error("Fetch error:", error)
       alert("Failed to fetch earnings")
       return
     }
 
     // ===============================
-    // CALCULATIONS
+    // CALC
     // ===============================
 
     let total = 0
@@ -82,33 +62,25 @@ async function loadEarnings() {
       total += item.photographer_amount || 0
       platformTotal += item.platform_amount || 0
 
-      const created = new Date(item.created_at)
+      const d = new Date(item.created_at)
 
       if (
-        created.getMonth() === now.getMonth() &&
-        created.getFullYear() === now.getFullYear()
+        d.getMonth() === now.getMonth() &&
+        d.getFullYear() === now.getFullYear()
       ) {
         thisMonth += item.photographer_amount || 0
       }
     })
 
     // ===============================
-    // SAFE UI UPDATE
+    // UI UPDATE
     // ===============================
 
-    const totalEl = document.getElementById("totalEarnings")
-    const salesEl = document.getElementById("totalSales")
-    const monthEl = document.getElementById("monthlyEarnings")
-
-    if (totalEl) totalEl.innerText = "₹" + total.toFixed(0)
-    if (salesEl) salesEl.innerText = totalSales
-    if (monthEl) monthEl.innerText = "₹" + thisMonth.toFixed(0)
+    document.getElementById("totalEarnings").innerText = "₹" + total.toFixed(0)
+    document.getElementById("totalSales").innerText = totalSales
+    document.getElementById("monthlyEarnings").innerText = "₹" + thisMonth.toFixed(0)
 
     renderTransactions(data)
-
-    // ===============================
-    // 🔥 ADVANCED ANALYTICS (SAFE ADD)
-    // ===============================
 
     renderMonthlyAnalytics(data)
     renderTopEvents(data)
@@ -116,19 +88,17 @@ async function loadEarnings() {
     renderProfitSplit(total, platformTotal)
 
   } catch (err) {
-    console.error("Fatal error:", err)
+    console.error(err)
     alert("Something went wrong")
   }
 }
 
 // ===============================
-// TRANSACTIONS (UNCHANGED)
+// TRANSACTIONS
 // ===============================
 
 function renderTransactions(data) {
   const container = document.getElementById("transactionsList")
-
-  if (!container) return
 
   if (!data.length) {
     container.innerHTML = `<p class="text-gray-400">No earnings yet</p>`
@@ -149,26 +119,47 @@ function renderTransactions(data) {
 }
 
 // ===============================
-// 📊 MONTHLY ANALYTICS
+// 📊 MONTHLY GRAPH
 // ===============================
 
 function renderMonthlyAnalytics(data) {
+
   const months = {}
 
   data.forEach(item => {
     const d = new Date(item.created_at)
-    const key = `${d.getFullYear()}-${d.getMonth()+1}`
+    const key = `${d.getMonth()+1}/${d.getFullYear()}`
     months[key] = (months[key] || 0) + (item.photographer_amount || 0)
   })
 
-  console.log("📊 Monthly Earnings:", months)
+  const labels = Object.keys(months)
+  const values = Object.values(months)
+
+  const ctx = document.getElementById("monthlyChart")
+
+  if (!ctx) return
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Earnings",
+        data: values,
+        borderWidth: 2
+      }]
+    }
+  })
 }
 
 // ===============================
-// 🏆 TOP EVENTS
+// 🏆 TOP EVENTS UI
 // ===============================
 
 function renderTopEvents(data) {
+  const container = document.getElementById("topEvents")
+  if (!container) return
+
   const events = {}
 
   data.forEach(item => {
@@ -176,14 +167,26 @@ function renderTopEvents(data) {
     events[id] = (events[id] || 0) + item.photographer_amount
   })
 
-  console.log("🏆 Top Events:", events)
+  const sorted = Object.entries(events)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+
+  container.innerHTML = sorted.map(([id, amt]) => `
+    <div class="flex justify-between">
+      <span>Event</span>
+      <span class="text-green-400">₹${amt.toFixed(0)}</span>
+    </div>
+  `).join("")
 }
 
 // ===============================
-// 👤 CLIENT EARNINGS
+// 👤 CLIENT UI
 // ===============================
 
 function renderClientEarnings(data) {
+  const container = document.getElementById("clientEarnings")
+  if (!container) return
+
   const clients = {}
 
   data.forEach(item => {
@@ -191,16 +194,36 @@ function renderClientEarnings(data) {
     clients[id] = (clients[id] || 0) + item.photographer_amount
   })
 
-  console.log("👤 Client Earnings:", clients)
+  const sorted = Object.entries(clients)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+
+  container.innerHTML = sorted.map(([id, amt]) => `
+    <div class="flex justify-between">
+      <span>Client</span>
+      <span class="text-green-400">₹${amt.toFixed(0)}</span>
+    </div>
+  `).join("")
 }
 
 // ===============================
-// 💰 PROFIT SPLIT
+// 💰 PROFIT SPLIT UI
 // ===============================
 
 function renderProfitSplit(total, platformTotal) {
-  console.log("💰 Photographer:", total)
-  console.log("🏢 Platform:", platformTotal)
+  const container = document.getElementById("profitSplit")
+  if (!container) return
+
+  container.innerHTML = `
+    <div class="flex justify-between mb-1">
+      <span>Photographer</span>
+      <span class="text-green-400">₹${total.toFixed(0)}</span>
+    </div>
+    <div class="flex justify-between">
+      <span>Platform</span>
+      <span class="text-yellow-400">₹${platformTotal.toFixed(0)}</span>
+    </div>
+  `
 }
 
 // ===============================
