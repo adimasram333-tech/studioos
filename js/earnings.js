@@ -148,7 +148,7 @@ function processAndRender(data) {
 }
 
 // ===============================
-// 💳 PAYOUT (FIXED PRO SAFE)
+// 💳 PAYOUT
 // ===============================
 
 function setupPayout() {
@@ -168,7 +168,6 @@ async function requestPayout() {
   const total = originalData.reduce((sum, i) =>
     sum + (i.photographer_amount || 0), 0)
 
-  // ✅ MIN LIMIT
   if (total < 500) {
     alert("Minimum withdrawal amount is ₹500")
     return
@@ -178,7 +177,6 @@ async function requestPayout() {
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    // ✅ DUPLICATE CHECK
     const { data: existing } = await supabase
       .from("payout_requests")
       .select("*")
@@ -190,10 +188,19 @@ async function requestPayout() {
       return
     }
 
+    const { data: profile } = await supabase
+      .from("photographer_settings")
+      .select("name, phone, city")
+      .eq("user_id", user.id)
+      .single()
+
     const { error } = await supabase
       .from("payout_requests")
       .insert([{
         photographer_id: user.id,
+        photographer_name: profile?.name || "Unknown",
+        phone: profile?.phone || "",
+        city: profile?.city || "",
         amount: total,
         status: "pending"
       }])
@@ -204,10 +211,7 @@ async function requestPayout() {
       return
     }
 
-    alert(`
-Your withdrawal request of ₹${total.toFixed(0)} has been submitted.
-It will be processed within 5 hours.
-`)
+    alert(`Your withdrawal request of ₹${total.toFixed(0)} submitted (processing ~5 hours)`)
 
   } catch (err) {
     console.error(err)
@@ -278,7 +282,7 @@ function renderTopEvents(data) {
 }
 
 // ===============================
-// TRANSACTIONS (LAST 2)
+// TRANSACTIONS
 // ===============================
 
 function renderTransactions(data) {
@@ -291,12 +295,10 @@ function renderTransactions(data) {
     <div onclick="window.location.href='transactions.html'"
          class="glass p-3 rounded-xl flex justify-between cursor-pointer">
       <div>
-        <p class="text-sm text-gray-300">${eventsMap[item.event_id] || "Event"}</p>
-        <p class="text-xs text-gray-500">${new Date(item.created_at).toLocaleString()}</p>
+        <p>${eventsMap[item.event_id] || "Event"}</p>
+        <p>${new Date(item.created_at).toLocaleString()}</p>
       </div>
-      <div class="text-green-400">
-        ₹${(item.photographer_amount || 0).toFixed(0)}
-      </div>
+      <div>₹${(item.photographer_amount || 0).toFixed(0)}</div>
     </div>
   `).join("")
 }
@@ -334,7 +336,7 @@ function renderMonthlyAnalytics(data) {
 }
 
 // ===============================
-// CLIENT (LAST 2)
+// CLIENT EARNINGS
 // ===============================
 
 function renderClientEarnings(data) {
@@ -352,7 +354,7 @@ function renderClientEarnings(data) {
 }
 
 // ===============================
-// PROFIT
+// PROFIT SPLIT
 // ===============================
 
 function renderProfitSplit(total, platformTotal) {
