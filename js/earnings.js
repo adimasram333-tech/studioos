@@ -1,23 +1,40 @@
 // ===============================
-// EARNINGS LOGIC (FIXED + FULL UI)
+// EARNINGS LOGIC (PRO FINAL)
 // ===============================
 
 import { protectPage } from "./auth.js"
 
 let supabase = null
-let originalData = [] // ✅ store original data
+let originalData = []
+let chartInstance = null
+let eventsMap = {} // ✅ event_id → name
 
 async function init() {
   await protectPage()
   supabase = await window.getSupabase()
-  loadEarnings()
 
-  setupFilters()     // ✅ NEW
-  setupExport()      // ✅ NEW
+  await loadEventsMap() // ✅ fetch event names
+  await loadEarnings()
+
+  setupRealtime() // ✅ LIVE updates
+  setupFilters()
+  setupExport()
 }
 
-function isValidUUID(id) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id)
+// ===============================
+// LOAD EVENTS MAP
+// ===============================
+
+async function loadEventsMap() {
+  const { data, error } = await supabase
+    .from("events")
+    .select("id, event_name")
+
+  if (!error && data) {
+    data.forEach(e => {
+      eventsMap[e.id] = e.event_name
+    })
+  }
 }
 
 // ===============================
@@ -27,42 +44,52 @@ function isValidUUID(id) {
 async function loadEarnings() {
   try {
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-    if (userError || !user) {
-      alert("User not found")
-      return
-    }
-
-    const photographer_id = user.id
-
-    if (!photographer_id || !isValidUUID(photographer_id)) {
-      alert("Invalid user ID")
-      return
-    }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
 
     const { data, error } = await supabase
       .from("image_purchases")
       .select("*")
-      .eq("photographer_id", photographer_id)
+      .eq("photographer_id", user.id)
 
     if (error) {
       alert("Failed to fetch earnings")
       return
     }
 
-    originalData = data // ✅ store original
-
+    originalData = data
     processAndRender(data)
 
-  } catch (err) {
-    console.error(err)
+  } catch {
     alert("Something went wrong")
   }
 }
 
 // ===============================
-// PROCESS + RENDER (NEW CENTRAL)
+// REALTIME (LIVE UPDATE)
+// ===============================
+
+function setupRealtime() {
+  supabase
+    .channel("earnings-live")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "image_purchases"
+      },
+      (payload) => {
+
+        originalData.unshift(payload.new) // add new data
+        processAndRender(originalData)
+      }
+    )
+    .subscribe()
+}
+
+// ===============================
+// PROCESS
 // ===============================
 
 function processAndRender(data) {
@@ -100,7 +127,7 @@ function processAndRender(data) {
 }
 
 // ===============================
-// FILTERS (NEW)
+// FILTERS
 // ===============================
 
 function setupFilters() {
@@ -128,7 +155,7 @@ function applyFilters() {
 
   if (eventVal) {
     filtered = filtered.filter(item =>
-      (item.event_id || "").toLowerCase().includes(eventVal)
+      (eventsMap[item.event_id] || "").toLowerCase().includes(eventVal)
     )
   }
 
@@ -136,7 +163,7 @@ function applyFilters() {
 }
 
 // ===============================
-// EXPORT (NEW)
+// EXPORT
 // ===============================
 
 function setupExport() {
@@ -148,31 +175,26 @@ function setupExport() {
 
 function exportCSV() {
 
-  if (!originalData.length) {
-    alert("No data to export")
-    return
-  }
+  if (!originalData.length) return
 
-  const rows = [
-    ["Date", "Event ID", "Amount"]
-  ]
+  const rows = [["Date", "Event", "Amount"]]
 
   originalData.forEach(item => {
     rows.push([
       new Date(item.created_at).toLocaleString(),
-      item.event_id || "-",
+      eventsMap[item.event_id] || "Event",
       item.photographer_amount || 0
     ])
   })
 
-  const csvContent = rows.map(e => e.join(",")).join("\n")
+  const csv = rows.map(r => r.join(",")).join("\n")
 
-  const blob = new Blob([csvContent], { type: "text/csv" })
+  const blob = new Blob([csv], { type: "text/csv" })
   const url = URL.createObjectURL(blob)
 
   const a = document.createElement("a")
   a.href = url
-  a.download = "earnings_report.csv"
+  a.download = "earnings.csv"
   a.click()
 
   URL.revokeObjectURL(url)
@@ -193,7 +215,7 @@ function renderTransactions(data) {
   container.innerHTML = data.map(item => `
     <div class="glass p-3 rounded-xl flex justify-between items-center">
       <div>
-        <p class="text-sm text-gray-300">Image Purchase</p>
+        <p class="text-sm text-gray-300">${eventsMap[item.event_id] || "Event"}</p>
         <p class="text-xs text-gray-500">${new Date(item.created_at).toLocaleString()}</p>
       </div>
       <div class="text-green-400 font-semibold">
@@ -204,7 +226,7 @@ function renderTransactions(data) {
 }
 
 // ===============================
-// 📊 MONTHLY GRAPH
+// 📊 ANIMATED GRAPH
 // ===============================
 
 function renderMonthlyAnalytics(data) {
@@ -217,27 +239,31 @@ function renderMonthlyAnalytics(data) {
     months[key] = (months[key] || 0) + (item.photographer_amount || 0)
   })
 
-  const labels = Object.keys(months)
-  const values = Object.values(months)
-
   const ctx = document.getElementById("monthlyChart")
   if (!ctx) return
 
-  new Chart(ctx, {
+  if (chartInstance) chartInstance.destroy() // ✅ fix duplicate
+
+  chartInstance = new Chart(ctx, {
     type: "line",
     data: {
-      labels,
+      labels: Object.keys(months),
       datasets: [{
         label: "Earnings",
-        data: values,
-        borderWidth: 2
+        data: Object.values(months),
+        tension: 0.4
       }]
+    },
+    options: {
+      animation: {
+        duration: 1000
+      }
     }
   })
 }
 
 // ===============================
-// 🏆 TOP EVENTS UI
+// TOP EVENTS (NAME FIXED)
 // ===============================
 
 function renderTopEvents(data) {
@@ -247,24 +273,24 @@ function renderTopEvents(data) {
   const events = {}
 
   data.forEach(item => {
-    const id = item.event_id || "unknown"
-    events[id] = (events[id] || 0) + item.photographer_amount
+    const name = eventsMap[item.event_id] || "Event"
+    events[name] = (events[name] || 0) + item.photographer_amount
   })
 
   const sorted = Object.entries(events)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
 
-  container.innerHTML = sorted.map(([id, amt]) => `
+  container.innerHTML = sorted.map(([name, amt]) => `
     <div class="flex justify-between">
-      <span>Event</span>
+      <span>${name}</span>
       <span class="text-green-400">₹${amt.toFixed(0)}</span>
     </div>
   `).join("")
 }
 
 // ===============================
-// 👤 CLIENT UI
+// CLIENT
 // ===============================
 
 function renderClientEarnings(data) {
@@ -274,7 +300,7 @@ function renderClientEarnings(data) {
   const clients = {}
 
   data.forEach(item => {
-    const id = item.visitor_id || "unknown"
+    const id = item.visitor_id || "Client"
     clients[id] = (clients[id] || 0) + item.photographer_amount
   })
 
@@ -291,7 +317,7 @@ function renderClientEarnings(data) {
 }
 
 // ===============================
-// 💰 PROFIT SPLIT UI
+// PROFIT SPLIT
 // ===============================
 
 function renderProfitSplit(total, platformTotal) {
@@ -311,7 +337,4 @@ function renderProfitSplit(total, platformTotal) {
 }
 
 // ===============================
-// START
-// ===============================
-
 init()
