@@ -1,5 +1,5 @@
 // ===============================
-// EARNINGS LOGIC (FIXED)
+// EARNINGS LOGIC (FIXED + ADVANCED SAFE)
 // ===============================
 
 import { protectPage } from "./auth.js"
@@ -12,14 +12,12 @@ let supabase = null
 
 async function init() {
   await protectPage()
-
   supabase = await window.getSupabase()
-
   loadEarnings()
 }
 
 // ===============================
-// UUID VALIDATOR (ADDED FIX)
+// UUID VALIDATOR (UNCHANGED)
 // ===============================
 
 function isValidUUID(id) {
@@ -27,7 +25,7 @@ function isValidUUID(id) {
 }
 
 // ===============================
-// LOAD EARNINGS (FIXED)
+// LOAD EARNINGS
 // ===============================
 
 async function loadEarnings() {
@@ -75,12 +73,14 @@ async function loadEarnings() {
 
     let total = 0
     let totalSales = data.length
+    let thisMonth = 0
+    let platformTotal = 0
 
     const now = new Date()
-    let thisMonth = 0
 
     data.forEach(item => {
       total += item.photographer_amount || 0
+      platformTotal += item.platform_amount || 0
 
       const created = new Date(item.created_at)
 
@@ -93,18 +93,27 @@ async function loadEarnings() {
     })
 
     // ===============================
-    // SAFE UI UPDATE (FINAL FIX)
+    // SAFE UI UPDATE
     // ===============================
 
     const totalEl = document.getElementById("totalEarnings")
     const salesEl = document.getElementById("totalSales")
-    const monthEl = document.getElementById("monthlyEarnings") // ✅ FIXED ID
+    const monthEl = document.getElementById("monthlyEarnings")
 
     if (totalEl) totalEl.innerText = "₹" + total.toFixed(0)
     if (salesEl) salesEl.innerText = totalSales
     if (monthEl) monthEl.innerText = "₹" + thisMonth.toFixed(0)
 
     renderTransactions(data)
+
+    // ===============================
+    // 🔥 ADVANCED ANALYTICS (SAFE ADD)
+    // ===============================
+
+    renderMonthlyAnalytics(data)
+    renderTopEvents(data)
+    renderClientEarnings(data)
+    renderProfitSplit(total, platformTotal)
 
   } catch (err) {
     console.error("Fatal error:", err)
@@ -113,7 +122,7 @@ async function loadEarnings() {
 }
 
 // ===============================
-// RENDER TRANSACTIONS
+// TRANSACTIONS (UNCHANGED)
 // ===============================
 
 function renderTransactions(data) {
@@ -137,6 +146,61 @@ function renderTransactions(data) {
       </div>
     </div>
   `).join("")
+}
+
+// ===============================
+// 📊 MONTHLY ANALYTICS
+// ===============================
+
+function renderMonthlyAnalytics(data) {
+  const months = {}
+
+  data.forEach(item => {
+    const d = new Date(item.created_at)
+    const key = `${d.getFullYear()}-${d.getMonth()+1}`
+    months[key] = (months[key] || 0) + (item.photographer_amount || 0)
+  })
+
+  console.log("📊 Monthly Earnings:", months)
+}
+
+// ===============================
+// 🏆 TOP EVENTS
+// ===============================
+
+function renderTopEvents(data) {
+  const events = {}
+
+  data.forEach(item => {
+    const id = item.event_id || "unknown"
+    events[id] = (events[id] || 0) + item.photographer_amount
+  })
+
+  console.log("🏆 Top Events:", events)
+}
+
+// ===============================
+// 👤 CLIENT EARNINGS
+// ===============================
+
+function renderClientEarnings(data) {
+  const clients = {}
+
+  data.forEach(item => {
+    const id = item.visitor_id || "unknown"
+    clients[id] = (clients[id] || 0) + item.photographer_amount
+  })
+
+  console.log("👤 Client Earnings:", clients)
+}
+
+// ===============================
+// 💰 PROFIT SPLIT
+// ===============================
+
+function renderProfitSplit(total, platformTotal) {
+  console.log("💰 Photographer:", total)
+  console.log("🏢 Platform:", platformTotal)
 }
 
 // ===============================
