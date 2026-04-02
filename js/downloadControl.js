@@ -1,5 +1,5 @@
 // =============================
-// DOWNLOAD + PAYMENT CONTROL (FINAL UPGRADED)
+// DOWNLOAD + PAYMENT CONTROL (FINAL FIXED PRO)
 // =============================
 
 // EDGE FUNCTION URL
@@ -35,7 +35,7 @@ function isPurchased(url) {
 }
 
 // =============================
-// LOW QUALITY URL (WATERMARK)
+// LOW QUALITY URL
 // =============================
 
 function getLowQualityUrl(url) {
@@ -70,7 +70,8 @@ function triggerDownload(imageUrl) {
 
       URL.revokeObjectURL(blobUrl);
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error(err);
       alert("Download failed");
     });
 }
@@ -100,16 +101,16 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
   modal.innerHTML = `
     <div style="background:#111; padding:20px; border-radius:12px; text-align:center; max-width:300px">
 
-      <div style="font-size:16px; margin-bottom:10px">Download Photo</div>
+      <div style="font-size:16px; margin-bottom:10px; color:#fff;">Download Photo</div>
 
       <input id="buyerName" placeholder="Your Name"
-        style="width:100%; padding:8px; margin-bottom:6px; border-radius:6px; background:#111; color:#fff; border:1px solid #333;" />
+        style="width:100%; padding:8px; margin-bottom:6px; border-radius:6px; background:#1a1a1a; color:#fff; border:1px solid #333;" />
 
       <input id="buyerUpi" placeholder="UPI ID (example@upi)"
-        style="width:100%; padding:8px; margin-bottom:6px; border-radius:6px; background:#111; color:#fff; border:1px solid #333;" />
+        style="width:100%; padding:8px; margin-bottom:6px; border-radius:6px; background:#1a1a1a; color:#fff; border:1px solid #333;" />
 
       <input id="buyerUpiName" placeholder="UPI Name"
-        style="width:100%; padding:8px; margin-bottom:10px; border-radius:6px; background:#111; color:#fff; border:1px solid #333;" />
+        style="width:100%; padding:8px; margin-bottom:10px; border-radius:6px; background:#1a1a1a; color:#fff; border:1px solid #333;" />
 
       <button id="freeDownloadBtn"
         style="margin-top:10px; width:100%; background:#333; color:white; padding:8px; border-radius:8px;">
@@ -139,6 +140,7 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
 
   document.getElementById("payNowBtn").onclick = async function () {
     try {
+
       const buyer_name = document.getElementById("buyerName").value.trim();
       const buyer_upi_id = document.getElementById("buyerUpi").value.trim();
       const buyer_upi_name = document.getElementById("buyerUpiName").value.trim();
@@ -149,33 +151,39 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
       }
 
       const visitor_id =
-        sessionStorage.getItem("visitor_id") || "guest_user";
+        sessionStorage.getItem("visitor_id") || "guest_" + Date.now();
+
+      const payload = {
+        event_id: eventId,
+        image_url: imageUrl,
+        photographer_id: photographerId,
+        visitor_id,
+        amount: 49,
+        buyer_name,
+        buyer_upi_id,
+        buyer_upi_name
+      };
+
+      console.log("🚀 Sending payload:", payload);
 
       const res = await fetch(EDGE_FUNCTION_URL, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_ANON_KEY,
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          event_id: eventId,
-          image_url: imageUrl,
-          photographer_id: photographerId,
-          visitor_id: visitor_id,
-          amount: 49,
-          buyer_name,
-          buyer_upi_id,
-          buyer_upi_name
-        })
+        body: JSON.stringify(payload)
       });
 
       let data = {};
-      try { data = await res.json(); } catch(e){}
+      try {
+        data = await res.json();
+      } catch (e) {
+        console.error("JSON parse error", e);
+      }
 
       if (!res.ok || !data.success) {
-        console.error(data);
-        alert("Payment failed: " + (data.error || "Unknown error"));
+        console.error("❌ Payment error:", data);
+        alert("Payment failed: " + (data?.error || "Server error"));
         return;
       }
 
@@ -188,7 +196,7 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
       triggerDownload(imageUrl);
 
     } catch (err) {
-      console.error(err);
+      console.error("🔥 Crash:", err);
       alert("Something went wrong");
     }
   };
