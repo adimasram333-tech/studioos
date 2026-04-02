@@ -24,7 +24,7 @@ async function init() {
 
   setupRealtime()
   setupExport()
-  setupPayout() // 💳 NEW
+  setupPayout()
 }
 
 // ===============================
@@ -34,12 +34,12 @@ async function init() {
 async function loadEventsMap() {
   const { data, error } = await supabase
     .from("events")
-    .select("id, event_name, client_name") // ✅ updated
+    .select("id, event_name, client_name")
 
   if (!error && data) {
     data.forEach(e => {
       eventsMap[e.id] = e.event_name
-      eventsClientMap[e.id] = e.client_name // ✅ NEW
+      eventsClientMap[e.id] = e.client_name
     })
   }
 }
@@ -74,7 +74,7 @@ async function loadEarnings() {
 }
 
 // ===============================
-// REALTIME (SAFE)
+// REALTIME
 // ===============================
 
 function setupRealtime() {
@@ -133,25 +133,22 @@ function processAndRender(data) {
     }
   })
 
-  const totalEl = document.getElementById("totalEarnings")
-  const salesEl = document.getElementById("totalSales")
-  const monthEl = document.getElementById("monthlyEarnings")
-  const balanceEl = document.getElementById("availableBalance") // 💳
+  document.getElementById("totalEarnings").innerText = "₹" + total.toFixed(0)
+  document.getElementById("totalSales").innerText = totalSales
+  document.getElementById("monthlyEarnings").innerText = "₹" + thisMonth.toFixed(0)
 
-  if (totalEl) totalEl.innerText = "₹" + total.toFixed(0)
-  if (salesEl) salesEl.innerText = totalSales
-  if (monthEl) monthEl.innerText = "₹" + thisMonth.toFixed(0)
+  const balanceEl = document.getElementById("availableBalance")
   if (balanceEl) balanceEl.innerText = "₹" + total.toFixed(0)
 
   renderTransactions(data)
   renderMonthlyAnalytics(data)
-  renderTopEvents(data)
+  renderTopEvents(data) // ✅ now defined
   renderClientEarnings(data)
   renderProfitSplit(total, platformTotal)
 }
 
 // ===============================
-// 💳 PAYOUT SYSTEM
+// 💳 PAYOUT
 // ===============================
 
 function setupPayout() {
@@ -202,39 +199,85 @@ async function requestPayout() {
 }
 
 // ===============================
-// EXPORT
+// EXPORT (FIXED)
 // ===============================
 
 function setupExport() {
   const btn = document.getElementById("exportBtn")
   if (!btn) return
 
-  btn.addEventListener("click", exportCSV)
+  btn.addEventListener("click", () => exportCSV(originalData))
+}
+
+function exportCSV(data) {
+
+  if (!data || !data.length) return
+
+  const rows = [
+    ["Event", "Amount"],
+    ...data.map(d => [
+      eventsMap[d.event_id] || "Event",
+      d.photographer_amount || 0
+    ])
+  ]
+
+  const csv = rows.map(r => r.join(",")).join("\n")
+
+  const blob = new Blob([csv], { type: "text/csv" })
+  const url = URL.createObjectURL(blob)
+
+  const a = document.createElement("a")
+  a.href = url
+  a.download = "earnings.csv"
+  a.click()
 }
 
 // ===============================
-// TRANSACTIONS (ONLY LAST 2 + CLICK)
+// TOP EVENTS (FIXED)
+// ===============================
+
+function renderTopEvents(data) {
+
+  const container = document.getElementById("topEvents")
+  if (!container) return
+
+  const map = {}
+
+  data.forEach(item => {
+    const id = item.event_id
+    map[id] = (map[id] || 0) + (item.photographer_amount || 0)
+  })
+
+  const sorted = Object.entries(map)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+
+  container.innerHTML = sorted.map(([id, amount]) => `
+    <div class="flex justify-between">
+      <span>${eventsMap[id] || "Event"}</span>
+      <span class="text-green-400">₹${amount.toFixed(0)}</span>
+    </div>
+  `).join("")
+}
+
+// ===============================
+// TRANSACTIONS (LAST 2)
 // ===============================
 
 function renderTransactions(data) {
   const container = document.getElementById("transactionsList")
   if (!container) return
 
-  if (!data.length) {
-    container.innerHTML = `<p class="text-gray-400">No earnings yet</p>`
-    return
-  }
-
-  const last2 = data.slice(0, 2) // ✅ ONLY 2
+  const last2 = data.slice(0, 2)
 
   container.innerHTML = last2.map(item => `
     <div onclick="window.location.href='transactions.html'"
-         class="glass p-3 rounded-xl flex justify-between items-center cursor-pointer">
+         class="glass p-3 rounded-xl flex justify-between cursor-pointer">
       <div>
         <p class="text-sm text-gray-300">${eventsMap[item.event_id] || "Event"}</p>
         <p class="text-xs text-gray-500">${new Date(item.created_at).toLocaleString()}</p>
       </div>
-      <div class="text-green-400 font-semibold">
+      <div class="text-green-400">
         ₹${(item.photographer_amount || 0).toFixed(0)}
       </div>
     </div>
@@ -269,15 +312,12 @@ function renderMonthlyAnalytics(data) {
         data: Object.values(months),
         tension: 0.4
       }]
-    },
-    options: {
-      animation: { duration: 1000 }
     }
   })
 }
 
 // ===============================
-// CLIENT (ONLY LAST 2 + NAME FIX)
+// CLIENT (LAST 2)
 // ===============================
 
 function renderClientEarnings(data) {
@@ -303,7 +343,7 @@ function renderProfitSplit(total, platformTotal) {
   if (!container) return
 
   container.innerHTML = `
-    <div class="flex justify-between mb-1">
+    <div class="flex justify-between">
       <span>Photographer</span>
       <span class="text-green-400">₹${total.toFixed(0)}</span>
     </div>
