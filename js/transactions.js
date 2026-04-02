@@ -19,7 +19,7 @@ async function init() {
 }
 
 // ===============================
-// LOAD EVENTS MAP
+// LOAD EVENTS MAP (FIXED)
 // ===============================
 
 async function loadEvents() {
@@ -30,8 +30,8 @@ async function loadEvents() {
 
   if (!error && data) {
     data.forEach(e => {
-      // ✅ FIX: safe fallback
-      eventsMap[e.id] = e.event_name || "Event"
+      const key = String(e.id).trim() // ✅ FIX
+      eventsMap[key] = e.event_name || "Event"
     })
   }
 }
@@ -71,7 +71,7 @@ async function loadTransactions() {
 }
 
 // ===============================
-// RENDER
+// RENDER (FIXED)
 // ===============================
 
 function renderTransactions(data) {
@@ -87,8 +87,9 @@ function renderTransactions(data) {
 
   container.innerHTML = data.map(item => {
 
-    // ✅ FIX: safe event name resolve
-    const eventName = eventsMap[item.event_id] || "Event"
+    // ✅ FIX: normalize event_id
+    const eventKey = String(item.event_id).trim()
+    const eventName = eventsMap[eventKey] || "Event"
 
     return `
       <div class="glass p-3 rounded-xl">
