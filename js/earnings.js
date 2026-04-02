@@ -10,6 +10,10 @@ let chartInstance = null
 let eventsMap = {}
 let eventsClientMap = {}
 
+function normalizeId(id){
+  return String(id || "").replace(/\s/g, '')
+}
+
 async function init() {
   await protectPage()
 
@@ -38,7 +42,7 @@ async function loadEventsMap() {
 
   if (!error && data) {
     data.forEach(e => {
-      const key = String(e.id).trim() // ✅ FIX
+      const key = normalizeId(e.id)
       eventsMap[key] = e.event_name || e.client_name || "Event"
       eventsClientMap[key] = e.client_name || ""
     })
@@ -143,7 +147,7 @@ function processAndRender(data) {
   if (balanceEl) balanceEl.innerText = "₹" + total.toFixed(0)
 
   renderTransactions(data)
-  renderMonthlyAnalytics(data)
+  renderMonthlyAnalytics(data) // ✅ preserved
   renderTopEvents(data)
   renderClientEarnings(data)
   renderProfitSplit(total, platformTotal)
@@ -239,7 +243,7 @@ function exportCSV(data) {
   const rows = [
     ["Event", "Buyer", "Amount"],
     ...data.map(d => [
-      eventsMap[String(d.event_id).trim()] || "Event", // ✅ FIX
+      eventsMap[normalizeId(d.event_id)] || "Event",
       d.buyer_name || "Guest",
       d.photographer_amount || 0
     ])
@@ -268,7 +272,7 @@ function renderTopEvents(data) {
   const map = {}
 
   data.forEach(item => {
-    const id = String(item.event_id).trim() // ✅ FIX
+    const id = normalizeId(item.event_id)
     map[id] = (map[id] || 0) + (item.photographer_amount || 0)
   })
 
@@ -278,7 +282,7 @@ function renderTopEvents(data) {
 
   container.innerHTML = sorted.map(([id, amount]) => `
     <div class="flex justify-between">
-      <span>${eventsMap[String(id).trim()] || "Event"}</span>
+      <span>${eventsMap[id] || "Event"}</span>
       <span class="text-green-400">₹${amount.toFixed(0)}</span>
     </div>
   `).join("")
@@ -298,7 +302,7 @@ function renderTransactions(data) {
     <div onclick="window.location.href='transactions.html'"
          class="glass p-3 rounded-xl flex justify-between cursor-pointer">
       <div>
-        <p>${eventsMap[String(item.event_id).trim()] || "Event"} (${item.buyer_name || "Guest"})</p>
+        <p>${eventsMap[normalizeId(item.event_id)] || "Event"} (${item.buyer_name || "Guest"})</p>
         <p>${new Date(item.created_at).toLocaleString()}</p>
       </div>
       <div>₹${(item.photographer_amount || 0).toFixed(0)}</div>
@@ -307,7 +311,7 @@ function renderTransactions(data) {
 }
 
 // ===============================
-// GRAPH
+// GRAPH (RESTORED — WAS MISSING)
 // ===============================
 
 function renderMonthlyAnalytics(data) {
@@ -350,30 +354,10 @@ function renderClientEarnings(data) {
 
   container.innerHTML = last2.map(item => `
     <div class="flex justify-between">
-      <span>${eventsMap[String(item.event_id).trim()] || "Event"} (${item.buyer_name || "Guest"})</span>
+      <span>${eventsMap[normalizeId(item.event_id)] || "Event"} (${item.buyer_name || "Guest"})</span>
       <span class="text-green-400">₹${(item.photographer_amount || 0).toFixed(0)}</span>
     </div>
   `).join("")
-}
-
-// ===============================
-// PROFIT SPLIT
-// ===============================
-
-function renderProfitSplit(total, platformTotal) {
-  const container = document.getElementById("profitSplit")
-  if (!container) return
-
-  container.innerHTML = `
-    <div class="flex justify-between">
-      <span>Photographer</span>
-      <span class="text-green-400">₹${total.toFixed(0)}</span>
-    </div>
-    <div class="flex justify-between">
-      <span>Platform</span>
-      <span class="text-yellow-400">₹${platformTotal.toFixed(0)}</span>
-    </div>
-  `
 }
 
 // ===============================
