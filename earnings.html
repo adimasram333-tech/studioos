@@ -64,22 +64,20 @@ border:1px solid rgba(255,255,255,0.1);
 <canvas id="monthlyChart"></canvas>
 </div>
 
-<!-- 🔍 FILTERS (ADDED - REQUIRED FIX) -->
+<!-- 💳 PAYOUT SYSTEM (REPLACED FILTERS) -->
 <div class="glass rounded-2xl p-4 mb-6">
-<h2 class="text-lg mb-3">🔍 Filters</h2>
+<h2 class="text-lg mb-3">💳 Payout</h2>
 
-<input type="date" id="filterDate" class="w-full mb-2 p-2 rounded bg-black/30">
-
-<input type="text" id="filterEvent" placeholder="Event ID"
-class="w-full p-2 rounded bg-black/30">
+<div class="flex justify-between mb-3 text-sm">
+<span class="text-gray-400">Available Balance</span>
+<span id="availableBalance" class="font-semibold">₹0</span>
 </div>
 
-<!-- 📤 EXPORT (ADDED - REQUIRED FIX) -->
-<div class="glass rounded-2xl p-4 mb-6">
-<button id="exportBtn"
-class="w-full bg-green-500 hover:bg-green-600 p-2 rounded-xl font-semibold">
-Export Report
+<button id="withdrawBtn"
+class="w-full bg-blue-500 hover:bg-blue-600 p-2 rounded-xl font-semibold">
+Withdraw Earnings
 </button>
+
 </div>
 
 <!-- 🏆 TOP EVENTS -->
