@@ -80,7 +80,7 @@ function triggerDownload(imageUrl) {
 // PAYMENT MODAL
 // =============================
 
-function showPaymentModal(imageUrl, eventId, photographerId) {
+function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
   let modal = document.getElementById("paymentModal");
   if (modal) return;
 
@@ -155,6 +155,7 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
 
       const payload = {
         event_id: eventId,
+        event_name: eventName, // ✅ FIX ADDED
         image_url: imageUrl,
         photographer_id: photographerId,
         visitor_id,
@@ -210,7 +211,7 @@ function showPaymentModal(imageUrl, eventId, photographerId) {
 // DOWNLOAD HANDLER
 // =============================
 
-window.handleDownload = function (imageUrl, eventId, photographerId) {
+window.handleDownload = function (imageUrl, eventId, photographerId, eventName) {
   window.lastDownloadedImage = imageUrl;
 
   const role = getUserRole();
@@ -225,5 +226,5 @@ window.handleDownload = function (imageUrl, eventId, photographerId) {
     return;
   }
 
-  showPaymentModal(imageUrl, eventId, photographerId);
+  showPaymentModal(imageUrl, eventId, photographerId, eventName);
 };
