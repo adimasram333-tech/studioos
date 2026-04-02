@@ -8,6 +8,7 @@ let supabase = null
 let originalData = []
 let chartInstance = null
 let eventsMap = {}
+let eventsClientMap = {} // ✅ NEW (client name mapping)
 
 async function init() {
   await protectPage()
@@ -22,8 +23,8 @@ async function init() {
   await loadEarnings()
 
   setupRealtime()
-  setupFilters()
   setupExport()
+  setupPayout() // 💳 NEW
 }
 
 // ===============================
@@ -33,11 +34,12 @@ async function init() {
 async function loadEventsMap() {
   const { data, error } = await supabase
     .from("events")
-    .select("id, event_name")
+    .select("id, event_name, client_name") // ✅ updated
 
   if (!error && data) {
     data.forEach(e => {
       eventsMap[e.id] = e.event_name
+      eventsClientMap[e.id] = e.client_name // ✅ NEW
     })
   }
 }
@@ -134,10 +136,12 @@ function processAndRender(data) {
   const totalEl = document.getElementById("totalEarnings")
   const salesEl = document.getElementById("totalSales")
   const monthEl = document.getElementById("monthlyEarnings")
+  const balanceEl = document.getElementById("availableBalance") // 💳
 
   if (totalEl) totalEl.innerText = "₹" + total.toFixed(0)
   if (salesEl) salesEl.innerText = totalSales
   if (monthEl) monthEl.innerText = "₹" + thisMonth.toFixed(0)
+  if (balanceEl) balanceEl.innerText = "₹" + total.toFixed(0)
 
   renderTransactions(data)
   renderMonthlyAnalytics(data)
@@ -147,40 +151,54 @@ function processAndRender(data) {
 }
 
 // ===============================
-// FILTERS
+// 💳 PAYOUT SYSTEM
 // ===============================
 
-function setupFilters() {
-  const dateInput = document.getElementById("filterDate")
-  const eventInput = document.getElementById("filterEvent")
+function setupPayout() {
+  const btn = document.getElementById("withdrawBtn")
+  if (!btn) return
 
-  if (!dateInput || !eventInput) return
-
-  dateInput.addEventListener("change", applyFilters)
-  eventInput.addEventListener("input", applyFilters)
+  btn.addEventListener("click", requestPayout)
 }
 
-function applyFilters() {
+async function requestPayout() {
 
-  const dateVal = document.getElementById("filterDate")?.value
-  const eventVal = document.getElementById("filterEvent")?.value?.toLowerCase() || ""
-
-  let filtered = [...originalData]
-
-  if (dateVal) {
-    filtered = filtered.filter(item => {
-      const d = new Date(item.created_at).toISOString().split("T")[0]
-      return d === dateVal
-    })
+  if (!originalData.length) {
+    alert("No earnings available")
+    return
   }
 
-  if (eventVal) {
-    filtered = filtered.filter(item =>
-      (eventsMap[item.event_id] || "").toLowerCase().includes(eventVal)
-    )
+  const total = originalData.reduce((sum, i) =>
+    sum + (i.photographer_amount || 0), 0)
+
+  if (total <= 0) {
+    alert("No withdrawable balance")
+    return
   }
 
-  processAndRender(filtered)
+  try {
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const { error } = await supabase
+      .from("payout_requests")
+      .insert([{
+        photographer_id: user.id,
+        amount: total,
+        status: "pending"
+      }])
+
+    if (error) {
+      alert("Payout request failed")
+      return
+    }
+
+    alert("Withdrawal request submitted ✅")
+
+  } catch (err) {
+    console.error(err)
+    alert("Something went wrong")
+  }
 }
 
 // ===============================
@@ -194,35 +212,8 @@ function setupExport() {
   btn.addEventListener("click", exportCSV)
 }
 
-function exportCSV() {
-
-  if (!originalData.length) return
-
-  const rows = [["Date", "Event", "Amount"]]
-
-  originalData.forEach(item => {
-    rows.push([
-      new Date(item.created_at).toLocaleString(),
-      eventsMap[item.event_id] || "Event",
-      item.photographer_amount || 0
-    ])
-  })
-
-  const csv = rows.map(r => r.join(",")).join("\n")
-
-  const blob = new Blob([csv], { type: "text/csv" })
-  const url = URL.createObjectURL(blob)
-
-  const a = document.createElement("a")
-  a.href = url
-  a.download = "earnings.csv"
-  a.click()
-
-  URL.revokeObjectURL(url)
-}
-
 // ===============================
-// TRANSACTIONS (SAFE)
+// TRANSACTIONS (ONLY LAST 2 + CLICK)
 // ===============================
 
 function renderTransactions(data) {
@@ -234,8 +225,11 @@ function renderTransactions(data) {
     return
   }
 
-  container.innerHTML = data.map(item => `
-    <div class="glass p-3 rounded-xl flex justify-between items-center">
+  const last2 = data.slice(0, 2) // ✅ ONLY 2
+
+  container.innerHTML = last2.map(item => `
+    <div onclick="window.location.href='transactions.html'"
+         class="glass p-3 rounded-xl flex justify-between items-center cursor-pointer">
       <div>
         <p class="text-sm text-gray-300">${eventsMap[item.event_id] || "Event"}</p>
         <p class="text-xs text-gray-500">${new Date(item.created_at).toLocaleString()}</p>
@@ -283,55 +277,19 @@ function renderMonthlyAnalytics(data) {
 }
 
 // ===============================
-// TOP EVENTS
-// ===============================
-
-function renderTopEvents(data) {
-  const container = document.getElementById("topEvents")
-  if (!container) return
-
-  const events = {}
-
-  data.forEach(item => {
-    const name = eventsMap[item.event_id] || "Event"
-    events[name] = (events[name] || 0) + item.photographer_amount
-  })
-
-  const sorted = Object.entries(events)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-
-  container.innerHTML = sorted.map(([name, amt]) => `
-    <div class="flex justify-between">
-      <span>${name}</span>
-      <span class="text-green-400">₹${amt.toFixed(0)}</span>
-    </div>
-  `).join("")
-}
-
-// ===============================
-// CLIENT (SAFE)
+// CLIENT (ONLY LAST 2 + NAME FIX)
 // ===============================
 
 function renderClientEarnings(data) {
   const container = document.getElementById("clientEarnings")
   if (!container) return
 
-  const clients = {}
+  const last2 = data.slice(0, 2)
 
-  data.forEach(item => {
-    const id = item.visitor_id || "Client"
-    clients[id] = (clients[id] || 0) + item.photographer_amount
-  })
-
-  const sorted = Object.entries(clients)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-
-  container.innerHTML = sorted.map(([id, amt]) => `
+  container.innerHTML = last2.map(item => `
     <div class="flex justify-between">
-      <span>Client</span>
-      <span class="text-green-400">₹${amt.toFixed(0)}</span>
+      <span>${eventsClientMap[item.event_id] || "Client"}</span>
+      <span class="text-green-400">₹${(item.photographer_amount || 0).toFixed(0)}</span>
     </div>
   `).join("")
 }
