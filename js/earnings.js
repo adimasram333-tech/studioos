@@ -19,13 +19,21 @@ async function init() {
 }
 
 // ===============================
+// UUID VALIDATOR (ADDED FIX)
+// ===============================
+
+function isValidUUID(id) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id)
+}
+
+// ===============================
 // LOAD EARNINGS (FIXED)
 // ===============================
 
 async function loadEarnings() {
   try {
 
-    // ✅ ALWAYS GET LOGGED IN USER (NO MANUAL ID)
+    // ✅ GET USER SAFELY
     const {
       data: { user },
       error: userError
@@ -39,8 +47,14 @@ async function loadEarnings() {
 
     const photographer_id = user.id
 
-    // 🔥 DEBUG (IMPORTANT)
     console.log("Photographer ID:", photographer_id)
+
+    // ✅ UUID VALIDATION (CRITICAL FIX)
+    if (!photographer_id || !isValidUUID(photographer_id)) {
+      console.error("Invalid UUID:", photographer_id)
+      alert("Invalid user ID")
+      return
+    }
 
     // ===============================
     // FETCH PURCHASES
