@@ -28,7 +28,7 @@ async function init() {
 }
 
 // ===============================
-// LOAD EVENTS MAP
+// LOAD EVENTS MAP (FIXED)
 // ===============================
 
 async function loadEventsMap() {
@@ -38,8 +38,9 @@ async function loadEventsMap() {
 
   if (!error && data) {
     data.forEach(e => {
-      eventsMap[e.id] = e.event_name || e.client_name || "Event"
-      eventsClientMap[e.id] = e.client_name || ""
+      const key = String(e.id).trim() // ✅ FIX
+      eventsMap[key] = e.event_name || e.client_name || "Event"
+      eventsClientMap[key] = e.client_name || ""
     })
   }
 }
@@ -238,7 +239,7 @@ function exportCSV(data) {
   const rows = [
     ["Event", "Buyer", "Amount"],
     ...data.map(d => [
-      eventsMap[d.event_id] || "Event",
+      eventsMap[String(d.event_id).trim()] || "Event", // ✅ FIX
       d.buyer_name || "Guest",
       d.photographer_amount || 0
     ])
@@ -256,7 +257,7 @@ function exportCSV(data) {
 }
 
 // ===============================
-// TOP EVENTS
+// TOP EVENTS (FIXED)
 // ===============================
 
 function renderTopEvents(data) {
@@ -267,7 +268,7 @@ function renderTopEvents(data) {
   const map = {}
 
   data.forEach(item => {
-    const id = item.event_id
+    const id = String(item.event_id).trim() // ✅ FIX
     map[id] = (map[id] || 0) + (item.photographer_amount || 0)
   })
 
@@ -277,7 +278,7 @@ function renderTopEvents(data) {
 
   container.innerHTML = sorted.map(([id, amount]) => `
     <div class="flex justify-between">
-      <span>${eventsMap[id] || "Event"}</span>
+      <span>${eventsMap[String(id).trim()] || "Event"}</span>
       <span class="text-green-400">₹${amount.toFixed(0)}</span>
     </div>
   `).join("")
@@ -297,7 +298,7 @@ function renderTransactions(data) {
     <div onclick="window.location.href='transactions.html'"
          class="glass p-3 rounded-xl flex justify-between cursor-pointer">
       <div>
-        <p>${eventsMap[item.event_id] || "Event"} (${item.buyer_name || "Guest"})</p>
+        <p>${eventsMap[String(item.event_id).trim()] || "Event"} (${item.buyer_name || "Guest"})</p>
         <p>${new Date(item.created_at).toLocaleString()}</p>
       </div>
       <div>₹${(item.photographer_amount || 0).toFixed(0)}</div>
@@ -349,7 +350,7 @@ function renderClientEarnings(data) {
 
   container.innerHTML = last2.map(item => `
     <div class="flex justify-between">
-      <span>${eventsMap[item.event_id] || "Event"} (${item.buyer_name || "Guest"})</span>
+      <span>${eventsMap[String(item.event_id).trim()] || "Event"} (${item.buyer_name || "Guest"})</span>
       <span class="text-green-400">₹${(item.photographer_amount || 0).toFixed(0)}</span>
     </div>
   `).join("")
