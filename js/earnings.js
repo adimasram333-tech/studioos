@@ -8,7 +8,7 @@ let supabase = null
 let originalData = []
 let chartInstance = null
 let eventsMap = {}
-let eventsClientMap = {} // ✅ NEW (client name mapping)
+let eventsClientMap = {}
 
 async function init() {
   await protectPage()
@@ -142,13 +142,13 @@ function processAndRender(data) {
 
   renderTransactions(data)
   renderMonthlyAnalytics(data)
-  renderTopEvents(data) // ✅ now defined
+  renderTopEvents(data)
   renderClientEarnings(data)
   renderProfitSplit(total, platformTotal)
 }
 
 // ===============================
-// 💳 PAYOUT
+// 💳 PAYOUT (FIXED PRO SAFE)
 // ===============================
 
 function setupPayout() {
@@ -168,14 +168,27 @@ async function requestPayout() {
   const total = originalData.reduce((sum, i) =>
     sum + (i.photographer_amount || 0), 0)
 
-  if (total <= 0) {
-    alert("No withdrawable balance")
+  // ✅ MIN LIMIT
+  if (total < 500) {
+    alert("Minimum withdrawal amount is ₹500")
     return
   }
 
   try {
 
     const { data: { user } } = await supabase.auth.getUser()
+
+    // ✅ DUPLICATE CHECK
+    const { data: existing } = await supabase
+      .from("payout_requests")
+      .select("*")
+      .eq("photographer_id", user.id)
+      .eq("status", "pending")
+
+    if (existing && existing.length > 0) {
+      alert("You already have a pending withdrawal request")
+      return
+    }
 
     const { error } = await supabase
       .from("payout_requests")
@@ -186,11 +199,15 @@ async function requestPayout() {
       }])
 
     if (error) {
+      console.error(error)
       alert("Payout request failed")
       return
     }
 
-    alert("Withdrawal request submitted ✅")
+    alert(`
+Your withdrawal request of ₹${total.toFixed(0)} has been submitted.
+It will be processed within 5 hours.
+`)
 
   } catch (err) {
     console.error(err)
@@ -199,7 +216,7 @@ async function requestPayout() {
 }
 
 // ===============================
-// EXPORT (FIXED)
+// EXPORT
 // ===============================
 
 function setupExport() {
@@ -233,7 +250,7 @@ function exportCSV(data) {
 }
 
 // ===============================
-// TOP EVENTS (FIXED)
+// TOP EVENTS
 // ===============================
 
 function renderTopEvents(data) {
