@@ -30,7 +30,8 @@ async function loadEvents() {
 
   if (!error && data) {
     data.forEach(e => {
-      eventsMap[e.id] = e.event_name
+      // ✅ FIX: safe fallback
+      eventsMap[e.id] = e.event_name || "Event"
     })
   }
 }
@@ -86,11 +87,14 @@ function renderTransactions(data) {
 
   container.innerHTML = data.map(item => {
 
+    // ✅ FIX: safe event name resolve
+    const eventName = eventsMap[item.event_id] || "Event"
+
     return `
       <div class="glass p-3 rounded-xl">
 
         <div class="text-sm text-gray-300 mb-1">
-          ${eventsMap[item.event_id] || "Event"}
+          ${eventName}
         </div>
 
         <div class="text-sm">
