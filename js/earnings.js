@@ -147,7 +147,7 @@ function processAndRender(data) {
   if (balanceEl) balanceEl.innerText = "₹" + total.toFixed(0)
 
   renderTransactions(data)
-  renderMonthlyAnalytics(data) // ✅ preserved
+  renderMonthlyAnalytics(data)
   renderTopEvents(data)
   renderClientEarnings(data)
   renderProfitSplit(total, platformTotal)
@@ -261,7 +261,7 @@ function exportCSV(data) {
 }
 
 // ===============================
-// TOP EVENTS (FIXED)
+// TOP EVENTS
 // ===============================
 
 function renderTopEvents(data) {
@@ -289,7 +289,7 @@ function renderTopEvents(data) {
 }
 
 // ===============================
-// TRANSACTIONS (FIXED)
+// TRANSACTIONS
 // ===============================
 
 function renderTransactions(data) {
@@ -311,7 +311,7 @@ function renderTransactions(data) {
 }
 
 // ===============================
-// GRAPH (RESTORED — WAS MISSING)
+// GRAPH
 // ===============================
 
 function renderMonthlyAnalytics(data) {
@@ -343,7 +343,7 @@ function renderMonthlyAnalytics(data) {
 }
 
 // ===============================
-// CLIENT EARNINGS (FIXED)
+// CLIENT EARNINGS
 // ===============================
 
 function renderClientEarnings(data) {
@@ -358,6 +358,27 @@ function renderClientEarnings(data) {
       <span class="text-green-400">₹${(item.photographer_amount || 0).toFixed(0)}</span>
     </div>
   `).join("")
+}
+
+// ===============================
+// ✅ PROFIT SPLIT (FINAL FIX)
+// ===============================
+
+function renderProfitSplit(total, platformTotal) {
+
+  const container = document.getElementById("profitSplit")
+  if (!container) return
+
+  container.innerHTML = `
+    <div class="flex justify-between">
+      <span>Photographer</span>
+      <span class="text-green-400">₹${(total || 0).toFixed(0)}</span>
+    </div>
+    <div class="flex justify-between">
+      <span>Platform</span>
+      <span class="text-yellow-400">₹${(platformTotal || 0).toFixed(0)}</span>
+    </div>
+  `
 }
 
 // ===============================
