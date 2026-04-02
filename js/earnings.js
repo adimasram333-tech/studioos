@@ -1,5 +1,5 @@
 // ===============================
-// EARNINGS LOGIC (PRO FINAL)
+// EARNINGS LOGIC (PRO FINAL SAFE FIX)
 // ===============================
 
 import { protectPage } from "./auth.js"
@@ -7,16 +7,21 @@ import { protectPage } from "./auth.js"
 let supabase = null
 let originalData = []
 let chartInstance = null
-let eventsMap = {} // ✅ event_id → name
+let eventsMap = {}
 
 async function init() {
   await protectPage()
-  supabase = await window.getSupabase()
 
-  await loadEventsMap() // ✅ fetch event names
+  supabase = await window.getSupabase()
+  if (!supabase) {
+    alert("Supabase not initialized")
+    return
+  }
+
+  await loadEventsMap()
   await loadEarnings()
 
-  setupRealtime() // ✅ LIVE updates
+  setupRealtime()
   setupFilters()
   setupExport()
 }
@@ -57,19 +62,23 @@ async function loadEarnings() {
       return
     }
 
-    originalData = data
-    processAndRender(data)
+    originalData = data || []
+    processAndRender(originalData)
 
-  } catch {
+  } catch (err) {
+    console.error(err)
     alert("Something went wrong")
   }
 }
 
 // ===============================
-// REALTIME (LIVE UPDATE)
+// REALTIME (SAFE)
 // ===============================
 
 function setupRealtime() {
+
+  if (!supabase) return
+
   supabase
     .channel("earnings-live")
     .on(
@@ -81,7 +90,9 @@ function setupRealtime() {
       },
       (payload) => {
 
-        originalData.unshift(payload.new) // add new data
+        if (!payload || !payload.new) return
+
+        originalData.unshift(payload.new)
         processAndRender(originalData)
       }
     )
@@ -94,6 +105,8 @@ function setupRealtime() {
 
 function processAndRender(data) {
 
+  if (!Array.isArray(data)) return
+
   let total = 0
   let totalSales = data.length
   let thisMonth = 0
@@ -102,6 +115,9 @@ function processAndRender(data) {
   const now = new Date()
 
   data.forEach(item => {
+
+    if (!item) return
+
     total += item.photographer_amount || 0
     platformTotal += item.platform_amount || 0
 
@@ -115,9 +131,13 @@ function processAndRender(data) {
     }
   })
 
-  document.getElementById("totalEarnings").innerText = "₹" + total.toFixed(0)
-  document.getElementById("totalSales").innerText = totalSales
-  document.getElementById("monthlyEarnings").innerText = "₹" + thisMonth.toFixed(0)
+  const totalEl = document.getElementById("totalEarnings")
+  const salesEl = document.getElementById("totalSales")
+  const monthEl = document.getElementById("monthlyEarnings")
+
+  if (totalEl) totalEl.innerText = "₹" + total.toFixed(0)
+  if (salesEl) salesEl.innerText = totalSales
+  if (monthEl) monthEl.innerText = "₹" + thisMonth.toFixed(0)
 
   renderTransactions(data)
   renderMonthlyAnalytics(data)
@@ -141,8 +161,9 @@ function setupFilters() {
 }
 
 function applyFilters() {
-  const dateVal = document.getElementById("filterDate").value
-  const eventVal = document.getElementById("filterEvent").value.toLowerCase()
+
+  const dateVal = document.getElementById("filterDate")?.value
+  const eventVal = document.getElementById("filterEvent")?.value?.toLowerCase() || ""
 
   let filtered = [...originalData]
 
@@ -201,11 +222,12 @@ function exportCSV() {
 }
 
 // ===============================
-// TRANSACTIONS
+// TRANSACTIONS (SAFE)
 // ===============================
 
 function renderTransactions(data) {
   const container = document.getElementById("transactionsList")
+  if (!container) return
 
   if (!data.length) {
     container.innerHTML = `<p class="text-gray-400">No earnings yet</p>`
@@ -226,10 +248,13 @@ function renderTransactions(data) {
 }
 
 // ===============================
-// 📊 ANIMATED GRAPH
+// GRAPH
 // ===============================
 
 function renderMonthlyAnalytics(data) {
+
+  const ctx = document.getElementById("monthlyChart")
+  if (!ctx || typeof Chart === "undefined") return
 
   const months = {}
 
@@ -239,10 +264,7 @@ function renderMonthlyAnalytics(data) {
     months[key] = (months[key] || 0) + (item.photographer_amount || 0)
   })
 
-  const ctx = document.getElementById("monthlyChart")
-  if (!ctx) return
-
-  if (chartInstance) chartInstance.destroy() // ✅ fix duplicate
+  if (chartInstance) chartInstance.destroy()
 
   chartInstance = new Chart(ctx, {
     type: "line",
@@ -255,15 +277,13 @@ function renderMonthlyAnalytics(data) {
       }]
     },
     options: {
-      animation: {
-        duration: 1000
-      }
+      animation: { duration: 1000 }
     }
   })
 }
 
 // ===============================
-// TOP EVENTS (NAME FIXED)
+// TOP EVENTS
 // ===============================
 
 function renderTopEvents(data) {
@@ -290,7 +310,7 @@ function renderTopEvents(data) {
 }
 
 // ===============================
-// CLIENT
+// CLIENT (SAFE)
 // ===============================
 
 function renderClientEarnings(data) {
@@ -317,7 +337,7 @@ function renderClientEarnings(data) {
 }
 
 // ===============================
-// PROFIT SPLIT
+// PROFIT
 // ===============================
 
 function renderProfitSplit(total, platformTotal) {
