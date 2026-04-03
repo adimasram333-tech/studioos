@@ -2,9 +2,16 @@
 // DOWNLOAD + PAYMENT CONTROL (FINAL FIXED PRO)
 // =============================
 
-// EDGE FUNCTION URL
+// ❌ OLD EDGE FUNCTION (not removed, just kept for safety)
 const EDGE_FUNCTION_URL =
   "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/process-image-payment";
+
+// ✅ NEW EDGE FUNCTIONS
+const CREATE_ORDER_URL =
+  "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/create-order";
+
+const VERIFY_PAYMENT_URL =
+  "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/verify-payment";
 
 // get role
 function getUserRole() {
@@ -155,7 +162,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 
       const payload = {
         event_id: eventId,
-        event_name: eventName, // ✅ FIX ADDED
+        event_name: eventName,
         image_url: imageUrl,
         photographer_id: photographerId,
         visitor_id,
@@ -165,36 +172,80 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         buyer_upi_name
       };
 
-      console.log("🚀 Sending payload:", payload);
-
-      const res = await fetch(EDGE_FUNCTION_URL, {
+      // =============================
+      // 🔥 STEP 1: CREATE ORDER
+      // =============================
+      const orderRes = await fetch(CREATE_ORDER_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ amount: 49 })
       });
 
-      let data = {};
-      try {
-        data = await res.json();
-      } catch (e) {
-        console.error("JSON parse error", e);
-      }
+      const orderData = await orderRes.json();
 
-      if (!res.ok || !data.success) {
-        console.error("❌ Payment error:", data);
-        alert("Payment failed: " + (data?.error || "Server error"));
+      if (!orderData.success) {
+        alert("Order creation failed");
         return;
       }
 
-      markImagePurchased(imageUrl);
+      const order = orderData.order;
 
-      alert("Payment Successful 🎉");
+      // =============================
+      // 🔥 STEP 2: OPEN RAZORPAY
+      // =============================
+      const options = {
+        key: "rzp_test_placeholder", // replace if needed
+        amount: order.amount,
+        currency: "INR",
+        name: "StudioOS",
+        description: "Photo Purchase",
+        order_id: order.id,
 
-      modal.remove();
+        handler: async function (response) {
 
-      triggerDownload(imageUrl);
+          // =============================
+          // 🔥 STEP 3: VERIFY PAYMENT
+          // =============================
+          const verifyRes = await fetch(VERIFY_PAYMENT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              payload
+            })
+          });
+
+          const verifyData = await verifyRes.json();
+
+          if (!verifyData.success) {
+            alert("Payment verification failed");
+            return;
+          }
+
+          markImagePurchased(imageUrl);
+          alert("Payment Successful 🎉");
+
+          modal.remove();
+          triggerDownload(imageUrl);
+        },
+
+        prefill: {
+          name: buyer_name
+        },
+
+        theme: {
+          color: "#22c55e"
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
 
     } catch (err) {
       console.error("🔥 Crash:", err);
