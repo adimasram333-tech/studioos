@@ -64,14 +64,17 @@ border:1px solid rgba(255,255,255,0.1);
 <canvas id="monthlyChart"></canvas>
 </div>
 
-<!-- 💳 PAYOUT SYSTEM (REPLACED FILTERS) -->
+<!-- 💳 PAYOUT SYSTEM -->
 <div class="glass rounded-2xl p-4 mb-6">
 <h2 class="text-lg mb-3">💳 Payout</h2>
 
-<div class="flex justify-between mb-3 text-sm">
+<div class="flex justify-between mb-2 text-sm">
 <span class="text-gray-400">Available Balance</span>
 <span id="availableBalance" class="font-semibold">₹0</span>
 </div>
+
+<!-- 🔥 NEW STATUS UI -->
+<div id="withdrawStatus" class="text-xs text-yellow-400 mb-3 hidden"></div>
 
 <button id="withdrawBtn"
 class="w-full bg-blue-500 hover:bg-blue-600 p-2 rounded-xl font-semibold">
