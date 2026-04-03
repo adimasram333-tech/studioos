@@ -150,7 +150,7 @@ function processAndRender(data) {
 }
 
 // ===============================
-// 💳 PAYOUT
+// 💳 PAYOUT (UPDATED - EDGE FUNCTION)
 // ===============================
 
 function setupPayout() {
@@ -178,7 +178,12 @@ async function requestPayout() {
   try {
 
     const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      alert("User not found")
+      return
+    }
 
+    // 🔥 CHECK EXISTING PENDING REQUEST
     const { data: existing } = await supabase
       .from("payout_requests")
       .select("*")
@@ -190,30 +195,29 @@ async function requestPayout() {
       return
     }
 
-    const { data: profile } = await supabase
-      .from("photographer_settings")
-      .select("name, phone, city")
-      .eq("user_id", user.id)
-      .single()
+    // 🔥 CALL EDGE FUNCTION (FINAL FIX)
+    const res = await fetch(
+      "https://gnnaaagvlrmdveqxicob.functions.supabase.co/create-withdraw-request",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          amount: total
+        })
+      }
+    )
 
-    const { error } = await supabase
-      .from("payout_requests")
-      .insert([{
-        photographer_id: user.id,
-        photographer_name: profile?.name || "Unknown",
-        phone: profile?.phone || "",
-        city: profile?.city || "",
-        amount: total,
-        status: "pending"
-      }])
+    const result = await res.json()
 
-    if (error) {
-      console.error(error)
-      alert("Payout request failed")
+    if (!result.success) {
+      alert(result.error || "Withdraw failed")
       return
     }
 
-    alert(`Your withdrawal request of ₹${total.toFixed(0)} submitted (processing ~5 hours)`)
+    alert(`Withdraw request submitted ₹${total.toFixed(0)} ✅`)
 
   } catch (err) {
     console.error(err)
