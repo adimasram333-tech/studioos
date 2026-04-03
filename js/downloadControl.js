@@ -94,7 +94,6 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
   let modal = document.getElementById("paymentModal");
   if (modal) return;
 
-  // ✅ FIX 1: eventId validation (ONLY ADD)
   if (!eventId) {
     console.error("❌ EVENT ID MISSING");
     alert("Event ID missing. Please reload page.");
@@ -115,10 +114,8 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
   modal.style.justifyContent = "center";
   modal.style.zIndex = 9999;
 
-  // ✅ ORIGINAL UI (UNCHANGED)
   modal.innerHTML = `
     <div style="background:#111; padding:20px; border-radius:12px; text-align:center; max-width:300px">
-
       <div style="font-size:16px; margin-bottom:10px; color:#fff;">Download Photo</div>
 
       <input id="buyerName" placeholder="Your Name"
@@ -144,7 +141,6 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         style="margin-top:8px; background:#444; color:white; padding:6px 12px; border-radius:8px;">
         Cancel
       </button>
-
     </div>
   `;
 
@@ -183,18 +179,17 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         buyer_upi_name
       };
 
-      // =============================
-      // 🔥 CREATE ORDER
-      // =============================
+      // 🔥 CREATE ORDER (FIXED HEADERS)
       const orderRes = await fetch(CREATE_ORDER_URL, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "apikey": window.SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({ amount: 49 })
       });
 
-      // ✅ FIX 2: HTTP check (ONLY ADD)
       if (!orderRes.ok) {
         console.error("HTTP ERROR:", orderRes.status);
         alert("Server error. Try again.");
@@ -211,9 +206,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 
       const order = orderData.order;
 
-      // =============================
       // 🔥 RAZORPAY
-      // =============================
       const options = {
         key: RAZORPAY_KEY,
         amount: order.amount,
@@ -228,7 +221,9 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
             const verifyRes = await fetch(VERIFY_PAYMENT_URL, {
               method: "POST",
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "apikey": window.SUPABASE_ANON_KEY,
+                "Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`
               },
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
@@ -238,7 +233,6 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
               })
             });
 
-            // ✅ FIX 3: verify check
             if (!verifyRes.ok) {
               alert("Verification server error");
               return;
