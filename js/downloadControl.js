@@ -1,5 +1,5 @@
 // =============================
-// DOWNLOAD + PAYMENT CONTROL (FINAL FIXED PRO)
+// DOWNLOAD + PAYMENT CONTROL (FINAL PRODUCTION VERSION)
 // =============================
 
 // ❌ OLD EDGE FUNCTION (not removed, just kept for safety)
@@ -134,7 +134,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 
       <button id="payNowBtn"
         style="margin-top:10px; width:100%; background:#22c55e; color:white; padding:8px; border-radius:8px;">
-        Pay ₹49 (HD)
+        Pay ₹49 (UPI)
       </button>
 
       <button id="closeModal"
@@ -179,6 +179,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         buyer_upi_name
       };
 
+      // 🔥 CREATE ORDER
       const orderRes = await fetch(CREATE_ORDER_URL, {
         method: "POST",
         headers: {
@@ -203,6 +204,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 
       const order = orderData.order;
 
+      // 🔥 RAZORPAY (UPI FIRST)
       const options = {
         key: RAZORPAY_KEY,
         amount: order.amount,
@@ -211,16 +213,22 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         description: "Photo Purchase",
         order_id: order.id,
 
-        // ✅🔥 FIX: ENABLE ALL METHODS (UPI INCLUDED)
-        method: {
-          upi: true,
-          card: true,
-          netbanking: true,
-          wallet: true
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: "Pay via UPI",
+                instruments: [{ method: "upi" }]
+              }
+            },
+            sequence: ["upi"],
+            preferences: {
+              show_default_blocks: false
+            }
+          }
         },
 
         handler: async function (response) {
-
           try {
             const verifyRes = await fetch(VERIFY_PAYMENT_URL, {
               method: "POST",
@@ -245,8 +253,6 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
             }
 
             markImagePurchased(imageUrl);
-            alert("Payment Successful 🎉");
-
             modal.remove();
             triggerDownload(imageUrl);
 
