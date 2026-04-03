@@ -4,6 +4,7 @@
 
 let supabase = null
 let eventsMap = {}
+let visitorsMap = {} // ✅ NEW
 
 async function init() {
 
@@ -15,6 +16,7 @@ async function init() {
   }
 
   await loadEvents()
+  await loadVisitors() // ✅ NEW
   await loadTransactions()
 }
 
@@ -32,6 +34,24 @@ async function loadEvents() {
     data.forEach(e => {
       const key = String(e.id).trim() // ✅ FIX
       eventsMap[key] = e.event_name || "Event"
+    })
+  }
+}
+
+// ===============================
+// LOAD VISITORS MAP (NEW)
+// ===============================
+
+async function loadVisitors() {
+
+  const { data, error } = await supabase
+    .from("event_visitors")
+    .select("id, phone")
+
+  if (!error && data) {
+    data.forEach(v => {
+      const key = String(v.id).trim()
+      visitorsMap[key] = v.phone || ""
     })
   }
 }
@@ -91,6 +111,10 @@ function renderTransactions(data) {
     const eventKey = String(item.event_id).trim()
     const eventName = eventsMap[eventKey] || "Event"
 
+    // ✅ NEW: visitor phone
+    const visitorKey = String(item.visitor_id || "").trim()
+    const phone = visitorsMap[visitorKey] || "No Phone"
+
     return `
       <div class="glass p-3 rounded-xl">
 
@@ -100,6 +124,10 @@ function renderTransactions(data) {
 
         <div class="text-sm">
           👤 ${item.buyer_name || "Guest"}
+        </div>
+
+        <div class="text-xs text-gray-400">
+          📱 ${phone}
         </div>
 
         <div class="text-xs text-gray-400">
