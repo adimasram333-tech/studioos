@@ -154,7 +154,6 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 
   document.getElementById("payNowBtn").onclick = async function () {
     try {
-
       const buyer_name = document.getElementById("buyerName").value.trim();
       const buyer_upi_id = document.getElementById("buyerUpi").value.trim();
       const buyer_upi_name = document.getElementById("buyerUpiName").value.trim();
@@ -179,7 +178,6 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         buyer_upi_name
       };
 
-      // 🔥 CREATE ORDER
       const orderRes = await fetch(CREATE_ORDER_URL, {
         method: "POST",
         headers: {
@@ -190,21 +188,10 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         body: JSON.stringify({ amount: 49 })
       });
 
-      if (!orderRes.ok) {
-        alert("Server error. Try again.");
-        return;
-      }
-
       const orderData = await orderRes.json();
-
-      if (!orderData.success) {
-        alert("Order creation failed");
-        return;
-      }
-
       const order = orderData.order;
 
-      // 🔥 RAZORPAY (UPI FIRST)
+      // ✅ FIXED RAZORPAY
       const options = {
         key: RAZORPAY_KEY,
         amount: order.amount,
@@ -213,52 +200,39 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         description: "Photo Purchase",
         order_id: order.id,
 
-        config: {
-          display: {
-            blocks: {
-              upi: {
-                name: "Pay via UPI",
-                instruments: [{ method: "upi" }]
-              }
-            },
-            sequence: ["upi"],
-            preferences: {
-              show_default_blocks: false
-            }
-          }
+        method: {
+          upi: true,
+          wallet: true,
+          card: false,
+          netbanking: false
         },
 
         handler: async function (response) {
-          try {
-            const verifyRes = await fetch(VERIFY_PAYMENT_URL, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "apikey": window.SUPABASE_ANON_KEY,
-                "Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`
-              },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                payload
-              })
-            });
+          const verifyRes = await fetch(VERIFY_PAYMENT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": window.SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              payload
+            })
+          });
 
-            const verifyData = await verifyRes.json();
+          const verifyData = await verifyRes.json();
 
-            if (!verifyData.success) {
-              alert("Payment verification failed");
-              return;
-            }
-
-            markImagePurchased(imageUrl);
-            modal.remove();
-            triggerDownload(imageUrl);
-
-          } catch (err) {
-            alert("Verification failed");
+          if (!verifyData.success) {
+            alert("Payment verification failed");
+            return;
           }
+
+          markImagePurchased(imageUrl);
+          modal.remove();
+          triggerDownload(imageUrl);
         },
 
         prefill: {
