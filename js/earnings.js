@@ -21,6 +21,7 @@ async function init() {
 
   await loadEventsMap()
   await loadEarnings()
+  await loadWithdrawStatus() // 🔥 NEW
 
   setupRealtime()
   setupExport()
@@ -72,6 +73,37 @@ async function loadEarnings() {
   } catch (err) {
     console.error(err)
     alert("Something went wrong")
+  }
+}
+
+// ===============================
+// 🔥 WITHDRAW STATUS + BALANCE FIX
+// ===============================
+
+async function loadWithdrawStatus() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data: requests } = await supabase
+      .from("payout_requests")
+      .select("*")
+      .eq("photographer_id", user.id)
+      .order("created_at", { ascending: false })
+
+    if (!requests || requests.length === 0) return
+
+    const pending = requests.find(r => r.status === "pending")
+
+    const statusEl = document.getElementById("withdrawStatus")
+
+    if (pending && statusEl) {
+      statusEl.classList.remove("hidden")
+      statusEl.innerText = `⏳ Withdrawal ₹${pending.amount} is processing`
+    }
+
+  } catch (err) {
+    console.error(err)
   }
 }
 
@@ -183,7 +215,6 @@ async function requestPayout() {
       return
     }
 
-    // 🔥 CHECK EXISTING PENDING REQUEST
     const { data: existing } = await supabase
       .from("payout_requests")
       .select("*")
@@ -195,7 +226,6 @@ async function requestPayout() {
       return
     }
 
-    // 🔥 CALL EDGE FUNCTION (FINAL FIX)
     const res = await fetch(
       "https://gnnaaagvlrmdveqxicob.functions.supabase.co/create-withdraw-request",
       {
@@ -218,6 +248,8 @@ async function requestPayout() {
     }
 
     alert(`Withdraw request submitted ₹${total.toFixed(0)} ✅`)
+
+    await loadWithdrawStatus() // 🔥 refresh
 
   } catch (err) {
     console.error(err)
