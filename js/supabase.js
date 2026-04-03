@@ -8,6 +8,9 @@ const SUPABASE_URL =
 const SUPABASE_ANON_KEY =
 "sb_publishable_TnjoiedXWPbSjjqh2tmfsQ_kpiIMaND"
 
+// ✅ FIX: global access for Razorpay + Edge Functions
+window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY
+
 
 // ================================
 // INTERNAL STATE
