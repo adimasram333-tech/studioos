@@ -196,7 +196,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
       // 🔥 STEP 2: OPEN RAZORPAY
       // =============================
       const options = {
-        key: "rzp_test_placeholder", // replace if needed
+        key: "rzp_test_SYs7AftkGNrQNe", // replace if needed
         amount: order.amount,
         currency: "INR",
         name: "StudioOS",
