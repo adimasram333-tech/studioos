@@ -21,7 +21,7 @@ async function init() {
 
   await loadEventsMap()
   await loadEarnings()
-  await loadWithdrawStatus() // 🔥 NEW
+  await loadWithdrawStatus()
 
   setupRealtime()
   setupExport()
@@ -77,7 +77,7 @@ async function loadEarnings() {
 }
 
 // ===============================
-// 🔥 WITHDRAW STATUS + BALANCE FIX
+// 🔥 WITHDRAW STATUS + FIX
 // ===============================
 
 async function loadWithdrawStatus() {
@@ -99,7 +99,7 @@ async function loadWithdrawStatus() {
 
     if (pending && statusEl) {
       statusEl.classList.remove("hidden")
-      statusEl.innerText = `⏳ Withdrawal ₹${pending.amount} is processing`
+      statusEl.innerText = `⏳ Withdrawal ₹${Math.round(pending.amount)} is processing`
     }
 
   } catch (err) {
@@ -136,10 +136,10 @@ function setupRealtime() {
 }
 
 // ===============================
-// PROCESS
+// PROCESS (🔥 BALANCE FREEZE FIX)
 // ===============================
 
-function processAndRender(data) {
+async function processAndRender(data) {
 
   if (!Array.isArray(data)) return
 
@@ -167,22 +167,41 @@ function processAndRender(data) {
     }
   })
 
-  document.getElementById("totalEarnings").innerText = "₹" + total.toFixed(0)
+  const totalRounded = Math.round(total)
+
+  // 🔥 FETCH PENDING
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let pendingTotal = 0
+
+  if (user) {
+    const { data: pendingData } = await supabase
+      .from("payout_requests")
+      .select("amount")
+      .eq("photographer_id", user.id)
+      .eq("status", "pending")
+
+    pendingTotal = (pendingData || []).reduce((s, r) => s + (r.amount || 0), 0)
+  }
+
+  const availableBalance = Math.max(0, totalRounded - Math.round(pendingTotal))
+
+  document.getElementById("totalEarnings").innerText = "₹" + totalRounded
   document.getElementById("totalSales").innerText = totalSales
-  document.getElementById("monthlyEarnings").innerText = "₹" + thisMonth.toFixed(0)
+  document.getElementById("monthlyEarnings").innerText = "₹" + Math.round(thisMonth)
 
   const balanceEl = document.getElementById("availableBalance")
-  if (balanceEl) balanceEl.innerText = "₹" + total.toFixed(0)
+  if (balanceEl) balanceEl.innerText = "₹" + availableBalance
 
   renderTransactions(data)
   renderMonthlyAnalytics(data)
   renderTopEvents(data)
   renderClientEarnings(data)
-  renderProfitSplit(total, platformTotal)
+  renderProfitSplit(totalRounded, platformTotal)
 }
 
 // ===============================
-// 💳 PAYOUT (UPDATED - EDGE FUNCTION)
+// 💳 PAYOUT (🔥 VALIDATION FIX)
 // ===============================
 
 function setupPayout() {
@@ -199,19 +218,31 @@ async function requestPayout() {
     return
   }
 
-  const total = originalData.reduce((sum, i) =>
+  const totalRaw = originalData.reduce((sum, i) =>
     sum + (i.photographer_amount || 0), 0)
 
-  if (total < 500) {
-    alert("Minimum withdrawal amount is ₹500")
-    return
-  }
+  const total = Math.round(totalRaw)
 
   try {
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       alert("User not found")
+      return
+    }
+
+    const { data: pendingData } = await supabase
+      .from("payout_requests")
+      .select("amount")
+      .eq("photographer_id", user.id)
+      .eq("status", "pending")
+
+    const pendingTotal = (pendingData || []).reduce((s, r) => s + (r.amount || 0), 0)
+
+    const available = Math.max(0, total - Math.round(pendingTotal))
+
+    if (available < 500) {
+      alert("Minimum withdrawal amount is ₹500")
       return
     }
 
@@ -226,6 +257,9 @@ async function requestPayout() {
       return
     }
 
+    const confirmWithdraw = confirm(`Withdraw ₹${available} ?`)
+    if (!confirmWithdraw) return
+
     const res = await fetch(
       "https://gnnaaagvlrmdveqxicob.functions.supabase.co/create-withdraw-request",
       {
@@ -235,7 +269,7 @@ async function requestPayout() {
         },
         body: JSON.stringify({
           user_id: user.id,
-          amount: total
+          amount: available
         })
       }
     )
@@ -247,9 +281,10 @@ async function requestPayout() {
       return
     }
 
-    alert(`Withdraw request submitted ₹${total.toFixed(0)} ✅`)
+    alert(`Withdraw request submitted ₹${available} ✅`)
 
-    await loadWithdrawStatus() // 🔥 refresh
+    await loadWithdrawStatus()
+    await loadEarnings()
 
   } catch (err) {
     console.error(err)
@@ -315,7 +350,7 @@ function renderTopEvents(data) {
   container.innerHTML = sorted.map(([id, amount]) => `
     <div class="flex justify-between">
       <span>${eventsMap[id] || "Event"}</span>
-      <span class="text-green-400">₹${amount.toFixed(0)}</span>
+      <span class="text-green-400">₹${Math.round(amount)}</span>
     </div>
   `).join("")
 }
@@ -337,7 +372,7 @@ function renderTransactions(data) {
         <p>${eventsMap[String(item.event_id)] || "Event"} (${item.buyer_name || "Guest"})</p>
         <p>${new Date(item.created_at).toLocaleString()}</p>
       </div>
-      <div>₹${(item.photographer_amount || 0).toFixed(0)}</div>
+      <div>₹${Math.round(item.photographer_amount || 0)}</div>
     </div>
   `).join("")
 }
@@ -387,7 +422,7 @@ function renderClientEarnings(data) {
   container.innerHTML = last2.map(item => `
     <div class="flex justify-between">
       <span>${eventsMap[String(item.event_id)] || "Event"} (${item.buyer_name || "Guest"})</span>
-      <span class="text-green-400">₹${(item.photographer_amount || 0).toFixed(0)}</span>
+      <span class="text-green-400">₹${Math.round(item.photographer_amount || 0)}</span>
     </div>
   `).join("")
 }
@@ -404,11 +439,11 @@ function renderProfitSplit(total, platformTotal) {
   container.innerHTML = `
     <div class="flex justify-between">
       <span>Photographer</span>
-      <span class="text-green-400">₹${(total || 0).toFixed(0)}</span>
+      <span class="text-green-400">₹${Math.round(total || 0)}</span>
     </div>
     <div class="flex justify-between">
       <span>Platform</span>
-      <span class="text-yellow-400">₹${(platformTotal || 0).toFixed(0)}</span>
+      <span class="text-yellow-400">₹${Math.round(platformTotal || 0)}</span>
     </div>
   `
 }
