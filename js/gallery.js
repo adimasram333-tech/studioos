@@ -223,7 +223,17 @@ async function loadGallery(){
 
 const params = new URLSearchParams(window.location.search)
 
-let eventId = params.get("event_id") || params.get("event") || ""
+// ✅ FIX START
+let eventId =
+params.get("event_id") ||
+params.get("event") ||
+sessionStorage.getItem("event_id") ||
+""
+
+if(eventId){
+sessionStorage.setItem("event_id", eventId)
+}
+// ✅ FIX END
 
 if(eventId){
 eventId = String(eventId).trim()
