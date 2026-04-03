@@ -40,7 +40,7 @@ menu.innerHTML = `
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
 
 <div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
-<div onclick="deleteGallery('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">Delete Gallery</div>
+<div onclick="deleteEvent('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">Delete Gallery</div>
 `
 
 document.body.appendChild(menu)
@@ -68,9 +68,8 @@ navigator.clipboard.writeText(link)
 alert("Link copied")
 }
 
-
 // =============================
-// TOKEN SYSTEM (ADDED)
+// TOKEN SYSTEM
 // =============================
 
 window.showToken = async function(id){
@@ -105,9 +104,8 @@ alert("Token: " + token)
 
 }
 
-
 // =============================
-// DELETE SYSTEM (ADDED)
+// DELETE SYSTEM
 // =============================
 
 window.deleteEvent = async function(id){
@@ -121,8 +119,8 @@ await fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/smart-process
 method: "POST",
 headers: {
 "Content-Type": "application/json",
-"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE",
-"apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubmFhYWd2bHJtZHZlcXhpY29iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTk4NTQsImV4cCI6MjA4ODA3NTg1NH0.LgK0WDOa1wp4vhUS3BjvQUpvU_pENGTZegbCtd_HWNE"
+"Authorization": "Bearer YOUR_KEY",
+"apikey": "YOUR_KEY"
 },
 body: JSON.stringify({ event_id: id })
 })
@@ -141,7 +139,6 @@ alert("Delete failed")
 }
 
 }
-
 
 // =============================
 // QR
@@ -214,7 +211,6 @@ a.click()
 
 }
 
-
 // =============================
 // LOAD GALLERY
 // =============================
@@ -223,17 +219,15 @@ async function loadGallery(){
 
 const params = new URLSearchParams(window.location.search)
 
-// ✅ FIX START
+// ✅ FIXED (ONLY CHANGE HERE)
 let eventId =
 params.get("event_id") ||
 params.get("event") ||
-sessionStorage.getItem("event_id") ||
 ""
 
 if(eventId){
 sessionStorage.setItem("event_id", eventId)
 }
-// ✅ FIX END
 
 if(eventId){
 eventId = String(eventId).trim()
@@ -311,6 +305,10 @@ return
 
 grid.innerHTML = ""
 
+// =============================
+// FOLDER VIEW (RESTORED)
+// =============================
+
 if(!eventId){
 
 if(!user){
@@ -376,6 +374,10 @@ return
 
 }
 
+// =============================
+// PHOTO VIEW (UNCHANGED)
+// =============================
+
 const safeEventId = String(eventId)
 
 const { data, error } =
@@ -385,7 +387,6 @@ await supabase
 .eq("event_id", safeEventId)
 .order("created_at",{ ascending:false })
 
-// ✅ ONLY ADD
 const photographerId = data && data.length > 0 ? data[0].user_id : null
 
 if(error){
@@ -434,7 +435,6 @@ document.body.appendChild(modal)
 
 const btn = document.getElementById("downloadBtn")
 
-// ✅ ONLY FIX
 btn.onclick = function(){
   window.handleDownload(url, eventId, photographerId, eventName)
 }
