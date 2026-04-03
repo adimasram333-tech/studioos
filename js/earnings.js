@@ -9,6 +9,7 @@ let originalData = []
 let chartInstance = null
 let eventsMap = {}
 let eventsClientMap = {}
+let withdrawData = null
 
 async function init() {
   await protectPage()
