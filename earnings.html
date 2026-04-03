@@ -111,8 +111,9 @@ Withdraw Earnings
 
 </div>
 
-<!-- 🔥 WITHDRAW MODAL -->
-<div id="withdrawModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+<!-- ✅ FIXED WITHDRAW MODAL -->
+<div id="withdrawModal"
+class="hidden fixed inset-0 flex items-center justify-center z-50 bg-black/60">
 
   <div class="bg-[#0f172a] p-5 rounded-2xl w-[90%] max-w-sm border border-white/10">
 
@@ -132,17 +133,17 @@ Withdraw Earnings
 
     <div class="flex gap-2">
 
-      <button onclick="goToProfile()"
+      <button onclick="window.goToProfile()"
       class="flex-1 bg-gray-600 p-2 rounded-xl text-sm">
         Edit
       </button>
 
-      <button onclick="closeWithdrawModal()"
+      <button onclick="window.closeWithdrawModal()"
       class="flex-1 bg-gray-500 p-2 rounded-xl text-sm">
         Cancel
       </button>
 
-      <button onclick="confirmWithdrawFinal()"
+      <button onclick="window.confirmWithdrawFinal()"
       class="flex-1 bg-green-500 p-2 rounded-xl text-sm font-semibold">
         Confirm
       </button>
