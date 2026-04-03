@@ -73,7 +73,6 @@ border:1px solid rgba(255,255,255,0.1);
 <span id="availableBalance" class="font-semibold">₹0</span>
 </div>
 
-<!-- 🔥 NEW STATUS UI -->
 <div id="withdrawStatus" class="text-xs text-yellow-400 mb-3 hidden"></div>
 
 <button id="withdrawBtn"
@@ -109,6 +108,48 @@ Withdraw Earnings
 <p class="text-gray-400">No earnings yet</p>
 </div>
 </div>
+
+</div>
+
+<!-- 🔥 WITHDRAW MODAL -->
+<div id="withdrawModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+
+  <div class="bg-[#0f172a] p-5 rounded-2xl w-[90%] max-w-sm border border-white/10">
+
+    <h2 class="text-lg font-semibold mb-4">Confirm Withdrawal</h2>
+
+    <div class="text-sm space-y-2 mb-4 text-gray-300">
+
+      <p><span class="text-gray-400">Name:</span> <span id="modalName"></span></p>
+      <p><span class="text-gray-400">UPI:</span> <span id="modalUpi"></span></p>
+      <p><span class="text-gray-400">Amount:</span> ₹<span id="modalAmount"></span></p>
+
+      <p class="text-xs text-yellow-400 mt-2">
+        ⚠️ Payment will be sent to this UPI ID. Please verify carefully.
+      </p>
+
+    </div>
+
+    <div class="flex gap-2">
+
+      <button onclick="goToProfile()"
+      class="flex-1 bg-gray-600 p-2 rounded-xl text-sm">
+        Edit
+      </button>
+
+      <button onclick="closeWithdrawModal()"
+      class="flex-1 bg-gray-500 p-2 rounded-xl text-sm">
+        Cancel
+      </button>
+
+      <button onclick="confirmWithdrawFinal()"
+      class="flex-1 bg-green-500 p-2 rounded-xl text-sm font-semibold">
+        Confirm
+      </button>
+
+    </div>
+
+  </div>
 
 </div>
 
