@@ -257,35 +257,38 @@ async function requestPayout() {
       return
     }
 
-    const confirmWithdraw = confirm(`Withdraw ₹${available} ?`)
-    if (!confirmWithdraw) return
+    // 🔥 FETCH PROFILE
+const { data: profile } = await supabase
+  .from("photographer_settings")
+  .select("owner_name, upi")
+  .eq("user_id", user.id)
+  .single()
 
-    const res = await fetch(
-      "https://gnnaaagvlrmdveqxicob.functions.supabase.co/create-withdraw-request",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          user_id: user.id,
-          amount: available
-        })
-      }
-    )
+if (!profile || !profile.upi) {
+  alert("Please set your UPI ID in profile first")
+  window.location.href = "profile.html"
+  return
+}
 
-    const result = await res.json()
+// 🔥 STORE DATA
+withdrawData = {
+  user_id: user.id,
+  amount: available,
+  upi: profile.upi,
+  name: profile.owner_name || "Not Set"
+}
 
-    if (!result.success) {
-      alert(result.error || "Withdraw failed")
-      return
-    }
+// 🔥 FILL MODAL
+document.getElementById("modalName").innerText = withdrawData.name
+document.getElementById("modalUpi").innerText = withdrawData.upi
+document.getElementById("modalAmount").innerText = withdrawData.amount
 
-    alert(`Withdraw request submitted ₹${available} ✅`)
+// 🔥 SHOW MODAL
+document.getElementById("withdrawModal").classList.remove("hidden")
 
-    await loadWithdrawStatus()
-    await loadEarnings()
+  
 
+    
   } catch (err) {
     console.error(err)
     alert("Something went wrong")
@@ -449,4 +452,47 @@ function renderProfitSplit(total, platformTotal) {
 }
 
 // ===============================
+
+function closeWithdrawModal() {
+  document.getElementById("withdrawModal").classList.add("hidden")
+}
+
+function goToProfile() {
+  window.location.href = "profile.html"
+}
+
+async function confirmWithdrawFinal() {
+
+  if (!withdrawData) return
+
+  const res = await fetch(
+    "https://gnnaaagvlrmdveqxicob.functions.supabase.co/create-withdraw-request",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        user_id: withdrawData.user_id,
+        amount: withdrawData.amount,
+        upi_id: withdrawData.upi,
+        name: withdrawData.name
+      })
+    }
+  )
+
+  const result = await res.json()
+
+  if (!result.success) {
+    alert(result.error || "Withdraw failed")
+    return
+  }
+
+  closeWithdrawModal()
+
+  alert(`Withdraw request submitted ₹${withdrawData.amount} ✅`)
+
+  await loadWithdrawStatus()
+  await loadEarnings()
+}
 init()
