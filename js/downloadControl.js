@@ -13,6 +13,9 @@ const CREATE_ORDER_URL =
 const VERIFY_PAYMENT_URL =
   "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/verify-payment";
 
+// 🔥 IMPORTANT: use dynamic key (future safe)
+const RAZORPAY_KEY = "rzp_test_SYs7AftkGNrQNe"; // change to live later
+
 // get role
 function getUserRole() {
   return sessionStorage.getItem("role") || "guest";
@@ -186,6 +189,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
       const orderData = await orderRes.json();
 
       if (!orderData.success) {
+        console.error("Order Error:", orderData);
         alert("Order creation failed");
         return;
       }
@@ -196,7 +200,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
       // 🔥 STEP 2: OPEN RAZORPAY
       // =============================
       const options = {
-        key: "rzp_test_SYs7AftkGNrQNe", // replace if needed
+        key: RAZORPAY_KEY,
         amount: order.amount,
         currency: "INR",
         name: "StudioOS",
@@ -205,34 +209,38 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 
         handler: async function (response) {
 
-          // =============================
-          // 🔥 STEP 3: VERIFY PAYMENT
-          // =============================
-          const verifyRes = await fetch(VERIFY_PAYMENT_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              payload
-            })
-          });
+          try {
+            const verifyRes = await fetch(VERIFY_PAYMENT_URL, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                payload
+              })
+            });
 
-          const verifyData = await verifyRes.json();
+            const verifyData = await verifyRes.json();
 
-          if (!verifyData.success) {
-            alert("Payment verification failed");
-            return;
+            if (!verifyData.success) {
+              console.error("Verify Error:", verifyData);
+              alert("Payment verification failed");
+              return;
+            }
+
+            markImagePurchased(imageUrl);
+            alert("Payment Successful 🎉");
+
+            modal.remove();
+            triggerDownload(imageUrl);
+
+          } catch (err) {
+            console.error("Verify Crash:", err);
+            alert("Verification failed");
           }
-
-          markImagePurchased(imageUrl);
-          alert("Payment Successful 🎉");
-
-          modal.remove();
-          triggerDownload(imageUrl);
         },
 
         prefill: {
