@@ -179,7 +179,6 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         buyer_upi_name
       };
 
-      // 🔥 CREATE ORDER (FIXED HEADERS)
       const orderRes = await fetch(CREATE_ORDER_URL, {
         method: "POST",
         headers: {
@@ -191,7 +190,6 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
       });
 
       if (!orderRes.ok) {
-        console.error("HTTP ERROR:", orderRes.status);
         alert("Server error. Try again.");
         return;
       }
@@ -199,14 +197,12 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
       const orderData = await orderRes.json();
 
       if (!orderData.success) {
-        console.error("Order Error:", orderData);
         alert("Order creation failed");
         return;
       }
 
       const order = orderData.order;
 
-      // 🔥 RAZORPAY
       const options = {
         key: RAZORPAY_KEY,
         amount: order.amount,
@@ -214,6 +210,14 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         name: "StudioOS",
         description: "Photo Purchase",
         order_id: order.id,
+
+        // ✅🔥 FIX: ENABLE ALL METHODS (UPI INCLUDED)
+        method: {
+          upi: true,
+          card: true,
+          netbanking: true,
+          wallet: true
+        },
 
         handler: async function (response) {
 
@@ -233,15 +237,9 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
               })
             });
 
-            if (!verifyRes.ok) {
-              alert("Verification server error");
-              return;
-            }
-
             const verifyData = await verifyRes.json();
 
             if (!verifyData.success) {
-              console.error("Verify Error:", verifyData);
               alert("Payment verification failed");
               return;
             }
@@ -253,7 +251,6 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
             triggerDownload(imageUrl);
 
           } catch (err) {
-            console.error("Verify Crash:", err);
             alert("Verification failed");
           }
         },
@@ -271,7 +268,6 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
       rzp.open();
 
     } catch (err) {
-      console.error("🔥 Crash:", err);
       alert("Something went wrong");
     }
   };
