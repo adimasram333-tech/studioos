@@ -497,3 +497,7 @@ async function confirmWithdrawFinal() {
   await loadEarnings()
 }
 init()
+
+window.closeWithdrawModal = closeWithdrawModal
+window.goToProfile = goToProfile
+window.confirmWithdrawFinal = confirmWithdrawFinal
