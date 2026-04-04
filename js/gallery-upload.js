@@ -45,12 +45,17 @@ return null
 
 
 // =============================
-// 🔥 NEW FACE FUNCTION (ADDED SAFE)
+// 🔥 NEW FACE FUNCTION (FIXED)
 // =============================
 
 async function processFace(imageUrl, eventId, userId){
 
 try{
+
+// ✅ NEW FIX (MODEL LOAD)
+if (window.loadFaceModels) {
+await window.loadFaceModels()
+}
 
 if(!window.getFaceEncoding){
 console.warn("face.js not loaded")
@@ -371,7 +376,7 @@ status.innerText = "Upload failed"
 return
 }
 
-// 🔥 NEW FACE PROCESSING (NON-BLOCKING)
+// 🔥 FACE PROCESSING (FIXED)
 urls.forEach(url=>{
 processFace(url, eventId, user.id)
 })
