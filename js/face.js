@@ -1,6 +1,6 @@
 // face.js
 // Core Face Recognition Engine (StudioOS)
-// FIXED VERSION (Browser Compatible - No Export Errors)
+// FINAL FIXED VERSION (Browser Safe)
 
 let faceModelsLoaded = false;
 
@@ -23,30 +23,42 @@ async function loadFaceModels() {
 }
 
 // ==============================
-// DETECT FACES FROM IMAGE
+// LOAD IMAGE FROM URL
+// ==============================
+function loadImageFromUrl(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = url;
+
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+    });
+}
+
+// ==============================
+// DETECT FACES
 // ==============================
 async function detectFacesFromImage(imageElement) {
     if (!faceModelsLoaded) {
         throw new Error("Face models not loaded");
     }
 
-    const detections = await faceapi
+    return await faceapi
         .detectAllFaces(imageElement)
         .withFaceLandmarks()
         .withFaceDescriptors();
-
-    return detections;
 }
 
 // ==============================
-// GET DESCRIPTORS (ENCODINGS)
+// EXTRACT ENCODINGS
 // ==============================
 function extractFaceEncodings(detections) {
     return detections.map(d => Array.from(d.descriptor));
 }
 
 // ==============================
-// DETECT SINGLE FACE (SELFIE)
+// SINGLE FACE (SELFIE)
 // ==============================
 async function detectSingleFace(imageElement) {
     if (!faceModelsLoaded) {
@@ -64,7 +76,7 @@ async function detectSingleFace(imageElement) {
 }
 
 // ==============================
-// MATCH FACES
+// MATCH
 // ==============================
 function matchFaces(selfieEncoding, storedEncodings, threshold = 0.5) {
     const matchedImages = [];
@@ -84,21 +96,7 @@ function matchFaces(selfieEncoding, storedEncodings, threshold = 0.5) {
 }
 
 // ==============================
-// LOAD IMAGE FROM URL
-// ==============================
-function loadImageFromUrl(url) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.src = url;
-
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-    });
-}
-
-// ==============================
-// PROCESS IMAGE (UPLOAD SIDE)
+// PROCESS IMAGE (UPLOAD)
 // ==============================
 async function processImageForFaces(imageUrl) {
     try {
@@ -113,9 +111,7 @@ async function processImageForFaces(imageUrl) {
             return [];
         }
 
-        const encodings = extractFaceEncodings(detections);
-
-        return encodings;
+        return extractFaceEncodings(detections);
 
     } catch (error) {
         console.error("Face processing error:", error);
@@ -124,7 +120,7 @@ async function processImageForFaces(imageUrl) {
 }
 
 // ==============================
-// PROCESS SELFIE (CLIENT SIDE)
+// PROCESS SELFIE (CLIENT)
 // ==============================
 async function processSelfie(imageFile) {
     try {
@@ -148,9 +144,8 @@ async function processSelfie(imageFile) {
 }
 
 // ==============================
-// 🔥 MAIN FUNCTION (VERY IMPORTANT FIX)
+// MAIN FUNCTION
 // ==============================
-
 async function getFaceEncoding(imageUrl) {
     try {
         const encodings = await processImageForFaces(imageUrl);
@@ -159,7 +154,7 @@ async function getFaceEncoding(imageUrl) {
             return null;
         }
 
-        return encodings[0]; // first face only
+        return encodings[0];
 
     } catch (err) {
         console.error("Encoding error:", err);
@@ -168,15 +163,16 @@ async function getFaceEncoding(imageUrl) {
 }
 
 // ==============================
-// MAKE GLOBAL (VERY IMPORTANT)
+// ✅ GLOBAL EXPORT (IMPORTANT)
 // ==============================
-
-window.loadFaceModels = loadFaceModels;
-window.detectFacesFromImage = detectFacesFromImage;
-window.extractFaceEncodings = extractFaceEncodings;
-window.detectSingleFace = detectSingleFace;
-window.matchFaces = matchFaces;
-window.loadImageFromUrl = loadImageFromUrl;
-window.processImageForFaces = processImageForFaces;
-window.processSelfie = processSelfie;
-window.getFaceEncoding = getFaceEncoding; // ✅ FIXED
+window.faceEngine = {
+    loadFaceModels,
+    detectFacesFromImage,
+    extractFaceEncodings,
+    detectSingleFace,
+    matchFaces,
+    loadImageFromUrl,
+    processImageForFaces,
+    processSelfie,
+    getFaceEncoding
+};
