@@ -315,7 +315,7 @@ const grid = document.getElementById("galleryGrid")
 const empty = document.getElementById("emptyState")
 
 // =============================
-// 🔥 FACE MATCH: PREPARE MATCHED SET
+// 🔥 FACE MATCH: PREPARE MATCHED SET (FIXED)
 // =============================
 
 let matchedImages = null
@@ -327,13 +327,17 @@ const { data: faces } = await supabase
 .select("face_encoding, image_url")
 .eq("event_id", eventId)
 
+// 🔍 DEBUG
+console.log("USER FACE:", userEncoding ? userEncoding.length : "NO")
+console.log("DB FACES:", faces ? faces.length : 0)
+
 if(faces && faces.length > 0){
 
 matchedImages = new Set()
 
 faces.forEach(row=>{
 
-if(!row.face_encoding) return
+if(!row.face_encoding || !row.image_url) return
 
 let dist = 0
 
@@ -343,11 +347,21 @@ dist += Math.pow(row.face_encoding[i] - userEncoding[i],2)
 
 dist = Math.sqrt(dist)
 
-if(dist < 0.5){
-matchedImages.add(row.image_url)
+// 🔍 DEBUG DISTANCE
+console.log("DIST:", dist)
+
+// 🔥 FIX 1: threshold loose
+if(dist < 0.65){
+
+// 🔥 FIX 2: trim safe match
+matchedImages.add(String(row.image_url).trim())
+
 }
 
 })
+
+// 🔍 FINAL MATCH COUNT
+console.log("MATCHED COUNT:", matchedImages.size)
 
 }
 
@@ -358,7 +372,6 @@ return
 }
 
 grid.innerHTML = ""
-
 // =============================
 // FOLDER VIEW (RESTORED)
 // =============================
