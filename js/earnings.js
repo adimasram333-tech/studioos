@@ -502,8 +502,8 @@ if (!result.success) {
 
   alert(`Withdraw request submitted ₹${withdrawData.amount} ✅`)
 
-  await loadWithdrawStatus()
   await loadEarnings()
+  await loadWithdrawStatus()
 }
 
 // 🔥 GET PENDING WITHDRAW AMOUNT
