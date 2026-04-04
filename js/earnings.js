@@ -198,7 +198,11 @@ async function processAndRender(data) {
   renderMonthlyAnalytics(data)
   renderTopEvents(data)
   renderClientEarnings(data)
-  renderProfitSplit(totalRounded, platformTotal)
+  // 🔥 FIXED SPLIT (BASED ON AVAILABLE)
+const photographerShare = Math.round(availableBalance * 0.8)
+const platformShare = Math.round(availableBalance * 0.2)
+
+renderProfitSplit(photographerShare, platformShare)
 }
 
 // ===============================
@@ -440,7 +444,7 @@ function renderClientEarnings(data) {
 // PROFIT SPLIT
 // ===============================
 
-function renderProfitSplit(total, platformTotal) {
+function renderProfitSplit(available, platformTotalAfterWithdraw) {
 
   const container = document.getElementById("profitSplit")
   if (!container) return
