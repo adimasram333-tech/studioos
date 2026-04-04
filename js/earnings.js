@@ -491,11 +491,13 @@ async function confirmWithdrawFinal() {
 
   const result = await res.json()
 
-  if (!result.success) {
-    alert(result.error || "Withdraw failed")
-    return
-  }
+console.log("API RESULT:", result)
+alert("DEBUG: " + JSON.stringify(result))
 
+if (!result.success) {
+  alert(result.error || "Withdraw failed")
+  return
+}
   closeWithdrawModal()
 
   alert(`Withdraw request submitted ₹${withdrawData.amount} ✅`)
