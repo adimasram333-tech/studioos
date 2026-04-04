@@ -526,23 +526,14 @@ document.getElementById("modalImg").src = url
 
 data.forEach(img=>{
 
-// 🔥 FACE FILTER (FINAL FIX)
-// sirf guest ke liye filter lagega
-if(role === "guest"){
-
-    // agar match hi nahi mila → kuch bhi show mat karo
-    if(!matchedImages || matchedImages.size === 0){
-        return
-    }
-
-    // agar image match nahi hai → skip
+// 🔥 FACE FILTER (FINAL SAFE)
+if(role === "guest" && matchedImages){
     if(!matchedImages.has(String(img.image_url).trim())){
         return
     }
-
 }
 
-// safety check
+// safety
 if(!img || !img.image_url) return
 
 const div = document.createElement("div")
