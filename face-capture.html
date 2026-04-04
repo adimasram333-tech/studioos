@@ -40,7 +40,6 @@ padding:4px 10px;
 border-radius:20px;
 font-size:12px;
 }
-
 </style>
 
 </head>
@@ -52,8 +51,8 @@ font-size:12px;
 <h2 class="text-xl mb-4">Capture Your Face</h2>
 
 <div class="circle mx-auto">
-<video id="video" autoplay muted></video>
-<div id="status" class="status">Camera Off</div>
+<video id="video" autoplay muted playsinline></video>
+<div id="status" class="status">Click Start</div>
 </div>
 
 <button id="startBtn"
@@ -67,32 +66,44 @@ Start Camera
 
 let stream = null
 let modelsLoaded = false
+let detecting = false
 
 const video = document.getElementById("video")
 const status = document.getElementById("status")
 
 // ======================
-// LOAD MODELS
+// LOAD MODELS (FIXED)
 // ======================
 
 async function loadModels(){
 
+try{
+
 status.innerText = "Loading AI..."
 
-await faceapi.nets.tinyFaceDetector.loadFromUri("/studioos/models")
-await faceapi.nets.faceLandmark68Net.loadFromUri("/studioos/models")
-await faceapi.nets.faceRecognitionNet.loadFromUri("/studioos/models")
+const MODEL_URL = "./models"
+
+await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
+await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
+await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
 
 modelsLoaded = true
 status.innerText = "Ready"
 
+}catch(err){
+console.error(err)
+alert("Model load failed")
+}
+
 }
 
 // ======================
-// START CAMERA
+// START CAMERA (FIXED)
 // ======================
 
 async function startCamera(){
+
+try{
 
 if(!modelsLoaded){
 alert("Models not loaded yet")
@@ -106,15 +117,25 @@ video: { facingMode: "user" }
 video.srcObject = stream
 status.innerText = "Detecting..."
 
+if(!detecting){
+detecting = true
 detectLoop()
+}
+
+}catch(err){
+console.error(err)
+alert("Camera permission denied")
+}
 
 }
 
 // ======================
-// DETECTION LOOP
+// DETECTION LOOP (FIXED)
 // ======================
 
 async function detectLoop(){
+
+if(!detecting) return
 
 const detection = await faceapi
 .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
@@ -130,7 +151,6 @@ setTimeout(()=> captureFace(detection), 800)
 }else{
 
 status.innerText = "No Face"
-
 requestAnimationFrame(detectLoop)
 
 }
@@ -143,23 +163,27 @@ requestAnimationFrame(detectLoop)
 
 function captureFace(detection){
 
+detecting = false
+
 if(stream){
 stream.getTracks().forEach(track=>track.stop())
 }
 
 const descriptor = Array.from(detection.descriptor)
 
-// save in session
+// save encoding
 sessionStorage.setItem("face_encoding", JSON.stringify(descriptor))
 
 const params = new URLSearchParams(window.location.search)
 const eventId = params.get("event_id")
 
-// redirect to gallery
+// redirect
 window.location.href = `gallery.html?event_id=${eventId}`
 
 }
 
+// ======================
+// BUTTON CLICK (FIXED)
 // ======================
 
 document.getElementById("startBtn").onclick = async ()=>{
