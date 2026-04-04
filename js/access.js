@@ -97,7 +97,6 @@ async function initAccess() {
 
       const t = tokenData[0];
 
-      // 🔥 CASE 1: FIRST TIME USE
       if (!t.used) {
 
         await supabase
@@ -112,12 +111,10 @@ async function initAccess() {
         return true;
       }
 
-      // 🔥 CASE 2: SAME DEVICE
       if (t.device_id === deviceId) {
         return true;
       }
 
-      // 🔥 CASE 3: SECOND DEVICE ALLOW
       if (!t.device_id_2) {
 
         await supabase
@@ -130,7 +127,6 @@ async function initAccess() {
         return true;
       }
 
-      // 🔴 CASE 4: THIRD DEVICE BLOCK
       alert("Token limit reached (only 2 devices allowed)");
       return null;
 
@@ -264,7 +260,8 @@ async function initAccess() {
       sessionStorage.setItem("visitor_id", visitorId);
       sessionStorage.setItem("role", userRole);
 
-      window.location.href = `gallery.html?event_id=${eventId}`;
+      // 🔥 UPDATED REDIRECT
+      window.location.href = `face-capture.html?event_id=${eventId}`;
 
     } catch (err) {
       console.error(err);
@@ -318,7 +315,8 @@ async function initAccess() {
         sessionStorage.setItem("visitor_id", existingVisitor.id);
         sessionStorage.setItem("role", "client");
 
-        window.location.href = `gallery.html?event_id=${eventId}`;
+        // 🔥 UPDATED REDIRECT
+        window.location.href = `face-capture.html?event_id=${eventId}`;
         return;
       }
 
@@ -334,7 +332,8 @@ async function initAccess() {
           .update({ last_visit: new Date().toISOString() })
           .eq("id", existingVisitor.id);
 
-        window.location.href = `gallery.html?event_id=${eventId}`;
+        // 🔥 UPDATED REDIRECT
+        window.location.href = `face-capture.html?event_id=${eventId}`;
         return;
       }
     }
