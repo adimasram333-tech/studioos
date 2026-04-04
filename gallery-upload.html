@@ -148,6 +148,13 @@ box.style.display = "none"
 // =============================
 
 async function ensureFaceReady(){
+
+// ✅ wait until face-api loaded
+if(typeof faceapi === "undefined"){
+console.error("❌ face-api not loaded")
+return false
+}
+
 if(!window.faceEngine){
 console.error("❌ faceEngine not loaded")
 return false
@@ -257,11 +264,14 @@ window.location.href = `gallery.html?event_id=${eventId}`
 </script>
 
 <!-- ============================= -->
-<!-- 🔥 SCRIPT ORDER FIXED -->
+<!-- 🔥 FINAL FIXED SCRIPT ORDER -->
 <!-- ============================= -->
 
-<script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
-<script src="js/face.js?v=3"></script>
+<!-- ✅ CORRECT FACE API (BROWSER SAFE) -->
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<!-- ✅ YOUR FILE -->
+<script src="js/face.js?v=5"></script>
 
 <script src="js/cloudinary.js"></script>
 <script src="js/supabase.js"></script>
