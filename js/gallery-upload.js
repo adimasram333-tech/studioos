@@ -45,6 +45,50 @@ return null
 
 
 // =============================
+// 🔥 NEW FACE FUNCTION (ADDED SAFE)
+// =============================
+
+async function processFace(imageUrl, eventId, userId){
+
+try{
+
+if(!window.getFaceEncoding){
+console.warn("face.js not loaded")
+return
+}
+
+const encoding = await window.getFaceEncoding(imageUrl)
+
+if(!encoding){
+console.warn("No face detected:", imageUrl)
+return
+}
+
+const supabase = getSupabase()
+
+const { error } = await supabase
+.from("face_data")
+.insert([{
+event_id: eventId,
+image_url: imageUrl,
+face_encoding: encoding,
+user_id: userId
+}])
+
+if(error){
+console.error("Face save error:", error)
+}else{
+console.log("Face saved:", imageUrl)
+}
+
+}catch(err){
+console.error("Face processing failed:", err)
+}
+
+}
+
+
+// =============================
 // 🔥 AUTO FIX OLD BOOKINGS (SAFE ONE-TIME)
 // =============================
 
@@ -299,7 +343,6 @@ const uploadPromises = validFiles.map(async (file)=>{
 
 try{
 
-// 🔥 ROLLBACK FIX APPLIED
 const url =
 await window.uploadToCloudinary(file, eventId)
 
@@ -327,6 +370,11 @@ if(!urls.length){
 status.innerText = "Upload failed"
 return
 }
+
+// 🔥 NEW FACE PROCESSING (NON-BLOCKING)
+urls.forEach(url=>{
+processFace(url, eventId, user.id)
+})
 
 try{
 
