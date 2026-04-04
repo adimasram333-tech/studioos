@@ -67,6 +67,7 @@ Start Camera
 let stream = null
 let modelsLoaded = false
 let detecting = false
+let stableFrames = 0   // 🔥 NEW (IMPORTANT)
 
 const video = document.getElementById("video")
 const status = document.getElementById("status")
@@ -124,12 +125,15 @@ video: { facingMode: "user" }
 })
 
 video.srcObject = stream
-status.innerText = "Detecting..."
 
-if(!detecting){
+// 🔥 FIX: wait for video ready
+video.onloadedmetadata = () => {
+video.play()
 detecting = true
 detectLoop()
 }
+
+status.innerText = "Detecting..."
 
 }catch(err){
 console.error(err)
@@ -139,7 +143,7 @@ alert("Camera permission denied")
 }
 
 // ======================
-// DETECTION LOOP (FIXED)
+// DETECTION LOOP (FIXED PROPERLY)
 // ======================
 
 async function detectLoop(){
@@ -153,26 +157,22 @@ const detection = await faceapi
 
 if(detection){
 
-status.innerText = "Face Detected"
+stableFrames++   // 🔥 NEW
 
-// 🔥 SINGLE CAPTURE FIX
-if(detecting){
+status.innerText = "Hold Still..."
 
-detecting = false
-
-setTimeout(()=>{
+if(stableFrames >= 5){   // 🔥 FIX: stable capture
 captureFace(detection)
-}, 500)
-
+return
 }
 
 }else{
 
+stableFrames = 0   // 🔥 RESET
 status.innerText = "No Face"
 
 }
 
-// 🔁 LOOP CONTINUE
 requestAnimationFrame(detectLoop)
 
 }
@@ -189,6 +189,8 @@ if(stream){
 stream.getTracks().forEach(track=>track.stop())
 }
 
+status.innerText = "Captured ✅"
+
 const descriptor = Array.from(detection.descriptor)
 
 // save encoding
@@ -197,7 +199,9 @@ sessionStorage.setItem("face_encoding", JSON.stringify(descriptor))
 const params = new URLSearchParams(window.location.search)
 const eventId = params.get("event_id")
 
+setTimeout(()=>{
 window.location.href = `gallery.html?event_id=${eventId}`
+}, 800)
 
 }
 
