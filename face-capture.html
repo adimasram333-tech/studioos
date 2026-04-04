@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Face Capture</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+
+<style>
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+}
+
+.circle{
+width:260px;
+height:260px;
+border-radius:50%;
+overflow:hidden;
+border:4px solid rgba(255,255,255,0.2);
+position:relative;
+}
+
+.circle video{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.status{
+position:absolute;
+bottom:10px;
+left:50%;
+transform:translateX(-50%);
+background:rgba(0,0,0,0.6);
+padding:4px 10px;
+border-radius:20px;
+font-size:12px;
+}
+
+</style>
+
+</head>
+
+<body class="text-white flex items-center justify-center min-h-screen">
+
+<div class="text-center">
+
+<h2 class="text-xl mb-4">Capture Your Face</h2>
+
+<div class="circle mx-auto">
+<video id="video" autoplay muted></video>
+<div id="status" class="status">Camera Off</div>
+</div>
+
+<button id="startBtn"
+class="mt-6 bg-indigo-600 px-6 py-2 rounded-lg">
+Start Camera
+</button>
+
+</div>
+
+<script>
+
+let stream = null
+let modelsLoaded = false
+
+const video = document.getElementById("video")
+const status = document.getElementById("status")
+
+// ======================
+// LOAD MODELS
+// ======================
+
+async function loadModels(){
+
+status.innerText = "Loading AI..."
+
+await faceapi.nets.tinyFaceDetector.loadFromUri("/studioos/models")
+await faceapi.nets.faceLandmark68Net.loadFromUri("/studioos/models")
+await faceapi.nets.faceRecognitionNet.loadFromUri("/studioos/models")
+
+modelsLoaded = true
+status.innerText = "Ready"
+
+}
+
+// ======================
+// START CAMERA
+// ======================
+
+async function startCamera(){
+
+if(!modelsLoaded){
+alert("Models not loaded yet")
+return
+}
+
+stream = await navigator.mediaDevices.getUserMedia({
+video: { facingMode: "user" }
+})
+
+video.srcObject = stream
+status.innerText = "Detecting..."
+
+detectLoop()
+
+}
+
+// ======================
+// DETECTION LOOP
+// ======================
+
+async function detectLoop(){
+
+const detection = await faceapi
+.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+.withFaceLandmarks()
+.withFaceDescriptor()
+
+if(detection){
+
+status.innerText = "Face Detected"
+
+setTimeout(()=> captureFace(detection), 800)
+
+}else{
+
+status.innerText = "No Face"
+
+requestAnimationFrame(detectLoop)
+
+}
+
+}
+
+// ======================
+// CAPTURE FACE
+// ======================
+
+function captureFace(detection){
+
+if(stream){
+stream.getTracks().forEach(track=>track.stop())
+}
+
+const descriptor = Array.from(detection.descriptor)
+
+// save in session
+sessionStorage.setItem("face_encoding", JSON.stringify(descriptor))
+
+const params = new URLSearchParams(window.location.search)
+const eventId = params.get("event_id")
+
+// redirect to gallery
+window.location.href = `gallery.html?event_id=${eventId}`
+
+}
+
+// ======================
+
+document.getElementById("startBtn").onclick = async ()=>{
+
+await loadModels()
+await startCamera()
+
+}
+
+</script>
+
+</body>
+</html>
