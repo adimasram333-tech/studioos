@@ -113,7 +113,6 @@ input.removeAttribute("webkitdirectory")
 input.click()
 }
 
-
 // =============================
 // GET EVENT FROM URL
 // =============================
@@ -122,7 +121,6 @@ function getEventFromURL(){
 const params = new URLSearchParams(window.location.search)
 return params.get("event_id") || params.get("event")
 }
-
 
 // =============================
 // SHOW / HIDE CREATE EVENT BOX
@@ -145,6 +143,24 @@ box.style.display = "none"
 
 })
 
+// =============================
+// 🔥 FACE READY CHECK
+// =============================
+
+async function ensureFaceReady(){
+if(!window.faceEngine){
+console.error("❌ faceEngine not loaded")
+return false
+}
+
+try{
+await window.faceEngine.loadFaceModels()
+return true
+}catch(e){
+console.error("❌ Face load error", e)
+return false
+}
+}
 
 // =============================
 // HANDLE UPLOAD FLOW
@@ -157,6 +173,14 @@ const user = await window.getCurrentUser()
 
 if(!user){
 alert("Login required")
+return
+}
+
+// ✅ ENSURE FACE LOADED BEFORE UPLOAD
+const faceReady = await ensureFaceReady()
+
+if(!faceReady){
+alert("Face system not ready. Refresh page.")
 return
 }
 
@@ -233,13 +257,11 @@ window.location.href = `gallery.html?event_id=${eventId}`
 </script>
 
 <!-- ============================= -->
-<!-- 🔥 FACE SYSTEM FIXED LOADING -->
+<!-- 🔥 SCRIPT ORDER FIXED -->
 <!-- ============================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
-
-<!-- ✅ CACHE FIX ADDED -->
-<script src="js/face.js?v=2"></script>
+<script src="js/face.js?v=3"></script>
 
 <script src="js/cloudinary.js"></script>
 <script src="js/supabase.js"></script>
