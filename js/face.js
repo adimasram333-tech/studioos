@@ -1,6 +1,6 @@
 // face.js
 // Core Face Recognition Engine (StudioOS)
-// FINAL FIXED VERSION (Browser Safe)
+// FINAL FIXED VERSION (Browser Safe + Local Models)
 
 let faceModelsLoaded = false;
 
@@ -10,16 +10,25 @@ let faceModelsLoaded = false;
 async function loadFaceModels() {
     if (faceModelsLoaded) return;
 
-    const MODEL_URL = "https://cdn.jsdelivr.net/npm/face-api.js/models";
+    try {
+        // ✅ FIX: LOCAL MODEL PATH
+        const MODEL_URL = "/studioos/models";
 
-    await Promise.all([
-        faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-    ]);
+        console.log("Loading models from:", MODEL_URL);
 
-    faceModelsLoaded = true;
-    console.log("✅ Face models loaded");
+        await Promise.all([
+            faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+        ]);
+
+        faceModelsLoaded = true;
+        console.log("✅ Face models loaded");
+
+    } catch (err) {
+        console.error("❌ Face load error:", err);
+        faceModelsLoaded = false;
+    }
 }
 
 // ==============================
@@ -176,3 +185,10 @@ window.faceEngine = {
     processSelfie,
     getFaceEncoding
 };
+
+// ==============================
+// ✅ AUTO LOAD MODELS (IMPORTANT FIX)
+// ==============================
+window.addEventListener("load", () => {
+    loadFaceModels();
+});
