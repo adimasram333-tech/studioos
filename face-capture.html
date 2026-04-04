@@ -72,7 +72,7 @@ const video = document.getElementById("video")
 const status = document.getElementById("status")
 
 // ======================
-// LOAD MODELS (FIXED)
+// LOAD MODELS
 // ======================
 
 async function loadModels(){
@@ -139,7 +139,7 @@ alert("Camera permission denied")
 }
 
 // ======================
-// DETECTION LOOP
+// DETECTION LOOP (FIXED)
 // ======================
 
 async function detectLoop(){
@@ -155,14 +155,25 @@ if(detection){
 
 status.innerText = "Face Detected"
 
-setTimeout(()=> captureFace(detection), 800)
+// 🔥 SINGLE CAPTURE FIX
+if(detecting){
+
+detecting = false
+
+setTimeout(()=>{
+captureFace(detection)
+}, 500)
+
+}
 
 }else{
 
 status.innerText = "No Face"
-requestAnimationFrame(detectLoop)
 
 }
+
+// 🔁 LOOP CONTINUE
+requestAnimationFrame(detectLoop)
 
 }
 
