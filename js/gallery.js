@@ -315,8 +315,23 @@ const grid = document.getElementById("galleryGrid")
 const empty = document.getElementById("emptyState")
 
 // =============================
-// 🔥 FACE MATCH: PREPARE MATCHED SET (FIXED)
+// 🔥 FACE MATCH: PREPARE MATCHED SET (FINAL FIX)
 // =============================
+
+// 🔥 ROLE DETECTION (IMPORTANT)
+let role = "guest"
+
+// agar login user hai → photographer/client
+if(user){
+    role = "photographer"
+}
+
+// agar face encoding mila → guest verified
+if(userEncoding){
+    role = "guest"
+}
+
+console.log("ROLE:", role)
 
 let matchedImages = null
 
@@ -350,17 +365,15 @@ dist = Math.sqrt(dist)
 // 🔍 DEBUG DISTANCE
 console.log("DIST:", dist)
 
-// 🔥 FIX 1: threshold loose
+// 🔥 THRESHOLD
 if(dist < 0.65){
 
-// 🔥 FIX 2: trim safe match
 matchedImages.add(String(row.image_url).trim())
 
 }
 
 })
 
-// 🔍 FINAL MATCH COUNT
 console.log("MATCHED COUNT:", matchedImages.size)
 
 }
@@ -513,9 +526,20 @@ document.getElementById("modalImg").src = url
 
 data.forEach(img=>{
 
-// 🔥 FACE FILTER (FIXED)
-if(role === "guest" && matchedImages && !matchedImages.has(String(img.image_url).trim())){
-    return
+// 🔥 FACE FILTER (FINAL FIX)
+// sirf guest ke liye filter lagega
+if(role === "guest"){
+
+    // agar match hi nahi mila → kuch bhi show mat karo
+    if(!matchedImages || matchedImages.size === 0){
+        return
+    }
+
+    // agar image match nahi hai → skip
+    if(!matchedImages.has(String(img.image_url).trim())){
+        return
+    }
+
 }
 
 // safety check
@@ -535,10 +559,4 @@ div.onclick = () => openImage(img.image_url)
 
 grid.appendChild(div)
 
-})
-
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-loadGallery()
 })
