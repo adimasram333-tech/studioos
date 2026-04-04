@@ -148,6 +148,26 @@ async function processSelfie(imageFile) {
 }
 
 // ==============================
+// 🔥 MAIN FUNCTION (VERY IMPORTANT FIX)
+// ==============================
+
+async function getFaceEncoding(imageUrl) {
+    try {
+        const encodings = await processImageForFaces(imageUrl);
+
+        if (!encodings || encodings.length === 0) {
+            return null;
+        }
+
+        return encodings[0]; // first face only
+
+    } catch (err) {
+        console.error("Encoding error:", err);
+        return null;
+    }
+}
+
+// ==============================
 // MAKE GLOBAL (VERY IMPORTANT)
 // ==============================
 
@@ -159,3 +179,4 @@ window.matchFaces = matchFaces;
 window.loadImageFromUrl = loadImageFromUrl;
 window.processImageForFaces = processImageForFaces;
 window.processSelfie = processSelfie;
+window.getFaceEncoding = getFaceEncoding; // ✅ FIXED
