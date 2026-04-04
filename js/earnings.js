@@ -496,6 +496,20 @@ async function confirmWithdrawFinal() {
   await loadWithdrawStatus()
   await loadEarnings()
 }
+
+// 🔥 GET PENDING WITHDRAW AMOUNT
+async function getPendingAmount(userId) {
+  const { data, error } = await supabase
+    .from("payout_requests")
+    .select("amount")
+    .eq("photographer_id", userId)
+    .eq("status", "pending")
+
+  if (error || !data) return 0
+
+  return data.reduce((sum, item) => sum + Number(item.amount || 0), 0)
+}
+
 init()
 
 window.closeWithdrawModal = closeWithdrawModal
