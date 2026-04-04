@@ -241,6 +241,10 @@ async function requestPayout() {
     const pendingTotal = (pendingData || []).reduce((s, r) => s + (r.amount || 0), 0)
 
     const available = Math.max(0, total - Math.round(pendingTotal))
+if (available <= 0) {
+  alert("No balance available")
+  return
+}
 
     if (available < 500) {
       alert("Minimum withdrawal amount is ₹500")
@@ -285,8 +289,9 @@ document.getElementById("modalUpi").innerText = withdrawData.upi
 document.getElementById("modalAmount").innerText = withdrawData.amount
 
 // 🔥 SHOW MODAL
-document.getElementById("withdrawModal").classList.remove("hidden")
-
+const modal = document.getElementById("withdrawModal")
+modal.classList.remove("hidden")
+modal.classList.add("flex")
   
 
     
@@ -455,7 +460,9 @@ function renderProfitSplit(total, platformTotal) {
 // ===============================
 
 function closeWithdrawModal() {
-  document.getElementById("withdrawModal").classList.add("hidden")
+  const modal = document.getElementById("withdrawModal")
+  modal.classList.add("hidden")
+  modal.classList.remove("flex")
 }
 
 function goToProfile() {
