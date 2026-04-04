@@ -1,16 +1,16 @@
 // face.js
 // Core Face Recognition Engine (StudioOS)
-// DO NOT MODIFY EXISTING SYSTEM — this is standalone module
+// FIXED VERSION (Browser Compatible - No Export Errors)
 
 let faceModelsLoaded = false;
 
 // ==============================
 // LOAD MODELS
 // ==============================
-export async function loadFaceModels() {
+async function loadFaceModels() {
     if (faceModelsLoaded) return;
 
-    const MODEL_URL = "/models"; // make sure models folder exists
+    const MODEL_URL = "https://cdn.jsdelivr.net/npm/face-api.js/models";
 
     await Promise.all([
         faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
@@ -25,7 +25,7 @@ export async function loadFaceModels() {
 // ==============================
 // DETECT FACES FROM IMAGE
 // ==============================
-export async function detectFacesFromImage(imageElement) {
+async function detectFacesFromImage(imageElement) {
     if (!faceModelsLoaded) {
         throw new Error("Face models not loaded");
     }
@@ -35,20 +35,20 @@ export async function detectFacesFromImage(imageElement) {
         .withFaceLandmarks()
         .withFaceDescriptors();
 
-    return detections; // array
+    return detections;
 }
 
 // ==============================
 // GET DESCRIPTORS (ENCODINGS)
 // ==============================
-export function extractFaceEncodings(detections) {
+function extractFaceEncodings(detections) {
     return detections.map(d => Array.from(d.descriptor));
 }
 
 // ==============================
 // DETECT SINGLE FACE (SELFIE)
 // ==============================
-export async function detectSingleFace(imageElement) {
+async function detectSingleFace(imageElement) {
     if (!faceModelsLoaded) {
         throw new Error("Face models not loaded");
     }
@@ -66,7 +66,7 @@ export async function detectSingleFace(imageElement) {
 // ==============================
 // MATCH FACES
 // ==============================
-export function matchFaces(selfieEncoding, storedEncodings, threshold = 0.5) {
+function matchFaces(selfieEncoding, storedEncodings, threshold = 0.5) {
     const matchedImages = [];
 
     for (let item of storedEncodings) {
@@ -86,7 +86,7 @@ export function matchFaces(selfieEncoding, storedEncodings, threshold = 0.5) {
 // ==============================
 // LOAD IMAGE FROM URL
 // ==============================
-export function loadImageFromUrl(url) {
+function loadImageFromUrl(url) {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -100,8 +100,10 @@ export function loadImageFromUrl(url) {
 // ==============================
 // PROCESS IMAGE (UPLOAD SIDE)
 // ==============================
-export async function processImageForFaces(imageUrl) {
+async function processImageForFaces(imageUrl) {
     try {
+        await loadFaceModels();
+
         const img = await loadImageFromUrl(imageUrl);
 
         const detections = await detectFacesFromImage(img);
@@ -124,8 +126,10 @@ export async function processImageForFaces(imageUrl) {
 // ==============================
 // PROCESS SELFIE (CLIENT SIDE)
 // ==============================
-export async function processSelfie(imageFile) {
+async function processSelfie(imageFile) {
     try {
+        await loadFaceModels();
+
         const img = await faceapi.bufferToImage(imageFile);
 
         const encoding = await detectSingleFace(img);
@@ -142,3 +146,16 @@ export async function processSelfie(imageFile) {
         return null;
     }
 }
+
+// ==============================
+// MAKE GLOBAL (VERY IMPORTANT)
+// ==============================
+
+window.loadFaceModels = loadFaceModels;
+window.detectFacesFromImage = detectFacesFromImage;
+window.extractFaceEncodings = extractFaceEncodings;
+window.detectSingleFace = detectSingleFace;
+window.matchFaces = matchFaces;
+window.loadImageFromUrl = loadImageFromUrl;
+window.processImageForFaces = processImageForFaces;
+window.processSelfie = processSelfie;
