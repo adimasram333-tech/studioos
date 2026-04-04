@@ -280,6 +280,21 @@ console.log("✅ Guest verified | Role:", role)
 
 const supabase = await window.getSupabase()
 
+// =============================
+// 🔥 FACE MATCH: GET USER FACE
+// =============================
+
+let userEncoding = null
+
+try{
+const stored = sessionStorage.getItem("face_encoding")
+if(stored){
+userEncoding = JSON.parse(stored)
+}
+}catch(e){
+userEncoding = null
+}
+
 let eventName = "Event"
 
 if(eventId){
@@ -298,6 +313,45 @@ console.log("FINAL EVENT ID:", eventId)
 
 const grid = document.getElementById("galleryGrid")
 const empty = document.getElementById("emptyState")
+
+// =============================
+// 🔥 FACE MATCH: PREPARE MATCHED SET
+// =============================
+
+let matchedImages = null
+
+if(userEncoding && eventId){
+
+const { data: faces } = await supabase
+.from("face_data")
+.select("face_encoding, image_url")
+.eq("event_id", eventId)
+
+if(faces && faces.length > 0){
+
+matchedImages = new Set()
+
+faces.forEach(row=>{
+
+if(!row.face_encoding) return
+
+let dist = 0
+
+for(let i=0;i<row.face_encoding.length;i++){
+dist += Math.pow(row.face_encoding[i] - userEncoding[i],2)
+}
+
+dist = Math.sqrt(dist)
+
+if(dist < 0.5){
+matchedImages.add(row.image_url)
+}
+
+})
+
+}
+
+}
 
 if(!grid || !empty){
 return
@@ -445,6 +499,11 @@ document.getElementById("modalImg").src = url
 }
 
 data.forEach(img=>{
+
+// 🔥 FACE FILTER (NEW ADD)
+if(!user && matchedImages && !matchedImages.has(img.image_url)){
+return
+}
 
 if(!img || !img.image_url) return
 
