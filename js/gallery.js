@@ -514,7 +514,9 @@ document.getElementById("modalImg").src = url
 data.forEach(img=>{
 
 // 🔥 FACE FILTER (NEW ADD)
-if(!user && matchedImages && !matchedImages.has(img.image_url)){
+if(role === "guest" && matchedImages && !matchedImages.has(String(img.image_url).trim())){
+    return
+}
 return
 }
 
