@@ -513,13 +513,12 @@ document.getElementById("modalImg").src = url
 
 data.forEach(img=>{
 
-// 🔥 FACE FILTER (NEW ADD)
+// 🔥 FACE FILTER (FIXED)
 if(role === "guest" && matchedImages && !matchedImages.has(String(img.image_url).trim())){
     return
 }
-return
-}
 
+// safety check
 if(!img || !img.image_url) return
 
 const div = document.createElement("div")
