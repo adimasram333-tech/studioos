@@ -8,7 +8,7 @@
 <title>Face Capture</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
 <style>
 body{
@@ -77,28 +77,37 @@ const status = document.getElementById("status")
 
 async function loadModels(){
 
+if(modelsLoaded) return
+
 try{
 
 status.innerText = "Loading AI..."
 
-const MODEL_URL = "./models"
+const MODEL_URL = "/studioos/models"
+
+console.log("Loading models from:", MODEL_URL)
 
 await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
+console.log("Tiny model loaded")
+
 await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
+console.log("Landmark model loaded")
+
 await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+console.log("Recognition model loaded")
 
 modelsLoaded = true
 status.innerText = "Ready"
 
 }catch(err){
-console.error(err)
-alert("Model load failed")
+console.error("MODEL ERROR:", err)
+alert("Model load error: " + err.message)
 }
 
 }
 
 // ======================
-// START CAMERA (FIXED)
+// START CAMERA
 // ======================
 
 async function startCamera(){
@@ -130,7 +139,7 @@ alert("Camera permission denied")
 }
 
 // ======================
-// DETECTION LOOP (FIXED)
+// DETECTION LOOP
 // ======================
 
 async function detectLoop(){
@@ -177,13 +186,12 @@ sessionStorage.setItem("face_encoding", JSON.stringify(descriptor))
 const params = new URLSearchParams(window.location.search)
 const eventId = params.get("event_id")
 
-// redirect
 window.location.href = `gallery.html?event_id=${eventId}`
 
 }
 
 // ======================
-// BUTTON CLICK (FIXED)
+// BUTTON CLICK
 // ======================
 
 document.getElementById("startBtn").onclick = async ()=>{
