@@ -444,19 +444,18 @@ function renderClientEarnings(data) {
 // PROFIT SPLIT
 // ===============================
 
-function renderProfitSplit(available, platformTotalAfterWithdraw) {
-
+function renderProfitSplit(photographer, platform) {
   const container = document.getElementById("profitSplit")
   if (!container) return
 
   container.innerHTML = `
     <div class="flex justify-between">
       <span>Photographer</span>
-      <span class="text-green-400">₹${Math.round(total || 0)}</span>
+      <span class="text-green-400">₹${Math.round(photographer || 0)}</span>
     </div>
     <div class="flex justify-between">
       <span>Platform</span>
-      <span class="text-yellow-400">₹${Math.round(platformTotal || 0)}</span>
+      <span class="text-yellow-400">₹${Math.round(platform || 0)}</span>
     </div>
   `
 }
