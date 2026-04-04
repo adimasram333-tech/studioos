@@ -466,6 +466,109 @@ grid.appendChild(div)
 
 }
 
+// =============================
+// 🧠 FACE SEARCH SYSTEM (SAFE ADD)
+// =============================
+
+let faceSearchEncoding = null
+
+async function initFaceSearchUI(){
+
+const grid = document.getElementById("galleryGrid")
+if(!grid) return
+
+const container = document.createElement("div")
+container.className = "mb-4 flex flex-col items-center gap-2"
+
+container.innerHTML = `
+<input type="file" id="selfieInput" accept="image/*"
+class="text-sm bg-white/10 p-2 rounded" />
+
+<button id="findMyPhotos"
+class="bg-purple-600 px-4 py-2 rounded text-sm">
+Find My Photos
+</button>
+`
+
+grid.parentElement.insertBefore(container, grid)
+
+document.getElementById("findMyPhotos").onclick = handleFaceSearch
+
+}
+
+async function handleFaceSearch(){
+
+const file = document.getElementById("selfieInput").files[0]
+if(!file){
+alert("Upload selfie first")
+return
+}
+
+const img = await createImageBitmap(file)
+
+const detection = await faceapi
+.detectSingleFace(img)
+.withFaceLandmarks()
+.withFaceDescriptor()
+
+if(!detection){
+alert("No face detected")
+return
+}
+
+faceSearchEncoding = Array.from(detection.descriptor)
+
+const supabase = await window.getSupabase()
+const eventId = sessionStorage.getItem("event_id")
+
+const { data } = await supabase
+.from("face_data")
+.select("*")
+.eq("event_id", eventId)
+
+const grid = document.getElementById("galleryGrid")
+
+const originalCards = grid.innerHTML
+
+grid.innerHTML = ""
+
+let found = false
+
+data.forEach(row=>{
+
+if(!row.face_encoding) return
+
+const dist = Math.sqrt(
+row.face_encoding.reduce((sum,val,i)=>
+sum + Math.pow(val - faceSearchEncoding[i],2),0)
+)
+
+if(dist < 0.5){
+
+found = true
+
+const div = document.createElement("div")
+div.className = "glass rounded-xl overflow-hidden cursor-pointer"
+
+div.innerHTML = `
+<img src="${row.image_url}"
+class="w-full h-40 object-cover"/>
+`
+
+grid.appendChild(div)
+
+}
+
+})
+
+if(!found){
+alert("No matching photos found")
+grid.innerHTML = originalCards
+}
+
+}
+
 document.addEventListener("DOMContentLoaded",()=>{
 loadGallery()
+initFaceSearchUI()
 })
