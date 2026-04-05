@@ -21,20 +21,28 @@ let supabaseInitPromise = null
 
 
 // ================================
-// WAIT FOR CDN (CRITICAL FIX)
+// WAIT FOR CDN (FIXED: NO INFINITE LOOP)
 // ================================
 
-function waitForSupabaseCDN(){
+function waitForSupabaseCDN(timeoutMs = 10000){
 
-return new Promise((resolve)=>{
+return new Promise((resolve, reject)=>{
+
+const start = Date.now()
 
 const check = () => {
 
 if(window.supabase && typeof window.supabase.createClient === "function"){
 resolve()
-} else {
-setTimeout(check, 50)
+return
 }
+
+if(Date.now() - start >= timeoutMs){
+reject(new Error("Supabase CDN not loaded"))
+return
+}
+
+setTimeout(check, 50)
 
 }
 
@@ -61,7 +69,13 @@ return supabaseInitPromise
 
 supabaseInitPromise = (async ()=>{
 
+try{
+
 await waitForSupabaseCDN()
+
+if(window.supabaseClient){
+return window.supabaseClient
+}
 
 supabaseClient =
 window.supabase.createClient(
@@ -78,9 +92,15 @@ detectSessionInUrl:true
 
 window.supabaseClient = supabaseClient
 
-window.supabase = supabaseClient
-
 return supabaseClient
+
+}catch(err){
+
+supabaseInitPromise = null
+console.error("Supabase initialization failed:", err)
+throw err
+
+}
 
 })()
 
@@ -110,11 +130,11 @@ return await initializeSupabase()
 
 window.getCurrentUser = async function(){
 
+try{
+
 const supabase = await window.getSupabase()
 
 if(!supabase) return null
-
-try{
 
 const { data } = await supabase.auth.getUser()
 
@@ -134,7 +154,9 @@ return null
 // PRELOAD SUPABASE
 // ================================
 
-initializeSupabase()
+initializeSupabase().catch(err=>{
+console.error("Supabase preload failed:", err)
+})
 
 
 // ================================
