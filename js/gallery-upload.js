@@ -45,14 +45,19 @@ return null
 
 
 // =============================
-// 🔥 NEW FACE FUNCTION (FIXED)
+// 🔥 NEW FACE FUNCTION (PERMANENT SAFE FIX)
 // =============================
 
 async function processFace(imageUrl, eventId, userId){
 
 try{
 
-// ✅ NEW FIX (MODEL LOAD)
+if(!imageUrl || !eventId) return
+
+// ✅ URL normalize (VERY IMPORTANT)
+const cleanUrl = String(imageUrl).split("?")[0].trim()
+
+// ✅ MODEL LOAD
 if (window.loadFaceModels) {
 await window.loadFaceModels()
 }
@@ -62,20 +67,35 @@ console.warn("face.js not loaded")
 return
 }
 
-const encoding = await window.getFaceEncoding(imageUrl)
+const encoding = await window.getFaceEncoding(cleanUrl)
 
-if(!encoding){
-console.warn("No face detected:", imageUrl)
+// ❌ invalid encoding
+if(!encoding || !Array.isArray(encoding) || encoding.length === 0){
+console.warn("No valid face detected:", cleanUrl)
 return
 }
 
 const supabase = getSupabase()
 
+// ✅ DUPLICATE CHECK (IMPORTANT)
+const { data: existing } = await supabase
+.from("face_data")
+.select("id")
+.eq("event_id", eventId)
+.eq("image_url", cleanUrl)
+.limit(1)
+
+if(existing && existing.length > 0){
+console.log("Already exists:", cleanUrl)
+return
+}
+
+// ✅ INSERT SAFE
 const { error } = await supabase
 .from("face_data")
 .insert([{
 event_id: eventId,
-image_url: imageUrl,
+image_url: cleanUrl,
 face_encoding: encoding,
 user_id: userId
 }])
@@ -83,7 +103,7 @@ user_id: userId
 if(error){
 console.error("Face save error:", error)
 }else{
-console.log("Face saved:", imageUrl)
+console.log("Face saved:", cleanUrl)
 }
 
 }catch(err){
@@ -94,7 +114,7 @@ console.error("Face processing failed:", err)
 
 
 // =============================
-// 🔥 AUTO FIX OLD BOOKINGS (SAFE ONE-TIME)
+// बाकी code unchanged
 // =============================
 
 async function autoFixOldBookings(){
@@ -274,6 +294,11 @@ return null
 return String(select.value)
 }
 
+
+// =============================
+// 🔥 UPLOAD SYSTEM (SAFE FIX)
+// =============================
+
 async function uploadImages(finalEventId){
 
 const input = document.getElementById("images")
@@ -344,19 +369,24 @@ status.innerText = "No valid images selected"
 return
 }
 
-const uploadPromises = validFiles.map(async (file)=>{
+// 🔥 SEQUENTIAL UPLOAD (SAFE)
+const urls = []
+
+for(const file of validFiles){
 
 try{
 
-const url =
-await window.uploadToCloudinary(file, eventId)
+const url = await window.uploadToCloudinary(file, eventId)
 
 if(url){
 
 uploaded++
 progress.innerText = `${uploaded} / ${validFiles.length}`
 
-return url
+urls.push(url)
+
+// 🔥 FACE PROCESS SAFE (WAIT)
+await processFace(url, eventId, user.id)
 
 }
 
@@ -364,28 +394,18 @@ return url
 console.error("Upload error",err)
 }
 
-return null
-
-})
-
-const urls =
-(await Promise.all(uploadPromises)).filter(Boolean)
+}
 
 if(!urls.length){
 status.innerText = "Upload failed"
 return
 }
 
-// 🔥 FACE PROCESSING (FIXED)
-urls.forEach(url=>{
-processFace(url, eventId, user.id)
-})
-
 try{
 
 const rows = urls.map(url => ({
 event_id:eventId,
-image_url:url,
+image_url:String(url).split("?")[0].trim(),
 user_id:user.id
 }))
 
