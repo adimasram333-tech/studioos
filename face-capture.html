@@ -362,8 +362,8 @@ const sortedMatches = Array.from(bestDistanceByImage.entries())
 .map(([image_url, distance]) => ({ image_url, distance }))
 .sort((a, b) => a.distance - b.distance)
 
-const ABSOLUTE_THRESHOLD = 0.52
-const BEST_MATCH_MARGIN = 0.06
+const ABSOLUTE_THRESHOLD = 0.55
+const BEST_MATCH_MARGIN = 0.10
 
 let matched = []
 
