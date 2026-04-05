@@ -57,17 +57,26 @@ if(!imageUrl || !eventId) return
 // ✅ URL normalize (VERY IMPORTANT)
 const cleanUrl = String(imageUrl).split("?")[0].trim()
 
+// ✅ SUPPORT BOTH GLOBAL + faceEngine
+const loadModelsFn =
+window.loadFaceModels ||
+(window.faceEngine && window.faceEngine.loadFaceModels)
+
+const getEncodingFn =
+window.getFaceEncoding ||
+(window.faceEngine && window.faceEngine.getFaceEncoding)
+
 // ✅ MODEL LOAD
-if (window.loadFaceModels) {
-await window.loadFaceModels()
+if(loadModelsFn){
+await loadModelsFn()
 }
 
-if(!window.getFaceEncoding){
+if(!getEncodingFn){
 console.warn("face.js not loaded")
 return
 }
 
-const encoding = await window.getFaceEncoding(cleanUrl)
+const encoding = await getEncodingFn(cleanUrl)
 
 // ❌ invalid encoding
 if(!encoding || !Array.isArray(encoding) || encoding.length === 0){
@@ -81,7 +90,7 @@ const supabase = getSupabase()
 const { data: existing } = await supabase
 .from("face_data")
 .select("id")
-.eq("event_id", eventId)
+.eq("event_id", String(eventId))
 .eq("image_url", cleanUrl)
 .limit(1)
 
@@ -94,7 +103,7 @@ return
 const { error } = await supabase
 .from("face_data")
 .insert([{
-event_id: eventId,
+event_id: String(eventId),
 image_url: cleanUrl,
 face_encoding: encoding,
 user_id: userId
@@ -114,7 +123,7 @@ console.error("Face processing failed:", err)
 
 
 // =============================
-// बाकी code unchanged
+// 🔥 AUTO FIX OLD BOOKINGS (SAFE ONE-TIME)
 // =============================
 
 async function autoFixOldBookings(){
