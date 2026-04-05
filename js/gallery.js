@@ -505,7 +505,10 @@ matchedImages.add(url)
 })
 }
 
-if(userEncoding && eventId){
+// ✅ FINAL FIX:
+// guest ke liye DB re-match allow nahi
+// sirf client / photographer ke liye optional DB matching
+if(userEncoding && eventId && effectiveRole !== "guest"){
 
 const { data: faces } = await supabase
 .from("face_data")
