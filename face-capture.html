@@ -66,44 +66,179 @@ let stream = null
 let modelsLoaded = false
 let detecting = false
 let stableFrames = 0
+let processingFace = false
 
 const video = document.getElementById("video")
 const status = document.getElementById("status")
+const startBtn = document.getElementById("startBtn")
+
+function getEventId(){
+const params = new URLSearchParams(window.location.search)
+const eventId = (params.get("event_id") || "").trim()
+return eventId || null
+}
+
+function clearFaceSession(){
+sessionStorage.removeItem("face_encoding")
+sessionStorage.removeItem("matched_images")
+sessionStorage.removeItem("matched_images_by_event")
+sessionStorage.removeItem("face_verified")
+sessionStorage.removeItem("face_scan_done")
+sessionStorage.removeItem("face_scan_event_id")
+}
+
+function normalizeImageUrl(url){
+if(!url) return ""
+return String(url).split("?")[0].trim()
+}
+
+function stopCamera(){
+try{
+if(stream){
+stream.getTracks().forEach(track=>track.stop())
+}
+}catch(e){
+console.error("Camera stop error:", e)
+}
+stream = null
+}
+
+function setBusyState(isBusy, text){
+processingFace = isBusy
+startBtn.disabled = isBusy
+startBtn.style.opacity = isBusy ? "0.7" : "1"
+startBtn.style.pointerEvents = isBusy ? "none" : "auto"
+if(text){
+status.innerText = text
+}
+}
+
+function withTimeout(promise, ms, message){
+return new Promise((resolve, reject)=>{
+const timer = setTimeout(()=>{
+reject(new Error(message || "Operation timed out"))
+}, ms)
+
+promise
+.then(result=>{
+clearTimeout(timer)
+resolve(result)
+})
+.catch(err=>{
+clearTimeout(timer)
+reject(err)
+})
+})
+}
+
+function saveMatchedImagesToSession(eventId, matchedImages){
+const cleanImages = matchedImages
+.map(normalizeImageUrl)
+.filter(Boolean)
+
+sessionStorage.setItem("matched_images", JSON.stringify(cleanImages))
+
+let map = {}
+try{
+map = JSON.parse(sessionStorage.getItem("matched_images_by_event") || "{}")
+}catch(e){
+map = {}
+}
+
+map[eventId] = cleanImages
+
+sessionStorage.setItem("matched_images_by_event", JSON.stringify(map))
+sessionStorage.setItem("face_verified", cleanImages.length > 0 ? "true" : "false")
+sessionStorage.setItem("face_scan_done", "true")
+sessionStorage.setItem("face_scan_event_id", eventId)
+}
 
 async function loadModels(){
 
 if(modelsLoaded) return
 
+try{
+setBusyState(true, "Loading AI...")
+
 const MODEL_URL = "/studioos/models"
 
-await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
-await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
-await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+await withTimeout(
+Promise.all([
+faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+]),
+15000,
+"AI models load timeout"
+)
 
 modelsLoaded = true
-status.innerText = "Ready"
+setBusyState(false, "Ready")
+}catch(err){
+console.error("MODEL ERROR:", err)
+setBusyState(false, "Model Error")
+alert("Model load error: " + err.message)
+}
 }
 
 async function startCamera(){
 
+try{
+
+const eventId = getEventId()
+if(!eventId){
+alert("Invalid event access")
+return
+}
+
+clearFaceSession()
+
+if(!modelsLoaded){
+alert("Models not loaded yet")
+return
+}
+
+setBusyState(true, "Opening Camera...")
+
 stream = await navigator.mediaDevices.getUserMedia({
-video: { facingMode: "user" }
+video: {
+facingMode: "user",
+width: { ideal: 640 },
+height: { ideal: 480 }
+},
+audio: false
 })
 
 video.srcObject = stream
 
-video.onloadedmetadata = () => {
-video.play()
+video.onloadedmetadata = async () => {
+try{
+await video.play()
+stableFrames = 0
 detecting = true
-detectLoop()
+setBusyState(false, "Detecting...")
+requestAnimationFrame(detectLoop)
+}catch(err){
+console.error("Video play error:", err)
+stopCamera()
+setBusyState(false, "Camera Error")
+alert("Unable to start camera preview")
+}
 }
 
-status.innerText = "Detecting..."
+}catch(err){
+console.error("Camera start error:", err)
+stopCamera()
+setBusyState(false, "Camera Error")
+alert("Camera permission denied")
+}
 }
 
 async function detectLoop(){
 
-if(!detecting) return
+if(!detecting || processingFace) return
+
+try{
 
 const detection = await faceapi
 .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
@@ -116,7 +251,7 @@ stableFrames++
 status.innerText = "Hold Still..."
 
 if(stableFrames >= 5){
-captureFace(detection)
+await captureFace(detection)
 return
 }
 
@@ -125,45 +260,83 @@ stableFrames = 0
 status.innerText = "No Face"
 }
 
+}catch(err){
+console.error("Detection loop error:", err)
+stableFrames = 0
+status.innerText = "Detection Error"
+}
+
+if(detecting && !processingFace){
 requestAnimationFrame(detectLoop)
+}
 }
 
 async function captureFace(detection){
 
+if(processingFace) return
+
 detecting = false
+setBusyState(true, "Processing...")
 
-if(stream){
-stream.getTracks().forEach(track=>track.stop())
-}
-
-status.innerText = "Processing..."
+stopCamera()
 
 const descriptor = Array.from(detection.descriptor)
-
 sessionStorage.setItem("face_encoding", JSON.stringify(descriptor))
 
-const params = new URLSearchParams(window.location.search)
-const eventId = params.get("event_id")
+const eventId = getEventId()
+
+if(!eventId){
+setBusyState(false, "Invalid Event")
+alert("Invalid event access")
+window.location.href = "access.html"
+return
+}
 
 try{
 
-const supabase = await window.getSupabase()
+if(!window.getSupabase){
+throw new Error("Supabase not initialized")
+}
 
-const { data: faces } = await supabase
+const supabase = await withTimeout(
+window.getSupabase(),
+10000,
+"Supabase initialization timeout"
+)
+
+const queryResult = await withTimeout(
+supabase
 .from("face_data")
 .select("face_encoding, image_url")
-.eq("event_id", eventId)
+.eq("event_id", eventId),
+15000,
+"Face data fetch timeout"
+)
 
-let matched = []
+const { data: faces, error } = queryResult
 
-if(faces && faces.length){
+if(error){
+throw error
+}
 
-faces.forEach(row=>{
+const matched = []
+
+if(Array.isArray(faces) && faces.length > 0){
+
+for(const row of faces){
+
+if(!row || !Array.isArray(row.face_encoding) || !row.image_url){
+continue
+}
+
+if(row.face_encoding.length !== descriptor.length){
+continue
+}
 
 let dist = 0
 
 for(let i=0;i<row.face_encoding.length;i++){
-const diff = row.face_encoding[i] - descriptor[i]
+const diff = Number(row.face_encoding[i]) - Number(descriptor[i])
 dist += diff * diff
 }
 
@@ -172,48 +345,46 @@ dist = Math.sqrt(dist)
 if(dist < 0.60){
 matched.push(row.image_url)
 }
-
-})
+}
 
 }
 
-sessionStorage.setItem("matched_images", JSON.stringify(matched))
-sessionStorage.setItem("face_verified", "true")
-sessionStorage.setItem("face_scan_event_id", eventId)
+saveMatchedImagesToSession(eventId, matched)
 
 if(matched.length === 0){
-
-status.innerText = "No Match Found ❌"
-
+setBusyState(false, "No Match Found ❌")
 setTimeout(()=>{
 alert("No photos found for your face")
 window.location.href = `access.html?event_id=${eventId}`
-}, 1000)
-
+}, 600)
 return
 }
 
-status.innerText = "Match Found ✅"
+setBusyState(false, "Match Found ✅")
 
 setTimeout(()=>{
 window.location.href = `gallery.html?event_id=${eventId}`
-}, 800)
+}, 500)
 
 }catch(err){
-
-console.error(err)
-alert("Face processing failed")
-
+console.error("Face processing error:", err)
+setBusyState(false, "Processing Failed")
+alert("Face processing failed: " + err.message)
 window.location.href = `access.html?event_id=${eventId}`
-
+}
 }
 
-}
-
-document.getElementById("startBtn").onclick = async ()=>{
+startBtn.onclick = async ()=>{
+if(processingFace) return
 await loadModels()
+if(modelsLoaded){
 await startCamera()
 }
+}
+
+window.addEventListener("beforeunload", ()=>{
+stopCamera()
+})
 
 </script>
 
