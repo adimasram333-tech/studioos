@@ -329,7 +329,7 @@ if(error){
 throw error
 }
 
-const strongMatches = []
+const bestDistanceByImage = new Map()
 
 if(Array.isArray(faces)){
 
@@ -339,31 +339,44 @@ if(!row || !Array.isArray(row.face_encoding) || !row.image_url){
 continue
 }
 
+const cleanUrl = normalizeImageUrl(row.image_url)
+if(!cleanUrl){
+continue
+}
+
 const dist = getFaceDistance(row.face_encoding, descriptor)
+if(!Number.isFinite(dist)){
+continue
+}
 
-// 🔥 STRICT THRESHOLD
-if(dist < 0.45){
-strongMatches.push({
-image_url: row.image_url,
-distance: dist
-})
+const existingBest = bestDistanceByImage.get(cleanUrl)
+
+if(existingBest === undefined || dist < existingBest){
+bestDistanceByImage.set(cleanUrl, dist)
 }
 }
 
 }
 
-strongMatches.sort((a, b) => a.distance - b.distance)
+const sortedMatches = Array.from(bestDistanceByImage.entries())
+.map(([image_url, distance]) => ({ image_url, distance }))
+.sort((a, b) => a.distance - b.distance)
 
-const matched = []
-const seenUrls = new Set()
+const ABSOLUTE_THRESHOLD = 0.52
+const BEST_MATCH_MARGIN = 0.06
 
-strongMatches.forEach(item=>{
-const cleanUrl = normalizeImageUrl(item.image_url)
-if(cleanUrl && !seenUrls.has(cleanUrl)){
-seenUrls.add(cleanUrl)
-matched.push(cleanUrl)
+let matched = []
+
+if(sortedMatches.length > 0){
+
+const bestDistance = sortedMatches[0].distance
+const dynamicThreshold = Math.min(ABSOLUTE_THRESHOLD, bestDistance + BEST_MATCH_MARGIN)
+
+matched = sortedMatches
+.filter(item => item.distance <= dynamicThreshold)
+.map(item => item.image_url)
+
 }
-})
 
 saveMatchedImagesToSession(eventId, matched)
 
