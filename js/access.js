@@ -28,6 +28,7 @@ async function initAccess() {
     return;
   }
 
+  eventId = String(eventId).trim();
   localStorage.setItem("last_event_id", eventId);
 
   const form = document.getElementById("accessForm");
@@ -56,6 +57,34 @@ async function initAccess() {
   let userRole = "guest";
 
   // =============================
+  // SAFE SESSION PREP
+  // =============================
+
+  function clearOldFaceSession() {
+    sessionStorage.removeItem("face_encoding");
+  }
+
+  function setGallerySession(visitorId, role) {
+    sessionStorage.setItem("gallery_access", "true");
+    sessionStorage.setItem("event_id", eventId);
+    sessionStorage.setItem("visitor_id", visitorId);
+    sessionStorage.setItem("role", role);
+  }
+
+  function goNext(role) {
+    clearOldFaceSession();
+
+    // client gets full gallery directly
+    if (role === "client") {
+      window.location.href = `gallery.html?event_id=${eventId}`;
+      return;
+    }
+
+    // guest goes through face capture
+    window.location.href = `face-capture.html?event_id=${eventId}`;
+  }
+
+  // =============================
   // TOKEN INPUT
   // =============================
 
@@ -82,7 +111,8 @@ async function initAccess() {
 
   async function verifyToken(visitorId) {
 
-    const token = document.getElementById("tokenInput").value.trim();
+    const tokenInput = document.getElementById("tokenInput");
+    const token = tokenInput ? tokenInput.value.trim() : "";
 
     if (!token) return false;
 
@@ -253,15 +283,12 @@ async function initAccess() {
 
       if (tokenResult === true) {
         userRole = "client";
+      } else {
+        userRole = "guest";
       }
 
-      sessionStorage.setItem("gallery_access", "true");
-      sessionStorage.setItem("event_id", eventId);
-      sessionStorage.setItem("visitor_id", visitorId);
-      sessionStorage.setItem("role", userRole);
-
-      // 🔥 UPDATED REDIRECT
-      window.location.href = `face-capture.html?event_id=${eventId}`;
+      setGallerySession(visitorId, userRole);
+      goNext(userRole);
 
     } catch (err) {
       console.error(err);
@@ -310,30 +337,20 @@ async function initAccess() {
 
       if (tokenResult === true) {
 
-        sessionStorage.setItem("gallery_access", "true");
-        sessionStorage.setItem("event_id", eventId);
-        sessionStorage.setItem("visitor_id", existingVisitor.id);
-        sessionStorage.setItem("role", "client");
-
-        // 🔥 UPDATED REDIRECT
-        window.location.href = `face-capture.html?event_id=${eventId}`;
+        setGallerySession(existingVisitor.id, "client");
+        goNext("client");
         return;
       }
 
       if (existingVisitor.verified) {
-
-        sessionStorage.setItem("gallery_access", "true");
-        sessionStorage.setItem("event_id", eventId);
-        sessionStorage.setItem("visitor_id", existingVisitor.id);
-        sessionStorage.setItem("role", "guest");
 
         await supabase
           .from("event_visitors")
           .update({ last_visit: new Date().toISOString() })
           .eq("id", existingVisitor.id);
 
-        // 🔥 UPDATED REDIRECT
-        window.location.href = `face-capture.html?event_id=${eventId}`;
+        setGallerySession(existingVisitor.id, "guest");
+        goNext("guest");
         return;
       }
     }
