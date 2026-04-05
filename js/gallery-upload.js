@@ -52,7 +52,13 @@ async function processFace(imageUrl, eventId, userId){
 
 try{
 
-if(!imageUrl || !eventId) return
+if(!imageUrl || !eventId){
+return {
+saved: false,
+facesDetected: 0,
+reason: "missing_image_or_event"
+}
+}
 
 // ✅ URL normalize (VERY IMPORTANT)
 const cleanUrl = String(imageUrl).split("?")[0].trim()
@@ -77,7 +83,11 @@ await loadModelsFn()
 
 if(!processMultiFaceFn && !getEncodingFn){
 console.warn("face.js not loaded")
-return
+return {
+saved: false,
+facesDetected: 0,
+reason: "face_engine_missing"
+}
 }
 
 const supabase = getSupabase()
@@ -93,7 +103,11 @@ const { data: existing } = await supabase
 
 if(existing && existing.length > 0){
 console.log("Face data already exists:", cleanUrl)
-return
+return {
+saved: true,
+facesDetected: existing.length,
+reason: "already_exists"
+}
 }
 
 // ✅ MULTI-FACE FIRST (wedding/group safe)
@@ -121,7 +135,11 @@ encodings = [singleEncoding]
 // ❌ invalid encoding(s)
 if(!encodings || encodings.length === 0){
 console.warn("No valid face detected:", cleanUrl)
-return
+return {
+saved: false,
+facesDetected: 0,
+reason: "no_face_detected"
+}
 }
 
 // ✅ PREPARE MULTI INSERT
@@ -138,12 +156,27 @@ const { error } = await supabase
 
 if(error){
 console.error("Face save error:", error)
+return {
+saved: false,
+facesDetected: 0,
+reason: "db_insert_failed"
+}
 }else{
 console.log(`Face saved (${rows.length} face${rows.length > 1 ? "s" : ""}):`, cleanUrl)
+return {
+saved: true,
+facesDetected: rows.length,
+reason: "saved"
+}
 }
 
 }catch(err){
 console.error("Face processing failed:", err)
+return {
+saved: false,
+facesDetected: 0,
+reason: "processing_failed"
+}
 }
 
 }
@@ -396,6 +429,11 @@ status.innerText = "Uploading photos..."
 progress.innerText = ""
 
 let uploaded = 0
+let savedFacesImages = 0
+let totalFacesDetected = 0
+let skippedFaceImages = 0
+
+const skippedFiles = []
 
 const validFiles =
 [...files].filter(file => file && file.type && file.type.startsWith("image/"))
@@ -422,12 +460,32 @@ progress.innerText = `${uploaded} / ${validFiles.length}`
 urls.push(url)
 
 // 🔥 FACE PROCESS SAFE (WAIT)
-await processFace(url, eventId, user.id)
+const faceResult = await processFace(url, eventId, user.id)
+
+if(faceResult && faceResult.saved){
+if(faceResult.reason !== "already_exists"){
+savedFacesImages++
+}
+if(faceResult.facesDetected > 0){
+totalFacesDetected += faceResult.facesDetected
+}
+}else{
+skippedFaceImages++
+skippedFiles.push({
+name: file.name,
+reason: faceResult?.reason || "unknown"
+})
+}
 
 }
 
 }catch(err){
 console.error("Upload error",err)
+skippedFaceImages++
+skippedFiles.push({
+name: file.name,
+reason: "upload_failed"
+})
 }
 
 }
@@ -454,7 +512,12 @@ return
 }
 
 status.innerText = "Upload Complete"
-progress.innerText = "All photos uploaded"
+progress.innerText =
+`${urls.length} photos uploaded • ${savedFacesImages} photos processed for face • ${totalFacesDetected} faces detected • ${skippedFaceImages} skipped`
+
+if(skippedFiles.length > 0){
+console.warn("Skipped face processing files:", skippedFiles)
+}
 
 await loadConfirmedEvents()
 
