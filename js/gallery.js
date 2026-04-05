@@ -372,21 +372,9 @@ return matched
 }
 
 function hasValidGuestFaceSession(eventId){
-const storedEventId = sessionStorage.getItem("face_scan_event_id")
-const hasEncoding = !!sessionStorage.getItem("face_encoding")
 const matchedImages = getGuestMatchedImagesFromSession(eventId)
-const faceVerified = sessionStorage.getItem("face_verified") === "true"
-const faceScanDone = sessionStorage.getItem("face_scan_done") === "true"
 
-if(matchedImages.size > 0){
-return true
-}
-
-if(hasEncoding && (!storedEventId || storedEventId === eventId)){
-return true
-}
-
-if((faceVerified || faceScanDone) && (!storedEventId || storedEventId === eventId)){
+if(matchedImages && matchedImages.size > 0){
 return true
 }
 
