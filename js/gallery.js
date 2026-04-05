@@ -318,19 +318,6 @@ const empty = document.getElementById("emptyState")
 // 🔥 FACE MATCH: PREPARE MATCHED SET (FINAL FIX)
 // =============================
 
-// 🔥 ROLE DETECTION (IMPORTANT)
-let role = "guest"
-
-// agar login user hai → photographer/client
-if(user){
-    role = "photographer"
-}
-
-// agar face encoding mila → guest verified
-if(userEncoding){
-    role = "guest"
-}
-
 console.log("ROLE:", role)
 
 let matchedImages = null
@@ -367,9 +354,7 @@ console.log("DIST:", dist)
 
 // 🔥 THRESHOLD
 if(dist < 0.65){
-
 matchedImages.add(String(row.image_url).trim())
-
 }
 
 })
@@ -385,6 +370,7 @@ return
 }
 
 grid.innerHTML = ""
+
 // =============================
 // FOLDER VIEW (RESTORED)
 // =============================
@@ -484,6 +470,14 @@ empty.classList.remove("hidden")
 return
 }
 
+// guest + no match => no photos message
+if(role === "guest" && userEncoding && matchedImages && matchedImages.size === 0){
+grid.innerHTML = ""
+empty.innerText = "No photos found for your face"
+empty.classList.remove("hidden")
+return
+}
+
 function openImage(url){
 let modal = document.getElementById("imageModal")
 
@@ -550,4 +544,16 @@ div.onclick = () => openImage(img.image_url)
 
 grid.appendChild(div)
 
+})
+
+// guest + had face encoding but no matched image rendered
+if(role === "guest" && userEncoding && grid.children.length === 0){
+empty.innerText = "No photos found for your face"
+empty.classList.remove("hidden")
+}
+
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+loadGallery()
 })
