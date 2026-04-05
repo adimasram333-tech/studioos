@@ -1,4 +1,3 @@
-<!-- ONLY SCRIPT PART UPDATED, FULL FILE BELOW -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +9,7 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="js/supabase.js"></script>
 
 <style>
 body{
@@ -128,10 +128,6 @@ status.innerText = "No Face"
 requestAnimationFrame(detectLoop)
 }
 
-// ======================
-// 🔥 FINAL FIX HERE
-// ======================
-
 async function captureFace(detection){
 
 detecting = false
@@ -148,8 +144,6 @@ sessionStorage.setItem("face_encoding", JSON.stringify(descriptor))
 
 const params = new URLSearchParams(window.location.search)
 const eventId = params.get("event_id")
-
-// 🔥 FETCH + MATCH IMMEDIATELY
 
 try{
 
@@ -183,12 +177,10 @@ matched.push(row.image_url)
 
 }
 
-// 🔥 SAVE MATCHED IMAGES
 sessionStorage.setItem("matched_images", JSON.stringify(matched))
 sessionStorage.setItem("face_verified", "true")
 sessionStorage.setItem("face_scan_event_id", eventId)
 
-// 🔥 BLOCK IF NO MATCH
 if(matched.length === 0){
 
 status.innerText = "No Match Found ❌"
@@ -201,7 +193,6 @@ window.location.href = `access.html?event_id=${eventId}`
 return
 }
 
-// SUCCESS
 status.innerText = "Match Found ✅"
 
 setTimeout(()=>{
