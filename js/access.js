@@ -57,11 +57,21 @@ async function initAccess() {
   let userRole = "guest";
 
   // =============================
-  // SAFE SESSION PREP
+  // 🔥 SAFE SESSION PREP (FIXED)
   // =============================
 
   function clearOldFaceSession() {
+
+    // OLD
     sessionStorage.removeItem("face_encoding");
+
+    // 🔥 NEW (CRITICAL FIX)
+    sessionStorage.removeItem("matched_images");
+    sessionStorage.removeItem("matched_images_by_event");
+    sessionStorage.removeItem("face_verified");
+    sessionStorage.removeItem("face_scan_done");
+    sessionStorage.removeItem("face_scan_event_id");
+
   }
 
   function setGallerySession(visitorId, role) {
@@ -72,6 +82,8 @@ async function initAccess() {
   }
 
   function goNext(role) {
+
+    // 🔥 ALWAYS RESET FACE SESSION
     clearOldFaceSession();
 
     // client gets full gallery directly
@@ -80,7 +92,7 @@ async function initAccess() {
       return;
     }
 
-    // guest goes through face capture
+    // guest MUST go through fresh face scan
     window.location.href = `face-capture.html?event_id=${eventId}`;
   }
 
@@ -106,7 +118,7 @@ async function initAccess() {
   }
 
   // =============================
-  // TOKEN VERIFY FUNCTION (UPDATED - 2 DEVICE LIMIT)
+  // TOKEN VERIFY FUNCTION
   // =============================
 
   async function verifyToken(visitorId) {
