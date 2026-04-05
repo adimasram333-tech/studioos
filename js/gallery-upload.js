@@ -92,24 +92,6 @@ reason: "face_engine_missing"
 
 const supabase = getSupabase()
 
-// ✅ IMAGE-LEVEL DUPLICATE CHECK
-// same image already processed => skip full insert
-const { data: existing } = await supabase
-.from("face_data")
-.select("id")
-.eq("event_id", String(eventId))
-.eq("image_url", cleanUrl)
-.limit(1)
-
-if(existing && existing.length > 0){
-console.log("Face data already exists:", cleanUrl)
-return {
-saved: true,
-facesDetected: existing.length,
-reason: "already_exists"
-}
-}
-
 // ✅ MULTI-FACE FIRST (wedding/group safe)
 let encodings = []
 
@@ -142,8 +124,85 @@ reason: "no_face_detected"
 }
 }
 
+// ✅ FETCH EXISTING FACES FOR SAME IMAGE
+const { data: existingFaces, error: existingError } = await supabase
+.from("face_data")
+.select("id, face_encoding")
+.eq("event_id", String(eventId))
+.eq("image_url", cleanUrl)
+.limit(100)
+
+if(existingError){
+console.error("Existing face fetch error:", existingError)
+return {
+saved: false,
+facesDetected: 0,
+reason: "existing_face_fetch_failed"
+}
+}
+
+function getFaceDistance(a, b){
+if(!Array.isArray(a) || !Array.isArray(b)) return Number.POSITIVE_INFINITY
+if(a.length !== b.length) return Number.POSITIVE_INFINITY
+
+let dist = 0
+
+for(let i=0;i<a.length;i++){
+const diff = Number(a[i]) - Number(b[i])
+dist += diff * diff
+}
+
+return Math.sqrt(dist)
+}
+
+const duplicateThreshold = 0.01
+const knownEncodings = []
+
+;(existingFaces || []).forEach(row=>{
+if(row && Array.isArray(row.face_encoding) && row.face_encoding.length > 0){
+knownEncodings.push(row.face_encoding)
+}
+})
+
+// ✅ KEEP ONLY UNIQUE ENCODINGS
+const uniqueEncodingsToInsert = []
+
+encodings.forEach(encoding=>{
+
+if(!Array.isArray(encoding) || encoding.length === 0){
+return
+}
+
+let duplicateFound = false
+
+for(const known of knownEncodings){
+if(getFaceDistance(known, encoding) < duplicateThreshold){
+duplicateFound = true
+break
+}
+}
+
+if(duplicateFound){
+return
+}
+
+uniqueEncodingsToInsert.push(encoding)
+knownEncodings.push(encoding)
+
+})
+
+// ✅ if all already saved, don't insert again
+if(uniqueEncodingsToInsert.length === 0){
+console.log("Face data already exists:", cleanUrl)
+return {
+saved: true,
+facesDetected: existingFaces?.length || 0,
+reason: "already_exists"
+}
+}
+
 // ✅ PREPARE MULTI INSERT
-const rows = encodings.map(encoding => ({
+const rows = uniqueEncodingsToInsert.map(encoding => ({
 event_id: String(eventId),
 image_url: cleanUrl,
 face_encoding: encoding,
