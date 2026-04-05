@@ -62,6 +62,15 @@ class="mt-6 bg-indigo-600 px-6 py-2 rounded-lg">
 Start Camera
 </button>
 
+<button id="retryBtn"
+class="mt-3 bg-amber-500 hover:bg-amber-600 px-6 py-2 rounded-lg hidden">
+Retry Scan
+</button>
+
+<p id="helpText" class="text-xs text-gray-400 mt-3 max-w-xs mx-auto hidden">
+Try again with front face, eyes open, and better lighting. Avoid sunglasses if possible.
+</p>
+
 </div>
 
 <script>
@@ -75,6 +84,8 @@ let processingFace = false
 const video = document.getElementById("video")
 const status = document.getElementById("status")
 const startBtn = document.getElementById("startBtn")
+const retryBtn = document.getElementById("retryBtn")
+const helpText = document.getElementById("helpText")
 
 function getEventId(){
 const params = new URLSearchParams(window.location.search)
@@ -112,9 +123,23 @@ processingFace = isBusy
 startBtn.disabled = isBusy
 startBtn.style.opacity = isBusy ? "0.7" : "1"
 startBtn.style.pointerEvents = isBusy ? "none" : "auto"
+retryBtn.disabled = isBusy
+retryBtn.style.opacity = isBusy ? "0.7" : "1"
+retryBtn.style.pointerEvents = isBusy ? "none" : "auto"
 if(text){
 status.innerText = text
 }
+}
+
+function showRetryUI(message){
+setBusyState(false, message || "No Match Found ❌")
+retryBtn.classList.remove("hidden")
+helpText.classList.remove("hidden")
+}
+
+function hideRetryUI(){
+retryBtn.classList.add("hidden")
+helpText.classList.add("hidden")
 }
 
 function withTimeout(promise, ms, message){
@@ -171,12 +196,26 @@ dist += diff * diff
 return Math.sqrt(dist)
 }
 
+function buildMatchedImages(sortedMatches, absoluteThreshold, bestMatchMargin){
+if(!Array.isArray(sortedMatches) || sortedMatches.length === 0){
+return []
+}
+
+const bestDistance = sortedMatches[0].distance
+const dynamicThreshold = Math.min(absoluteThreshold, bestDistance + bestMatchMargin)
+
+return sortedMatches
+.filter(item => item.distance <= dynamicThreshold)
+.map(item => item.image_url)
+}
+
 async function loadModels(){
 
 if(modelsLoaded) return
 
 try{
 setBusyState(true, "Loading AI...")
+hideRetryUI()
 
 if(!window.faceEngine || typeof window.faceEngine.loadFaceModels !== "function"){
 throw new Error("Face engine not loaded")
@@ -208,6 +247,9 @@ return
 }
 
 clearFaceSession()
+hideRetryUI()
+stableFrames = 0
+detecting = false
 
 if(!modelsLoaded){
 alert("Models not loaded yet")
@@ -362,33 +404,36 @@ const sortedMatches = Array.from(bestDistanceByImage.entries())
 .map(([image_url, distance]) => ({ image_url, distance }))
 .sort((a, b) => a.distance - b.distance)
 
-const ABSOLUTE_THRESHOLD = 0.55
-const BEST_MATCH_MARGIN = 0.10
+const STRICT_ABSOLUTE_THRESHOLD = 0.55
+const STRICT_BEST_MATCH_MARGIN = 0.10
 
-let matched = []
+const RELAXED_ABSOLUTE_THRESHOLD = 0.60
+const RELAXED_BEST_MATCH_MARGIN = 0.04
 
-if(sortedMatches.length > 0){
+let matched = buildMatchedImages(
+sortedMatches,
+STRICT_ABSOLUTE_THRESHOLD,
+STRICT_BEST_MATCH_MARGIN
+)
 
-const bestDistance = sortedMatches[0].distance
-const dynamicThreshold = Math.min(ABSOLUTE_THRESHOLD, bestDistance + BEST_MATCH_MARGIN)
-
-matched = sortedMatches
-.filter(item => item.distance <= dynamicThreshold)
-.map(item => item.image_url)
-
+// difficult cases: eyes closed / sunglasses / angle change
+if(matched.length === 0 && sortedMatches.length > 0){
+matched = buildMatchedImages(
+sortedMatches,
+RELAXED_ABSOLUTE_THRESHOLD,
+RELAXED_BEST_MATCH_MARGIN
+)
 }
 
 saveMatchedImagesToSession(eventId, matched)
 
 if(matched.length === 0){
-setBusyState(false, "No Match Found ❌")
-setTimeout(()=>{
-alert("No photos found for your face")
-window.location.href = `access.html?event_id=${eventId}`
-}, 600)
+clearFaceSession()
+showRetryUI("No Match Found ❌")
 return
 }
 
+hideRetryUI()
 setBusyState(false, "Match Found ✅")
 
 setTimeout(()=>{
@@ -397,13 +442,21 @@ window.location.href = `gallery.html?event_id=${eventId}`
 
 }catch(err){
 console.error("Face processing error:", err)
-setBusyState(false, "Processing Failed")
+clearFaceSession()
+showRetryUI("Processing Failed")
 alert("Face processing failed: " + err.message)
-window.location.href = `access.html?event_id=${eventId}`
 }
 }
 
 startBtn.onclick = async ()=>{
+if(processingFace) return
+await loadModels()
+if(modelsLoaded){
+await startCamera()
+}
+}
+
+retryBtn.onclick = async ()=>{
 if(processingFace) return
 await loadModels()
 if(modelsLoaded){
