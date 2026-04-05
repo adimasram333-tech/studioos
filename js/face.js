@@ -187,6 +187,12 @@ window.faceEngine = {
 };
 
 // ==============================
+// ✅ COMPATIBILITY EXPORTS (ADDED)
+// ==============================
+window.loadFaceModels = loadFaceModels;
+window.getFaceEncoding = getFaceEncoding;
+
+// ==============================
 // ✅ AUTO LOAD MODELS (IMPORTANT FIX)
 // ==============================
 window.addEventListener("load", () => {
