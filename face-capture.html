@@ -10,10 +10,10 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
-<!-- 🔥 FIX START -->
+<!-- 🔥 REQUIRED DEPENDENCIES -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
-<!-- 🔥 FIX END -->
+<script src="js/face.js"></script>
 
 <style>
 body{
@@ -65,8 +65,6 @@ Start Camera
 </div>
 
 <script>
-
-// 🔥 NO CHANGE BELOW (same logic as your file)
 
 let stream = null
 let modelsLoaded = false
@@ -159,6 +157,20 @@ sessionStorage.setItem("face_scan_done", "true")
 sessionStorage.setItem("face_scan_event_id", eventId)
 }
 
+function getFaceDistance(a, b){
+if(!Array.isArray(a) || !Array.isArray(b)) return Number.POSITIVE_INFINITY
+if(a.length !== b.length) return Number.POSITIVE_INFINITY
+
+let dist = 0
+
+for(let i=0;i<a.length;i++){
+const diff = Number(a[i]) - Number(b[i])
+dist += diff * diff
+}
+
+return Math.sqrt(dist)
+}
+
 async function loadModels(){
 
 if(modelsLoaded) return
@@ -166,14 +178,12 @@ if(modelsLoaded) return
 try{
 setBusyState(true, "Loading AI...")
 
-const MODEL_URL = "/studioos/models"
+if(!window.faceEngine || typeof window.faceEngine.loadFaceModels !== "function"){
+throw new Error("Face engine not loaded")
+}
 
 await withTimeout(
-Promise.all([
-faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-]),
+window.faceEngine.loadFaceModels(),
 15000,
 "AI models load timeout"
 )
@@ -246,18 +256,19 @@ if(!detecting || processingFace) return
 
 try{
 
-const detection = await faceapi
-.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-.withFaceLandmarks()
-.withFaceDescriptor()
+if(!window.faceEngine || typeof window.faceEngine.detectSingleFace !== "function"){
+throw new Error("Face engine detect function missing")
+}
 
-if(detection){
+const encoding = await window.faceEngine.detectSingleFace(video)
+
+if(encoding){
 
 stableFrames++
 status.innerText = "Hold Still..."
 
 if(stableFrames >= 5){
-await captureFace(detection)
+await captureFace(encoding)
 return
 }
 
@@ -277,7 +288,7 @@ requestAnimationFrame(detectLoop)
 }
 }
 
-async function captureFace(detection){
+async function captureFace(descriptor){
 
 if(processingFace) return
 
@@ -286,7 +297,6 @@ setBusyState(true, "Processing...")
 
 stopCamera()
 
-const descriptor = Array.from(detection.descriptor)
 sessionStorage.setItem("face_encoding", JSON.stringify(descriptor))
 
 const eventId = getEventId()
@@ -325,16 +335,11 @@ if(Array.isArray(faces)){
 
 for(const row of faces){
 
-if(!row || !Array.isArray(row.face_encoding)) continue
-
-let dist = 0
-
-for(let i=0;i<row.face_encoding.length;i++){
-const diff = Number(row.face_encoding[i]) - Number(descriptor[i])
-dist += diff * diff
+if(!row || !Array.isArray(row.face_encoding) || !row.image_url){
+continue
 }
 
-dist = Math.sqrt(dist)
+const dist = getFaceDistance(row.face_encoding, descriptor)
 
 if(dist < 0.60){
 matched.push(row.image_url)
