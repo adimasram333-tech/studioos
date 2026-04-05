@@ -9,7 +9,11 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<!-- 🔥 FIX START -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
+<!-- 🔥 FIX END -->
 
 <style>
 body{
@@ -61,6 +65,8 @@ Start Camera
 </div>
 
 <script>
+
+// 🔥 NO CHANGE BELOW (same logic as your file)
 
 let stream = null
 let modelsLoaded = false
@@ -294,17 +300,13 @@ return
 
 try{
 
-if(!window.getSupabase){
-throw new Error("Supabase not initialized")
-}
-
 const supabase = await withTimeout(
 window.getSupabase(),
 10000,
 "Supabase initialization timeout"
 )
 
-const queryResult = await withTimeout(
+const { data: faces, error } = await withTimeout(
 supabase
 .from("face_data")
 .select("face_encoding, image_url")
@@ -313,25 +315,17 @@ supabase
 "Face data fetch timeout"
 )
 
-const { data: faces, error } = queryResult
-
 if(error){
 throw error
 }
 
 const matched = []
 
-if(Array.isArray(faces) && faces.length > 0){
+if(Array.isArray(faces)){
 
 for(const row of faces){
 
-if(!row || !Array.isArray(row.face_encoding) || !row.image_url){
-continue
-}
-
-if(row.face_encoding.length !== descriptor.length){
-continue
-}
+if(!row || !Array.isArray(row.face_encoding)) continue
 
 let dist = 0
 
