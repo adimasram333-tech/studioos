@@ -329,7 +329,7 @@ if(error){
 throw error
 }
 
-const matched = []
+const strongMatches = []
 
 if(Array.isArray(faces)){
 
@@ -341,12 +341,29 @@ continue
 
 const dist = getFaceDistance(row.face_encoding, descriptor)
 
-if(dist < 0.60){
-matched.push(row.image_url)
+// 🔥 STRICT THRESHOLD
+if(dist < 0.45){
+strongMatches.push({
+image_url: row.image_url,
+distance: dist
+})
 }
 }
 
 }
+
+strongMatches.sort((a, b) => a.distance - b.distance)
+
+const matched = []
+const seenUrls = new Set()
+
+strongMatches.forEach(item=>{
+const cleanUrl = normalizeImageUrl(item.image_url)
+if(cleanUrl && !seenUrls.has(cleanUrl)){
+seenUrls.add(cleanUrl)
+matched.push(cleanUrl)
+}
+})
 
 saveMatchedImagesToSession(eventId, matched)
 
