@@ -38,7 +38,6 @@ menu.innerHTML = `
 <div onclick="openEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Open</div>
 <div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
-
 <div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
 <div onclick="deleteEvent('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">Delete Gallery</div>
 `
@@ -245,14 +244,153 @@ return "client"
 return "guest"
 }
 
-function directDownloadImage(url, filename = "photo.jpg"){
+function getSafeFileName(url, fallback = "photo.jpg"){
+try{
+const cleanUrl = normalizeImageUrl(url)
+const rawName = cleanUrl.split("/").pop() || fallback
+const decoded = decodeURIComponent(rawName)
+const safeName = decoded.replace(/[<>:"/\\|?*\x00-\x1F]/g, "_").trim()
+return safeName || fallback
+}catch(e){
+return fallback
+}
+}
+
+function triggerBlobDownload(blob, filename){
+const blobUrl = URL.createObjectURL(blob)
 const a = document.createElement("a")
-a.href = url
+a.href = blobUrl
 a.download = filename
-a.target = "_blank"
 document.body.appendChild(a)
 a.click()
 a.remove()
+
+setTimeout(()=>{
+URL.revokeObjectURL(blobUrl)
+}, 3000)
+}
+
+async function directDownloadImage(url, filename = "photo.jpg"){
+const cleanUrl = normalizeImageUrl(url)
+
+try{
+const response = await fetch(cleanUrl, {
+method: "GET",
+mode: "cors",
+cache: "no-store"
+})
+
+if(!response.ok){
+throw new Error("Failed to fetch file for download")
+}
+
+const blob = await response.blob()
+triggerBlobDownload(blob, filename)
+return true
+}catch(err){
+console.error("Download fallback triggered:", err)
+
+try{
+const a = document.createElement("a")
+a.href = cleanUrl
+a.download = filename
+a.rel = "noopener"
+document.body.appendChild(a)
+a.click()
+a.remove()
+return true
+}catch(linkErr){
+console.error("Direct link download failed:", linkErr)
+alert("Download failed. Please try again.")
+return false
+}
+}
+}
+
+function readJsonSessionArray(key){
+try{
+const raw = sessionStorage.getItem(key)
+if(!raw) return []
+const parsed = JSON.parse(raw)
+return Array.isArray(parsed) ? parsed : []
+}catch(e){
+return []
+}
+}
+
+function readJsonSessionObject(key){
+try{
+const raw = sessionStorage.getItem(key)
+if(!raw) return null
+const parsed = JSON.parse(raw)
+return parsed && typeof parsed === "object" ? parsed : null
+}catch(e){
+return null
+}
+}
+
+function getGuestMatchedImagesFromSession(eventId){
+const matched = new Set()
+
+const directArrays = [
+"matched_images",
+"matched_image_urls",
+"face_matched_images",
+"face_match_images",
+"guest_matched_images"
+]
+
+directArrays.forEach(key=>{
+const values = readJsonSessionArray(key)
+values.forEach(url=>{
+const clean = normalizeImageUrl(url)
+if(clean){
+matched.add(clean)
+}
+})
+})
+
+const byEventMaps = [
+"matched_images_by_event",
+"matched_image_urls_by_event",
+"face_matched_images_by_event"
+]
+
+byEventMaps.forEach(key=>{
+const mapValue = readJsonSessionObject(key)
+if(mapValue && eventId && Array.isArray(mapValue[eventId])){
+mapValue[eventId].forEach(url=>{
+const clean = normalizeImageUrl(url)
+if(clean){
+matched.add(clean)
+}
+})
+}
+})
+
+return matched
+}
+
+function hasValidGuestFaceSession(eventId){
+const storedEventId = sessionStorage.getItem("face_scan_event_id")
+const hasEncoding = !!sessionStorage.getItem("face_encoding")
+const matchedImages = getGuestMatchedImagesFromSession(eventId)
+const faceVerified = sessionStorage.getItem("face_verified") === "true"
+const faceScanDone = sessionStorage.getItem("face_scan_done") === "true"
+
+if(matchedImages.size > 0){
+return true
+}
+
+if(hasEncoding && (!storedEventId || storedEventId === eventId)){
+return true
+}
+
+if((faceVerified || faceScanDone) && (!storedEventId || storedEventId === eventId)){
+return true
+}
+
+return false
 }
 
 // =============================
@@ -316,6 +454,11 @@ window.location.href = `access.html?event_id=${eventId}`
 return
 }
 
+if(effectiveRole === "guest" && !hasValidGuestFaceSession(eventId)){
+window.location.href = `access.html?event_id=${eventId}`
+return
+}
+
 console.log("✅ Guest/Client verified | Role:", effectiveRole)
 
 }
@@ -333,7 +476,10 @@ let userEncoding = null
 try{
 const stored = sessionStorage.getItem("face_encoding")
 if(stored){
-userEncoding = JSON.parse(stored)
+const parsed = JSON.parse(stored)
+if(Array.isArray(parsed) && parsed.length > 0){
+userEncoding = parsed
+}
 }
 }catch(e){
 userEncoding = null
@@ -342,15 +488,15 @@ userEncoding = null
 let eventName = "Event"
 
 if(eventId){
-  const { data: ev } = await supabase
-    .from("events")
-    .select("event_name, client_name")
-    .eq("id", eventId)
-    .single()
+const { data: ev } = await supabase
+.from("events")
+.select("event_name, client_name")
+.eq("id", eventId)
+.single()
 
-  if(ev){
-    eventName = ev.event_name || ev.client_name || "Event"
-  }
+if(ev){
+eventName = ev.event_name || ev.client_name || "Event"
+}
 }
 
 console.log("FINAL EVENT ID:", eventId)
@@ -363,6 +509,13 @@ const empty = document.getElementById("emptyState")
 // =============================
 
 let matchedImages = new Set()
+
+if(effectiveRole === "guest" && eventId){
+const sessionMatchedImages = getGuestMatchedImagesFromSession(eventId)
+sessionMatchedImages.forEach(url=>{
+matchedImages.add(url)
+})
+}
 
 if(userEncoding && eventId){
 
@@ -503,14 +656,18 @@ empty.classList.remove("hidden")
 return
 }
 
-// guest + selfie present + no match
-if(effectiveRole === "guest" && userEncoding && matchedImages.size === 0){
+// guest = fail closed
+if(effectiveRole === "guest"){
+
+if(matchedImages.size === 0){
 empty.innerText = "No photos found for your face"
 empty.classList.remove("hidden")
 return
 }
 
-function openImage(url){
+}
+
+async function openImage(url){
 let modal = document.getElementById("imageModal")
 
 if(!modal){
@@ -541,23 +698,23 @@ document.body.appendChild(modal)
 
 const btn = document.getElementById("downloadBtn")
 
-btn.onclick = function(){
+btn.onclick = async function(){
 
 if(effectiveRole === "photographer" || effectiveRole === "client"){
-  const cleanUrl = normalizeImageUrl(url)
-  const fileName = cleanUrl.split("/").pop() || "photo.jpg"
-  directDownloadImage(cleanUrl, fileName)
-  return
+const cleanUrl = normalizeImageUrl(url)
+const fileName = getSafeFileName(cleanUrl, "photo.jpg")
+await directDownloadImage(cleanUrl, fileName)
+return
 }
 
 if(typeof window.handleDownload === "function"){
-  window.handleDownload(url, eventId, photographerId, eventName)
-  return
+window.handleDownload(url, eventId, photographerId, eventName)
+return
 }
 
 const cleanUrl = normalizeImageUrl(url)
-const fileName = cleanUrl.split("/").pop() || "photo.jpg"
-directDownloadImage(cleanUrl, fileName)
+const fileName = getSafeFileName(cleanUrl, "photo.jpg")
+await directDownloadImage(cleanUrl, fileName)
 
 }
 
@@ -565,23 +722,23 @@ directDownloadImage(cleanUrl, fileName)
 document.getElementById("modalImg").src = url
 
 const btn = document.getElementById("downloadBtn")
-btn.onclick = function(){
+btn.onclick = async function(){
 
 if(effectiveRole === "photographer" || effectiveRole === "client"){
-  const cleanUrl = normalizeImageUrl(url)
-  const fileName = cleanUrl.split("/").pop() || "photo.jpg"
-  directDownloadImage(cleanUrl, fileName)
-  return
+const cleanUrl = normalizeImageUrl(url)
+const fileName = getSafeFileName(cleanUrl, "photo.jpg")
+await directDownloadImage(cleanUrl, fileName)
+return
 }
 
 if(typeof window.handleDownload === "function"){
-  window.handleDownload(url, eventId, photographerId, eventName)
-  return
+window.handleDownload(url, eventId, photographerId, eventName)
+return
 }
 
 const cleanUrl = normalizeImageUrl(url)
-const fileName = cleanUrl.split("/").pop() || "photo.jpg"
-directDownloadImage(cleanUrl, fileName)
+const fileName = getSafeFileName(cleanUrl, "photo.jpg")
+await directDownloadImage(cleanUrl, fileName)
 
 }
 }
@@ -613,7 +770,7 @@ grid.appendChild(div)
 
 })
 
-if(effectiveRole === "guest" && userEncoding && grid.children.length === 0){
+if(effectiveRole === "guest" && grid.children.length === 0){
 empty.innerText = "No photos found for your face"
 empty.classList.remove("hidden")
 }
