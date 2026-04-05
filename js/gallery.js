@@ -212,7 +212,7 @@ a.click()
 }
 
 // =============================
-// SAFE FACE FILTER HELPERS
+// SAFE HELPERS
 // =============================
 
 function normalizeImageUrl(url){
@@ -233,6 +233,26 @@ return true
 }
 
 return false
+}
+
+function resolveEffectiveRole(sessionRole, user){
+if(user){
+return "photographer"
+}
+if(sessionRole === "client"){
+return "client"
+}
+return "guest"
+}
+
+function directDownloadImage(url, filename = "photo.jpg"){
+const a = document.createElement("a")
+a.href = url
+a.download = filename
+a.target = "_blank"
+document.body.appendChild(a)
+a.click()
+a.remove()
 }
 
 // =============================
@@ -268,7 +288,8 @@ user = await window.getCurrentUser()
 user = null
 }
 
-const role = sessionStorage.getItem("role") || "guest"
+const sessionRole = sessionStorage.getItem("role") || "guest"
+const effectiveRole = resolveEffectiveRole(sessionRole, user)
 
 const accessGranted = sessionStorage.getItem("gallery_access")
 const sessionEventId = sessionStorage.getItem("event_id")
@@ -295,7 +316,7 @@ window.location.href = `access.html?event_id=${eventId}`
 return
 }
 
-console.log("✅ Guest verified | Role:", role)
+console.log("✅ Guest/Client verified | Role:", effectiveRole)
 
 }
 
@@ -304,7 +325,7 @@ console.log("✅ Guest verified | Role:", role)
 const supabase = await window.getSupabase()
 
 // =============================
-// 🔥 FACE MATCH: GET USER FACE
+// FACE MATCH: GET USER FACE
 // =============================
 
 let userEncoding = null
@@ -338,7 +359,7 @@ const grid = document.getElementById("galleryGrid")
 const empty = document.getElementById("emptyState")
 
 // =============================
-// 🔥 FACE MATCH: PREPARE MATCHED SET
+// FACE MATCH: PREPARE MATCHED SET
 // =============================
 
 let matchedImages = new Set()
@@ -367,7 +388,6 @@ dist += diff * diff
 
 dist = Math.sqrt(dist)
 
-// safer threshold
 if(dist < 0.60){
 matchedImages.add(normalizeImageUrl(row.image_url))
 }
@@ -484,7 +504,7 @@ return
 }
 
 // guest + selfie present + no match
-if(role === "guest" && userEncoding && matchedImages.size === 0){
+if(effectiveRole === "guest" && userEncoding && matchedImages.size === 0){
 empty.innerText = "No photos found for your face"
 empty.classList.remove("hidden")
 return
@@ -522,11 +542,48 @@ document.body.appendChild(modal)
 const btn = document.getElementById("downloadBtn")
 
 btn.onclick = function(){
+
+if(effectiveRole === "photographer" || effectiveRole === "client"){
+  const cleanUrl = normalizeImageUrl(url)
+  const fileName = cleanUrl.split("/").pop() || "photo.jpg"
+  directDownloadImage(cleanUrl, fileName)
+  return
+}
+
+if(typeof window.handleDownload === "function"){
   window.handleDownload(url, eventId, photographerId, eventName)
+  return
+}
+
+const cleanUrl = normalizeImageUrl(url)
+const fileName = cleanUrl.split("/").pop() || "photo.jpg"
+directDownloadImage(cleanUrl, fileName)
+
 }
 
 }else{
 document.getElementById("modalImg").src = url
+
+const btn = document.getElementById("downloadBtn")
+btn.onclick = function(){
+
+if(effectiveRole === "photographer" || effectiveRole === "client"){
+  const cleanUrl = normalizeImageUrl(url)
+  const fileName = cleanUrl.split("/").pop() || "photo.jpg"
+  directDownloadImage(cleanUrl, fileName)
+  return
+}
+
+if(typeof window.handleDownload === "function"){
+  window.handleDownload(url, eventId, photographerId, eventName)
+  return
+}
+
+const cleanUrl = normalizeImageUrl(url)
+const fileName = cleanUrl.split("/").pop() || "photo.jpg"
+directDownloadImage(cleanUrl, fileName)
+
+}
 }
 }
 
@@ -534,7 +591,7 @@ data.forEach(img=>{
 
 if(!img || !img.image_url) return
 
-if(role === "guest"){
+if(effectiveRole === "guest"){
 if(!isMatchedImage(img.image_url, matchedImages)){
 return
 }
@@ -556,7 +613,7 @@ grid.appendChild(div)
 
 })
 
-if(role === "guest" && userEncoding && grid.children.length === 0){
+if(effectiveRole === "guest" && userEncoding && grid.children.length === 0){
 empty.innerText = "No photos found for your face"
 empty.classList.remove("hidden")
 }
