@@ -212,25 +212,27 @@ a.click()
 }
 
 // =============================
-// 🔥 SAFE FACE FILTER FUNCTION (NEW)
+// SAFE FACE FILTER HELPERS
 // =============================
+
+function normalizeImageUrl(url){
+if(!url) return ""
+return String(url).split("?")[0].trim()
+}
 
 function isMatchedImage(imgUrl, matchedImages){
 
 if(!matchedImages || matchedImages.size === 0) return false
 
-const cleanUrl = String(imgUrl).split("?")[0].trim()
+const cleanUrl = normalizeImageUrl(imgUrl)
 
-let found = false
-
-matchedImages.forEach(m=>{
-const cleanMatch = String(m).split("?")[0].trim()
-if(cleanMatch === cleanUrl){
-found = true
+for(const m of matchedImages){
+if(normalizeImageUrl(m) === cleanUrl){
+return true
 }
-})
+}
 
-return found
+return false
 }
 
 // =============================
@@ -339,7 +341,7 @@ const empty = document.getElementById("emptyState")
 // 🔥 FACE MATCH: PREPARE MATCHED SET
 // =============================
 
-let matchedImages = null
+let matchedImages = new Set()
 
 if(userEncoding && eventId){
 
@@ -350,22 +352,24 @@ const { data: faces } = await supabase
 
 if(faces && faces.length > 0){
 
-matchedImages = new Set()
-
 faces.forEach(row=>{
 
-if(!row.face_encoding || !row.image_url) return
+if(!row || !row.face_encoding || !row.image_url) return
+if(!Array.isArray(row.face_encoding)) return
+if(row.face_encoding.length !== userEncoding.length) return
 
 let dist = 0
 
 for(let i=0;i<row.face_encoding.length;i++){
-dist += Math.pow(row.face_encoding[i] - userEncoding[i],2)
+const diff = row.face_encoding[i] - userEncoding[i]
+dist += diff * diff
 }
 
 dist = Math.sqrt(dist)
 
-if(dist < 0.65){
-matchedImages.add(String(row.image_url).split("?")[0].trim())
+// safer threshold
+if(dist < 0.60){
+matchedImages.add(normalizeImageUrl(row.image_url))
 }
 
 })
@@ -479,8 +483,8 @@ empty.classList.remove("hidden")
 return
 }
 
-// guest + no match
-if(role === "guest" && userEncoding && matchedImages && matchedImages.size === 0){
+// guest + selfie present + no match
+if(role === "guest" && userEncoding && matchedImages.size === 0){
 empty.innerText = "No photos found for your face"
 empty.classList.remove("hidden")
 return
@@ -528,13 +532,13 @@ document.getElementById("modalImg").src = url
 
 data.forEach(img=>{
 
-if(role === "guest"){
-    if(!isMatchedImage(img.image_url, matchedImages)){
-        return
-    }
-}
-
 if(!img || !img.image_url) return
+
+if(role === "guest"){
+if(!isMatchedImage(img.image_url, matchedImages)){
+return
+}
+}
 
 const div = document.createElement("div")
 
