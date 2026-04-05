@@ -1,6 +1,6 @@
 // face.js
 // Core Face Recognition Engine (StudioOS)
-// FINAL FIXED VERSION (Browser Safe + Local Models)
+// FINAL STABLE VERSION (MULTI-FACE SAFE)
 
 let faceModelsLoaded = false;
 
@@ -11,7 +11,6 @@ async function loadFaceModels() {
     if (faceModelsLoaded) return;
 
     try {
-        // ✅ FIX: LOCAL MODEL PATH
         const MODEL_URL = "/studioos/models";
 
         console.log("Loading models from:", MODEL_URL);
@@ -32,16 +31,24 @@ async function loadFaceModels() {
 }
 
 // ==============================
-// LOAD IMAGE FROM URL
+// LOAD IMAGE FROM URL (SAFE)
 // ==============================
 function loadImageFromUrl(url) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.src = url;
+    return new Promise((resolve) => {
+        try {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = url;
 
-        img.onload = () => resolve(img);
-        img.onerror = reject;
+            img.onload = () => resolve(img);
+            img.onerror = () => {
+                console.warn("Image load failed:", url);
+                resolve(null);
+            };
+        } catch (err) {
+            console.error("Image load crash:", err);
+            resolve(null);
+        }
     });
 }
 
@@ -60,10 +67,15 @@ async function detectFacesFromImage(imageElement) {
 }
 
 // ==============================
-// EXTRACT ENCODINGS
+// EXTRACT ENCODINGS (SAFE)
 // ==============================
 function extractFaceEncodings(detections) {
-    return detections.map(d => Array.from(d.descriptor));
+
+    if(!detections || !detections.length) return [];
+
+    return detections
+        .map(d => Array.from(d.descriptor))
+        .filter(arr => Array.isArray(arr) && arr.length > 0);
 }
 
 // ==============================
@@ -105,7 +117,7 @@ function matchFaces(selfieEncoding, storedEncodings, threshold = 0.5) {
 }
 
 // ==============================
-// PROCESS IMAGE (UPLOAD)
+// PROCESS IMAGE (MULTI-FACE SAFE)
 // ==============================
 async function processImageForFaces(imageUrl) {
     try {
@@ -113,14 +125,24 @@ async function processImageForFaces(imageUrl) {
 
         const img = await loadImageFromUrl(imageUrl);
 
-        const detections = await detectFacesFromImage(img);
-
-        if (!detections || detections.length === 0) {
-            console.log("⚠️ No face detected");
+        // ❗ image load fail
+        if(!img){
+            console.warn("Skipping image:", imageUrl);
             return [];
         }
 
-        return extractFaceEncodings(detections);
+        const detections = await detectFacesFromImage(img);
+
+        if (!detections || detections.length === 0) {
+            console.log("⚠️ No face detected:", imageUrl);
+            return [];
+        }
+
+        const encodings = extractFaceEncodings(detections);
+
+        console.log(`Faces detected (${encodings.length}):`, imageUrl);
+
+        return encodings;
 
     } catch (error) {
         console.error("Face processing error:", error);
@@ -172,7 +194,7 @@ async function getFaceEncoding(imageUrl) {
 }
 
 // ==============================
-// ✅ GLOBAL EXPORT (IMPORTANT)
+// GLOBAL EXPORT
 // ==============================
 window.faceEngine = {
     loadFaceModels,
@@ -187,13 +209,14 @@ window.faceEngine = {
 };
 
 // ==============================
-// ✅ COMPATIBILITY EXPORTS (ADDED)
+// 🔥 COMPATIBILITY FIX
 // ==============================
 window.loadFaceModels = loadFaceModels;
 window.getFaceEncoding = getFaceEncoding;
+window.processImageForFaces = processImageForFaces;
 
 // ==============================
-// ✅ AUTO LOAD MODELS (IMPORTANT FIX)
+// AUTO LOAD
 // ==============================
 window.addEventListener("load", () => {
     loadFaceModels();
