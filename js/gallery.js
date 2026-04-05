@@ -212,6 +212,28 @@ a.click()
 }
 
 // =============================
+// 🔥 SAFE FACE FILTER FUNCTION (NEW)
+// =============================
+
+function isMatchedImage(imgUrl, matchedImages){
+
+if(!matchedImages || matchedImages.size === 0) return false
+
+const cleanUrl = String(imgUrl).split("?")[0].trim()
+
+let found = false
+
+matchedImages.forEach(m=>{
+const cleanMatch = String(m).split("?")[0].trim()
+if(cleanMatch === cleanUrl){
+found = true
+}
+})
+
+return found
+}
+
+// =============================
 // LOAD GALLERY
 // =============================
 
@@ -219,7 +241,6 @@ async function loadGallery(){
 
 const params = new URLSearchParams(window.location.search)
 
-// ✅ FIXED (ONLY CHANGE HERE)
 let eventId =
 params.get("event_id") ||
 params.get("event") ||
@@ -315,10 +336,8 @@ const grid = document.getElementById("galleryGrid")
 const empty = document.getElementById("emptyState")
 
 // =============================
-// 🔥 FACE MATCH: PREPARE MATCHED SET (FINAL FIX)
+// 🔥 FACE MATCH: PREPARE MATCHED SET
 // =============================
-
-console.log("ROLE:", role)
 
 let matchedImages = null
 
@@ -328,10 +347,6 @@ const { data: faces } = await supabase
 .from("face_data")
 .select("face_encoding, image_url")
 .eq("event_id", eventId)
-
-// 🔍 DEBUG
-console.log("USER FACE:", userEncoding ? userEncoding.length : "NO")
-console.log("DB FACES:", faces ? faces.length : 0)
 
 if(faces && faces.length > 0){
 
@@ -349,17 +364,11 @@ dist += Math.pow(row.face_encoding[i] - userEncoding[i],2)
 
 dist = Math.sqrt(dist)
 
-// 🔍 DEBUG DISTANCE
-console.log("DIST:", dist)
-
-// 🔥 THRESHOLD
 if(dist < 0.65){
-matchedImages.add(String(row.image_url).trim())
+matchedImages.add(String(row.image_url).split("?")[0].trim())
 }
 
 })
-
-console.log("MATCHED COUNT:", matchedImages.size)
 
 }
 
@@ -372,7 +381,7 @@ return
 grid.innerHTML = ""
 
 // =============================
-// FOLDER VIEW (RESTORED)
+// FOLDER VIEW
 // =============================
 
 if(!eventId){
@@ -441,7 +450,7 @@ return
 }
 
 // =============================
-// PHOTO VIEW (UNCHANGED)
+// PHOTO VIEW
 // =============================
 
 const safeEventId = String(eventId)
@@ -470,9 +479,8 @@ empty.classList.remove("hidden")
 return
 }
 
-// guest + no match => no photos message
+// guest + no match
 if(role === "guest" && userEncoding && matchedImages && matchedImages.size === 0){
-grid.innerHTML = ""
 empty.innerText = "No photos found for your face"
 empty.classList.remove("hidden")
 return
@@ -520,14 +528,12 @@ document.getElementById("modalImg").src = url
 
 data.forEach(img=>{
 
-// 🔥 FACE FILTER (FINAL SAFE)
-if(role === "guest" && matchedImages){
-    if(!matchedImages.has(String(img.image_url).trim())){
+if(role === "guest"){
+    if(!isMatchedImage(img.image_url, matchedImages)){
         return
     }
 }
 
-// safety
 if(!img || !img.image_url) return
 
 const div = document.createElement("div")
@@ -546,7 +552,6 @@ grid.appendChild(div)
 
 })
 
-// guest + had face encoding but no matched image rendered
 if(role === "guest" && userEncoding && grid.children.length === 0){
 empty.innerText = "No photos found for your face"
 empty.classList.remove("hidden")
