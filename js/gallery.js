@@ -234,16 +234,6 @@ return true
 return false
 }
 
-function resolveEffectiveRole(sessionRole, user){
-if(user){
-return "photographer"
-}
-if(sessionRole === "client"){
-return "client"
-}
-return "guest"
-}
-
 function getSafeFileName(url, fallback = "photo.jpg"){
 try{
 const cleanUrl = normalizeImageUrl(url)
@@ -373,12 +363,17 @@ return matched
 
 function hasValidGuestFaceSession(eventId){
 const matchedImages = getGuestMatchedImagesFromSession(eventId)
-
-if(matchedImages && matchedImages.size > 0){
-return true
+return !!(matchedImages && matchedImages.size > 0)
 }
 
-return false
+function resolveEffectiveRole(sessionRole, currentUserId, eventOwnerId){
+if(currentUserId && eventOwnerId && String(currentUserId) === String(eventOwnerId)){
+return "photographer"
+}
+if(sessionRole === "client"){
+return "client"
+}
+return "guest"
 }
 
 // =============================
@@ -407,6 +402,8 @@ eventId = null
 eventId = null
 }
 
+const supabase = await window.getSupabase()
+
 let user = null
 try{
 user = await window.getCurrentUser()
@@ -415,14 +412,34 @@ user = null
 }
 
 const sessionRole = sessionStorage.getItem("role") || "guest"
-const effectiveRole = resolveEffectiveRole(sessionRole, user)
-
 const accessGranted = sessionStorage.getItem("gallery_access")
 const sessionEventId = sessionStorage.getItem("event_id")
 const visitorId = sessionStorage.getItem("visitor_id")
 
-if(user){
-console.log("👤 Photographer access")
+let eventName = "Event"
+let eventOwnerId = null
+
+if(eventId){
+const { data: ev } = await supabase
+.from("events")
+.select("event_name, client_name, user_id")
+.eq("id", eventId)
+.single()
+
+if(ev){
+eventName = ev.event_name || ev.client_name || "Event"
+eventOwnerId = ev.user_id || null
+}
+}
+
+const effectiveRole = resolveEffectiveRole(
+sessionRole,
+user?.id || null,
+eventOwnerId
+)
+
+if(effectiveRole === "photographer"){
+console.log("👤 Photographer access (owner verified)")
 }else{
 
 if(eventId){
@@ -453,8 +470,6 @@ console.log("✅ Guest/Client verified | Role:", effectiveRole)
 
 }
 
-const supabase = await window.getSupabase()
-
 // =============================
 // FACE MATCH: GET USER FACE
 // =============================
@@ -471,20 +486,6 @@ userEncoding = parsed
 }
 }catch(e){
 userEncoding = null
-}
-
-let eventName = "Event"
-
-if(eventId){
-const { data: ev } = await supabase
-.from("events")
-.select("event_name, client_name")
-.eq("id", eventId)
-.single()
-
-if(ev){
-eventName = ev.event_name || ev.client_name || "Event"
-}
 }
 
 console.log("FINAL EVENT ID:", eventId)
@@ -505,7 +506,6 @@ matchedImages.add(url)
 })
 }
 
-// ✅ FINAL FIX:
 // guest ke liye DB re-match allow nahi
 // sirf client / photographer ke liye optional DB matching
 if(userEncoding && eventId && effectiveRole !== "guest"){
@@ -526,7 +526,7 @@ if(row.face_encoding.length !== userEncoding.length) return
 let dist = 0
 
 for(let i=0;i<row.face_encoding.length;i++){
-const diff = row.face_encoding[i] - userEncoding[i]
+const diff = Number(row.face_encoding[i]) - Number(userEncoding[i])
 dist += diff * diff
 }
 
@@ -649,13 +649,11 @@ return
 
 // guest = fail closed
 if(effectiveRole === "guest"){
-
 if(matchedImages.size === 0){
 empty.innerText = "No photos found for your face"
 empty.classList.remove("hidden")
 return
 }
-
 }
 
 async function openImage(url){
