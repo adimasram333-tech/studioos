@@ -62,6 +62,10 @@ const loadModelsFn =
 window.loadFaceModels ||
 (window.faceEngine && window.faceEngine.loadFaceModels)
 
+const processMultiFaceFn =
+window.processImageForFaces ||
+(window.faceEngine && window.faceEngine.processImageForFaces)
+
 const getEncodingFn =
 window.getFaceEncoding ||
 (window.faceEngine && window.faceEngine.getFaceEncoding)
@@ -71,22 +75,15 @@ if(loadModelsFn){
 await loadModelsFn()
 }
 
-if(!getEncodingFn){
+if(!processMultiFaceFn && !getEncodingFn){
 console.warn("face.js not loaded")
-return
-}
-
-const encoding = await getEncodingFn(cleanUrl)
-
-// ❌ invalid encoding
-if(!encoding || !Array.isArray(encoding) || encoding.length === 0){
-console.warn("No valid face detected:", cleanUrl)
 return
 }
 
 const supabase = getSupabase()
 
-// ✅ DUPLICATE CHECK (IMPORTANT)
+// ✅ IMAGE-LEVEL DUPLICATE CHECK
+// same image already processed => skip full insert
 const { data: existing } = await supabase
 .from("face_data")
 .select("id")
@@ -95,24 +92,54 @@ const { data: existing } = await supabase
 .limit(1)
 
 if(existing && existing.length > 0){
-console.log("Already exists:", cleanUrl)
+console.log("Face data already exists:", cleanUrl)
 return
 }
 
-// ✅ INSERT SAFE
-const { error } = await supabase
-.from("face_data")
-.insert([{
+// ✅ MULTI-FACE FIRST (wedding/group safe)
+let encodings = []
+
+if(processMultiFaceFn){
+const multiResult = await processMultiFaceFn(cleanUrl)
+
+if(Array.isArray(multiResult) && multiResult.length > 0){
+encodings = multiResult.filter(arr =>
+Array.isArray(arr) && arr.length > 0
+)
+}
+}
+
+// ✅ FALLBACK SINGLE FACE
+if((!encodings || encodings.length === 0) && getEncodingFn){
+const singleEncoding = await getEncodingFn(cleanUrl)
+
+if(singleEncoding && Array.isArray(singleEncoding) && singleEncoding.length > 0){
+encodings = [singleEncoding]
+}
+}
+
+// ❌ invalid encoding(s)
+if(!encodings || encodings.length === 0){
+console.warn("No valid face detected:", cleanUrl)
+return
+}
+
+// ✅ PREPARE MULTI INSERT
+const rows = encodings.map(encoding => ({
 event_id: String(eventId),
 image_url: cleanUrl,
 face_encoding: encoding,
 user_id: userId
-}])
+}))
+
+const { error } = await supabase
+.from("face_data")
+.insert(rows)
 
 if(error){
 console.error("Face save error:", error)
 }else{
-console.log("Face saved:", cleanUrl)
+console.log(`Face saved (${rows.length} face${rows.length > 1 ? "s" : ""}):`, cleanUrl)
 }
 
 }catch(err){
