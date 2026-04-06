@@ -104,30 +104,68 @@ alert("Token: " + token)
 }
 
 // =============================
-// DELETE SYSTEM
+// DELETE SYSTEM (FULL FIX)
 // =============================
 
 window.deleteEvent = async function(id){
 
-const confirmDelete = confirm("Delete gallery permanently?")
+const confirmDelete = confirm("Delete gallery permanently?\n\nThis will remove all event photos from Cloudinary and related gallery data from Supabase.")
 if(!confirmDelete) return
+
+const existingMenu = document.getElementById("floatingMenu")
+if(existingMenu) existingMenu.remove()
+activeMenu = null
 
 try{
 
-await fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/smart-processor", {
+const supabase = await window.getSupabase()
+
+if(!supabase){
+alert("Supabase not initialized")
+return
+}
+
+const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+
+if(sessionError){
+console.error("Session fetch failed:", sessionError)
+alert("Failed to verify session")
+return
+}
+
+const accessToken = sessionData?.session?.access_token
+
+if(!accessToken){
+alert("Please login again and try deleting the gallery.")
+return
+}
+
+const response = await fetch(
+"https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/smart-processor",
+{
 method: "POST",
 headers: {
 "Content-Type": "application/json",
-"Authorization": "Bearer YOUR_KEY",
-"apikey": "YOUR_KEY"
+"apikey": window.SUPABASE_ANON_KEY || "",
+"Authorization": `Bearer ${accessToken}`
 },
-body: JSON.stringify({ event_id: id })
-})
+body: JSON.stringify({ event_id: String(id) })
+}
+)
 
-const supabase = await window.getSupabase()
+let result = null
 
-await supabase.from("gallery_photos").delete().eq("event_id", id)
-await supabase.from("event_tokens").delete().eq("event_id", id)
+try{
+result = await response.json()
+}catch(parseErr){
+result = null
+}
+
+if(!response.ok || !result?.success){
+console.error("Delete failed:", result)
+alert(result?.error || "Delete failed")
+return
+}
 
 alert("Gallery deleted successfully")
 location.reload()
