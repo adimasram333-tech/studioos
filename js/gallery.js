@@ -509,16 +509,36 @@ e.preventDefault()
 }
 
 function buildToggleMarkup(eventId, isGuestFree){
+const bgColor = isGuestFree ? "#6366f1" : "rgba(255,255,255,0.28)"
+const knobLeft = isGuestFree ? "22px" : "2px"
+
 return `
 <label class="guest-download-toggle inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()">
   <input
     type="checkbox"
-    class="sr-only peer"
+    class="sr-only"
     ${isGuestFree ? "checked" : ""}
     onchange="toggleGuestFreeDownload('${eventId}', ${isGuestFree ? "true" : "false"})"
   />
-  <div class="relative w-10 h-5 bg-white/30 rounded-full peer peer-checked:bg-indigo-500 transition-colors">
-    <span class="absolute top-[2px] left-[2px] h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></span>
+  <div style="
+    position: relative;
+    width: 40px;
+    height: 20px;
+    border-radius: 9999px;
+    background: ${bgColor};
+    transition: background 0.2s ease;
+  ">
+    <span style="
+      position: absolute;
+      top: 2px;
+      left: ${knobLeft};
+      width: 16px;
+      height: 16px;
+      border-radius: 9999px;
+      background: #ffffff;
+      transition: left 0.2s ease;
+      display: block;
+    "></span>
   </div>
 </label>
 `
