@@ -191,7 +191,6 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
       const orderData = await orderRes.json();
       const order = orderData.order;
 
-      // ✅ FIXED RAZORPAY
       const options = {
         key: RAZORPAY_KEY,
         amount: order.amount,
@@ -248,6 +247,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
       rzp.open();
 
     } catch (err) {
+      console.error(err);
       alert("Something went wrong");
     }
   };
@@ -261,12 +261,18 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 // DOWNLOAD HANDLER
 // =============================
 
-window.handleDownload = function (imageUrl, eventId, photographerId, eventName) {
+window.handleDownload = function (imageUrl, eventId, photographerId, eventName, options = {}) {
   window.lastDownloadedImage = imageUrl;
 
   const role = getUserRole();
+  const guestFreeDownload = !!options.guestFreeDownload;
 
   if (role === "client") {
+    triggerDownload(imageUrl);
+    return;
+  }
+
+  if (guestFreeDownload) {
     triggerDownload(imageUrl);
     return;
   }
