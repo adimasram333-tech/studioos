@@ -4,7 +4,26 @@
 
 let activeMenu = null
 
-window.toggleMenu = function(id, btn){
+function buildGuestDownloadLabel(isFree){
+return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
+}
+
+function buildMenuHtml(id, guestFreeDownload){
+const safeMode = guestFreeDownload ? "true" : "false"
+
+return `
+<div onclick="openEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Open</div>
+<div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
+<div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
+<div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
+<div onclick="toggleGuestFreeDownload('${id}', ${safeMode})" class="px-3 py-2 hover:bg-white/10 cursor-pointer">
+${buildGuestDownloadLabel(guestFreeDownload)}
+</div>
+<div onclick="deleteEvent('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">Delete Gallery</div>
+`
+}
+
+window.toggleMenu = function(id, btn, guestFreeDownload = false){
 
 const existing = document.getElementById("floatingMenu")
 
@@ -21,10 +40,11 @@ const rect = btn.getBoundingClientRect()
 const menu = document.createElement("div")
 menu.id = "floatingMenu"
 menu.dataset.id = id
+menu.dataset.guestFreeDownload = guestFreeDownload ? "true" : "false"
 
 menu.style.position = "fixed"
 menu.style.top = rect.bottom + "px"
-menu.style.left = (rect.right - 120) + "px"
+menu.style.left = (rect.right - 180) + "px"
 menu.style.background = "#1a1f2e"
 menu.style.border = "1px solid rgba(255,255,255,0.1)"
 menu.style.borderRadius = "8px"
@@ -32,15 +52,9 @@ menu.style.fontSize = "12px"
 menu.style.zIndex = 99999
 menu.style.backdropFilter = "blur(10px)"
 menu.style.overflow = "hidden"
-menu.style.minWidth = "120px"
+menu.style.minWidth = "180px"
 
-menu.innerHTML = `
-<div onclick="openEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Open</div>
-<div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
-<div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
-<div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
-<div onclick="deleteEvent('${id}')" class="px-3 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer">Delete Gallery</div>
-`
+menu.innerHTML = buildMenuHtml(id, !!guestFreeDownload)
 
 document.body.appendChild(menu)
 activeMenu = menu
@@ -100,6 +114,58 @@ token = inserted?.[0]?.token || newToken
 }
 
 alert("Token: " + token)
+
+}
+
+// =============================
+// GUEST FREE DOWNLOAD TOGGLE
+// =============================
+
+window.toggleGuestFreeDownload = async function(id, currentValue = false){
+
+const nextValue = !currentValue
+const confirmMessage = nextValue
+? "Enable FREE guest downloads for this event?\n\nGuests will be able to download matched photos without payment."
+: "Disable FREE guest downloads for this event?\n\nGuests will need to pay before downloading matched photos."
+
+const confirmed = confirm(confirmMessage)
+if(!confirmed) return
+
+const existingMenu = document.getElementById("floatingMenu")
+if(existingMenu) existingMenu.remove()
+activeMenu = null
+
+try{
+
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!supabase || !user){
+alert("Please login again and try.")
+return
+}
+
+const { error } = await supabase
+.from("events")
+.update({
+guest_free_download: nextValue
+})
+.eq("id", String(id))
+.eq("user_id", user.id)
+
+if(error){
+console.error("Guest download mode update failed:", error)
+alert("Failed to update guest download mode")
+return
+}
+
+alert(nextValue ? "Guest free download enabled" : "Guest free download disabled")
+location.reload()
+
+}catch(err){
+console.error(err)
+alert("Failed to update guest download mode")
+}
 
 }
 
@@ -480,17 +546,19 @@ const visitorId = sessionStorage.getItem("visitor_id")
 
 let eventName = "Event"
 let eventOwnerId = null
+let guestFreeDownload = false
 
 if(eventId){
 const { data: ev } = await supabase
 .from("events")
-.select("event_name, client_name, user_id")
+.select("event_name, client_name, user_id, guest_free_download")
 .eq("id", eventId)
 .single()
 
 if(ev){
 eventName = ev.event_name || ev.client_name || "Event"
 eventOwnerId = ev.user_id || null
+guestFreeDownload = !!ev.guest_free_download
 }
 }
 
@@ -661,13 +729,18 @@ if(displayName && displayName.startsWith("Q_")){
 displayName = e.client_name || "Booking Event"
 }
 
+const isGuestFree = !!e.guest_free_download
+
 div.innerHTML = `
 <div class="flex justify-between items-center">
 <div>
 <div class="text-sm font-semibold">${displayName}</div>
 <div class="text-xs text-gray-400">${date}</div>
+<div class="text-[11px] ${isGuestFree ? "text-green-400" : "text-yellow-400"}">
+${buildGuestDownloadLabel(isGuestFree)}
 </div>
-<button onclick="toggleMenu('${e.id}', this)" class="text-xl px-2">⋮</button>
+</div>
+<button onclick="toggleMenu('${e.id}', this, ${isGuestFree ? "true" : "false"})" class="text-xl px-2">⋮</button>
 </div>
 `
 
@@ -765,8 +838,16 @@ await directDownloadImage(cleanUrl, fileName)
 return
 }
 
+if(guestFreeDownload){
+const fileName = getSafeFileName(cleanUrl, "photo.jpg")
+await directDownloadImage(cleanUrl, fileName)
+return
+}
+
 if(typeof window.handleDownload === "function"){
-window.handleDownload(cleanUrl, eventId, photographerId, eventName)
+window.handleDownload(cleanUrl, eventId, photographerId, eventName, {
+guestFreeDownload: false
+})
 return
 }
 
@@ -794,8 +875,16 @@ await directDownloadImage(cleanUrl, fileName)
 return
 }
 
+if(guestFreeDownload){
+const fileName = getSafeFileName(cleanUrl, "photo.jpg")
+await directDownloadImage(cleanUrl, fileName)
+return
+}
+
 if(typeof window.handleDownload === "function"){
-window.handleDownload(cleanUrl, eventId, photographerId, eventName)
+window.handleDownload(cleanUrl, eventId, photographerId, eventName, {
+guestFreeDownload: false
+})
 return
 }
 
