@@ -125,29 +125,13 @@ alert("Supabase not initialized")
 return
 }
 
-const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-
-if(sessionError){
-console.error("Session fetch failed:", sessionError)
-alert("Failed to verify session")
-return
-}
-
-const accessToken = sessionData?.session?.access_token
-
-if(!accessToken){
-alert("Please login again and try deleting the gallery.")
-return
-}
-
 const response = await fetch(
 "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/smart-processor",
 {
 method: "POST",
 headers: {
 "Content-Type": "application/json",
-"apikey": window.SUPABASE_ANON_KEY || "",
-"Authorization": `Bearer ${accessToken}`
+"apikey": window.SUPABASE_ANON_KEY || ""
 },
 body: JSON.stringify({ event_id: String(id) })
 }
@@ -412,6 +396,46 @@ if(sessionRole === "client"){
 return "client"
 }
 return "guest"
+}
+
+function getLowQualityPreviewUrl(url){
+try{
+const cleanUrl = normalizeImageUrl(url)
+if(!cleanUrl.includes("/upload/")) return cleanUrl
+
+return cleanUrl.replace(
+"/upload/",
+"/upload/q_30,w_800,l_text:Arial_40:StudioOS,o_50/"
+)
+}catch(e){
+return normalizeImageUrl(url)
+}
+}
+
+function getDisplayImageUrl(url, role){
+const cleanUrl = normalizeImageUrl(url)
+
+if(role === "photographer" || role === "client"){
+return cleanUrl
+}
+
+return getLowQualityPreviewUrl(cleanUrl)
+}
+
+function applyGuestImageProtection(target){
+if(!target) return
+
+target.setAttribute("draggable", "false")
+target.style.webkitUserDrag = "none"
+target.style.userSelect = "none"
+
+target.addEventListener("dragstart", (e)=>{
+e.preventDefault()
+})
+
+target.addEventListener("contextmenu", (e)=>{
+e.preventDefault()
+})
 }
 
 // =============================
@@ -695,6 +719,9 @@ return
 }
 
 async function openImage(url){
+const cleanUrl = normalizeImageUrl(url)
+const displayUrl = getDisplayImageUrl(cleanUrl, effectiveRole)
+
 let modal = document.getElementById("imageModal")
 
 if(!modal){
@@ -712,7 +739,7 @@ modal.style.justifyContent = "center"
 modal.style.zIndex = 9999
 
 modal.innerHTML = `
-<img id="modalImg" src="${url}" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:12px;" />
+<img id="modalImg" src="${displayUrl}" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:12px;" />
 <button id="downloadBtn"
 style="position:absolute; bottom:30px; background:#4f46e5; color:white; padding:8px 16px; border-radius:8px;">
 Download
@@ -724,48 +751,56 @@ modal.onclick = (e)=>{ if(e.target === modal) modal.remove() }
 document.body.appendChild(modal)
 
 const btn = document.getElementById("downloadBtn")
+const modalImg = document.getElementById("modalImg")
+
+if(effectiveRole === "guest"){
+applyGuestImageProtection(modalImg)
+}
 
 btn.onclick = async function(){
 
 if(effectiveRole === "photographer" || effectiveRole === "client"){
-const cleanUrl = normalizeImageUrl(url)
 const fileName = getSafeFileName(cleanUrl, "photo.jpg")
 await directDownloadImage(cleanUrl, fileName)
 return
 }
 
 if(typeof window.handleDownload === "function"){
-window.handleDownload(url, eventId, photographerId, eventName)
+window.handleDownload(cleanUrl, eventId, photographerId, eventName)
 return
 }
 
-const cleanUrl = normalizeImageUrl(url)
-const fileName = getSafeFileName(cleanUrl, "photo.jpg")
-await directDownloadImage(cleanUrl, fileName)
+const previewFileName = getSafeFileName(displayUrl, "photo.jpg")
+await directDownloadImage(displayUrl, previewFileName)
 
 }
 
 }else{
-document.getElementById("modalImg").src = url
+const modalImg = document.getElementById("modalImg")
+modalImg.src = displayUrl
+
+if(effectiveRole === "guest"){
+applyGuestImageProtection(modalImg)
+}else{
+modalImg.setAttribute("draggable", "false")
+}
 
 const btn = document.getElementById("downloadBtn")
 btn.onclick = async function(){
 
 if(effectiveRole === "photographer" || effectiveRole === "client"){
-const cleanUrl = normalizeImageUrl(url)
 const fileName = getSafeFileName(cleanUrl, "photo.jpg")
 await directDownloadImage(cleanUrl, fileName)
 return
 }
 
 if(typeof window.handleDownload === "function"){
-window.handleDownload(url, eventId, photographerId, eventName)
+window.handleDownload(cleanUrl, eventId, photographerId, eventName)
 return
 }
 
-const cleanUrl = normalizeImageUrl(url)
-const fileName = getSafeFileName(cleanUrl, "photo.jpg")
-await directDownloadImage(cleanUrl, fileName)
+const previewFileName = getSafeFileName(displayUrl, "photo.jpg")
+await directDownloadImage(displayUrl, previewFileName)
 
 }
 }
@@ -781,17 +816,26 @@ return
 }
 }
 
+const cleanUrl = normalizeImageUrl(img.image_url)
+const displayUrl = getDisplayImageUrl(cleanUrl, effectiveRole)
+
 const div = document.createElement("div")
 
 div.className =
 "glass rounded-xl overflow-hidden cursor-pointer"
 
 div.innerHTML = `
-<img src="${img.image_url}"
+<img src="${displayUrl}"
 class="w-full h-40 object-cover hover:scale-105 transition"/>
 `
 
-div.onclick = () => openImage(img.image_url)
+const imageEl = div.querySelector("img")
+
+if(effectiveRole === "guest"){
+applyGuestImageProtection(imageEl)
+}
+
+div.onclick = () => openImage(cleanUrl)
 
 grid.appendChild(div)
 
