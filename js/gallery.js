@@ -63,7 +63,7 @@ activeMenu = menu
 
 document.addEventListener("click",(e)=>{
 
-if(!e.target.closest("#floatingMenu") && !e.target.closest("button")){
+if(!e.target.closest("#floatingMenu") && !e.target.closest("button") && !e.target.closest(".guest-download-toggle")){
 const existing = document.getElementById("floatingMenu")
 if(existing) existing.remove()
 activeMenu = null
@@ -125,7 +125,7 @@ window.toggleGuestFreeDownload = async function(id, currentValue = false){
 
 const nextValue = !currentValue
 const confirmMessage = nextValue
-? "Enable FREE guest downloads for this event?\n\nGuests will be able to download matched photos without payment."
+? "Enable FREE guest downloads for this event?\n\nGuests will be able to preview and download matched photos without payment."
 : "Disable FREE guest downloads for this event?\n\nGuests will need to pay before downloading matched photos."
 
 const confirmed = confirm(confirmMessage)
@@ -478,10 +478,14 @@ return normalizeImageUrl(url)
 }
 }
 
-function getDisplayImageUrl(url, role){
+function getDisplayImageUrl(url, role, guestFreeDownload = false){
 const cleanUrl = normalizeImageUrl(url)
 
 if(role === "photographer" || role === "client"){
+return cleanUrl
+}
+
+if(role === "guest" && guestFreeDownload){
 return cleanUrl
 }
 
@@ -502,6 +506,22 @@ e.preventDefault()
 target.addEventListener("contextmenu", (e)=>{
 e.preventDefault()
 })
+}
+
+function buildToggleMarkup(eventId, isGuestFree){
+return `
+<label class="guest-download-toggle inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()">
+  <input
+    type="checkbox"
+    class="sr-only peer"
+    ${isGuestFree ? "checked" : ""}
+    onchange="toggleGuestFreeDownload('${eventId}', ${isGuestFree ? "true" : "false"})"
+  />
+  <div class="relative w-10 h-5 bg-white/30 rounded-full peer peer-checked:bg-indigo-500 transition-colors">
+    <span class="absolute top-[2px] left-[2px] h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></span>
+  </div>
+</label>
+`
 }
 
 // =============================
@@ -732,15 +752,16 @@ displayName = e.client_name || "Booking Event"
 const isGuestFree = !!e.guest_free_download
 
 div.innerHTML = `
-<div class="flex justify-between items-center">
-<div>
-<div class="text-sm font-semibold">${displayName}</div>
-<div class="text-xs text-gray-400">${date}</div>
-<div class="text-[11px] ${isGuestFree ? "text-green-400" : "text-yellow-400"}">
-${buildGuestDownloadLabel(isGuestFree)}
-</div>
-</div>
-<button onclick="toggleMenu('${e.id}', this, ${isGuestFree ? "true" : "false"})" class="text-xl px-2">⋮</button>
+<div class="flex justify-between items-start gap-3">
+  <div class="min-w-0 flex-1">
+    <div class="text-sm font-semibold truncate">${displayName}</div>
+    <div class="text-xs text-gray-400">${date}</div>
+  </div>
+
+  <div class="flex items-center gap-2 shrink-0">
+    ${buildToggleMarkup(e.id, isGuestFree)}
+    <button onclick="toggleMenu('${e.id}', this, ${isGuestFree ? "true" : "false"})" class="text-xl px-1 leading-none">⋮</button>
+  </div>
 </div>
 `
 
@@ -793,7 +814,7 @@ return
 
 async function openImage(url){
 const cleanUrl = normalizeImageUrl(url)
-const displayUrl = getDisplayImageUrl(cleanUrl, effectiveRole)
+const displayUrl = getDisplayImageUrl(cleanUrl, effectiveRole, guestFreeDownload)
 
 let modal = document.getElementById("imageModal")
 
@@ -906,7 +927,7 @@ return
 }
 
 const cleanUrl = normalizeImageUrl(img.image_url)
-const displayUrl = getDisplayImageUrl(cleanUrl, effectiveRole)
+const displayUrl = getDisplayImageUrl(cleanUrl, effectiveRole, guestFreeDownload)
 
 const div = document.createElement("div")
 
