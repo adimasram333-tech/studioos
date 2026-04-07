@@ -649,6 +649,20 @@ window.location.href = getClientFaceScanUrl(eventId)
 
 }
 
+function updateUploadButton(effectiveRole){
+
+const uploadBtn = document.getElementById("uploadBtn")
+if(!uploadBtn) return
+
+if(effectiveRole === "photographer"){
+uploadBtn.classList.remove("hidden")
+uploadBtn.disabled = false
+}else{
+uploadBtn.classList.add("hidden")
+uploadBtn.disabled = true
+}
+}
+
 // =============================
 // LOAD GALLERY
 // =============================
@@ -712,6 +726,8 @@ sessionRole,
 user?.id || null,
 eventOwnerId
 )
+
+updateUploadButton(effectiveRole)
 
 if(effectiveRole === "photographer"){
 console.log("👤 Photographer access (owner verified)")
@@ -850,6 +866,8 @@ if(faceBtn){
 faceBtn.classList.add("hidden")
 faceBtn.onclick = null
 }
+
+updateUploadButton("photographer")
 
 if(!user){
 window.location.href = "access.html"
