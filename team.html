@@ -88,9 +88,22 @@ Team Role
 
 <div>
 <label class="text-sm text-gray-400">Role</label>
-<input id="role"
+
+<!-- ✅ FIX: dropdown + typing -->
+<input list="roleOptions" id="role"
 class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
-placeholder="e.g. Candid Photographer">
+placeholder="Select or type role">
+
+<datalist id="roleOptions">
+  <option value="Candid Photographer">
+  <option value="Traditional Photographer">
+  <option value="Traditional Videographer">
+  <option value="Cinematographer">
+  <option value="Drone Operator">
+  <option value="Assistant">
+  <option value="LED Screen">
+</datalist>
+
 </div>
 
 <div>
@@ -129,7 +142,9 @@ Save Team
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ❌ REMOVED CDN (CRITICAL FIX) -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
+
 <script src="js/supabase.js"></script>
 <script src="js/team.js"></script>
 
