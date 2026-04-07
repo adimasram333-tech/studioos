@@ -176,12 +176,22 @@ placeholder="Optional note">
 <div class="glass p-4 rounded-xl space-y-3">
 
 <div class="flex items-center justify-between">
-<h2 class="text-sm font-semibold text-gray-300">
-Added Team Members
-</h2>
-<span id="teamCount" class="text-xs text-gray-400">
-0 members
-</span>
+  <h2 class="text-sm font-semibold text-gray-300">
+    Added Team Members
+  </h2>
+
+  <div class="flex items-center gap-2">
+    <button id="editTeamBtn"
+      type="button"
+      onclick="editTeam()"
+      class="hidden text-xs text-indigo-400 hover:text-indigo-300">
+      Edit
+    </button>
+
+    <span id="teamCount" class="text-xs text-gray-400">
+      0 members
+    </span>
+  </div>
 </div>
 
 <div id="teamPreview" class="space-y-3 text-sm text-gray-300">
@@ -195,12 +205,14 @@ Added Team Members
 
 <div class="space-y-2">
 
-<button onclick="addMember()"
+<button id="addMemberBtn"
+onclick="addMember()"
 class="w-full glass p-3 rounded-xl hover:bg-white/10 text-sm">
 + Add Member
 </button>
 
-<button onclick="saveTeam()"
+<button id="saveTeamBtn"
+onclick="saveTeam()"
 class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl text-sm font-semibold">
 Save Team
 </button>
