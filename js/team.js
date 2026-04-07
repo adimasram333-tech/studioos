@@ -4,6 +4,7 @@ let quotationId = null;
 let db = null;
 let quotationData = null;
 let teamData = {};
+let isTeamSaved = false;
 
 
 // ===== GET QUOTATION ID =====
@@ -111,6 +112,54 @@ function updateTeamCount() {
 }
 
 
+// ===== TOGGLE FORM MODE =====
+
+function setFormDisabled(disabled) {
+  document.getElementById("role").disabled = disabled;
+  document.getElementById("day").disabled = disabled;
+  document.getElementById("memberName").disabled = disabled;
+  document.getElementById("memberPhone").disabled = disabled;
+  document.getElementById("memberAltPhone").disabled = disabled;
+  document.getElementById("memberReportingTime").disabled = disabled;
+  document.getElementById("memberNote").disabled = disabled;
+  document.getElementById("addMemberBtn").disabled = disabled;
+  document.getElementById("addMemberBtn").classList.toggle("opacity-50", disabled);
+}
+
+function setEditVisibility(show) {
+  const editBtn = document.getElementById("editTeamBtn");
+  if (!editBtn) return;
+
+  if (show) {
+    editBtn.classList.remove("hidden");
+  } else {
+    editBtn.classList.add("hidden");
+  }
+}
+
+
+// ===== RENDER SUCCESS STATE =====
+
+function renderSavedState() {
+  const preview = document.getElementById("teamPreview");
+  if (!preview) return;
+
+  preview.innerHTML = `
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2 text-sm text-green-400">
+        <span>✔</span>
+        <span>Team assigned successfully</span>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400">You can edit assigned members anytime.</p>
+  `;
+
+  setEditVisibility(true);
+  setFormDisabled(true);
+  updateTeamCount();
+}
+
+
 // ===== RENDER TEAM PREVIEW =====
 
 function renderTeamPreview() {
@@ -121,6 +170,8 @@ function renderTeamPreview() {
 
   if (keys.length === 0) {
     preview.innerHTML = `<p class="text-gray-400 text-sm">No members added yet</p>`;
+    setEditVisibility(false);
+    setFormDisabled(false);
     updateTeamCount();
     return;
   }
@@ -197,7 +248,52 @@ function renderTeamPreview() {
     preview.appendChild(block);
   });
 
+  setEditVisibility(true);
+  setFormDisabled(false);
   updateTeamCount();
+}
+
+
+// ===== LOAD SAVED TEAM FROM DB =====
+
+async function loadSavedTeamIfExists() {
+  const { data, error } = await db
+    .from("team_assignments")
+    .select("*")
+    .eq("quotation_id", quotationId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("LOAD SAVED TEAM ERROR:", error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    return;
+  }
+
+  teamData = {};
+
+  data.forEach((member) => {
+    const key = getGroupKey(member.role_name || "", member.day || "");
+
+    if (!teamData[key]) {
+      teamData[key] = [];
+    }
+
+    teamData[key].push({
+      role_name: member.role_name || "",
+      day: member.day || "",
+      member_name: member.member_name || "",
+      phone: member.phone || "",
+      alt_phone: member.alt_phone || "",
+      reporting_time: member.reporting_time || "",
+      note: member.note || ""
+    });
+  });
+
+  isTeamSaved = true;
+  renderSavedState();
 }
 
 
@@ -208,7 +304,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     quotationId = getQuotationId();
 
     if (!quotationId) {
-      alert("Invalid access");
       return;
     }
 
@@ -219,10 +314,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
 
     await loadClientData();
-    renderTeamPreview();
+    await loadSavedTeamIfExists();
+    updateTeamCount();
   } catch (err) {
     console.error("APP INIT ERROR:", err);
-    alert("App init failed");
   }
 });
 
@@ -255,7 +350,6 @@ async function loadClientData() {
 
   } catch (err) {
     console.error("LOAD CLIENT DATA ERROR:", err);
-    alert("Failed to load client data");
   }
 }
 
@@ -271,13 +365,7 @@ function addMember() {
   const memberReportingTime = document.getElementById("memberReportingTime").value.trim();
   const memberNote = document.getElementById("memberNote").value.trim();
 
-  if (!role) {
-    alert("Select role");
-    return;
-  }
-
-  if (!memberName || !memberPhone) {
-    alert("Enter member name and phone");
+  if (!role || !memberName || !memberPhone) {
     return;
   }
 
@@ -297,6 +385,7 @@ function addMember() {
     note: memberNote
   });
 
+  isTeamSaved = false;
   clearMemberForm();
   renderTeamPreview();
 }
@@ -308,11 +397,17 @@ async function saveTeam() {
   const groupKeys = Object.keys(teamData);
 
   if (groupKeys.length === 0) {
-    alert("Add at least one member");
     return;
   }
 
   try {
+    const { error: deleteError } = await db
+      .from("team_assignments")
+      .delete()
+      .eq("quotation_id", quotationId);
+
+    if (deleteError) throw deleteError;
+
     let insertData = [];
 
     groupKeys.forEach((key) => {
@@ -340,7 +435,6 @@ async function saveTeam() {
     });
 
     if (insertData.length === 0) {
-      alert("No team data to save");
       return;
     }
 
@@ -350,12 +444,19 @@ async function saveTeam() {
 
     if (error) throw error;
 
-    alert("Team saved successfully");
-    window.location.href = `client.html?quotation=${quotationId}`;
+    isTeamSaved = true;
+    renderSavedState();
   } catch (err) {
     console.error("SAVE TEAM ERROR:", err);
-    alert("Error saving team");
   }
+}
+
+
+// ===== EDIT TEAM =====
+
+function editTeam() {
+  isTeamSaved = false;
+  renderTeamPreview();
 }
 
 
