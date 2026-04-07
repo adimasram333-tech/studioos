@@ -24,8 +24,6 @@ function getQuotationId(){
 const params =
 new URLSearchParams(window.location.search)
 
-// FIX: support both quotation and id
-
 return params.get("quotation") || params.get("id")
 
 }
@@ -58,11 +56,16 @@ year:"numeric"
 
 async function loadClient(){
 
+try{
+
 const supabase = await window.getSupabase()
 
 const quotationId = getQuotationId()
 
-if(!quotationId) return
+if(!quotationId) {
+console.warn("No quotationId found")
+return
+}
 
 
 
@@ -70,12 +73,17 @@ if(!quotationId) return
 // GET QUOTATION
 // =============================
 
-const { data: quote } =
+const { data: quote, error } =
 await supabase
 .from("quotations")
 .select("*")
 .eq("id",quotationId)
 .single()
+
+if(error){
+console.error("QUOTE ERROR:", error)
+return
+}
 
 if(!quote) return
 
@@ -136,8 +144,6 @@ formatDate(startDate) + " → " + formatDate(endDate)
 document.getElementById("eventDate").innerText =
 eventDateText
 
-
-
 document.getElementById("eventVenue").innerText =
 quote.venue || "-"
 
@@ -193,7 +199,6 @@ row.className =
 "flex justify-between"
 
 row.innerHTML = `
-
 <div>
 ₹${p.amount}
 <div class="text-xs text-gray-400">
@@ -204,7 +209,6 @@ ${p.payment_type} • ${p.method}
 <div class="text-xs text-gray-400">
 ${formatDate(p.payment_date)}
 </div>
-
 `
 
 container.appendChild(row)
@@ -216,23 +220,14 @@ container.appendChild(row)
 
 
 // =============================
-// PAID AMOUNT
+// PAID + BALANCE
 // =============================
 
 document.getElementById("paidAmount").innerText =
 "₹" + paid
 
-
-
-// =============================
-// BALANCE
-// =============================
-
-const balance =
-total - paid
-
 document.getElementById("balanceAmount").innerText =
-"₹" + balance
+"₹" + (total - paid)
 
 
 
@@ -246,10 +241,6 @@ document.getElementById("addPaymentBtn").href =
 document.getElementById("viewInvoiceBtn").href =
 "invoice.html?quotation=" + quotationId
 
-
-
-// ✅ NEW: ADD TEAM BUTTON
-
 const addTeamBtn = document.getElementById("addTeamBtn")
 
 if(addTeamBtn){
@@ -260,7 +251,7 @@ addTeamBtn.href =
 
 
 // =============================
-// MENU LOGIC
+// MENU LOGIC (FIXED)
 // =============================
 
 const menuBtn = document.getElementById("menuBtn")
@@ -282,37 +273,51 @@ menuDropdown.classList.add("hidden")
 
 
 // =============================
-// SHARE TEAM
+// MENU ACTIONS (NEW)
 // =============================
 
-const shareTeamBtn =
-document.getElementById("shareTeamBtn")
+const openTeamBtn = document.getElementById("openTeamBtn")
+const viewTeamSheetBtn = document.getElementById("viewTeamSheetBtn")
+const shareTeamBtn = document.getElementById("shareTeamBtn")
+
+if(openTeamBtn){
+openTeamBtn.onclick = ()=>{
+window.location.href =
+"team.html?quotation=" + quotationId
+}
+}
+
+if(viewTeamSheetBtn){
+viewTeamSheetBtn.onclick = ()=>{
+window.location.href =
+"team-sheet.html?quotation=" + quotationId
+}
+}
 
 if(shareTeamBtn){
-
-shareTeamBtn.addEventListener("click",()=>{
-
+shareTeamBtn.onclick = async ()=>{
 const url =
 window.location.origin +
-"/studioos/team.html?quotation=" +
+"/team-sheet.html?quotation=" +
 quotationId
 
-navigator.clipboard.writeText(url)
-
-alert("Team link copied")
-
-})
-
+await navigator.clipboard.writeText(url)
+alert("Team sheet link copied")
+}
 }
 
-
+}catch(err){
+console.error("LOAD CLIENT ERROR:", err)
+}
 
 }
 
 
 
 // =============================
-// INIT
+// INIT (SAFE)
 // =============================
 
+window.addEventListener("DOMContentLoaded",()=>{
 loadClient()
+})
