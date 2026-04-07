@@ -19,6 +19,17 @@ background: rgba(255,255,255,0.05);
 backdrop-filter: blur(15px);
 border:1px solid rgba(255,255,255,0.1);
 }
+.dark-select{
+color-scheme: dark;
+-webkit-appearance: none;
+appearance: none;
+background-color: rgba(255,255,255,0.05);
+color: white;
+}
+.dark-select option{
+background-color: #0f172a;
+color: white;
+}
 </style>
 
 </head>
@@ -89,18 +100,17 @@ Team Role
 <div>
 <label class="text-sm text-gray-400">Role</label>
 
-<!-- ✅ FIXED DROPDOWN ONLY -->
 <select id="role"
-class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none border border-white/10">
+class="dark-select w-full mt-1 p-2 rounded-lg text-sm outline-none border border-white/10">
 
 <option value="">Select Role</option>
-<option>Candid Photographer</option>
-<option>Traditional Photographer</option>
-<option>Traditional Videographer</option>
-<option>Cinematographer</option>
-<option>Drone Operator</option>
-<option>Assistant</option>
-<option>LED Screen</option>
+<option value="Candid Photographer">Candid Photographer</option>
+<option value="Traditional Photographer">Traditional Photographer</option>
+<option value="Traditional Videographer">Traditional Videographer</option>
+<option value="Cinematographer">Cinematographer</option>
+<option value="Drone Operator">Drone Operator</option>
+<option value="Assistant">Assistant</option>
+<option value="LED Screen">LED Screen</option>
 
 </select>
 
@@ -109,10 +119,10 @@ class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none bo
 <div>
 <label class="text-sm text-gray-400">Day</label>
 <select id="day"
-class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none border border-white/10">
-<option>Day 1</option>
-<option>Day 2</option>
-<option>Day 3</option>
+class="dark-select w-full mt-1 p-2 rounded-lg text-sm outline-none border border-white/10">
+<option value="Day 1">Day 1</option>
+<option value="Day 2">Day 2</option>
+<option value="Day 3">Day 3</option>
 </select>
 </div>
 
@@ -142,6 +152,8 @@ Save Team
 
 </div>
 
+<!-- REQUIRED: supabase.js ko CDN chahiye -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/team.js"></script>
 
