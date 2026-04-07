@@ -16,7 +16,14 @@ body{
 background: radial-gradient(circle at top,#1e293b,#0f172a);
 font-family:Arial, Helvetica, sans-serif;
 margin:0;
-padding:0;
+padding:16px;
+box-sizing:border-box;
+}
+
+*,
+*::before,
+*::after{
+box-sizing:border-box;
 }
 
 /* EXACT A4 PAGE */
@@ -85,6 +92,7 @@ justify-content:space-between;
 align-items:center;
 font-size:15px;
 margin-bottom:18px;
+gap:20px;
 }
 
 .divider{
@@ -131,6 +139,7 @@ font-weight:600;
 .invoice-table td{
 padding:14px 12px;
 border-bottom:1px solid #e5e7eb;
+word-break:break-word;
 }
 
 .invoice-table th:nth-child(2),
@@ -194,6 +203,158 @@ text-align:center;
 font-size:12px;
 color:#6b7280;
 margin-top:40px;
+}
+
+/* MOBILE RESPONSIVE PREVIEW */
+
+@media (max-width: 860px){
+
+body{
+padding:12px;
+}
+
+.invoice-page{
+width:100%;
+max-width:794px;
+min-height:auto;
+}
+
+}
+
+@media (max-width: 640px){
+
+body{
+padding:10px;
+}
+
+.invoice-page{
+width:100%;
+border-radius:10px;
+overflow:hidden;
+}
+
+.invoice-header{
+padding:28px 18px 62px 18px;
+}
+
+.invoice-title{
+position:static;
+margin-top:14px;
+font-size:20px;
+letter-spacing:1px;
+text-align:right;
+}
+
+.invoice-header h1{
+font-size:14px;
+line-height:1.4;
+max-width:70%;
+word-break:break-word;
+}
+
+.invoice-header .text-sm{
+font-size:11px;
+line-height:1.5;
+max-width:80%;
+word-break:break-word;
+}
+
+.wave-1{
+bottom:-24px;
+height:58px;
+border-top-left-radius:100% 58px;
+border-top-right-radius:100% 58px;
+}
+
+.wave-2{
+bottom:-34px;
+height:68px;
+border-top-left-radius:100% 68px;
+border-top-right-radius:100% 68px;
+}
+
+.invoice-body{
+padding:26px 16px;
+}
+
+.invoice-top{
+flex-direction:column;
+align-items:flex-start;
+font-size:14px;
+gap:10px;
+margin-bottom:14px;
+}
+
+.divider{
+margin-bottom:22px;
+}
+
+.client-event{
+flex-direction:column;
+gap:18px;
+margin-bottom:24px;
+}
+
+.event{
+padding-left:0;
+padding-top:16px;
+border-left:none;
+border-top:1px solid #e5e7eb;
+}
+
+.invoice-table{
+font-size:13px;
+margin-top:12px;
+}
+
+.invoice-table th,
+.invoice-table td{
+padding:12px 10px;
+}
+
+.invoice-table th:nth-child(1){width:50%;}
+.invoice-table th:nth-child(2){width:25%;}
+.invoice-table th:nth-child(3){width:25%;}
+
+.payment-summary{
+margin-top:28px;
+}
+
+.payment-summary h3{
+font-size:16px;
+}
+
+.terms{
+margin-top:30px;
+}
+
+.invoice-footer{
+padding:28px 16px;
+}
+
+.invoice-footer .text-sm{
+font-size:13px;
+}
+
+.signature{
+text-align:left;
+margin-top:32px;
+}
+
+.signature-line{
+margin-left:0;
+}
+
+.generated{
+margin-top:28px;
+font-size:11px;
+}
+
+#downloadInvoice{
+font-size:14px;
+padding:14px 16px;
+}
+
 }
 
 </style>
