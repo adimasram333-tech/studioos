@@ -45,6 +45,24 @@ function getEventNameFromQuotation(data) {
 }
 
 
+// ===== WAIT FOR SUPABASE (FIX) =====
+
+async function waitForSupabaseReady() {
+  let retries = 0;
+
+  while (retries < 20) {
+    if (window.getSupabase) {
+      return await window.getSupabase();
+    }
+
+    await new Promise(r => setTimeout(r, 200));
+    retries++;
+  }
+
+  throw new Error("Supabase not ready");
+}
+
+
 // ===== INIT =====
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -56,11 +74,8 @@ window.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    if (typeof window.getSupabase === "function") {
-      db = await window.getSupabase();
-    } else if (window.supabaseClient) {
-      db = window.supabaseClient;
-    }
+    // ✅ FIXED: wait properly
+    db = await waitForSupabaseReady();
 
     if (!db) {
       throw new Error("Supabase not initialized");
@@ -97,6 +112,7 @@ async function loadClientData() {
 
     document.getElementById("venue").innerText =
       data?.venue || "-";
+
   } catch (err) {
     console.error("LOAD CLIENT DATA ERROR:", err);
     alert("Failed to load client data");
@@ -158,11 +174,11 @@ function addMember() {
 // ===== SAVE TEAM =====
 
 async function saveTeam() {
-  const role = document.getElementById("role").value.trim();
+  const role = document.getElementById("role").value;
   const day = document.getElementById("day").value;
 
   if (!role) {
-    alert("Enter role");
+    alert("Select role");
     return;
   }
 
@@ -223,6 +239,7 @@ async function saveTeam() {
 
     alert("Team saved successfully");
     window.location.href = `client.html?quotation=${quotationId}`;
+
   } catch (err) {
     console.error("SAVE TEAM ERROR:", err);
     alert("Error saving team");
