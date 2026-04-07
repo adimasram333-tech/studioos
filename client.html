@@ -11,17 +11,14 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-
 body{
 background: radial-gradient(circle at top,#1e293b,#0f172a);
 }
-
 .glass{
 background: rgba(255,255,255,0.05);
 backdrop-filter: blur(15px);
 border:1px solid rgba(255,255,255,0.1);
 }
-
 </style>
 
 </head>
@@ -31,10 +28,11 @@ border:1px solid rgba(255,255,255,0.1);
 
 <div class="max-w-md mx-auto space-y-4 relative">
 
-<a href="clients.html"
-class="text-sm text-gray-400">
+<a id="backBtn"
+class="text-sm text-gray-400 cursor-pointer">
 ← Back
 </a>
+
 
 <!-- HEADER WITH MENU -->
 
@@ -97,7 +95,6 @@ Client Details
 </div>
 
 
-
 <!-- EVENT DETAILS -->
 
 <div class="glass p-4 rounded-xl space-y-2">
@@ -122,7 +119,6 @@ Event Details
 </div>
 
 </div>
-
 
 
 <!-- PAYMENT SUMMARY -->
@@ -151,7 +147,6 @@ Payment Summary
 </div>
 
 
-
 <!-- PAYMENTS -->
 
 <div class="glass p-4 rounded-xl">
@@ -172,7 +167,6 @@ No payments yet
 </div>
 
 
-
 <!-- ACTIONS -->
 
 <div class="space-y-2">
@@ -180,27 +174,19 @@ No payments yet
 <a id="addPaymentBtn"
 href="#"
 class="block text-center bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl">
-
 Add Payment
-
 </a>
-
-<!-- ✅ NEW BUTTON -->
 
 <a id="addTeamBtn"
 href="#"
 class="block text-center bg-indigo-600/80 hover:bg-indigo-700 p-3 rounded-xl">
-
 Add Team
-
 </a>
 
 <a id="viewInvoiceBtn"
 href="#"
 class="block text-center glass p-3 rounded-xl hover:bg-white/10 transition">
-
 View Invoice
-
 </a>
 
 </div>
@@ -211,6 +197,81 @@ View Invoice
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/client.js"></script>
+
+
+<script>
+/* =========================
+   SAFE NAVIGATION + MENU
+========================= */
+
+(function () {
+
+  const params = new URLSearchParams(window.location.search);
+  const quotationId = params.get("quotation");
+
+  const menuBtn = document.getElementById("menuBtn");
+  const menuDropdown = document.getElementById("menuDropdown");
+
+  const addTeamBtn = document.getElementById("addTeamBtn");
+  const viewTeamSheetBtn = document.getElementById("viewTeamSheetBtn");
+  const openTeamBtn = document.getElementById("openTeamBtn");
+  const shareTeamBtn = document.getElementById("shareTeamBtn");
+
+  const backBtn = document.getElementById("backBtn");
+
+
+  // ================= MENU TOGGLE =================
+
+  menuBtn.onclick = () => {
+    menuDropdown.classList.toggle("hidden");
+  };
+
+  document.addEventListener("click", (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add("hidden");
+    }
+  });
+
+
+  // ================= NAVIGATION =================
+
+  addTeamBtn.onclick = () => {
+    if (!quotationId) return alert("Invalid client");
+    window.location.href = `team.html?quotation=${quotationId}`;
+  };
+
+  openTeamBtn.onclick = () => {
+    if (!quotationId) return alert("Invalid client");
+    window.location.href = `team.html?quotation=${quotationId}`;
+  };
+
+  viewTeamSheetBtn.onclick = () => {
+    if (!quotationId) return alert("Invalid client");
+    window.location.href = `team-sheet.html?quotation=${quotationId}`;
+  };
+
+  shareTeamBtn.onclick = async () => {
+    if (!quotationId) return;
+
+    const url = `${window.location.origin}/studioos/team-sheet.html?quotation=${quotationId}`;
+
+    if (navigator.share) {
+      await navigator.share({
+        title: "Team Sheet",
+        url: url
+      });
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert("Link copied");
+    }
+  };
+
+  backBtn.onclick = () => {
+    window.location.href = "clients.html";
+  };
+
+})();
+</script>
 
 </body>
 </html>
