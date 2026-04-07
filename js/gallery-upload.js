@@ -110,7 +110,8 @@ encodings = [singleEncoding]
 }
 
 if(!encodings || encodings.length === 0){
-console.warn("No valid face detected:", cleanUrl)
+// ✅ warning ko error jaisa noisy feel na ho
+console.log("No valid face detected:", cleanUrl)
 return {
 saved: false,
 facesDetected: 0,
@@ -422,7 +423,7 @@ loadConfirmedEvents()
 
 
 // =============================
-// बाकी code unchanged
+// HELPERS
 // =============================
 
 function getEventId(){
@@ -433,9 +434,41 @@ return null
 return String(select.value)
 }
 
+async function runWithConcurrency(items, worker, limit = 3){
+
+const results = new Array(items.length)
+let currentIndex = 0
+
+async function runner(){
+while(true){
+const index = currentIndex++
+if(index >= items.length){
+return
+}
+
+try{
+results[index] = await worker(items[index], index)
+}catch(err){
+results[index] = { error: err }
+}
+}
+}
+
+const count = Math.min(limit, items.length)
+const runners = []
+
+for(let i=0;i<count;i++){
+runners.push(runner())
+}
+
+await Promise.all(runners)
+
+return results
+}
+
 
 // =============================
-// 🔥 UPLOAD SYSTEM (SAFE FIX)
+// 🔥 UPLOAD SYSTEM (OPTIMIZED SAFE FIX)
 // =============================
 
 async function uploadImages(finalEventId){
@@ -513,55 +546,63 @@ status.innerText = "No valid images selected"
 return
 }
 
-const urls = []
-
-for(const file of validFiles){
-
+// ✅ FAST: parallel upload with safe limit
+const uploadResults = await runWithConcurrency(
+validFiles,
+async (file) => {
 try{
-
 const url = await window.uploadToCloudinary(file, eventId)
 
 if(url){
-
 uploaded++
-progress.innerText = `${uploaded} / ${validFiles.length}`
-
-urls.push(url)
-
-const faceResult = await processFace(url, eventId, user.id)
-
-if(faceResult && faceResult.saved){
-if(faceResult.reason !== "already_exists"){
-savedFacesImages++
+progress.innerText = `Uploading ${uploaded} / ${validFiles.length}`
+return {
+success: true,
+file,
+url
 }
-if(faceResult.facesDetected > 0){
-totalFacesDetected += faceResult.facesDetected
-}
-}else{
-skippedFaceImages++
-skippedFiles.push({
-name: file.name,
-reason: faceResult?.reason || "unknown"
-})
 }
 
+return {
+success: false,
+file,
+reason: "upload_failed"
 }
 
 }catch(err){
-console.error("Upload error",err)
+console.error("Upload error", err)
+return {
+success: false,
+file,
+reason: "upload_failed"
+}
+}
+},
+3
+)
+
+const successfulUploads = (uploadResults || []).filter(item => item && item.success && item.url)
+const urls = successfulUploads.map(item => item.url)
+
+const failedUploads = (uploadResults || []).filter(item => item && !item.success)
+
+failedUploads.forEach(item => {
 skippedFaceImages++
 skippedFiles.push({
-name: file.name,
-reason: "upload_failed"
+name: item?.file?.name || "unknown",
+reason: item?.reason || "upload_failed"
 })
-}
-
-}
+})
 
 if(!urls.length){
 status.innerText = "Upload failed"
+progress.innerText = ""
 return
 }
+
+// ✅ Save gallery records before face processing
+status.innerText = "Saving photos..."
+progress.innerText = ""
 
 try{
 
@@ -576,8 +617,55 @@ await window.saveGalleryImages(rows)
 
 if(!success){
 status.innerText = "Upload complete but database save failed"
+progress.innerText = ""
 return
 }
+
+}catch(err){
+console.error("Database save error",err)
+status.innerText = "Upload complete but database save failed"
+progress.innerText = ""
+return
+}
+
+// ✅ Faster than before: face processing in parallel with smaller safe limit
+status.innerText = "Processing faces..."
+let processedFaceCount = 0
+
+const faceResults = await runWithConcurrency(
+successfulUploads,
+async (item) => {
+const result = await processFace(item.url, eventId, user.id)
+processedFaceCount++
+progress.innerText = `Faces ${processedFaceCount} / ${successfulUploads.length}`
+return {
+file: item.file,
+result
+}
+},
+2
+)
+
+;(faceResults || []).forEach(item => {
+
+const faceResult = item?.result
+
+if(faceResult && faceResult.saved){
+if(faceResult.reason !== "already_exists"){
+savedFacesImages++
+}
+if(faceResult.facesDetected > 0){
+totalFacesDetected += faceResult.facesDetected
+}
+}else{
+skippedFaceImages++
+skippedFiles.push({
+name: item?.file?.name || "unknown",
+reason: faceResult?.reason || "unknown"
+})
+}
+
+})
 
 status.innerText = "Upload Complete"
 progress.innerText =
@@ -589,12 +677,9 @@ console.warn("Skipped face processing files:", skippedFiles)
 
 await loadConfirmedEvents(eventId)
 
-}catch(err){
-
-console.error("Database save error",err)
-status.innerText = "Upload complete but database save failed"
-
-}
+setTimeout(()=>{
+window.location.href = `gallery.html?event_id=${eventId}`
+}, 300)
 
 }
 
