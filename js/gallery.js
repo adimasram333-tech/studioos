@@ -246,13 +246,21 @@ alert("Supabase not initialized")
 return
 }
 
+const { data: { session } } = await supabase.auth.getSession()
+
+if(!session){
+alert("Please login again")
+return
+}
+
 const response = await fetch(
 "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/smart-processor",
 {
 method: "POST",
 headers: {
 "Content-Type": "application/json",
-"apikey": window.SUPABASE_ANON_KEY || ""
+"apikey": window.SUPABASE_ANON_KEY || "",
+"Authorization": `Bearer ${session.access_token}`
 },
 body: JSON.stringify({ event_id: String(id) })
 }
