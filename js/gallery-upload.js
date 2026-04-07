@@ -329,7 +329,7 @@ return params.get("event_id") || params.get("event")
 // LOAD EVENTS
 // =============================
 
-async function loadConfirmedEvents(){
+async function loadConfirmedEvents(selectedEventId = null){
 
 try{
 
@@ -354,21 +354,21 @@ localStorage.setItem("oldBookingsFixed","true")
 const { data: events, error } = await supabase
 .from("events")
 .select("*")
+.eq("user_id", user.id)
 .order("created_at",{ascending:false})
 
 if(error){
 console.error("Events error", error)
 }
 
-select.innerHTML = `<option value="">Select Event</option>`
+select.innerHTML = `
+<option value="">Select Event</option>
+<option value="create_new">+ Create New Event</option>
+`
 
 ;(events || []).forEach(e=>{
 
 if(!e || !e.id) return
-
-if(user && e.user_id && e.user_id !== user.id){
-return
-}
 
 const option = document.createElement("option")
 
@@ -383,15 +383,21 @@ select.appendChild(option)
 
 })
 
-const createOption = document.createElement("option")
-createOption.value = "create_new"
-createOption.textContent = "+ Create New Event"
-select.appendChild(createOption)
+const createEventBox = document.getElementById("createEventBox")
 
+if(selectedEventId){
+select.value = String(selectedEventId)
+if(createEventBox){
+createEventBox.style.display = "none"
+}
+}else{
 const urlEvent = getEventFromURL()
-
 if(urlEvent){
 select.value = String(urlEvent)
+if(createEventBox){
+createEventBox.style.display = "none"
+}
+}
 }
 
 }catch(err){
@@ -399,6 +405,8 @@ console.error("Dropdown load error",err)
 }
 
 }
+
+window.loadConfirmedEvents = loadConfirmedEvents
 
 
 // =============================
@@ -578,7 +586,7 @@ if(skippedFiles.length > 0){
 console.warn("Skipped face processing files:", skippedFiles)
 }
 
-await loadConfirmedEvents()
+await loadConfirmedEvents(eventId)
 
 }catch(err){
 
