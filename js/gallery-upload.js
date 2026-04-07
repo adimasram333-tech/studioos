@@ -60,10 +60,8 @@ reason: "missing_image_or_event"
 }
 }
 
-// ✅ URL normalize (VERY IMPORTANT)
 const cleanUrl = String(imageUrl).split("?")[0].trim()
 
-// ✅ SUPPORT BOTH GLOBAL + faceEngine
 const loadModelsFn =
 window.loadFaceModels ||
 (window.faceEngine && window.faceEngine.loadFaceModels)
@@ -76,7 +74,6 @@ const getEncodingFn =
 window.getFaceEncoding ||
 (window.faceEngine && window.faceEngine.getFaceEncoding)
 
-// ✅ MODEL LOAD
 if(loadModelsFn){
 await loadModelsFn()
 }
@@ -92,7 +89,6 @@ reason: "face_engine_missing"
 
 const supabase = getSupabase()
 
-// ✅ MULTI-FACE FIRST (wedding/group safe)
 let encodings = []
 
 if(processMultiFaceFn){
@@ -105,7 +101,6 @@ Array.isArray(arr) && arr.length > 0
 }
 }
 
-// ✅ FALLBACK SINGLE FACE
 if((!encodings || encodings.length === 0) && getEncodingFn){
 const singleEncoding = await getEncodingFn(cleanUrl)
 
@@ -114,7 +109,6 @@ encodings = [singleEncoding]
 }
 }
 
-// ❌ invalid encoding(s)
 if(!encodings || encodings.length === 0){
 console.warn("No valid face detected:", cleanUrl)
 return {
@@ -124,7 +118,6 @@ reason: "no_face_detected"
 }
 }
 
-// ✅ FETCH EXISTING FACES FOR SAME IMAGE
 const { data: existingFaces, error: existingError } = await supabase
 .from("face_data")
 .select("id, face_encoding")
@@ -164,7 +157,6 @@ knownEncodings.push(row.face_encoding)
 }
 })
 
-// ✅ KEEP ONLY UNIQUE ENCODINGS
 const uniqueEncodingsToInsert = []
 
 encodings.forEach(encoding=>{
@@ -191,7 +183,6 @@ knownEncodings.push(encoding)
 
 })
 
-// ✅ if all already saved, don't insert again
 if(uniqueEncodingsToInsert.length === 0){
 console.log("Face data already exists:", cleanUrl)
 return {
@@ -201,7 +192,6 @@ reason: "already_exists"
 }
 }
 
-// ✅ PREPARE MULTI INSERT
 const rows = uniqueEncodingsToInsert.map(encoding => ({
 event_id: String(eventId),
 image_url: cleanUrl,
@@ -355,20 +345,33 @@ const { data: events, error } = await supabase
 .from("events")
 .select("*")
 .eq("user_id", user.id)
-.order("created_at",{ascending:false})
 
 if(error){
 console.error("Events error", error)
 }
+
+const safeEvents = (events || []).filter(e => e && e.id)
+
+safeEvents.sort((a, b) => {
+const aEventDate = a?.event_date ? new Date(a.event_date).getTime() : 0
+const bEventDate = b?.event_date ? new Date(b.event_date).getTime() : 0
+
+if(bEventDate !== aEventDate){
+return bEventDate - aEventDate
+}
+
+const aCreatedAt = a?.created_at ? new Date(a.created_at).getTime() : 0
+const bCreatedAt = b?.created_at ? new Date(b.created_at).getTime() : 0
+
+return bCreatedAt - aCreatedAt
+})
 
 select.innerHTML = `
 <option value="">Select Event</option>
 <option value="create_new">+ Create New Event</option>
 `
 
-;(events || []).forEach(e=>{
-
-if(!e || !e.id) return
+safeEvents.forEach(e => {
 
 const option = document.createElement("option")
 
@@ -510,7 +513,6 @@ status.innerText = "No valid images selected"
 return
 }
 
-// 🔥 SEQUENTIAL UPLOAD (SAFE)
 const urls = []
 
 for(const file of validFiles){
@@ -526,7 +528,6 @@ progress.innerText = `${uploaded} / ${validFiles.length}`
 
 urls.push(url)
 
-// 🔥 FACE PROCESS SAFE (WAIT)
 const faceResult = await processFace(url, eventId, user.id)
 
 if(faceResult && faceResult.saved){
