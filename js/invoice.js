@@ -99,6 +99,86 @@ data.studio_name || "Photographer"
 
 
 // =============================
+// EXTRACT LAST INVOICE NUMBER
+// =============================
+
+function extractInvoiceSequence(invoiceNumber){
+
+if(!invoiceNumber || typeof invoiceNumber !== "string"){
+return 0
+}
+
+const match = invoiceNumber.match(/INV-\d{4}-(\d{4,})$/)
+
+if(!match) return 0
+
+const sequence = parseInt(match[1],10)
+
+return Number.isFinite(sequence) ? sequence : 0
+
+}
+
+
+// =============================
+// GENERATE UNIQUE INVOICE NUMBER
+// =============================
+
+async function getOrCreateInvoiceNumber(supabase, userId, quotationId, currentInvoiceNumber){
+
+if(currentInvoiceNumber){
+return currentInvoiceNumber
+}
+
+const year = new Date().getFullYear()
+
+const { data: existingNumbers, error: existingError } =
+await supabase
+.from("quotations")
+.select("id, invoice_number, user_id, created_at")
+.eq("user_id", userId)
+.not("invoice_number","is",null)
+
+if(existingError){
+console.error("Invoice fetch error:", existingError)
+throw existingError
+}
+
+let maxSequence = 0
+
+if(existingNumbers && existingNumbers.length > 0){
+existingNumbers.forEach((row)=>{
+const sequence = extractInvoiceSequence(row.invoice_number)
+if(sequence > maxSequence){
+maxSequence = sequence
+}
+})
+}
+
+const nextSequence = maxSequence + 1
+
+const newInvoiceNumber =
+`INV-${year}-${String(nextSequence).padStart(4,"0")}`
+
+const { error: updateError } =
+await supabase
+.from("quotations")
+.update({
+invoice_number: newInvoiceNumber
+})
+.eq("id", quotationId)
+.eq("user_id", userId)
+
+if(updateError){
+console.error("Invoice update error:", updateError)
+throw updateError
+}
+
+return newInvoiceNumber
+
+}
+
+
+// =============================
 // LOAD INVOICE
 // =============================
 
@@ -110,11 +190,16 @@ const quotationId = getQuotationId()
 
 if(!quotationId) return
 
+const user = await getCurrentUser()
+
+if(!user) return
+
 const { data: quote } =
 await supabase
 .from("quotations")
 .select("*")
 .eq("id",quotationId)
+.eq("user_id",user.id)
 .single()
 
 if(!quote) return
@@ -237,43 +322,22 @@ formatCurrency(balance)
 
 let invoiceNumber = quote.invoice_number
 
+try{
+
+invoiceNumber = await getOrCreateInvoiceNumber(
+supabase,
+user.id,
+quotationId,
+invoiceNumber
+)
+
+}catch(error){
+
+console.error("Invoice number generation failed:", error)
+
 if(!invoiceNumber){
-
-const year = new Date().getFullYear()
-
-const { data: lastInvoice } =
-await supabase
-.from("quotations")
-.select("invoice_number")
-.order("created_at",{ascending:false})
-.limit(1)
-
-let nextNumber = 1
-
-if(lastInvoice && lastInvoice.length > 0){
-
-const last = lastInvoice[0].invoice_number
-
-if(last){
-
-const parts = last.split("-")
-const number = parseInt(parts[2])
-
-nextNumber = number + 1
-
+invoiceNumber = `INV-${new Date().getFullYear()}-0001`
 }
-
-}
-
-invoiceNumber =
-`INV-${year}-${String(nextNumber).padStart(4,"0")}`
-
-await supabase
-.from("quotations")
-.update({
-invoice_number: invoiceNumber
-})
-.eq("id", quotationId)
 
 }
 
@@ -309,12 +373,6 @@ return `invoice-${clientName}-${invoiceNumber}.pdf`
 // DEVICE HELPERS
 // =============================
 
-function isMobileDevice(){
-
-return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent)
-
-}
-
 function isIOSDevice(){
 
 return /iPhone|iPad|iPod/i.test(navigator.userAgent)
@@ -323,10 +381,10 @@ return /iPhone|iPad|iPod/i.test(navigator.userAgent)
 
 
 // =============================
-// BLOB DOWNLOAD HELPER
+// DIRECT DOWNLOAD HELPERS
 // =============================
 
-function triggerBlobDownload(blob, fileName){
+function triggerObjectUrlDownload(blob, fileName){
 
 const blobUrl = URL.createObjectURL(blob)
 
@@ -342,43 +400,60 @@ document.body.removeChild(link)
 
 setTimeout(()=>{
 URL.revokeObjectURL(blobUrl)
-}, 8000)
+}, 10000)
 
 }
 
+function triggerDataUrlDownload(blob, fileName){
 
-// =============================
-// SHARE / SAVE HELPER
-// =============================
+return new Promise((resolve,reject)=>{
 
-async function sharePdfFile(blob, fileName){
+const reader = new FileReader()
+
+reader.onloadend = function(){
 
 try{
 
-const pdfFile = new File([blob], fileName, {
-type:"application/pdf"
-})
+const link = document.createElement("a")
+link.href = reader.result
+link.download = fileName
+link.rel = "noopener"
+link.style.display = "none"
 
-if(navigator.canShare && navigator.canShare({ files:[pdfFile] })){
-await navigator.share({
-files:[pdfFile],
-title:"Invoice PDF",
-text:"Invoice PDF"
-})
-return true
-}
+document.body.appendChild(link)
+link.click()
+document.body.removeChild(link)
 
-return false
+resolve()
 
 }catch(error){
-
-if(error && error.name === "AbortError"){
-return true
+reject(error)
 }
 
-console.warn("Share failed:", error)
-return false
+}
 
+reader.onerror = function(){
+reject(new Error("Data URL conversion failed"))
+}
+
+reader.readAsDataURL(blob)
+
+})
+
+}
+
+async function triggerBestDownload(blob, fileName){
+
+if(window.navigator && typeof window.navigator.msSaveOrOpenBlob === "function"){
+window.navigator.msSaveOrOpenBlob(blob, fileName)
+return
+}
+
+try{
+triggerObjectUrlDownload(blob, fileName)
+}catch(error){
+console.warn("Object URL download failed, trying data URL fallback:", error)
+await triggerDataUrlDownload(blob, fileName)
 }
 
 }
@@ -452,30 +527,12 @@ try{
 
 const { blob, fileName } = await buildInvoicePdfBlob()
 
-if(isMobileDevice()){
-
-const shared = await sharePdfFile(blob, fileName)
-
-if(shared){
-
-if(downloadBtn){
-downloadBtn.disabled = false
-downloadBtn.innerText = "Download Invoice"
-}
-
-return
-}
-
-triggerBlobDownload(blob, fileName)
+await triggerBestDownload(blob, fileName)
 
 if(isIOSDevice()){
-alert("PDF open ho sakti hai browser preview me. Wahan Share ya Save to Files use karke file save karein.")
-}
-
-}else{
-
-triggerBlobDownload(blob, fileName)
-
+setTimeout(()=>{
+alert("Agar iPhone/iPad browser preview khole, to browser menu se Save to Files ya Download option use karein.")
+}, 500)
 }
 
 }catch(error){
