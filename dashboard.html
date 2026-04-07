@@ -31,10 +31,14 @@ pointer-events:none;
 cursor:pointer;
 transition:transform .2s ease;
 min-width: 0;
+min-height: 112px;
+display:flex;
+flex-direction:column;
+justify-content:space-between;
 }
 
 .stat-card:hover{
-transform:scale(1.05);
+transform:scale(1.03);
 }
 
 .notification-item{
@@ -47,11 +51,30 @@ transform:translateX(5px);
 color:white;
 }
 
+.stat-label{
+font-size: 0.875rem;
+line-height: 1.25rem;
+color: rgb(156 163 175);
+word-break: break-word;
+}
+
 .stat-value{
-font-size: clamp(1.25rem, 4vw, 1.75rem);
-line-height: 1.15;
+font-size: clamp(1.35rem, 4.5vw, 1.9rem);
+line-height: 1.1;
+font-weight: 700;
 word-break: break-word;
 overflow-wrap: anywhere;
+margin-top: 10px;
+}
+
+@media (max-width: 360px){
+.stat-card{
+min-height: 104px;
+padding: 0.875rem;
+}
+.stat-value{
+font-size: 1.25rem;
+}
 }
 
 </style>
@@ -89,21 +112,21 @@ Setup
 </div>
 
 
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+<div class="grid grid-cols-2 gap-4 mb-6">
 
-<div onclick="location.href='clients.html'" class="glass rounded-2xl p-4 stat-card min-w-0">
-<p class="text-gray-400 text-sm break-words">Total Bookings</p>
-<h2 id="totalBookings" class="stat-value font-bold mt-2">0</h2>
+<div onclick="location.href='clients.html'" class="glass rounded-2xl p-4 stat-card">
+<p class="stat-label">Total Bookings</p>
+<h2 id="totalBookings" class="stat-value">0</h2>
 </div>
 
-<div onclick="location.href='pending-payments.html'" class="glass rounded-2xl p-4 stat-card min-w-0">
-<p class="text-gray-400 text-sm break-words">Pending Payments</p>
-<h2 id="pendingPayments" class="stat-value font-bold mt-2">₹0</h2>
+<div onclick="location.href='pending-payments.html'" class="glass rounded-2xl p-4 stat-card">
+<p class="stat-label">Pending Payments</p>
+<h2 id="pendingPayments" class="stat-value">₹0</h2>
 </div>
 
-<div onclick="location.href='monthly-revenue.html'" class="glass rounded-2xl p-4 stat-card min-w-0">
-<p class="text-gray-400 text-sm break-words">Monthly Revenue</p>
-<h2 id="monthlyRevenue" class="stat-value font-bold mt-2">₹0</h2>
+<div onclick="location.href='monthly-revenue.html'" class="glass rounded-2xl p-4 stat-card col-span-2">
+<p class="stat-label">Monthly Revenue</p>
+<h2 id="monthlyRevenue" class="stat-value">₹0</h2>
 </div>
 
 </div>
@@ -224,6 +247,20 @@ document
 
 
 // =============================
+// FORMAT CURRENCY
+// =============================
+
+function formatCurrency(value){
+
+const amount = Number(value || 0)
+
+return "₹" + amount.toLocaleString("en-IN")
+
+}
+
+
+
+// =============================
 // LOAD STUDIO
 // =============================
 
@@ -300,7 +337,7 @@ row.innerHTML =
 <div class="break-words">${q.client_name}</div>
 <div class="text-xs text-gray-400">${date}</div>
 </div>
-<span class="shrink-0 break-words">₹${q.total}</span>
+<span class="shrink-0 break-words">${formatCurrency(q.total)}</span>
 </div>
 `
 
@@ -389,10 +426,10 @@ pending += remaining
 
 
 document.getElementById("pendingPayments").innerText =
-"₹" + pending
+formatCurrency(pending)
 
 document.getElementById("monthlyRevenue").innerText =
-"₹" + monthlyRevenue
+formatCurrency(monthlyRevenue)
 
 
 
