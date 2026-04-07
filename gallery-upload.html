@@ -150,7 +150,6 @@ box.style.display = "none"
 
 async function ensureFaceReady(){
 
-// ✅ wait until face-api loaded
 if(typeof faceapi === "undefined"){
 console.error("❌ face-api not loaded")
 return false
@@ -184,7 +183,6 @@ alert("Login required")
 return
 }
 
-// ✅ ENSURE FACE LOADED BEFORE UPLOAD
 const faceReady = await ensureFaceReady()
 
 if(!faceReady){
@@ -249,7 +247,6 @@ alert("Token creation failed")
 return
 }
 
-// ✅ REFRESH DROPDOWN + AUTO SELECT NEW EVENT
 if(typeof loadConfirmedEvents === "function"){
 await loadConfirmedEvents(eventId)
 }
@@ -279,19 +276,12 @@ window.location.href = `gallery.html?event_id=${eventId}`
 
 </script>
 
-<!-- ============================= -->
-<!-- 🔥 FINAL FIXED SCRIPT ORDER -->
-<!-- ============================= -->
-
-<!-- ✅ CORRECT FACE API (BROWSER SAFE) -->
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-
-<!-- ✅ YOUR FILE -->
 <script src="js/face.js?v=5"></script>
 
 <script src="js/cloudinary.js"></script>
 <script src="js/supabase.js"></script>
-<script src="js/gallery-upload.js"></script>
+<script src="js/gallery-upload.js?v=2"></script>
 
 </body>
 </html>
