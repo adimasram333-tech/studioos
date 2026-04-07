@@ -306,7 +306,24 @@ return `invoice-${clientName}-${invoiceNumber}.pdf`
 
 
 // =============================
-// DOWNLOAD BLOB HELPER
+// DEVICE HELPERS
+// =============================
+
+function isMobileDevice(){
+
+return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
+}
+
+function isIOSDevice(){
+
+return /iPhone|iPad|iPod/i.test(navigator.userAgent)
+
+}
+
+
+// =============================
+// BLOB DOWNLOAD HELPER
 // =============================
 
 function triggerBlobDownload(blob, fileName){
@@ -316,6 +333,7 @@ const blobUrl = URL.createObjectURL(blob)
 const link = document.createElement("a")
 link.href = blobUrl
 link.download = fileName
+link.rel = "noopener"
 link.style.display = "none"
 
 document.body.appendChild(link)
@@ -324,16 +342,16 @@ document.body.removeChild(link)
 
 setTimeout(()=>{
 URL.revokeObjectURL(blobUrl)
-}, 5000)
+}, 8000)
 
 }
 
 
 // =============================
-// MOBILE SHARE/SAVE HELPER
+// SHARE / SAVE HELPER
 // =============================
 
-async function tryMobileShare(blob, fileName){
+async function sharePdfFile(blob, fileName){
 
 try{
 
@@ -353,28 +371,24 @@ return true
 return false
 
 }catch(error){
-console.warn("Mobile share skipped:", error)
+
+if(error && error.name === "AbortError"){
+return true
+}
+
+console.warn("Share failed:", error)
 return false
+
 }
 
 }
 
 
 // =============================
-// DOWNLOAD PDF
+// BUILD PDF BLOB
 // =============================
 
-async function downloadInvoice(){
-
-const downloadBtn =
-document.getElementById("downloadInvoice")
-
-if(downloadBtn){
-downloadBtn.disabled = true
-downloadBtn.innerText = "Preparing PDF..."
-}
-
-try{
+async function buildInvoicePdfBlob(){
 
 window.scrollTo(0,0)
 
@@ -412,24 +426,55 @@ html2pdf().set(opt).from(element)
 const pdfBlob =
 await worker.outputPdf("blob")
 
-const isMobile =
-/Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent)
+return {
+blob: pdfBlob,
+fileName
+}
 
-if(isMobile){
+}
 
-triggerBlobDownload(pdfBlob, fileName)
 
-const shared = await tryMobileShare(pdfBlob, fileName)
+// =============================
+// DOWNLOAD PDF
+// =============================
 
-if(!shared){
-setTimeout(()=>{
-alert("PDF generate ho gayi hai. Agar browser preview open kare, to wahan browser menu se Save/Download karein.")
-}, 400)
+async function downloadInvoice(){
+
+const downloadBtn =
+document.getElementById("downloadInvoice")
+
+if(downloadBtn){
+downloadBtn.disabled = true
+downloadBtn.innerText = "Preparing PDF..."
+}
+
+try{
+
+const { blob, fileName } = await buildInvoicePdfBlob()
+
+if(isMobileDevice()){
+
+const shared = await sharePdfFile(blob, fileName)
+
+if(shared){
+
+if(downloadBtn){
+downloadBtn.disabled = false
+downloadBtn.innerText = "Download Invoice"
+}
+
+return
+}
+
+triggerBlobDownload(blob, fileName)
+
+if(isIOSDevice()){
+alert("PDF open ho sakti hai browser preview me. Wahan Share ya Save to Files use karke file save karein.")
 }
 
 }else{
 
-triggerBlobDownload(pdfBlob, fileName)
+triggerBlobDownload(blob, fileName)
 
 }
 
