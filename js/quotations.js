@@ -36,6 +36,73 @@ return user
 
 
 // =============================
+// MENU STATE
+// =============================
+
+let activeQuotationMenuId = null
+let quotationMenuListenersInitialized = false
+
+function closeAllMenus(exceptId = null){
+
+const allMenus = document.querySelectorAll('[id^="menu-"]')
+
+allMenus.forEach((menu)=>{
+if(menu.id !== exceptId){
+menu.classList.add("hidden")
+}
+})
+
+if(exceptId){
+activeQuotationMenuId = exceptId.replace("menu-","")
+}else{
+activeQuotationMenuId = null
+}
+
+}
+
+function initializeQuotationMenuListeners(){
+
+if(quotationMenuListenersInitialized) return
+
+document.addEventListener("click", function(e){
+
+const clickedToggle =
+e.target.closest("[data-quotation-menu-toggle='true']")
+
+const clickedMenu =
+e.target.closest("[data-quotation-menu='true']")
+
+if(clickedToggle || clickedMenu){
+return
+}
+
+closeAllMenus()
+
+})
+
+document.addEventListener("touchstart", function(e){
+
+const clickedToggle =
+e.target.closest("[data-quotation-menu-toggle='true']")
+
+const clickedMenu =
+e.target.closest("[data-quotation-menu='true']")
+
+if(clickedToggle || clickedMenu){
+return
+}
+
+closeAllMenus()
+
+}, { passive:true })
+
+quotationMenuListenersInitialized = true
+
+}
+
+
+
+// =============================
 // FETCH QUOTATIONS
 // =============================
 
@@ -78,13 +145,13 @@ document.getElementById("quotationList")
 
 if(!listContainer) return
 
+initializeQuotationMenuListeners()
+closeAllMenus()
 
 listContainer.innerHTML =
 "<p class='text-gray-400 text-sm'>Loading quotations...</p>"
 
-
 const quotations = await getAllQuotations()
-
 
 if(!quotations || quotations.length === 0){
 
@@ -95,12 +162,9 @@ return
 
 }
 
-
 listContainer.innerHTML = ""
 
-
 quotations.forEach((q)=>{
-
 
 // ===== BUILD SEO LINK =====
 
@@ -115,12 +179,9 @@ q.short_id || q.id.substring(0,8)
 const proposalLink =
 "p/" + slug + "-" + shortId
 
-
-
 const card = document.createElement("div")
 
 card.className = "glass p-4 rounded-xl relative"
-
 
 // ===== CONFIRM BUTTON STATE =====
 
@@ -144,7 +205,6 @@ Confirm Booking
 `
 
 }
-
 
 // ===== CARD HTML =====
 
@@ -170,7 +230,9 @@ ${formatDate(q.event_date)}
 ₹${q.total}
 </div>
 
-<button onclick="toggleMenu('${q.id}')"
+<button
+onclick="toggleMenu(event, '${q.id}')"
+data-quotation-menu-toggle="true"
 class="text-xl px-2">
 ⋮
 </button>
@@ -178,7 +240,6 @@ class="text-xl px-2">
 </div>
 
 </div>
-
 
 <div class="mt-3 flex gap-2">
 
@@ -194,8 +255,9 @@ Edit
 
 </div>
 
-
 <div id="menu-${q.id}"
+data-quotation-menu="true"
+onclick="event.stopPropagation()"
 class="hidden absolute right-3 top-12 glass rounded-lg text-xs overflow-hidden">
 
 ${confirmOption}
@@ -226,12 +288,28 @@ listContainer.appendChild(card)
 // TOGGLE MENU
 // =============================
 
-function toggleMenu(id){
+function toggleMenu(event,id){
+
+if(event){
+event.stopPropagation()
+}
 
 const menu =
 document.getElementById("menu-" + id)
 
-menu.classList.toggle("hidden")
+if(!menu) return
+
+const isHidden = menu.classList.contains("hidden")
+
+closeAllMenus()
+
+if(isHidden){
+menu.classList.remove("hidden")
+activeQuotationMenuId = id
+}else{
+menu.classList.add("hidden")
+activeQuotationMenuId = null
+}
 
 }
 
