@@ -23,6 +23,41 @@ ${buildGuestDownloadLabel(guestFreeDownload)}
 `
 }
 
+function positionFloatingMenu(menu, btn){
+
+if(!menu || !btn) return
+
+const rect = btn.getBoundingClientRect()
+const viewportWidth = window.innerWidth
+const viewportHeight = window.innerHeight
+const safeMargin = 8
+
+const menuWidth = menu.offsetWidth || 180
+const menuHeight = menu.offsetHeight || 220
+
+let left = rect.right - menuWidth
+let top = rect.bottom + 6
+
+if(left < safeMargin){
+left = safeMargin
+}
+
+if(left + menuWidth > viewportWidth - safeMargin){
+left = viewportWidth - menuWidth - safeMargin
+}
+
+if(top + menuHeight > viewportHeight - safeMargin){
+top = rect.top - menuHeight - 6
+}
+
+if(top < safeMargin){
+top = safeMargin
+}
+
+menu.style.left = `${Math.max(safeMargin, left)}px`
+menu.style.top = `${Math.max(safeMargin, top)}px`
+}
+
 window.toggleMenu = function(id, btn, guestFreeDownload = false){
 
 const existing = document.getElementById("floatingMenu")
@@ -35,16 +70,14 @@ return
 
 if(existing) existing.remove()
 
-const rect = btn.getBoundingClientRect()
-
 const menu = document.createElement("div")
 menu.id = "floatingMenu"
 menu.dataset.id = id
 menu.dataset.guestFreeDownload = guestFreeDownload ? "true" : "false"
 
 menu.style.position = "fixed"
-menu.style.top = rect.bottom + "px"
-menu.style.left = (rect.right - 180) + "px"
+menu.style.top = "0px"
+menu.style.left = "0px"
 menu.style.background = "#1a1f2e"
 menu.style.border = "1px solid rgba(255,255,255,0.1)"
 menu.style.borderRadius = "8px"
@@ -53,11 +86,17 @@ menu.style.zIndex = 99999
 menu.style.backdropFilter = "blur(10px)"
 menu.style.overflow = "hidden"
 menu.style.minWidth = "180px"
+menu.style.maxWidth = "calc(100vw - 16px)"
+menu.style.boxSizing = "border-box"
 
 menu.innerHTML = buildMenuHtml(id, !!guestFreeDownload)
 
 document.body.appendChild(menu)
 activeMenu = menu
+
+requestAnimationFrame(()=>{
+positionFloatingMenu(menu, btn)
+})
 
 }
 
@@ -70,6 +109,22 @@ activeMenu = null
 }
 
 })
+
+window.addEventListener("resize", ()=>{
+const existing = document.getElementById("floatingMenu")
+if(existing){
+existing.remove()
+activeMenu = null
+}
+})
+
+window.addEventListener("scroll", ()=>{
+const existing = document.getElementById("floatingMenu")
+if(existing){
+existing.remove()
+activeMenu = null
+}
+}, true)
 
 window.openEvent = function(id){
 window.location.href = `gallery.html?event_id=${id}`
