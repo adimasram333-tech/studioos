@@ -80,12 +80,12 @@ await supabase
 .order("event_date",{ascending:true})
 
 if(error){
-eventList.innerHTML = "<p>Error loading events</p>"
+eventList.innerHTML = "<p class='text-sm text-red-400'>Error loading events</p>"
 return
 }
 
 if(!data || data.length === 0){
-eventList.innerHTML = "<p>No upcoming events</p>"
+eventList.innerHTML = "<p class='text-sm text-gray-400'>No upcoming events</p>"
 return
 }
 
@@ -127,11 +127,11 @@ busyLabel = "<span class='text-yellow-400 text-xs ml-2'>⚡ Busy Day</span>"
 }
 
 eventList.innerHTML += `
-<div class="glass p-4 rounded-xl">
+<div class="glass p-3 sm:p-4 rounded-xl">
 
-<p class="text-lg font-semibold mb-2">
+<p class="text-base sm:text-lg font-semibold mb-2 leading-snug">
 ${eventDate}
-<span class="text-gray-400 text-sm">
+<span class="text-gray-400 text-xs sm:text-sm">
 (${events.length} events)
 </span>
 ${busyLabel}
@@ -140,7 +140,7 @@ ${busyLabel}
 <div class="space-y-1">
 ${events.map(e=>`
 <div 
-class="text-sm text-gray-300"
+class="text-sm text-gray-300 break-words"
 >
 • ${e.client_name || e.event_name}
 </div>
@@ -228,7 +228,7 @@ currentDate.toLocaleString("default",{month:"long",year:"numeric"})
 
 // EMPTY
 for(let i=0;i<firstDay;i++){
-calendar.innerHTML += `<div></div>`
+calendar.innerHTML += `<div class="min-h-[42px] sm:min-h-[48px]"></div>`
 }
 
 // DAYS
@@ -237,7 +237,7 @@ for(let d=1; d<=daysInMonth; d++){
 const fullDate =
 `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
 
-let classes = "p-2 rounded cursor-pointer transition hover:scale-105"
+let classes = "min-h-[42px] sm:min-h-[48px] w-full rounded cursor-pointer transition flex items-center justify-center text-sm sm:text-base font-medium select-none"
 
 if(eventDates[fullDate]){
 classes += " bg-red-600"
