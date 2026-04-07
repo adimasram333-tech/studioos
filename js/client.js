@@ -237,20 +237,74 @@ document.getElementById("balanceAmount").innerText =
 
 
 // =============================
-// ADD PAYMENT BUTTON
+// BUTTON LINKS
 // =============================
 
 document.getElementById("addPaymentBtn").href =
 "payment.html?quotation=" + quotationId
 
-
-
-// =============================
-// VIEW INVOICE BUTTON
-// =============================
-
 document.getElementById("viewInvoiceBtn").href =
 "invoice.html?quotation=" + quotationId
+
+
+
+// ✅ NEW: ADD TEAM BUTTON
+
+const addTeamBtn = document.getElementById("addTeamBtn")
+
+if(addTeamBtn){
+addTeamBtn.href =
+"team.html?quotation=" + quotationId
+}
+
+
+
+// =============================
+// MENU LOGIC
+// =============================
+
+const menuBtn = document.getElementById("menuBtn")
+const menuDropdown = document.getElementById("menuDropdown")
+
+if(menuBtn && menuDropdown){
+
+menuBtn.addEventListener("click",(e)=>{
+e.stopPropagation()
+menuDropdown.classList.toggle("hidden")
+})
+
+document.addEventListener("click",()=>{
+menuDropdown.classList.add("hidden")
+})
+
+}
+
+
+
+// =============================
+// SHARE TEAM
+// =============================
+
+const shareTeamBtn =
+document.getElementById("shareTeamBtn")
+
+if(shareTeamBtn){
+
+shareTeamBtn.addEventListener("click",()=>{
+
+const url =
+window.location.origin +
+"/studioos/team.html?quotation=" +
+quotationId
+
+navigator.clipboard.writeText(url)
+
+alert("Team link copied")
+
+})
+
+}
+
 
 
 }
