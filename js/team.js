@@ -2,20 +2,40 @@
 
 let quotationId = null;
 let members = [];
+let supabase = null;
+
 
 // ===== INIT =====
 
 window.addEventListener("DOMContentLoaded", async () => {
 
-  const params = new URLSearchParams(window.location.search);
-  quotationId = params.get("quotation");
+  try {
 
-  if (!quotationId) {
-    alert("Invalid access");
-    return;
+    const params = new URLSearchParams(window.location.search);
+    quotationId = params.get("quotation");
+
+    if (!quotationId) {
+      alert("Invalid access");
+      return;
+    }
+
+    // ✅ SAFE SUPABASE INIT (FIX)
+    if (window.getSupabase) {
+      supabase = await window.getSupabase();
+    } else if (window.supabaseClient) {
+      supabase = window.supabaseClient;
+    }
+
+    if (!supabase) {
+      throw new Error("Supabase not initialized");
+    }
+
+    await loadClientData();
+
+  } catch (err) {
+    console.error(err);
+    alert("App init failed");
   }
-
-  await loadClientData();
 
 });
 
@@ -26,9 +46,6 @@ async function loadClientData() {
 
   try {
 
-    // ✅ FIX: properly get supabase
-    const supabase = await window.getSupabase();
-
     const { data, error } = await supabase
       .from("quotations")
       .select("*")
@@ -37,13 +54,14 @@ async function loadClientData() {
 
     if (error) throw error;
 
-    document.getElementById("clientName").innerText = data.client_name || "-";
-    document.getElementById("eventName").innerText = data.event_type || "-";
-    document.getElementById("eventDate").innerText = data.event_date || "-";
-    document.getElementById("venue").innerText = data.venue || "-";
+    // ✅ SAFE SET (no crash)
+    document.getElementById("clientName").innerText = data?.client_name || "-";
+    document.getElementById("eventName").innerText = data?.event_type || "-";
+    document.getElementById("eventDate").innerText = data?.event_date || "-";
+    document.getElementById("venue").innerText = data?.venue || "-";
 
   } catch (err) {
-    console.error(err);
+    console.error("LOAD ERROR:", err);
     alert("Failed to load client data");
   }
 
@@ -78,19 +96,19 @@ function addMember() {
     <div>
       <label class="text-sm text-gray-400">Alt Phone</label>
       <input id="alt_phone_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white text-black text-sm outline-none">
     </div>
 
     <div>
       <label class="text-sm text-gray-400">Reporting Time</label>
       <input id="reporting_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white text-black text-sm outline-none">
     </div>
 
     <div>
       <label class="text-sm text-gray-400">Note</label>
       <input id="note_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white text-black text-sm outline-none">
     </div>
   `;
 
@@ -120,14 +138,13 @@ async function saveTeam() {
 
   try {
 
-    // ✅ FIX: get supabase
-    const supabase = await window.getSupabase();
-
-    const { data: client } = await supabase
+    const { data: client, error: fetchError } = await supabase
       .from("quotations")
       .select("*")
       .eq("id", quotationId)
       .single();
+
+    if (fetchError) throw fetchError;
 
     let insertData = [];
 
