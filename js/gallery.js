@@ -3,6 +3,12 @@
 // =============================
 
 let activeMenu = null
+let FACE_FILTER_ACTIVE = false
+let CURRENT_GALLERY_STATE = {
+eventId: null,
+effectiveRole: "guest",
+matchedImages: new Set()
+}
 
 function buildGuestDownloadLabel(isFree){
 return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
@@ -607,6 +613,42 @@ return `
 `
 }
 
+function getClientFaceScanUrl(eventId){
+const redirectUrl = `${window.location.origin}/studioos/gallery.html?event_id=${eventId}`
+return `face-capture.html?event_id=${encodeURIComponent(eventId)}&role=client&redirect=${encodeURIComponent(redirectUrl)}`
+}
+
+function updateFaceActionButton(){
+
+const btn = document.getElementById("faceActionBtn")
+if(!btn) return
+
+const { eventId, effectiveRole, matchedImages } = CURRENT_GALLERY_STATE
+
+if(!eventId || effectiveRole !== "client"){
+btn.classList.add("hidden")
+btn.onclick = null
+return
+}
+
+btn.classList.remove("hidden")
+
+if(matchedImages && matchedImages.size > 0){
+btn.innerText = FACE_FILTER_ACTIVE ? "Show Full Gallery" : "Show My Photos"
+btn.onclick = function(){
+FACE_FILTER_ACTIVE = !FACE_FILTER_ACTIVE
+loadGallery()
+}
+}else{
+FACE_FILTER_ACTIVE = false
+btn.innerText = "Face Scan"
+btn.onclick = function(){
+window.location.href = getClientFaceScanUrl(eventId)
+}
+}
+
+}
+
 // =============================
 // LOAD GALLERY
 // =============================
@@ -739,6 +781,13 @@ matchedImages.add(url)
 })
 }
 
+if(effectiveRole === "client" && eventId){
+const sessionMatchedImages = getGuestMatchedImagesFromSession(eventId)
+sessionMatchedImages.forEach(url=>{
+matchedImages.add(url)
+})
+}
+
 // guest ke liye DB re-match allow nahi
 // sirf client / photographer ke liye optional DB matching
 if(userEncoding && eventId && effectiveRole !== "guest"){
@@ -775,17 +824,32 @@ matchedImages.add(normalizeImageUrl(row.image_url))
 
 }
 
+CURRENT_GALLERY_STATE = {
+eventId,
+effectiveRole,
+matchedImages
+}
+
+updateFaceActionButton()
+
 if(!grid || !empty){
 return
 }
 
 grid.innerHTML = ""
+empty.classList.add("hidden")
 
 // =============================
 // FOLDER VIEW
 // =============================
 
 if(!eventId){
+
+const faceBtn = document.getElementById("faceActionBtn")
+if(faceBtn){
+faceBtn.classList.add("hidden")
+faceBtn.onclick = null
+}
 
 if(!user){
 window.location.href = "access.html"
@@ -1009,6 +1073,12 @@ return
 }
 }
 
+if(effectiveRole === "client" && FACE_FILTER_ACTIVE){
+if(!isMatchedImage(img.image_url, matchedImages)){
+return
+}
+}
+
 const cleanUrl = normalizeImageUrl(img.image_url)
 const displayUrl = getDisplayImageUrl(cleanUrl, effectiveRole, guestFreeDownload)
 
@@ -1036,6 +1106,11 @@ grid.appendChild(div)
 
 if(effectiveRole === "guest" && grid.children.length === 0){
 empty.innerText = "No photos found for your face"
+empty.classList.remove("hidden")
+}
+
+if(effectiveRole === "client" && FACE_FILTER_ACTIVE && grid.children.length === 0){
+empty.innerText = "No face matched photos"
 empty.classList.remove("hidden")
 }
 
