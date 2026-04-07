@@ -99,10 +99,8 @@ Team Role
 
 <div>
 <label class="text-sm text-gray-400">Role</label>
-
 <select id="role"
 class="dark-select w-full mt-1 p-2 rounded-lg text-sm outline-none border border-white/10">
-
 <option value="">Select Role</option>
 <option value="Candid Photographer">Candid Photographer</option>
 <option value="Traditional Photographer">Traditional Photographer</option>
@@ -111,9 +109,7 @@ class="dark-select w-full mt-1 p-2 rounded-lg text-sm outline-none border border
 <option value="Drone Operator">Drone Operator</option>
 <option value="Assistant">Assistant</option>
 <option value="LED Screen">LED Screen</option>
-
 </select>
-
 </div>
 
 <div>
@@ -129,9 +125,70 @@ class="dark-select w-full mt-1 p-2 rounded-lg text-sm outline-none border border
 </div>
 
 
-<!-- MEMBERS -->
+<!-- MEMBER ENTRY -->
 
-<div id="membersContainer" class="space-y-2"></div>
+<div class="glass p-4 rounded-xl space-y-2">
+
+<h2 class="text-sm font-semibold text-gray-300">
+Member Details
+</h2>
+
+<div>
+<label class="text-sm text-gray-400">Member Name</label>
+<input id="memberName"
+class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
+placeholder="Enter member name">
+</div>
+
+<div>
+<label class="text-sm text-gray-400">Phone</label>
+<input id="memberPhone"
+class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
+placeholder="Enter phone number">
+</div>
+
+<div>
+<label class="text-sm text-gray-400">Alt Phone</label>
+<input id="memberAltPhone"
+class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
+placeholder="Optional alternate number">
+</div>
+
+<div>
+<label class="text-sm text-gray-400">Reporting Time</label>
+<input id="memberReportingTime"
+class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
+placeholder="e.g. 8:00 AM">
+</div>
+
+<div>
+<label class="text-sm text-gray-400">Note</label>
+<input id="memberNote"
+class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
+placeholder="Optional note">
+</div>
+
+</div>
+
+
+<!-- TEAM PREVIEW -->
+
+<div class="glass p-4 rounded-xl space-y-3">
+
+<div class="flex items-center justify-between">
+<h2 class="text-sm font-semibold text-gray-300">
+Added Team Members
+</h2>
+<span id="teamCount" class="text-xs text-gray-400">
+0 members
+</span>
+</div>
+
+<div id="teamPreview" class="space-y-3 text-sm text-gray-300">
+<p class="text-gray-400 text-sm">No members added yet</p>
+</div>
+
+</div>
 
 
 <!-- ACTIONS -->
@@ -148,11 +205,15 @@ class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl text-sm font-semi
 Save Team
 </button>
 
-</div>
+<button onclick="viewTeamSheet()"
+class="w-full glass p-3 rounded-xl hover:bg-white/10 text-sm">
+View Team Sheet
+</button>
 
 </div>
 
-<!-- REQUIRED: supabase.js ko CDN chahiye -->
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/team.js"></script>
