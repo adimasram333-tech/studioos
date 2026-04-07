@@ -37,6 +37,7 @@ Upload Event Photos
 <select id="eventSelect"
 class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-3 text-sm">
 <option value="">Select Event</option>
+<option value="create_new">+ Create New Event</option>
 </select>
 
 <div id="createEventBox" style="display:none;" class="mb-4">
@@ -248,6 +249,21 @@ alert("Token creation failed")
 return
 }
 
+// ✅ REFRESH DROPDOWN + AUTO SELECT NEW EVENT
+if(typeof loadConfirmedEvents === "function"){
+await loadConfirmedEvents(eventId)
+}
+
+const createBox = document.getElementById("createEventBox")
+if(createBox){
+createBox.style.display = "none"
+}
+
+const selectBox = document.getElementById("eventSelect")
+if(selectBox){
+selectBox.value = String(eventId)
+}
+
 }
 
 if(!eventId){
@@ -255,7 +271,7 @@ alert("Please select event")
 return
 }
 
-await window.uploadImages()
+await window.uploadImages(eventId)
 
 window.location.href = `gallery.html?event_id=${eventId}`
 
