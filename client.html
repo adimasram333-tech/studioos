@@ -29,16 +29,51 @@ border:1px solid rgba(255,255,255,0.1);
 
 <body class="text-white min-h-screen p-4">
 
-<div class="max-w-md mx-auto space-y-4">
+<div class="max-w-md mx-auto space-y-4 relative">
 
 <a href="clients.html"
 class="text-sm text-gray-400">
 ← Back
 </a>
 
+<!-- HEADER WITH MENU -->
+
+<div class="flex justify-between items-center">
+
 <h1 class="text-xl font-bold">
 Client Profile
 </h1>
+
+<div class="relative">
+
+<button id="menuBtn"
+class="p-2 rounded-lg hover:bg-white/10 text-lg">
+⋮
+</button>
+
+<div id="menuDropdown"
+class="hidden absolute right-0 mt-2 w-40 glass rounded-xl overflow-hidden z-50">
+
+<button id="shareTeamBtn"
+class="w-full text-left px-4 py-2 text-sm hover:bg-white/10">
+Share Team
+</button>
+
+<button id="openTeamBtn"
+class="w-full text-left px-4 py-2 text-sm hover:bg-white/10">
+Open Team
+</button>
+
+<button id="viewTeamSheetBtn"
+class="w-full text-left px-4 py-2 text-sm hover:bg-white/10">
+View Team Sheet
+</button>
+
+</div>
+
+</div>
+
+</div>
 
 
 <!-- CLIENT DETAILS -->
@@ -147,6 +182,16 @@ href="#"
 class="block text-center bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl">
 
 Add Payment
+
+</a>
+
+<!-- ✅ NEW BUTTON -->
+
+<a id="addTeamBtn"
+href="#"
+class="block text-center bg-indigo-600/80 hover:bg-indigo-700 p-3 rounded-xl">
+
+Add Team
 
 </a>
 
