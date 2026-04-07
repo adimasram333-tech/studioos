@@ -30,6 +30,7 @@ pointer-events:none;
 .stat-card{
 cursor:pointer;
 transition:transform .2s ease;
+min-width: 0;
 }
 
 .stat-card:hover{
@@ -44,6 +45,13 @@ transition:all .2s ease;
 .notification-item:hover{
 transform:translateX(5px);
 color:white;
+}
+
+.stat-value{
+font-size: clamp(1.25rem, 4vw, 1.75rem);
+line-height: 1.15;
+word-break: break-word;
+overflow-wrap: anywhere;
 }
 
 </style>
@@ -63,17 +71,17 @@ Logout
 
 <div id="dashboard" class="max-w-md mx-auto">
 
-<div class="glass rounded-2xl p-4 flex justify-between items-center mb-6">
+<div class="glass rounded-2xl p-4 flex justify-between items-center gap-3 mb-6">
 
-<div>
-<h1 id="studioDisplay" class="text-xl font-bold">StudioOS</h1>
+<div class="min-w-0 flex-1">
+<h1 id="studioDisplay" class="text-xl font-bold break-words">StudioOS</h1>
 <p class="text-gray-400 text-xs">Photography Business System</p>
 </div>
 
 <a
 id="setupBtn"
 href="profile.html"
-class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm"
+class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm shrink-0"
 >
 Setup
 </a>
@@ -81,21 +89,21 @@ Setup
 </div>
 
 
-<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
 
-<div onclick="location.href='clients.html'" class="glass rounded-2xl p-4 stat-card">
-<p class="text-gray-400 text-sm">Total Bookings</p>
-<h2 id="totalBookings" class="text-2xl font-bold">0</h2>
+<div onclick="location.href='clients.html'" class="glass rounded-2xl p-4 stat-card min-w-0">
+<p class="text-gray-400 text-sm break-words">Total Bookings</p>
+<h2 id="totalBookings" class="stat-value font-bold mt-2">0</h2>
 </div>
 
-<div onclick="location.href='pending-payments.html'" class="glass rounded-2xl p-4 stat-card">
-<p class="text-gray-400 text-sm">Pending Payments</p>
-<h2 id="pendingPayments" class="text-2xl font-bold">₹0</h2>
+<div onclick="location.href='pending-payments.html'" class="glass rounded-2xl p-4 stat-card min-w-0">
+<p class="text-gray-400 text-sm break-words">Pending Payments</p>
+<h2 id="pendingPayments" class="stat-value font-bold mt-2">₹0</h2>
 </div>
 
-<div onclick="location.href='monthly-revenue.html'" class="glass rounded-2xl p-4 stat-card">
-<p class="text-gray-400 text-sm">Monthly Revenue</p>
-<h2 id="monthlyRevenue" class="text-2xl font-bold">₹0</h2>
+<div onclick="location.href='monthly-revenue.html'" class="glass rounded-2xl p-4 stat-card min-w-0">
+<p class="text-gray-400 text-sm break-words">Monthly Revenue</p>
+<h2 id="monthlyRevenue" class="stat-value font-bold mt-2">₹0</h2>
 </div>
 
 </div>
@@ -103,14 +111,14 @@ Setup
 
 <div class="glass rounded-2xl p-4 mb-6">
 
-<div class="flex justify-between items-center mb-3">
+<div class="flex justify-between items-center mb-3 gap-3">
 
 <h3 class="text-lg font-semibold">
 Recent Quotations
 </h3>
 
 <a href="quotations.html"
-class="text-indigo-400 text-sm hover:underline">
+class="text-indigo-400 text-sm hover:underline shrink-0">
 View All →
 </a>
 
@@ -287,12 +295,12 @@ document.createElement("div")
 
 row.innerHTML =
 `
-<div class="flex justify-between">
-<div>
-<div>${q.client_name}</div>
+<div class="flex justify-between gap-3">
+<div class="min-w-0">
+<div class="break-words">${q.client_name}</div>
 <div class="text-xs text-gray-400">${date}</div>
 </div>
-<span>₹${q.total}</span>
+<span class="shrink-0 break-words">₹${q.total}</span>
 </div>
 `
 
