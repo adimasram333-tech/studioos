@@ -26,6 +26,9 @@ async function loadClientData() {
 
   try {
 
+    // ✅ FIX: properly get supabase
+    const supabase = await window.getSupabase();
+
     const { data, error } = await supabase
       .from("quotations")
       .select("*")
@@ -63,31 +66,31 @@ function addMember() {
     <div>
       <label class="text-sm text-gray-400">Member Name</label>
       <input id="member_name_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none">
     </div>
 
     <div>
       <label class="text-sm text-gray-400">Phone</label>
       <input id="phone_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none">
     </div>
 
     <div>
       <label class="text-sm text-gray-400">Alt Phone</label>
       <input id="alt_phone_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none">
     </div>
 
     <div>
       <label class="text-sm text-gray-400">Reporting Time</label>
       <input id="reporting_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none">
     </div>
 
     <div>
       <label class="text-sm text-gray-400">Note</label>
       <input id="note_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none">
     </div>
   `;
 
@@ -117,7 +120,9 @@ async function saveTeam() {
 
   try {
 
-    // fetch client again (safe way)
+    // ✅ FIX: get supabase
+    const supabase = await window.getSupabase();
+
     const { data: client } = await supabase
       .from("quotations")
       .select("*")
