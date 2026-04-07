@@ -2,51 +2,83 @@
 
 let quotationId = null;
 let members = [];
-let supabase = null;
+let db = null;
+
+
+// ===== GET QUOTATION ID =====
+
+function getQuotationId() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("quotation") || params.get("id");
+}
+
+
+// ===== FORMAT DATE =====
+
+function formatDate(dateString) {
+  if (!dateString) return "-";
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return dateString;
+  }
+
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+
+// ===== GET EVENT NAME =====
+
+function getEventNameFromQuotation(data) {
+  return (
+    data?.event_category ||
+    data?.event_type ||
+    data?.package ||
+    data?.event_name ||
+    "-"
+  );
+}
 
 
 // ===== INIT =====
 
 window.addEventListener("DOMContentLoaded", async () => {
-
   try {
-
-    const params = new URLSearchParams(window.location.search);
-    quotationId = params.get("quotation");
+    quotationId = getQuotationId();
 
     if (!quotationId) {
       alert("Invalid access");
       return;
     }
 
-    // ✅ SAFE SUPABASE INIT (FIX)
-    if (window.getSupabase) {
-      supabase = await window.getSupabase();
+    if (typeof window.getSupabase === "function") {
+      db = await window.getSupabase();
     } else if (window.supabaseClient) {
-      supabase = window.supabaseClient;
+      db = window.supabaseClient;
     }
 
-    if (!supabase) {
+    if (!db) {
       throw new Error("Supabase not initialized");
     }
 
     await loadClientData();
-
   } catch (err) {
-    console.error(err);
+    console.error("APP INIT ERROR:", err);
     alert("App init failed");
   }
-
 });
 
 
 // ===== LOAD CLIENT DATA =====
 
 async function loadClientData() {
-
   try {
-
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("quotations")
       .select("*")
       .eq("id", quotationId)
@@ -54,75 +86,78 @@ async function loadClientData() {
 
     if (error) throw error;
 
-    // ✅ SAFE SET (no crash)
-    document.getElementById("clientName").innerText = data?.client_name || "-";
-    document.getElementById("eventName").innerText = data?.event_type || "-";
-    document.getElementById("eventDate").innerText = data?.event_date || "-";
-    document.getElementById("venue").innerText = data?.venue || "-";
+    document.getElementById("clientName").innerText =
+      data?.client_name || "-";
 
+    document.getElementById("eventName").innerText =
+      getEventNameFromQuotation(data);
+
+    document.getElementById("eventDate").innerText =
+      formatDate(data?.event_start_date || data?.event_date);
+
+    document.getElementById("venue").innerText =
+      data?.venue || "-";
   } catch (err) {
-    console.error("LOAD ERROR:", err);
+    console.error("LOAD CLIENT DATA ERROR:", err);
     alert("Failed to load client data");
   }
-
 }
 
 
 // ===== ADD MEMBER UI =====
 
 function addMember() {
-
   const container = document.getElementById("membersContainer");
-
   const index = members.length;
 
   const div = document.createElement("div");
-
   div.className = "glass p-4 rounded-xl space-y-2";
 
   div.innerHTML = `
     <div>
       <label class="text-sm text-gray-400">Member Name</label>
       <input id="member_name_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
+      placeholder="Enter member name">
     </div>
 
     <div>
       <label class="text-sm text-gray-400">Phone</label>
       <input id="phone_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
+      placeholder="Enter phone number">
     </div>
 
     <div>
       <label class="text-sm text-gray-400">Alt Phone</label>
       <input id="alt_phone_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white text-black text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
+      placeholder="Optional alternate number">
     </div>
 
     <div>
       <label class="text-sm text-gray-400">Reporting Time</label>
       <input id="reporting_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white text-black text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
+      placeholder="e.g. 8:00 AM">
     </div>
 
     <div>
       <label class="text-sm text-gray-400">Note</label>
       <input id="note_${index}"
-      class="w-full mt-1 p-2 rounded-lg bg-white text-black text-sm outline-none">
+      class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
+      placeholder="Optional note">
     </div>
   `;
 
   container.appendChild(div);
-
   members.push(index);
-
 }
 
 
 // ===== SAVE TEAM =====
 
 async function saveTeam() {
-
   const role = document.getElementById("role").value.trim();
   const day = document.getElementById("day").value;
 
@@ -137,8 +172,7 @@ async function saveTeam() {
   }
 
   try {
-
-    const { data: client, error: fetchError } = await supabase
+    const { data: client, error: fetchError } = await db
       .from("quotations")
       .select("*")
       .eq("id", quotationId)
@@ -146,30 +180,34 @@ async function saveTeam() {
 
     if (fetchError) throw fetchError;
 
-    let insertData = [];
+    const insertData = [];
 
-    members.forEach(i => {
+    members.forEach((i) => {
+      const member_name =
+        document.getElementById(`member_name_${i}`)?.value.trim() || "";
 
-      const member_name = document.getElementById(`member_name_${i}`).value;
-      const phone = document.getElementById(`phone_${i}`).value;
+      const phone =
+        document.getElementById(`phone_${i}`)?.value.trim() || "";
 
       if (!member_name || !phone) return;
 
       insertData.push({
         quotation_id: quotationId,
-        client_name: client.client_name,
-        event_name: client.event_type,
-        event_date: client.event_date,
-        venue: client.venue,
+        client_name: client?.client_name || "",
+        event_name: getEventNameFromQuotation(client),
+        event_date: client?.event_start_date || client?.event_date || "",
+        venue: client?.venue || "",
         role_name: role,
         day: day,
         member_name: member_name,
         phone: phone,
-        alt_phone: document.getElementById(`alt_phone_${i}`).value,
-        reporting_time: document.getElementById(`reporting_${i}`).value,
-        note: document.getElementById(`note_${i}`).value
+        alt_phone:
+          document.getElementById(`alt_phone_${i}`)?.value.trim() || "",
+        reporting_time:
+          document.getElementById(`reporting_${i}`)?.value.trim() || "",
+        note:
+          document.getElementById(`note_${i}`)?.value.trim() || ""
       });
-
     });
 
     if (insertData.length === 0) {
@@ -177,19 +215,16 @@ async function saveTeam() {
       return;
     }
 
-    const { error } = await supabase
+    const { error } = await db
       .from("team_assignments")
       .insert(insertData);
 
     if (error) throw error;
 
     alert("Team saved successfully");
-
     window.location.href = `client.html?quotation=${quotationId}`;
-
   } catch (err) {
-    console.error(err);
+    console.error("SAVE TEAM ERROR:", err);
     alert("Error saving team");
   }
-
 }
