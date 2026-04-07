@@ -30,11 +30,12 @@ pointer-events:none;
 .stat-card{
 cursor:pointer;
 transition:transform .2s ease;
-min-width: 0;
-min-height: 112px;
+min-width:0;
 display:flex;
 flex-direction:column;
 justify-content:space-between;
+padding:0.875rem;
+min-height:86px;
 }
 
 .stat-card:hover{
@@ -52,28 +53,52 @@ color:white;
 }
 
 .stat-label{
-font-size: 0.875rem;
-line-height: 1.25rem;
-color: rgb(156 163 175);
-word-break: break-word;
+font-size:0.875rem;
+line-height:1.2;
+color:rgb(156 163 175);
+word-break:break-word;
 }
 
 .stat-value{
-font-size: clamp(1.35rem, 4.5vw, 1.9rem);
-line-height: 1.1;
-font-weight: 700;
-word-break: break-word;
-overflow-wrap: anywhere;
-margin-top: 10px;
+font-size:clamp(1.05rem,4vw,1.55rem);
+line-height:1.1;
+font-weight:700;
+word-break:break-word;
+overflow-wrap:anywhere;
+margin-top:8px;
+}
+
+.stat-card-wide{
+min-height:80px;
+}
+
+@media (min-width: 640px){
+.stat-card{
+padding:1rem;
+min-height:100px;
+}
+.stat-card-wide{
+min-height:92px;
+}
+.stat-value{
+font-size:clamp(1.2rem,3vw,1.75rem);
+}
 }
 
 @media (max-width: 360px){
 .stat-card{
-min-height: 104px;
-padding: 0.875rem;
+padding:0.75rem;
+min-height:80px;
+}
+.stat-card-wide{
+min-height:76px;
+}
+.stat-label{
+font-size:0.8rem;
 }
 .stat-value{
-font-size: 1.25rem;
+font-size:1rem;
+margin-top:6px;
 }
 }
 
@@ -94,7 +119,7 @@ Logout
 
 <div id="dashboard" class="max-w-md mx-auto">
 
-<div class="glass rounded-2xl p-4 flex justify-between items-center gap-3 mb-6">
+<div class="glass rounded-2xl p-4 flex justify-between items-center gap-3 mb-5">
 
 <div class="min-w-0 flex-1">
 <h1 id="studioDisplay" class="text-xl font-bold break-words">StudioOS</h1>
@@ -112,19 +137,19 @@ Setup
 </div>
 
 
-<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="grid grid-cols-2 gap-3 mb-5">
 
-<div onclick="location.href='clients.html'" class="glass rounded-2xl p-4 stat-card">
+<div onclick="location.href='clients.html'" class="glass rounded-2xl stat-card">
 <p class="stat-label">Total Bookings</p>
 <h2 id="totalBookings" class="stat-value">0</h2>
 </div>
 
-<div onclick="location.href='pending-payments.html'" class="glass rounded-2xl p-4 stat-card">
+<div onclick="location.href='pending-payments.html'" class="glass rounded-2xl stat-card">
 <p class="stat-label">Pending Payments</p>
 <h2 id="pendingPayments" class="stat-value">₹0</h2>
 </div>
 
-<div onclick="location.href='monthly-revenue.html'" class="glass rounded-2xl p-4 stat-card col-span-2">
+<div onclick="location.href='monthly-revenue.html'" class="glass rounded-2xl stat-card stat-card-wide col-span-2">
 <p class="stat-label">Monthly Revenue</p>
 <h2 id="monthlyRevenue" class="stat-value">₹0</h2>
 </div>
@@ -189,7 +214,6 @@ class="block glass rounded-2xl p-4 hover:scale-105 transition">
 📦 Upload Photos
 </a>
 
-<!-- ✅ NEW BUTTON ADDED -->
 <a href="gallery.html"
 class="block glass rounded-2xl p-4 hover:scale-105 transition">
 🖼 Gallery
@@ -415,7 +439,7 @@ payments.forEach(p=>{
 paid += Number(p.amount || 0)
 })
 
-const remaining = q.total - paid
+const remaining = Number(q.total || 0) - paid
 
 if(remaining > 0){
 pending += remaining
