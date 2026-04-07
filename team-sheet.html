@@ -22,8 +22,8 @@ background: radial-gradient(circle at top,#1e293b,#0f172a);
 
 <div class="max-w-md mx-auto space-y-4">
 
-<a href="client.html"
-class="text-sm text-gray-400">
+<a id="backBtn"
+class="text-sm text-gray-400 cursor-pointer">
 ← Back
 </a>
 
@@ -73,7 +73,7 @@ Team Assignment Sheet
 
 <div id="teamList" class="bg-white text-black rounded-xl p-4 space-y-4">
 
-<p class="text-sm text-gray-500">Loading...</p>
+<p id="loadingText" class="text-sm text-gray-500">Loading...</p>
 
 </div>
 
@@ -99,6 +99,32 @@ Share
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/team-sheet.js"></script>
+
+<script>
+/* =========================
+   SAFE BACK NAVIGATION FIX
+========================= */
+
+(function () {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const quotationId = params.get("quotation");
+
+    const backBtn = document.getElementById("backBtn");
+
+    backBtn.onclick = function () {
+      if (quotationId) {
+        window.location.href = `client.html?quotation=${quotationId}`;
+      } else {
+        window.location.href = "clients.html";
+      }
+    };
+
+  } catch (err) {
+    console.error("BACK NAV ERROR:", err);
+  }
+})();
+</script>
 
 </body>
 </html>
