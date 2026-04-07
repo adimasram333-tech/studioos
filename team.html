@@ -89,20 +89,20 @@ Team Role
 <div>
 <label class="text-sm text-gray-400">Role</label>
 
-<!-- ✅ FIX: dropdown + typing -->
-<input list="roleOptions" id="role"
-class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none"
-placeholder="Select or type role">
+<!-- ✅ FIXED DROPDOWN ONLY -->
+<select id="role"
+class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none border border-white/10">
 
-<datalist id="roleOptions">
-  <option value="Candid Photographer">
-  <option value="Traditional Photographer">
-  <option value="Traditional Videographer">
-  <option value="Cinematographer">
-  <option value="Drone Operator">
-  <option value="Assistant">
-  <option value="LED Screen">
-</datalist>
+<option value="">Select Role</option>
+<option>Candid Photographer</option>
+<option>Traditional Photographer</option>
+<option>Traditional Videographer</option>
+<option>Cinematographer</option>
+<option>Drone Operator</option>
+<option>Assistant</option>
+<option>LED Screen</option>
+
+</select>
 
 </div>
 
@@ -110,9 +110,9 @@ placeholder="Select or type role">
 <label class="text-sm text-gray-400">Day</label>
 <select id="day"
 class="w-full mt-1 p-2 rounded-lg bg-white/10 text-white text-sm outline-none border border-white/10">
-<option class="bg-[#0f172a] text-white">Day 1</option>
-<option class="bg-[#0f172a] text-white">Day 2</option>
-<option class="bg-[#0f172a] text-white">Day 3</option>
+<option>Day 1</option>
+<option>Day 2</option>
+<option>Day 3</option>
 </select>
 </div>
 
@@ -141,9 +141,6 @@ Save Team
 </div>
 
 </div>
-
-<!-- ❌ REMOVED CDN (CRITICAL FIX) -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
 
 <script src="js/supabase.js"></script>
 <script src="js/team.js"></script>
