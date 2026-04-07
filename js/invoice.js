@@ -110,7 +110,6 @@ const quotationId = getQuotationId()
 
 if(!quotationId) return
 
-
 const { data: quote } =
 await supabase
 .from("quotations")
@@ -120,17 +119,14 @@ await supabase
 
 if(!quote) return
 
-
 document.getElementById("clientName").innerText =
 quote.client_name || "-"
 
 document.getElementById("clientPhone").innerText =
 quote.phone || "-"
 
-
 document.getElementById("invoiceDate").innerText =
 formatDate(quote.created_at)
-
 
 const eventType =
 quote.event_category ||
@@ -143,7 +139,6 @@ eventType
 
 document.getElementById("eventVenue").innerText =
 quote.venue || "-"
-
 
 const startDate =
 quote.event_start_date ||
@@ -160,7 +155,6 @@ formatDate(startDate)
 document.getElementById("eventEnd").innerText =
 formatDate(endDate)
 
-
 const total = Number(quote.total || 0)
 
 document.getElementById("invoiceTotal").innerText =
@@ -168,7 +162,6 @@ formatCurrency(total)
 
 document.getElementById("invoiceTotalFooter").innerText =
 formatCurrency(total)
-
 
 const { data: payments } =
 await supabase
@@ -221,7 +214,6 @@ container.appendChild(row)
 })
 
 }
-
 
 document.getElementById("invoicePaid").innerText =
 formatCurrency(paid)
@@ -292,51 +284,168 @@ invoiceNumber
 
 
 // =============================
+// FILE NAME HELPER
+// =============================
+
+function getInvoiceFileName(){
+
+const clientName =
+(document.getElementById("clientName")?.innerText || "client")
+.replace(/\s+/g,"-")
+.replace(/[^a-zA-Z0-9-_]/g,"")
+.toLowerCase()
+
+const invoiceNumber =
+(document.getElementById("invoiceNumber")?.innerText || "invoice")
+.replace(/\s+/g,"-")
+.replace(/[^a-zA-Z0-9-_]/g,"")
+
+return `invoice-${clientName}-${invoiceNumber}.pdf`
+
+}
+
+
+// =============================
+// DOWNLOAD BLOB HELPER
+// =============================
+
+function triggerBlobDownload(blob, fileName){
+
+const blobUrl = URL.createObjectURL(blob)
+
+const link = document.createElement("a")
+link.href = blobUrl
+link.download = fileName
+link.style.display = "none"
+
+document.body.appendChild(link)
+link.click()
+document.body.removeChild(link)
+
+setTimeout(()=>{
+URL.revokeObjectURL(blobUrl)
+}, 5000)
+
+}
+
+
+// =============================
+// MOBILE SHARE/SAVE HELPER
+// =============================
+
+async function tryMobileShare(blob, fileName){
+
+try{
+
+const pdfFile = new File([blob], fileName, {
+type:"application/pdf"
+})
+
+if(navigator.canShare && navigator.canShare({ files:[pdfFile] })){
+await navigator.share({
+files:[pdfFile],
+title:"Invoice PDF",
+text:"Invoice PDF"
+})
+return true
+}
+
+return false
+
+}catch(error){
+console.warn("Mobile share skipped:", error)
+return false
+}
+
+}
+
+
+// =============================
 // DOWNLOAD PDF
 // =============================
 
-function downloadInvoice(){
+async function downloadInvoice(){
+
+const downloadBtn =
+document.getElementById("downloadInvoice")
+
+if(downloadBtn){
+downloadBtn.disabled = true
+downloadBtn.innerText = "Preparing PDF..."
+}
+
+try{
 
 window.scrollTo(0,0)
 
 const element =
 document.getElementById("invoiceContainer")
 
-const clientName =
-document.getElementById("clientName")
-.innerText
-.replace(/\s+/g,"-")
-.toLowerCase()
+if(!element){
+throw new Error("Invoice container not found")
+}
 
-const invoiceNumber =
-document.getElementById("invoiceNumber").innerText
+const fileName = getInvoiceFileName()
 
 const opt = {
-
 margin:0,
-
-filename:`invoice-${clientName}-${invoiceNumber}.pdf`,
-
+filename:fileName,
 image:{
 type:"jpeg",
 quality:1
 },
-
 html2canvas:{
 scale:2,
 useCORS:true,
 scrollY:0
 },
-
 jsPDF:{
 unit:"mm",
 format:[210,297],
 orientation:"portrait"
 }
+}
+
+const worker =
+html2pdf().set(opt).from(element)
+
+const pdfBlob =
+await worker.outputPdf("blob")
+
+const isMobile =
+/Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
+if(isMobile){
+
+triggerBlobDownload(pdfBlob, fileName)
+
+const shared = await tryMobileShare(pdfBlob, fileName)
+
+if(!shared){
+setTimeout(()=>{
+alert("PDF generate ho gayi hai. Agar browser preview open kare, to wahan browser menu se Save/Download karein.")
+}, 400)
+}
+
+}else{
+
+triggerBlobDownload(pdfBlob, fileName)
 
 }
 
-html2pdf().set(opt).from(element).save()
+}catch(error){
+
+console.error("Invoice download error:", error)
+alert("Invoice PDF download failed")
+
+}finally{
+
+if(downloadBtn){
+downloadBtn.disabled = false
+downloadBtn.innerText = "Download Invoice"
+}
+
+}
 
 }
 
