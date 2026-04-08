@@ -591,6 +591,7 @@ const page = document.getElementById("proposalPage")
 if(!page) return
 
 const coverImage =
+profile?.proposal_cover_image ||
 profile?.team_sheet_cover_image ||
 "https://images.unsplash.com/photo-1519741497674-611481863552"
 
