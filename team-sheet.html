@@ -17,7 +17,6 @@ font-family: Georgia, "Times New Roman", serif;
 }
 
 .sheet-title{
-color:#c78d82;
 letter-spacing:0.02em;
 }
 
@@ -95,6 +94,7 @@ class="no-print inline-block text-sm text-gray-300 cursor-pointer mb-4">
 
   <div class="w-full lg:w-[40%] xl:w-[38%] min-h-[320px] lg:min-h-full relative">
     <img
+      id="coverImage"
       src="team-sheet.jpg"
       alt="Wedding cover"
       class="w-full h-full object-cover"
@@ -108,7 +108,9 @@ class="no-print inline-block text-sm text-gray-300 cursor-pointer mb-4">
     <!-- HEADER -->
 
     <div class="text-center">
-      <h1 class="sheet-title text-[28px] sm:text-[34px] lg:text-[42px] font-normal leading-tight">
+      <h1 id="sheetTitle"
+      class="sheet-title text-[28px] sm:text-[34px] lg:text-[42px] font-normal leading-tight"
+      style="color:#c78d82;">
         Team Assignment Sheet
       </h1>
 
@@ -153,7 +155,7 @@ class="no-print inline-block text-sm text-gray-300 cursor-pointer mb-4">
       <p id="loadingText" class="text-sm text-gray-500">Loading...</p>
     </div>
 
-    <!-- PROFESSIONAL NOTES -->
+    <!-- NOTES -->
 
     <div class="mt-8 rounded-[20px] border border-[#ebe5df] bg-white/80 p-4 sm:p-5">
       <h3 class="text-[18px] sm:text-[20px] text-[#3a3734] mb-3">
@@ -161,11 +163,11 @@ class="no-print inline-block text-sm text-gray-300 cursor-pointer mb-4">
       </h3>
 
       <div class="space-y-2 text-[13px] sm:text-[14px] professional-note leading-6">
-        <p>• Please report at the venue at least 30 minutes before the scheduled event time.</p>
-        <p>• Carry all required cameras, lenses, batteries, memory cards, lights, and backup equipment.</p>
-        <p>• Maintain proper dress code, discipline, and polite communication with the client and guests.</p>
-        <p>• Follow the event timeline carefully and stay coordinated with the lead photographer.</p>
-        <p>• Important moments must not be missed, so remain alert and ready throughout the event.</p>
+        <p>• Please report at least 30 minutes before event time.</p>
+        <p>• Carry all required equipment and backup.</p>
+        <p>• Maintain discipline and professional behaviour.</p>
+        <p>• Follow event timeline strictly.</p>
+        <p>• Do not miss important moments.</p>
       </div>
     </div>
 
@@ -193,6 +195,42 @@ class="no-print inline-block text-sm text-gray-300 cursor-pointer mb-4">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/team-sheet.js"></script>
+
+<script>
+// 🔥 APPLY COVER + COLOR
+
+async function applyCoverAndColor(){
+  try{
+    const db = await window.getSupabase()
+    const { data } = await db.auth.getUser()
+    const user = data?.user
+
+    if(!user) return
+
+    const { data: settings } = await db
+    .from("photographer_settings")
+    .select("team_sheet_cover_image, team_sheet_title_color")
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+    const img = document.getElementById("coverImage")
+    const title = document.getElementById("sheetTitle")
+
+    if(settings?.team_sheet_cover_image){
+      img.src = settings.team_sheet_cover_image
+    }
+
+    if(settings?.team_sheet_title_color){
+      title.style.color = settings.team_sheet_title_color
+    }
+
+  }catch(e){
+    console.error("COVER LOAD ERROR:", e)
+  }
+}
+
+applyCoverAndColor()
+</script>
 
 <script>
 (function () {
