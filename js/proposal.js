@@ -189,6 +189,29 @@ return String(value || "")
 
 
 // ======================
+// GET BRANDING VALUES
+// ======================
+
+function getProposalCoverImage(data,profile){
+return (
+data?.proposal_cover_image ||
+profile?.proposal_cover_image ||
+profile?.team_sheet_cover_image ||
+"https://images.unsplash.com/photo-1519741497674-611481863552"
+)
+}
+
+function getProposalAccentColor(data,profile){
+return (
+data?.proposal_title_color ||
+profile?.proposal_title_color ||
+profile?.team_sheet_title_color ||
+"#c78d82"
+)
+}
+
+
+// ======================
 // PREMIUM SERVICES HTML
 // ======================
 
@@ -199,7 +222,7 @@ const serviceMap = [
 { key:"traditional_photo", label:"Traditional Photographer" },
 { key:"traditional_video", label:"Traditional Videographer" },
 { key:"cinematographer", label:"Cinematographer" },
-{ key:"drone", label:"Drone" },
+{ key:"drone", label:"Drone Operator" },
 { key:"led_wall", label:"LED Screen Wall" },
 { key:"assistant", label:"Assistant" }
 ]
@@ -210,7 +233,7 @@ const qty = row.qty || 0
 const days = row.days || 0
 
 return `
-<div class="premium-row">
+<div class="proposal-premium-service-row">
   <span>${escapeHtml(item.label)}</span>
   <span>${qty} x ${days} Days</span>
 </div>
@@ -258,33 +281,35 @@ return html
 
 
 // ======================
-// APPLY PREMIUM STYLES
+// INJECT PREMIUM STYLES
 // ======================
 
 function injectPremiumStyles(){
 
-if(document.getElementById("premium-proposal-styles")) return
+if(document.getElementById("proposal-premium-styles")) return
 
 const style = document.createElement("style")
-style.id = "premium-proposal-styles"
+style.id = "proposal-premium-styles"
 style.innerHTML = `
 :root{
---premium-bg:#0f172a;
---premium-card:rgba(255,255,255,0.08);
---premium-border:rgba(255,255,255,0.12);
---premium-text:#ffffff;
---premium-muted:rgba(255,255,255,0.75);
---premium-soft:rgba(255,255,255,0.55);
---premium-accent:#c78d82;
+--proposal-premium-bg:#e8e1d9;
+--proposal-premium-paper:#f7f5f2;
+--proposal-premium-card:#ffffff;
+--proposal-premium-border:#e8e0d7;
+--proposal-premium-text:#2d2926;
+--proposal-premium-muted:#7a736b;
+--proposal-premium-soft:#a19890;
+--proposal-premium-shadow:0 18px 48px rgba(33,26,21,0.12);
 }
-html, body{
+html,
+body{
 margin:0;
 padding:0;
 }
 body{
-background:var(--premium-bg);
+background:var(--proposal-premium-bg);
 font-family:'Inter',sans-serif;
-color:var(--premium-text);
+color:var(--proposal-premium-text);
 -webkit-print-color-adjust:exact;
 print-color-adjust:exact;
 }
@@ -293,165 +318,174 @@ width:100%;
 max-width:100%;
 margin:0;
 }
-.premium-shell{
+.proposal-premium-shell{
 min-height:100vh;
-background:linear-gradient(180deg,#0f172a 0%,#111827 100%);
+background:var(--proposal-premium-bg);
+padding:28px 16px;
+box-sizing:border-box;
 }
-.premium-page{
-width:100%;
-max-width:1120px;
+.proposal-premium-page{
+max-width:1180px;
 margin:0 auto;
-padding-bottom:40px;
-}
-.premium-hero{
-position:relative;
-height:320px;
+background:var(--proposal-premium-paper);
+border-radius:30px;
 overflow:hidden;
+box-shadow:var(--proposal-premium-shadow);
+display:grid;
+grid-template-columns:42% 58%;
+min-height:calc(100vh - 56px);
 }
-.premium-hero-image{
+.proposal-premium-image-column{
+position:relative;
+min-height:100%;
+background:#d8cec4;
+}
+.proposal-premium-image{
 position:absolute;
 inset:0;
 width:100%;
 height:100%;
 object-fit:cover;
+object-position:center;
 }
-.premium-hero-overlay{
+.proposal-premium-image-overlay{
 position:absolute;
 inset:0;
-background:linear-gradient(to bottom,rgba(0,0,0,0.28),rgba(0,0,0,0.70));
+background:linear-gradient(to bottom,rgba(0,0,0,0.08),rgba(0,0,0,0.12));
 }
-.premium-hero-content{
-position:relative;
-z-index:2;
-height:100%;
+.proposal-premium-content{
+padding:44px 42px 30px;
 display:flex;
 flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
-padding:20px;
+box-sizing:border-box;
 }
-.premium-title{
+.proposal-premium-header{
+text-align:center;
+}
+.proposal-premium-title{
 margin:0;
 font-family:'Playfair Display',serif;
-font-size:42px;
-line-height:1.15;
-letter-spacing:0.02em;
-}
-.premium-studio{
-margin-top:14px;
-font-size:18px;
+font-size:52px;
 font-weight:600;
+line-height:1.12;
+letter-spacing:0.01em;
+word-break:break-word;
 }
-.premium-phone{
-margin-top:6px;
-font-size:14px;
-color:var(--premium-muted);
+.proposal-premium-studio{
+margin-top:26px;
+font-family:'Playfair Display',serif;
+font-size:28px;
+line-height:1.2;
+color:var(--proposal-premium-text);
+word-break:break-word;
 }
-.premium-content{
-max-width:960px;
-margin:-48px auto 0;
-padding:0 16px;
-position:relative;
-z-index:3;
+.proposal-premium-phone{
+margin-top:8px;
+font-size:16px;
+color:var(--proposal-premium-muted);
+word-break:break-word;
 }
-.premium-card{
-background:var(--premium-card);
-backdrop-filter:blur(16px);
-border:1px solid var(--premium-border);
+.proposal-premium-meta{
+margin-top:32px;
+padding:18px 20px;
 border-radius:22px;
-padding:20px;
-box-shadow:0 10px 35px rgba(0,0,0,0.18);
-}
-.premium-grid{
+background:rgba(255,255,255,0.72);
+border:1px solid var(--proposal-premium-border);
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:16px;
+gap:14px 22px;
 }
-.premium-info{
+.proposal-premium-meta-item{
 display:flex;
 justify-content:space-between;
 gap:16px;
-padding:14px 16px;
-border-radius:16px;
-background:rgba(255,255,255,0.05);
-border:1px solid rgba(255,255,255,0.08);
+font-size:14px;
 }
-.premium-info span:first-child{
-color:var(--premium-soft);
+.proposal-premium-meta-item span:first-child{
+color:var(--proposal-premium-muted);
 }
-.premium-section{
+.proposal-premium-section{
 margin-top:18px;
+padding:22px;
+background:rgba(255,255,255,0.72);
+border:1px solid var(--proposal-premium-border);
+border-radius:22px;
 }
-.premium-section-title{
-margin:0 0 14px 0;
-font-family:'Playfair Display',serif;
-font-size:24px;
-line-height:1.2;
-}
-.premium-two-col{
+.proposal-premium-two-col{
 display:grid;
-grid-template-columns:1.2fr .8fr;
+grid-template-columns:1.12fr 0.88fr;
 gap:18px;
 margin-top:18px;
 }
-.premium-panel{
-background:var(--premium-card);
-backdrop-filter:blur(16px);
-border:1px solid var(--premium-border);
-border-radius:22px;
-padding:20px;
+.proposal-premium-section-title{
+margin:0 0 14px 0;
+font-family:'Playfair Display',serif;
+font-size:28px;
+line-height:1.15;
+color:var(--proposal-premium-text);
 }
-.premium-row{
+.proposal-premium-service-row{
+display:flex;
+justify-content:space-between;
+gap:18px;
+padding:11px 0;
+border-bottom:1px solid var(--proposal-premium-border);
+font-size:15px;
+}
+.proposal-premium-service-row:last-child{
+border-bottom:none;
+}
+.proposal-premium-service-row span:first-child{
+color:var(--proposal-premium-muted);
+}
+.proposal-premium-service-row span:last-child{
+text-align:right;
+color:var(--proposal-premium-text);
+font-weight:500;
+}
+.proposal-premium-summary-row{
 display:flex;
 justify-content:space-between;
 gap:16px;
 padding:12px 0;
-border-bottom:1px solid rgba(255,255,255,0.10);
+border-bottom:1px solid var(--proposal-premium-border);
 font-size:15px;
 }
-.premium-row:last-child{
+.proposal-premium-summary-row:last-child{
 border-bottom:none;
 }
-.premium-row span:first-child{
-color:var(--premium-muted);
+.proposal-premium-summary-row strong:first-child{
+font-weight:600;
+color:var(--proposal-premium-text);
 }
-.premium-list{
-margin:0;
-padding-left:18px;
-line-height:1.85;
-color:var(--premium-muted);
-}
-.premium-summary-row{
-display:flex;
-justify-content:space-between;
-gap:16px;
-padding:10px 0;
-border-bottom:1px solid rgba(255,255,255,0.10);
-}
-.premium-summary-row:last-child{
-border-bottom:none;
-}
-.premium-summary-row strong:last-child{
+.proposal-premium-summary-row strong:last-child{
 font-weight:700;
+color:var(--proposal-premium-text);
+text-align:right;
 }
-.premium-copy{
-margin-top:18px;
-color:var(--premium-muted);
-line-height:1.8;
+.proposal-premium-list{
+margin:0;
+padding-left:20px;
+line-height:1.9;
+color:var(--proposal-premium-muted);
 font-size:15px;
 }
-.premium-copy ul{
-margin:10px 0 0;
-padding-left:18px;
+.proposal-premium-copy{
+color:var(--proposal-premium-muted);
+font-size:15px;
+line-height:1.85;
 }
-.premium-actions{
-margin-top:20px;
+.proposal-premium-copy ul{
+margin:10px 0 0;
+padding-left:20px;
+}
+.proposal-premium-actions{
+margin-top:22px;
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:12px;
 }
-.premium-btn{
+.proposal-premium-btn{
 border:none;
 border-radius:14px;
 padding:14px 18px;
@@ -459,87 +493,100 @@ font-size:14px;
 font-weight:600;
 cursor:pointer;
 transition:.2s ease;
+font-family:'Inter',sans-serif;
 }
-.premium-btn-whatsapp{
+.proposal-premium-btn-whatsapp{
 background:#25D366;
-color:white;
+color:#ffffff;
 }
-.premium-btn-whatsapp:hover{
+.proposal-premium-btn-whatsapp:hover{
 opacity:.92;
 }
-.premium-btn-pdf{
-background:var(--premium-accent);
-color:white;
+.proposal-premium-btn-pdf{
+color:#ffffff;
 }
-.premium-btn-pdf:hover{
-opacity:.92;
-}
-.premium-footer{
-margin-top:26px;
+.proposal-premium-footer{
+margin-top:18px;
 text-align:center;
 font-size:12px;
-color:var(--premium-soft);
+line-height:1.7;
+color:var(--proposal-premium-soft);
 }
-@media (max-width: 1024px){
-.premium-title{
-font-size:34px;
+.proposal-premium-footer p{
+margin:0;
 }
-.premium-two-col{
+.proposal-premium-footer p + p{
+margin-top:4px;
+}
+@media (max-width: 1100px){
+.proposal-premium-page{
 grid-template-columns:1fr;
+}
+.proposal-premium-image-column{
+min-height:360px;
 }
 }
 @media (max-width: 768px){
-.premium-page{
-padding-bottom:24px;
+.proposal-premium-shell{
+padding:0;
 }
-.premium-hero{
-height:260px;
+.proposal-premium-page{
+border-radius:0;
+min-height:100vh;
+box-shadow:none;
 }
-.premium-hero-content{
-padding:18px;
+.proposal-premium-image-column{
+min-height:260px;
 }
-.premium-title{
-font-size:25px;
+.proposal-premium-content{
+padding:24px 16px 22px;
 }
-.premium-studio{
-font-size:16px;
+.proposal-premium-title{
+font-size:34px;
 }
-.premium-phone{
-font-size:13px;
+.proposal-premium-studio{
+margin-top:18px;
+font-size:22px;
 }
-.premium-content{
-margin:-28px auto 0;
-padding:0 12px;
+.proposal-premium-phone{
+font-size:14px;
 }
-.premium-card,
-.premium-panel{
+.proposal-premium-meta{
+grid-template-columns:1fr;
+padding:16px;
+gap:10px;
+}
+.proposal-premium-meta-item{
+flex-direction:column;
+gap:4px;
+}
+.proposal-premium-two-col{
+grid-template-columns:1fr;
+gap:16px;
+}
+.proposal-premium-section{
 padding:16px;
 border-radius:18px;
 }
-.premium-grid{
-grid-template-columns:1fr;
-gap:12px;
+.proposal-premium-section-title{
+font-size:23px;
 }
-.premium-info{
-padding:12px 14px;
-font-size:14px;
-}
-.premium-section-title{
-font-size:21px;
-}
-.premium-row{
-font-size:14px;
+.proposal-premium-service-row{
 flex-direction:column;
 align-items:flex-start;
 gap:4px;
-}
-.premium-summary-row{
 font-size:14px;
 }
-.premium-actions{
+.proposal-premium-service-row span:last-child{
+text-align:left;
+}
+.proposal-premium-summary-row{
+font-size:14px;
+}
+.proposal-premium-actions{
 grid-template-columns:1fr;
 }
-.premium-btn{
+.proposal-premium-btn{
 width:100%;
 }
 }
@@ -548,27 +595,60 @@ size:A4;
 margin:0;
 }
 @media print{
+html,
 body{
 background:#ffffff !important;
-}
-.premium-shell{
-background:#ffffff !important;
-}
-.premium-page{
-max-width:100% !important;
-}
-.premium-content{
 margin:0 !important;
 padding:0 !important;
-max-width:100% !important;
 }
-.premium-card,
-.premium-panel{
+body{
+-webkit-print-color-adjust:exact !important;
+print-color-adjust:exact !important;
+}
+#proposalPage{
+width:794px !important;
+max-width:794px !important;
+margin:0 auto !important;
+}
+.proposal-premium-shell{
+background:#ffffff !important;
+padding:0 !important;
+min-height:auto !important;
+}
+.proposal-premium-page{
+max-width:794px !important;
+min-height:auto !important;
+border-radius:0 !important;
+box-shadow:none !important;
+grid-template-columns:38% 62% !important;
+}
+.proposal-premium-image-column{
+min-height:auto !important;
+}
+.proposal-premium-content{
+padding:28px 24px 22px !important;
+}
+.proposal-premium-title{
+font-size:34px !important;
+}
+.proposal-premium-studio{
+font-size:22px !important;
+}
+.proposal-premium-phone{
+font-size:13px !important;
+}
+.proposal-premium-meta{
+grid-template-columns:1fr 1fr !important;
+padding:14px 16px !important;
+}
+.proposal-premium-section,
+.proposal-premium-meta{
+background:#ffffff !important;
 box-shadow:none !important;
 break-inside:avoid;
 page-break-inside:avoid;
 }
-.premium-actions{
+.proposal-premium-actions{
 display:none !important;
 }
 }
@@ -590,70 +670,62 @@ const page = document.getElementById("proposalPage")
 
 if(!page) return
 
-const coverImage =
-profile?.proposal_cover_image ||
-profile?.team_sheet_cover_image ||
-"https://images.unsplash.com/photo-1519741497674-611481863552"
-
-const accentColor =
-profile?.team_sheet_title_color || "#c78d82"
-
+const coverImage = getProposalCoverImage(data,profile)
+const accentColor = getProposalAccentColor(data,profile)
 const proposalTitle = getProposalTitle(data)
 const eventDateText = getEventDateText(data)
 
 page.className = ""
 page.innerHTML = `
-<div class="premium-shell">
-  <div class="premium-page">
+<div class="proposal-premium-shell">
+  <div class="proposal-premium-page">
 
-    <div class="premium-hero">
-      <img class="premium-hero-image" src="${escapeHtml(coverImage)}" alt="Proposal Cover">
-      <div class="premium-hero-overlay"></div>
-
-      <div class="premium-hero-content">
-        <h1 class="premium-title" style="color:${escapeHtml(accentColor)}">${escapeHtml(proposalTitle)}</h1>
-        <div class="premium-studio">${escapeHtml(profile?.studio_name || "")}</div>
-        <div class="premium-phone">${escapeHtml(profile?.phone || "")}</div>
-      </div>
+    <div class="proposal-premium-image-column">
+      <img class="proposal-premium-image" src="${escapeHtml(coverImage)}" alt="Proposal Cover">
+      <div class="proposal-premium-image-overlay"></div>
     </div>
 
-    <div class="premium-content">
+    <div class="proposal-premium-content">
 
-      <div class="premium-card">
-        <div class="premium-grid">
-          <div class="premium-info">
-            <span>Prepared For</span>
-            <span>${escapeHtml(data.client_name || "")}</span>
-          </div>
+      <div class="proposal-premium-header">
+        <h1 class="proposal-premium-title" style="color:${escapeHtml(accentColor)}">${escapeHtml(proposalTitle)}</h1>
+        <div class="proposal-premium-studio">${escapeHtml(profile?.studio_name || "")}</div>
+        <div class="proposal-premium-phone">${escapeHtml(profile?.phone || "")}</div>
+      </div>
 
-          <div class="premium-info">
-            <span>Event Dates</span>
-            <span>${escapeHtml(eventDateText)}</span>
-          </div>
+      <div class="proposal-premium-meta">
+        <div class="proposal-premium-meta-item">
+          <span>Prepared For</span>
+          <span>${escapeHtml(data.client_name || "")}</span>
+        </div>
+
+        <div class="proposal-premium-meta-item">
+          <span>Event Dates</span>
+          <span>${escapeHtml(eventDateText)}</span>
         </div>
       </div>
 
-      <div class="premium-two-col">
+      <div class="proposal-premium-two-col">
 
-        <div class="premium-panel">
-          <h2 class="premium-section-title">Services & Coverage</h2>
+        <div class="proposal-premium-section">
+          <h2 class="proposal-premium-section-title">Services & Coverage</h2>
           ${buildPremiumServicesHtml(services)}
         </div>
 
-        <div class="premium-panel">
-          <h2 class="premium-section-title">Investment Summary</h2>
+        <div class="proposal-premium-section">
+          <h2 class="proposal-premium-section-title">Investment Summary</h2>
 
-          <div class="premium-summary-row">
+          <div class="proposal-premium-summary-row">
             <strong>Total Investment</strong>
             <strong>${escapeHtml(formatMoney(data.total))}</strong>
           </div>
 
-          <div class="premium-summary-row">
+          <div class="proposal-premium-summary-row">
             <strong>Advance Required</strong>
             <strong>${escapeHtml(formatMoney(data.advance))}</strong>
           </div>
 
-          <div class="premium-summary-row">
+          <div class="proposal-premium-summary-row">
             <strong>Balance</strong>
             <strong>${escapeHtml(formatMoney(data.balance))}</strong>
           </div>
@@ -661,17 +733,17 @@ page.innerHTML = `
 
       </div>
 
-      <div class="premium-panel premium-section">
-        <h2 class="premium-section-title">Deliverables</h2>
-        <ul class="premium-list">
+      <div class="proposal-premium-section">
+        <h2 class="proposal-premium-section-title">Deliverables</h2>
+        <ul class="proposal-premium-list">
           ${buildPremiumDeliverablesHtml(deliverables)}
         </ul>
       </div>
 
-      <div class="premium-panel premium-section">
-        <h2 class="premium-section-title">Why Choose Us</h2>
+      <div class="proposal-premium-section">
+        <h2 class="proposal-premium-section-title">Why Choose Us</h2>
 
-        <div class="premium-copy">
+        <div class="proposal-premium-copy">
           We believe every celebration has a story worth preserving forever.
           Our team focuses on capturing real emotions, beautiful details, and timeless moments.
 
@@ -685,10 +757,10 @@ page.innerHTML = `
         </div>
       </div>
 
-      <div class="premium-panel premium-section">
-        <h2 class="premium-section-title">Booking Terms</h2>
+      <div class="proposal-premium-section">
+        <h2 class="proposal-premium-section-title">Booking Terms</h2>
 
-        <div class="premium-copy">
+        <div class="proposal-premium-copy">
           <ul>
             <li>Booking will be confirmed only after advance payment.</li>
             <li>Event date will be reserved only after confirmation.</li>
@@ -698,12 +770,12 @@ page.innerHTML = `
           </ul>
         </div>
 
-        <div class="premium-actions">
-          <button class="premium-btn premium-btn-whatsapp" onclick="sendWhatsApp()">Send Proposal on WhatsApp</button>
-          <button class="premium-btn premium-btn-pdf" onclick="downloadPDF()">Download Proposal PDF</button>
+        <div class="proposal-premium-actions">
+          <button class="proposal-premium-btn proposal-premium-btn-whatsapp" onclick="sendWhatsApp()">Send Proposal on WhatsApp</button>
+          <button class="proposal-premium-btn proposal-premium-btn-pdf" style="background:${escapeHtml(accentColor)}" onclick="downloadPDF()">Download Proposal PDF</button>
         </div>
 
-        <div class="premium-footer">
+        <div class="proposal-premium-footer">
           <p><strong>Generated by StudioOS</strong></p>
           <p>Professional Photography Business Operating System</p>
         </div>
@@ -853,6 +925,7 @@ const deliverables = parseDeliverables(data.deliverables)
 
 if(isPremiumUser(profile)){
 renderPremiumProposal(data, profile, services, deliverables)
+return
 }
 
 
