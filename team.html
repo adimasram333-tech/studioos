@@ -89,26 +89,40 @@ Event Details
 </div>
 
 
-<!-- 🔥 TEAM SHEET COVER (NEW SECTION) -->
+<!-- 🔥 TEAM SHEET COVER (FIXED PRODUCTION VERSION) -->
 
 <div class="glass p-4 rounded-xl space-y-3">
 
-<h2 class="text-sm font-semibold text-gray-300">
-Team Sheet Cover
-</h2>
+<div class="flex items-center justify-between">
+  <h2 class="text-sm font-semibold text-gray-300">
+    Team Sheet Cover
+  </h2>
+
+  <span id="coverStatus" class="text-[11px] text-gray-400">
+    Default image
+  </span>
+</div>
 
 <input type="file"
 id="coverInput"
 accept="image/*"
 class="hidden">
 
-<button onclick="document.getElementById('coverInput').click()"
+<button id="uploadCoverBtn"
 class="w-full glass p-2 rounded-lg text-sm hover:bg-white/10">
 Upload / Change Cover Image
 </button>
 
-<img id="coverPreview"
-class="w-full h-40 object-cover rounded-lg hidden">
+<div id="coverPreviewWrap"
+class="hidden overflow-hidden rounded-lg border border-white/10">
+  <img id="coverPreview"
+  class="w-full h-40 object-cover">
+</div>
+
+<button id="removeCoverBtn"
+class="hidden w-full text-xs text-red-400">
+Remove Image
+</button>
 
 <p class="text-xs text-gray-400">
 This image will be used in your team sheet
@@ -259,19 +273,38 @@ View Team Sheet
 <script src="js/team.js"></script>
 
 <script>
-// PREVIEW ONLY (SAFE)
-document.getElementById("coverInput").addEventListener("change", function(e){
-  const file = e.target.files[0]
-  if(!file) return
+// ===== COVER UI FIX (PRODUCTION SAFE) =====
 
-  const reader = new FileReader()
+const input = document.getElementById("coverInput");
+const uploadBtn = document.getElementById("uploadCoverBtn");
+const preview = document.getElementById("coverPreview");
+const wrap = document.getElementById("coverPreviewWrap");
+const removeBtn = document.getElementById("removeCoverBtn");
+const status = document.getElementById("coverStatus");
+
+uploadBtn.onclick = () => input.click();
+
+input.addEventListener("change", function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
   reader.onload = function(){
-    const img = document.getElementById("coverPreview")
-    img.src = reader.result
-    img.classList.remove("hidden")
-  }
-  reader.readAsDataURL(file)
-})
+    preview.src = reader.result;
+    wrap.classList.remove("hidden");
+    removeBtn.classList.remove("hidden");
+    status.innerText = "Custom image selected";
+  };
+  reader.readAsDataURL(file);
+});
+
+removeBtn.onclick = function(){
+  input.value = "";
+  preview.src = "";
+  wrap.classList.add("hidden");
+  removeBtn.classList.add("hidden");
+  status.innerText = "Default image";
+};
 </script>
 
 </body>
