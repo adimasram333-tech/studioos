@@ -89,6 +89,34 @@ Event Details
 </div>
 
 
+<!-- 🔥 TEAM SHEET COVER (NEW SECTION) -->
+
+<div class="glass p-4 rounded-xl space-y-3">
+
+<h2 class="text-sm font-semibold text-gray-300">
+Team Sheet Cover
+</h2>
+
+<input type="file"
+id="coverInput"
+accept="image/*"
+class="hidden">
+
+<button onclick="document.getElementById('coverInput').click()"
+class="w-full glass p-2 rounded-lg text-sm hover:bg-white/10">
+Upload / Change Cover Image
+</button>
+
+<img id="coverPreview"
+class="w-full h-40 object-cover rounded-lg hidden">
+
+<p class="text-xs text-gray-400">
+This image will be used in your team sheet
+</p>
+
+</div>
+
+
 <!-- ROLE + DAY -->
 
 <div class="glass p-4 rounded-xl space-y-3">
@@ -229,6 +257,22 @@ View Team Sheet
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/team.js"></script>
+
+<script>
+// PREVIEW ONLY (SAFE)
+document.getElementById("coverInput").addEventListener("change", function(e){
+  const file = e.target.files[0]
+  if(!file) return
+
+  const reader = new FileReader()
+  reader.onload = function(){
+    const img = document.getElementById("coverPreview")
+    img.src = reader.result
+    img.classList.remove("hidden")
+  }
+  reader.readAsDataURL(file)
+})
+</script>
 
 </body>
 </html>
