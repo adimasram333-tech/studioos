@@ -251,7 +251,7 @@ addTeamBtn.href =
 
 
 // =============================
-// MENU LOGIC (FIXED)
+// MENU LOGIC
 // =============================
 
 const menuBtn = document.getElementById("menuBtn")
@@ -259,10 +259,14 @@ const menuDropdown = document.getElementById("menuDropdown")
 
 if(menuBtn && menuDropdown){
 
-menuBtn.addEventListener("click",(e)=>{
+menuBtn.onclick = (e)=>{
 e.stopPropagation()
 menuDropdown.classList.toggle("hidden")
-})
+}
+
+menuDropdown.onclick = (e)=>{
+e.stopPropagation()
+}
 
 document.addEventListener("click",()=>{
 menuDropdown.classList.add("hidden")
@@ -273,12 +277,13 @@ menuDropdown.classList.add("hidden")
 
 
 // =============================
-// MENU ACTIONS (NEW)
+// MENU ACTIONS
 // =============================
 
 const openTeamBtn = document.getElementById("openTeamBtn")
 const viewTeamSheetBtn = document.getElementById("viewTeamSheetBtn")
 const shareTeamBtn = document.getElementById("shareTeamBtn")
+const backBtn = document.getElementById("backBtn")
 
 if(openTeamBtn){
 openTeamBtn.onclick = ()=>{
@@ -296,13 +301,32 @@ window.location.href =
 
 if(shareTeamBtn){
 shareTeamBtn.onclick = async ()=>{
+try{
 const url =
 window.location.origin +
-"/team-sheet.html?quotation=" +
+"/studioos/team-sheet.html?quotation=" +
 quotationId
 
+if(navigator.share){
+await navigator.share({
+title:"Team Sheet",
+url:url
+})
+}else if(navigator.clipboard && navigator.clipboard.writeText){
 await navigator.clipboard.writeText(url)
-alert("Team sheet link copied")
+console.log("Team sheet link copied")
+}else{
+console.warn("Clipboard API not supported")
+}
+}catch(err){
+console.error("SHARE TEAM ERROR:", err)
+}
+}
+}
+
+if(backBtn){
+backBtn.onclick = ()=>{
+window.location.href = "clients.html"
 }
 }
 
