@@ -162,7 +162,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     quotationId = getQuotationId();
 
     if (!quotationId) {
-      alert("Invalid access");
+      setLoadingText("Invalid access");
       return;
     }
 
@@ -177,7 +177,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     console.error("TEAM SHEET INIT ERROR:", err);
     setLoadingText("Failed to load");
-    alert("Failed to load team sheet");
   }
 });
 
@@ -319,33 +318,56 @@ function renderTeam(grouped) {
 
   keys.forEach(key => {
     const group = grouped[key];
+
     const roleBlock = document.createElement("div");
-    roleBlock.className = "space-y-2";
+    roleBlock.className = "space-y-4";
 
-    roleBlock.innerHTML = `
-      <div class="border-b pb-2 mb-2">
-        <h3 class="font-semibold text-sm">${group.role}</h3>
-        <p class="text-xs text-gray-500 mt-1">${group.day}</p>
-      </div>
-
-      <div class="space-y-3 text-sm">
-        ${group.members.map(m => `
-          <div class="border border-gray-200 rounded-lg p-3 space-y-1">
-            <div class="flex justify-between gap-3">
-              <div>
-                <div class="font-medium text-black">${m.member_name || "-"}</div>
-                <div class="text-gray-600">${m.phone || "-"}</div>
-                ${m.alt_phone ? `<div class="text-gray-500">${m.alt_phone}</div>` : ""}
+    const membersHtml = group.members.map(m => {
+      return `
+        <div class="member-card rounded-2xl p-4">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div class="min-w-0">
+              <div class="text-[17px] sm:text-[18px] font-medium text-[#2f2b27] break-words">
+                ${m.member_name || "-"}
               </div>
 
-              <div class="text-right text-xs text-gray-500">
-                ${m.reporting_time ? `<div>Time: ${m.reporting_time}</div>` : ""}
+              <div class="mt-1 text-[14px] text-[#666059] break-words">
+                ${m.phone || "-"}
               </div>
+
+              ${m.alt_phone ? `
+                <div class="mt-1 text-[13px] text-[#8a847d] break-words">
+                  Alt: ${m.alt_phone}
+                </div>
+              ` : ""}
             </div>
 
-            ${m.note ? `<div class="text-xs text-gray-500">Note: ${m.note}</div>` : ""}
+            <div class="text-left sm:text-right text-[13px] text-[#8a847d] sm:min-w-[120px]">
+              ${m.reporting_time ? `<div>Reporting: ${m.reporting_time}</div>` : ""}
+            </div>
           </div>
-        `).join("")}
+
+          ${m.note ? `
+            <div class="mt-3 text-[13px] text-[#6e675f] leading-6">
+              Note: ${m.note}
+            </div>
+          ` : ""}
+        </div>
+      `;
+    }).join("");
+
+    roleBlock.innerHTML = `
+      <div class="border-b border-[#e8e1da] pb-3">
+        <h3 class="role-title text-[20px] sm:text-[24px] leading-tight">
+          ${group.role}
+        </h3>
+        <p class="role-subtitle text-[13px] sm:text-[14px] mt-1">
+          ${group.day}
+        </p>
+      </div>
+
+      <div class="space-y-3">
+        ${membersHtml}
       </div>
     `;
 
@@ -361,24 +383,40 @@ function renderTeam(grouped) {
 async function downloadPDF() {
   try {
     if (typeof window.html2pdf === "undefined") {
-      alert("PDF library not loaded");
+      console.error("PDF library not loaded");
       return;
     }
 
-    const element = document.body;
+    const element = document.querySelector(".sheet-page");
+
+    if (!element) {
+      console.error("Printable sheet container not found");
+      return;
+    }
 
     const opt = {
       margin: 0,
       filename: "team-sheet.pdf",
       image: { type: "jpeg", quality: 1 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#f4f1ed",
+        scrollY: 0
+      },
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait"
+      },
+      pagebreak: {
+        mode: ["css", "legacy"]
+      }
     };
 
     await window.html2pdf().set(opt).from(element).save();
   } catch (err) {
     console.error("DOWNLOAD PDF ERROR:", err);
-    alert("Failed to download PDF");
   }
 }
 
@@ -400,10 +438,10 @@ async function shareTeam() {
       return;
     }
 
-    await navigator.clipboard.writeText(url);
-    alert("Team sheet link copied");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+    }
   } catch (err) {
     console.error("SHARE ERROR:", err);
-    alert("Unable to share team sheet");
   }
 }
