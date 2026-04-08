@@ -106,13 +106,135 @@ font-size:12px;
 color:#9ca3af;
 }
 
+.brandingCard{
+padding:14px;
+border-radius:14px;
+background:rgba(255,255,255,0.04);
+border:1px solid rgba(255,255,255,0.08);
+margin-bottom:12px;
+}
+
+.brandingHeader{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+margin-bottom:10px;
+}
+
+.brandingTitle{
+font-size:14px;
+font-weight:600;
+color:white;
+}
+
+.brandingBadge{
+font-size:11px;
+color:#9ca3af;
+}
+
+.brandingActions{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+.brandBtn{
+flex:1;
+padding:10px 12px;
+border-radius:10px;
+background:#374151;
+color:white;
+border:1px solid rgba(255,255,255,0.1);
+font-size:13px;
+transition:0.2s;
+cursor:pointer;
+}
+
+.brandBtn:hover{
+border-color:rgba(255,255,255,0.2);
+background:#425066;
+}
+
+.brandBtnRemove{
+background:transparent;
+color:#f87171;
+border:1px solid rgba(248,113,113,0.35);
+}
+
+.brandBtnRemove:hover{
+background:rgba(248,113,113,0.08);
+border-color:rgba(248,113,113,0.45);
+}
+
+.brandPreviewWrap{
+display:none;
+margin-top:10px;
+overflow:hidden;
+border-radius:12px;
+border:1px solid rgba(255,255,255,0.1);
+background:#111827;
+}
+
+.brandPreviewWrap.show{
+display:block;
+}
+
+.brandPreview{
+width:100%;
+height:170px;
+object-fit:cover;
+display:block;
+}
+
+.brandHelper{
+margin-top:8px;
+font-size:12px;
+line-height:1.5;
+color:#9ca3af;
+}
+
+@media (max-width:768px){
+
+body{
+padding:16px;
+align-items:flex-start;
+justify-content:center;
+}
+
+.quotationCard{
+width:100%;
+max-width:460px;
+}
+
+.serviceRow span{
+width:auto;
+min-width:130px;
+font-size:13px;
+}
+
+.serviceHeader .blank{
+width:auto;
+min-width:130px;
+}
+
+.brandingActions{
+flex-direction:column;
+}
+
+.brandPreview{
+height:150px;
+}
+
+}
+
 </style>
 
 </head>
 
 <body class="text-white min-h-screen flex items-center justify-center p-6">
 
-<div class="glass p-6 rounded-2xl w-[460px]">
+<div class="glass p-6 rounded-2xl w-[460px] quotationCard">
 
 <a href="index.html" class="text-sm text-gray-400">← Back</a>
 
@@ -154,6 +276,52 @@ required>
 <option value="80000">Gold</option>
 <option value="120000">Platinum</option>
 </select>
+
+<!-- PROPOSAL COVER BRANDING -->
+
+<div class="brandingCard">
+
+<div class="brandingHeader">
+<div class="brandingTitle">Proposal Cover Branding</div>
+<div id="proposalCoverStatus" class="brandingBadge">Default image</div>
+</div>
+
+<input
+id="proposalCoverInput"
+type="file"
+accept="image/*"
+class="hidden"
+>
+
+<div id="proposalCoverPreviewWrap" class="brandPreviewWrap">
+<img
+id="proposalCoverPreview"
+class="brandPreview"
+alt="Proposal cover preview"
+>
+</div>
+
+<div class="brandingActions">
+<button
+type="button"
+id="proposalCoverChooseBtn"
+class="brandBtn">
+Upload / Change Cover Image
+</button>
+
+<button
+type="button"
+id="proposalCoverRemoveBtn"
+class="brandBtn brandBtnRemove hidden">
+Remove Image
+</button>
+</div>
+
+<p class="brandHelper">
+This cover image will be used only for premium proposal branding. Image will be optimized automatically for better performance.
+</p>
+
+</div>
 
 <hr class="my-3 border-gray-600">
 
@@ -278,6 +446,61 @@ Preview Quote
 
 <!-- QUOTATION ENGINE -->
 <script src="js/quotation.js"></script>
+
+<script>
+(function(){
+
+const input = document.getElementById("proposalCoverInput")
+const chooseBtn = document.getElementById("proposalCoverChooseBtn")
+const removeBtn = document.getElementById("proposalCoverRemoveBtn")
+const previewWrap = document.getElementById("proposalCoverPreviewWrap")
+const previewImg = document.getElementById("proposalCoverPreview")
+const statusEl = document.getElementById("proposalCoverStatus")
+
+function setDefaultState(){
+previewImg.src = ""
+previewWrap.classList.remove("show")
+removeBtn.classList.add("hidden")
+statusEl.innerText = "Default image"
+}
+
+function setSelectedState(src){
+previewImg.src = src
+previewWrap.classList.add("show")
+removeBtn.classList.remove("hidden")
+statusEl.innerText = "Custom image selected"
+}
+
+if(chooseBtn && input){
+chooseBtn.addEventListener("click", function(){
+input.click()
+})
+}
+
+if(input){
+input.addEventListener("change", function(e){
+const file = e.target.files[0]
+if(!file) return
+
+const reader = new FileReader()
+reader.onload = function(evt){
+setSelectedState(evt.target.result)
+}
+reader.readAsDataURL(file)
+})
+}
+
+if(removeBtn && input){
+removeBtn.addEventListener("click", function(){
+input.value = ""
+setDefaultState()
+})
+}
+
+setDefaultState()
+
+})()
+</script>
 
 </body>
 </html>
