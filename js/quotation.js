@@ -55,6 +55,9 @@ return text
 // =============================
 
 let editId = null
+let selectedProposalCoverFile = null
+let existingProposalCoverImage = ""
+let existingProposalTitleColor = ""
 
 function getQueryParam(name){
 const url = new URL(window.location.href)
@@ -62,6 +65,524 @@ return url.searchParams.get(name)
 }
 
 editId = getQueryParam("edit")
+
+
+// =============================
+// PROPOSAL COVER UI HELPERS
+// =============================
+
+function setProposalCoverPreviewState(imageUrl,statusText,showRemove){
+
+const previewWrap = get("proposalCoverPreviewWrap")
+const previewImg = get("proposalCoverPreview")
+const removeBtn = get("proposalCoverRemoveBtn")
+const statusEl = get("proposalCoverStatus")
+
+if(previewImg){
+previewImg.src = imageUrl || ""
+}
+
+if(previewWrap){
+if(imageUrl){
+previewWrap.classList.add("show")
+}else{
+previewWrap.classList.remove("show")
+}
+}
+
+if(removeBtn){
+if(showRemove){
+removeBtn.classList.remove("hidden")
+}else{
+removeBtn.classList.add("hidden")
+}
+}
+
+if(statusEl){
+statusEl.innerText = statusText || "Default image"
+}
+
+}
+
+function resetProposalCoverSelection(){
+
+selectedProposalCoverFile = null
+
+const input = get("proposalCoverInput")
+if(input){
+input.value = ""
+}
+
+if(existingProposalCoverImage){
+setProposalCoverPreviewState(
+existingProposalCoverImage,
+"Saved image",
+true
+)
+}else{
+setProposalCoverPreviewState(
+"",
+"Default image",
+false
+)
+}
+
+}
+
+function initProposalCoverUI(){
+
+const input = get("proposalCoverInput")
+const chooseBtn = get("proposalCoverChooseBtn")
+const removeBtn = get("proposalCoverRemoveBtn")
+
+if(chooseBtn && input){
+chooseBtn.addEventListener("click",function(){
+input.click()
+})
+}
+
+if(input){
+
+input.addEventListener("change",function(e){
+
+const file = e.target.files?.[0]
+
+if(!file){
+selectedProposalCoverFile = null
+if(existingProposalCoverImage){
+setProposalCoverPreviewState(
+existingProposalCoverImage,
+"Saved image",
+true
+)
+}else{
+setProposalCoverPreviewState(
+"",
+"Default image",
+false
+)
+}
+return
+}
+
+selectedProposalCoverFile = file
+
+const reader = new FileReader()
+
+reader.onload = function(evt){
+setProposalCoverPreviewState(
+evt.target?.result || "",
+"Custom image selected",
+true
+)
+}
+
+reader.readAsDataURL(file)
+
+})
+
+}
+
+if(removeBtn){
+
+removeBtn.addEventListener("click",function(){
+
+selectedProposalCoverFile = null
+existingProposalCoverImage = ""
+existingProposalTitleColor = ""
+
+const inputEl = get("proposalCoverInput")
+if(inputEl){
+inputEl.value = ""
+}
+
+setProposalCoverPreviewState(
+"",
+"Default image",
+false
+)
+
+})
+
+}
+
+setProposalCoverPreviewState(
+"",
+"Default image",
+false
+)
+
+}
+
+
+// =============================
+// IMAGE PROCESSING HELPERS
+// =============================
+
+async function compressImage(file){
+
+return new Promise((resolve,reject)=>{
+
+try{
+
+const img = new Image()
+const reader = new FileReader()
+
+reader.onload = function(e){
+img.src = e.target?.result || ""
+}
+
+reader.onerror = function(){
+reject(new Error("Failed to read image file"))
+}
+
+img.onload = function(){
+
+try{
+
+const canvas = document.createElement("canvas")
+const ctx = canvas.getContext("2d")
+
+const MAX_WIDTH = 1600
+const MAX_HEIGHT = 1600
+
+let width = img.width
+let height = img.height
+
+if(width > MAX_WIDTH || height > MAX_HEIGHT){
+const scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height)
+width = Math.round(width * scale)
+height = Math.round(height * scale)
+}
+
+canvas.width = width
+canvas.height = height
+
+ctx.drawImage(img,0,0,width,height)
+
+canvas.toBlob(function(blob){
+
+if(!blob){
+reject(new Error("Image compression failed"))
+return
+}
+
+resolve(blob)
+
+},"image/jpeg",0.9)
+
+}catch(err){
+reject(err)
+}
+
+}
+
+img.onerror = function(){
+reject(new Error("Invalid image"))
+}
+
+reader.readAsDataURL(file)
+
+}catch(err){
+reject(err)
+}
+
+})
+
+}
+
+function normalizeTitleColor(r,g,b){
+
+const brightness = (r * 299 + g * 587 + b * 114) / 1000
+
+if(brightness > 185){
+r = Math.max(90, r - 95)
+g = Math.max(70, g - 95)
+b = Math.max(70, b - 95)
+}
+
+if(brightness < 70){
+r = Math.min(215, r + 70)
+g = Math.min(195, g + 70)
+b = Math.min(195, b + 70)
+}
+
+return "#" +
+((1 << 24) + (Math.round(r) << 16) + (Math.round(g) << 8) + Math.round(b))
+.toString(16)
+.slice(1)
+
+}
+
+async function extractTitleColor(file){
+
+return new Promise((resolve,reject)=>{
+
+try{
+
+const img = new Image()
+const reader = new FileReader()
+
+reader.onload = function(e){
+img.src = e.target?.result || ""
+}
+
+reader.onerror = function(){
+reject(new Error("Failed to read image for color extraction"))
+}
+
+img.onload = function(){
+
+try{
+
+const canvas = document.createElement("canvas")
+const ctx = canvas.getContext("2d")
+
+canvas.width = 60
+canvas.height = 60
+
+ctx.drawImage(img,0,0,60,60)
+
+const pixels = ctx.getImageData(0,0,60,60).data
+
+let r = 0
+let g = 0
+let b = 0
+let count = 0
+
+for(let i = 0; i < pixels.length; i += 4){
+r += pixels[i]
+g += pixels[i + 1]
+b += pixels[i + 2]
+count++
+}
+
+if(!count){
+resolve("#c78d82")
+return
+}
+
+r = r / count
+g = g / count
+b = b / count
+
+resolve(normalizeTitleColor(r,g,b))
+
+}catch(err){
+reject(err)
+}
+
+}
+
+img.onerror = function(){
+reject(new Error("Invalid image for color extraction"))
+}
+
+reader.readAsDataURL(file)
+
+}catch(err){
+reject(err)
+}
+
+})
+
+}
+
+function getStoragePathFromPublicUrl(url){
+
+if(!url) return ""
+
+const marker = "/storage/v1/object/public/proposal-covers/"
+const index = url.indexOf(marker)
+
+if(index === -1) return ""
+
+let path = url.slice(index + marker.length)
+
+if(path.includes("?")){
+path = path.split("?")[0]
+}
+
+return path
+
+}
+
+
+// =============================
+// PROPOSAL COVER STORAGE
+// =============================
+
+async function loadExistingProposalBranding(userId){
+
+try{
+
+const supabase = getSupabase()
+
+const { data, error } =
+await supabase
+.from("photographer_settings")
+.select("proposal_cover_image, proposal_title_color")
+.eq("user_id", userId)
+.maybeSingle()
+
+if(error){
+console.error("LOAD PROPOSAL BRANDING ERROR:", error)
+return
+}
+
+existingProposalCoverImage = data?.proposal_cover_image || ""
+existingProposalTitleColor = data?.proposal_title_color || ""
+
+if(existingProposalCoverImage){
+setProposalCoverPreviewState(
+existingProposalCoverImage,
+"Saved image",
+true
+)
+}else{
+setProposalCoverPreviewState(
+"",
+"Default image",
+false
+)
+}
+
+}catch(err){
+console.error("LOAD PROPOSAL BRANDING ERROR:", err)
+}
+
+}
+
+async function ensurePhotographerSettingsRow(userId){
+
+const supabase = getSupabase()
+
+const { data, error } =
+await supabase
+.from("photographer_settings")
+.select("user_id")
+.eq("user_id", userId)
+.maybeSingle()
+
+if(error){
+throw error
+}
+
+if(!data){
+
+const { error: insertError } =
+await supabase
+.from("photographer_settings")
+.insert({
+user_id: userId
+})
+
+if(insertError){
+throw insertError
+}
+
+}
+
+}
+
+async function uploadProposalCoverAndSaveBranding(userId){
+
+const supabase = getSupabase()
+
+await ensurePhotographerSettingsRow(userId)
+
+if(!selectedProposalCoverFile){
+
+if(!existingProposalCoverImage){
+return {
+proposal_cover_image: null,
+proposal_title_color: null
+}
+}
+
+return {
+proposal_cover_image: existingProposalCoverImage,
+proposal_title_color: existingProposalTitleColor || null
+}
+
+}
+
+const compressedBlob = await compressImage(selectedProposalCoverFile)
+const titleColor = await extractTitleColor(selectedProposalCoverFile)
+
+if(existingProposalCoverImage){
+
+try{
+
+const oldPath = getStoragePathFromPublicUrl(existingProposalCoverImage)
+
+if(oldPath){
+await supabase.storage
+.from("proposal-covers")
+.remove([oldPath])
+}
+
+}catch(err){
+console.error("OLD PROPOSAL COVER DELETE ERROR:", err)
+}
+
+}
+
+const filePath = `${userId}/proposal-cover.jpg`
+
+const { error: uploadError } =
+await supabase.storage
+.from("proposal-covers")
+.upload(filePath, compressedBlob, {
+contentType: "image/jpeg",
+upsert: true
+})
+
+if(uploadError){
+throw uploadError
+}
+
+const { data: publicUrlData } =
+supabase.storage
+.from("proposal-covers")
+.getPublicUrl(filePath)
+
+const publicUrl = `${publicUrlData.publicUrl}?v=${Date.now()}`
+
+const { error: updateError } =
+await supabase
+.from("photographer_settings")
+.update({
+proposal_cover_image: publicUrl,
+proposal_title_color: titleColor
+})
+.eq("user_id", userId)
+
+if(updateError){
+throw updateError
+}
+
+existingProposalCoverImage = publicUrl
+existingProposalTitleColor = titleColor
+selectedProposalCoverFile = null
+
+const input = get("proposalCoverInput")
+if(input){
+input.value = ""
+}
+
+setProposalCoverPreviewState(
+existingProposalCoverImage,
+"Saved image",
+true
+)
+
+return {
+proposal_cover_image: existingProposalCoverImage,
+proposal_title_color: existingProposalTitleColor
+}
+
+}
 
 
 // =============================
@@ -288,7 +809,7 @@ return data?.length || 0
 
 
 // =============================
-// 🔥 AUTO CREATE EVENT (UPDATED WITH TOKEN)
+// AUTO CREATE EVENT
 // =============================
 
 async function createEventIfConfirmed(quotation){
@@ -299,10 +820,8 @@ if(quotation.status !== "confirmed") return
 
 const supabase = getSupabase()
 
-// 🔥 UNIQUE EVENT LINK USING QUOTATION ID
 const uniqueName = "Q_" + quotation.id
 
-// CHECK EXISTING EVENT
 const { data: existing } =
 await supabase
 .from("events")
@@ -313,7 +832,6 @@ if(existing && existing.length > 0){
 return
 }
 
-// INSERT EVENT (UPDATED TO GET ID)
 const { data: insertedEvent, error: insertError } =
 await supabase
 .from("events")
@@ -332,10 +850,6 @@ if(insertError){
 console.error("Event insert error:", insertError)
 return
 }
-
-// =============================
-// 🔥 TOKEN GENERATION (ADDED)
-// =============================
 
 const token =
 Math.random().toString(36).substring(2,10).toUpperCase()
@@ -381,7 +895,6 @@ console.error(error)
 return null
 }
 
-// 🔥 EVENT CREATE ON UPDATE
 await createEventIfConfirmed({ ...data, id: editId, user_id: user.id })
 
 return { id: editId }
@@ -400,7 +913,6 @@ console.error(error)
 return null
 }
 
-// 🔥 EVENT CREATE ON INSERT
 await createEventIfConfirmed(inserted)
 
 return inserted
@@ -415,6 +927,29 @@ return null
 }
 
 }
+
+
+// =============================
+// INIT
+// =============================
+
+window.addEventListener("DOMContentLoaded", async function(){
+
+initProposalCoverUI()
+
+try{
+
+const user = await getCurrentUser()
+
+if(user?.id){
+await loadExistingProposalBranding(user.id)
+}
+
+}catch(err){
+console.error("INIT PROPOSAL BRANDING ERROR:", err)
+}
+
+})
 
 
 // =============================
@@ -506,6 +1041,24 @@ alert(
 }
 
 
+// PROPOSAL BRANDING SAVE
+
+let proposalBranding = {
+proposal_cover_image: existingProposalCoverImage || null,
+proposal_title_color: existingProposalTitleColor || null
+}
+
+try{
+proposalBranding = await uploadProposalCoverAndSaveBranding(user.id)
+}catch(err){
+console.error("PROPOSAL BRANDING SAVE ERROR:", err)
+alert("Proposal cover upload failed")
+previewBtn.disabled = false
+previewBtn.innerText = "Preview Quote"
+return
+}
+
+
 // BUILD SERVICES
 
 const services = {
@@ -594,7 +1147,10 @@ balance: parseFloat(balanceInput?.value || 0),
 status: "proposal",
 
 services,
-deliverables
+deliverables,
+
+proposal_cover_image: proposalBranding?.proposal_cover_image || null,
+proposal_title_color: proposalBranding?.proposal_title_color || null
 
 }
 
