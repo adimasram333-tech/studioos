@@ -5,6 +5,7 @@ let db = null;
 let quotationData = null;
 let teamData = {};
 let isTeamSaved = false;
+let coverFile = null;
 
 
 // ===== GET QUOTATION ID =====
@@ -112,7 +113,7 @@ function updateTeamCount() {
 }
 
 
-// ===== TOGGLE FORM MODE =====
+// ===== SET FORM DISABLED =====
 
 function setFormDisabled(disabled) {
   document.getElementById("role").disabled = disabled;
@@ -125,6 +126,9 @@ function setFormDisabled(disabled) {
   document.getElementById("addMemberBtn").disabled = disabled;
   document.getElementById("addMemberBtn").classList.toggle("opacity-50", disabled);
 }
+
+
+// ===== EDIT BUTTON VISIBILITY =====
 
 function setEditVisibility(show) {
   const editBtn = document.getElementById("editTeamBtn");
@@ -201,6 +205,7 @@ function renderTeamPreview() {
     removeBtn.innerText = "Remove Group";
     removeBtn.onclick = function() {
       delete teamData[key];
+      isTeamSaved = false;
       renderTeamPreview();
     };
 
@@ -237,6 +242,7 @@ function renderTeamPreview() {
           delete teamData[key];
         }
 
+        isTeamSaved = false;
         renderTeamPreview();
       };
 
@@ -251,6 +257,407 @@ function renderTeamPreview() {
   setEditVisibility(true);
   setFormDisabled(false);
   updateTeamCount();
+}
+
+
+// ===== IMAGE COMPRESSION =====
+
+async function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    try {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+
+      reader.onerror = () => {
+        reject(new Error("Failed to read image"));
+      };
+
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 1600;
+          const MAX_HEIGHT = 1600;
+
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+            const scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                reject(new Error("Image compression failed"));
+                return;
+              }
+              resolve(blob);
+            },
+            "image/jpeg",
+            0.88
+          );
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      img.onerror = () => {
+        reject(new Error("Invalid image"));
+      };
+
+      reader.readAsDataURL(file);
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+
+// ===== NORMALIZE TITLE COLOR =====
+
+function normalizeTitleColor(r, g, b) {
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+  if (brightness > 180) {
+    r = Math.max(80, r - 90);
+    g = Math.max(60, g - 90);
+    b = Math.max(60, b - 90);
+  }
+
+  if (brightness < 70) {
+    r = Math.min(210, r + 70);
+    g = Math.min(180, g + 70);
+    b = Math.min(180, b + 70);
+  }
+
+  return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+}
+
+
+// ===== EXTRACT COLOR =====
+
+async function extractColor(file) {
+  return new Promise((resolve, reject) => {
+    try {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+
+      reader.onerror = () => {
+        reject(new Error("Failed to read image for color extraction"));
+      };
+
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          canvas.width = 50;
+          canvas.height = 50;
+
+          ctx.drawImage(img, 0, 0, 50, 50);
+
+          const data = ctx.getImageData(0, 0, 50, 50).data;
+
+          let r = 0;
+          let g = 0;
+          let b = 0;
+          let count = 0;
+
+          for (let i = 0; i < data.length; i += 4) {
+            r += data[i];
+            g += data[i + 1];
+            b += data[i + 2];
+            count++;
+          }
+
+          if (count === 0) {
+            resolve("rgb(199,141,130)");
+            return;
+          }
+
+          r = Math.floor(r / count);
+          g = Math.floor(g / count);
+          b = Math.floor(b / count);
+
+          resolve(normalizeTitleColor(r, g, b));
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      img.onerror = () => {
+        reject(new Error("Invalid image for color extraction"));
+      };
+
+      reader.readAsDataURL(file);
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+
+// ===== APPLY COVER STATUS =====
+
+function applyCoverStatus(options = {}) {
+  const {
+    hasCustomImage = false,
+    isSelected = false,
+    imageUrl = ""
+  } = options;
+
+  const coverStatus = document.getElementById("coverStatus");
+  const coverPreview = document.getElementById("coverPreview");
+  const coverPreviewWrap = document.getElementById("coverPreviewWrap");
+  const removeCoverBtn = document.getElementById("removeCoverBtn");
+
+  if (!coverStatus || !coverPreview || !coverPreviewWrap || !removeCoverBtn) return;
+
+  if (imageUrl) {
+    coverPreview.src = imageUrl;
+    coverPreviewWrap.classList.remove("hidden");
+    removeCoverBtn.classList.remove("hidden");
+  } else {
+    coverPreview.src = "";
+    coverPreviewWrap.classList.add("hidden");
+    removeCoverBtn.classList.add("hidden");
+  }
+
+  if (isSelected) {
+    coverStatus.innerText = "Custom image selected";
+    return;
+  }
+
+  if (hasCustomImage) {
+    coverStatus.innerText = "Custom image active";
+    return;
+  }
+
+  coverStatus.innerText = "Default image";
+}
+
+
+// ===== HANDLE COVER INPUT =====
+
+function initCoverHandlers() {
+  const input = document.getElementById("coverInput");
+  const removeBtn = document.getElementById("removeCoverBtn");
+
+  if (input) {
+    input.addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      coverFile = file;
+
+      const reader = new FileReader();
+      reader.onload = function() {
+        applyCoverStatus({
+          hasCustomImage: false,
+          isSelected: true,
+          imageUrl: reader.result
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (removeBtn) {
+    removeBtn.addEventListener("click", function() {
+      const inputEl = document.getElementById("coverInput");
+      if (inputEl) {
+        inputEl.value = "";
+      }
+
+      coverFile = null;
+      applyCoverStatus({
+        hasCustomImage: false,
+        isSelected: false,
+        imageUrl: ""
+      });
+    });
+  }
+}
+
+
+// ===== LOAD EXISTING COVER SETTINGS =====
+
+async function loadExistingCoverSettings() {
+  try {
+    const { data: authData } = await db.auth.getUser();
+    const user = authData?.user || null;
+
+    if (!user?.id) {
+      applyCoverStatus({
+        hasCustomImage: false,
+        isSelected: false,
+        imageUrl: ""
+      });
+      return;
+    }
+
+    const { data, error } = await db
+      .from("photographer_settings")
+      .select("team_sheet_cover_image")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    const imageUrl = data?.team_sheet_cover_image || "";
+
+    applyCoverStatus({
+      hasCustomImage: !!imageUrl,
+      isSelected: false,
+      imageUrl
+    });
+  } catch (err) {
+    console.error("LOAD COVER SETTINGS ERROR:", err);
+    applyCoverStatus({
+      hasCustomImage: false,
+      isSelected: false,
+      imageUrl: ""
+    });
+  }
+}
+
+
+// ===== ENSURE PHOTOGRAPHER SETTINGS ROW =====
+
+async function ensurePhotographerSettingsRow(userId) {
+  const { data, error } = await db
+    .from("photographer_settings")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    const { error: insertError } = await db
+      .from("photographer_settings")
+      .insert({
+        user_id: userId
+      });
+
+    if (insertError) {
+      throw insertError;
+    }
+  }
+}
+
+
+// ===== REMOVE COVER FROM SETTINGS =====
+
+async function clearStoredCoverIfRequested(userId) {
+  const coverPreview = document.getElementById("coverPreview");
+  const hasPreviewVisible =
+    coverPreview &&
+    coverPreview.src &&
+    coverPreview.src.trim() !== "" &&
+    !coverPreview.classList.contains("hidden");
+
+  const inputEl = document.getElementById("coverInput");
+  const hasSelectedFile = !!(inputEl && inputEl.files && inputEl.files[0]);
+
+  if (hasPreviewVisible || hasSelectedFile || coverFile) {
+    return;
+  }
+
+  await ensurePhotographerSettingsRow(userId);
+
+  const { error } = await db
+    .from("photographer_settings")
+    .update({
+      team_sheet_cover_image: null,
+      team_sheet_title_color: null
+    })
+    .eq("user_id", userId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+
+// ===== UPLOAD COVER IF NEEDED =====
+
+async function uploadCoverIfNeeded(userId) {
+  if (!coverFile) return;
+
+  try {
+    await ensurePhotographerSettingsRow(userId);
+
+    const compressedBlob = await compressImage(coverFile);
+    const titleColor = await extractColor(coverFile);
+    const path = `${userId}/team-sheet.jpg`;
+
+    const { error: uploadError } = await db.storage
+      .from("team-sheet")
+      .upload(path, compressedBlob, {
+        upsert: true,
+        contentType: "image/jpeg"
+      });
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data: publicUrlData } = db.storage
+      .from("team-sheet")
+      .getPublicUrl(path);
+
+    const publicUrl = `${publicUrlData.publicUrl}?v=${Date.now()}`;
+
+    const { error: updateError } = await db
+      .from("photographer_settings")
+      .update({
+        team_sheet_cover_image: publicUrl,
+        team_sheet_title_color: titleColor
+      })
+      .eq("user_id", userId);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    coverFile = null;
+
+    const inputEl = document.getElementById("coverInput");
+    if (inputEl) {
+      inputEl.value = "";
+    }
+
+    applyCoverStatus({
+      hasCustomImage: true,
+      isSelected: false,
+      imageUrl: publicUrl
+    });
+
+  } catch (err) {
+    console.error("UPLOAD COVER ERROR:", err);
+    throw err;
+  }
 }
 
 
@@ -313,7 +720,9 @@ window.addEventListener("DOMContentLoaded", async () => {
       throw new Error("Supabase not initialized");
     }
 
+    initCoverHandlers();
     await loadClientData();
+    await loadExistingCoverSettings();
     await loadSavedTeamIfExists();
     updateTeamCount();
   } catch (err) {
@@ -401,6 +810,14 @@ async function saveTeam() {
   }
 
   try {
+    const { data: authData } = await db.auth.getUser();
+    const user = authData?.user || null;
+
+    if (user?.id) {
+      await uploadCoverIfNeeded(user.id);
+      await clearStoredCoverIfRequested(user.id);
+    }
+
     const { error: deleteError } = await db
       .from("team_assignments")
       .delete()
