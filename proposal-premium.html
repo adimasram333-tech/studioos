@@ -8,258 +8,638 @@
 
 <title>Premium Proposal</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
+:root{
+--premium-bg:#0f172a;
+--premium-card:rgba(255,255,255,0.08);
+--premium-card-solid:#111827;
+--premium-border:rgba(255,255,255,0.12);
+--premium-text:#ffffff;
+--premium-muted:rgba(255,255,255,0.80);
+--premium-soft:rgba(255,255,255,0.60);
+--premium-title:#d6a77a;
+}
+
+html,
+body{
+margin:0;
+padding:0;
+}
 
 body{
-background:#0f172a;
+background:var(--premium-bg);
 font-family:'Inter',sans-serif;
-color:#fff;
+color:var(--premium-text);
+-webkit-print-color-adjust:exact;
+print-color-adjust:exact;
+overflow-x:hidden;
 }
 
-/* ===== HERO ===== */
+#proposalPage{
+width:100%;
+min-height:100vh;
+}
 
-.hero{
+.premium-shell{
+min-height:100vh;
+background:
+radial-gradient(circle at top, rgba(30,41,59,1), rgba(15,23,42,1));
+}
+
+.premium-page{
+width:100%;
+max-width:1180px;
+margin:0 auto;
+padding-bottom:32px;
+}
+
+.premium-hero{
 position:relative;
-height:420px;
-display:flex;
-align-items:center;
-justify-content:center;
-text-align:center;
+height:340px;
+overflow:hidden;
 }
 
-.hero img{
+.premium-hero-image{
 position:absolute;
+inset:0;
 width:100%;
 height:100%;
 object-fit:cover;
 z-index:0;
 }
 
-.hero::after{
-content:'';
+.premium-hero-overlay{
 position:absolute;
-width:100%;
-height:100%;
-background:linear-gradient(to bottom,rgba(0,0,0,0.5),rgba(0,0,0,0.7));
+inset:0;
+background:linear-gradient(to bottom, rgba(0,0,0,0.28), rgba(0,0,0,0.72));
 z-index:1;
 }
 
-.hero-content{
+.premium-hero-content{
 position:relative;
 z-index:2;
-}
-
-.hero h1{
-font-family:'Playfair Display',serif;
-font-size:42px;
-}
-
-.hero p{
-margin-top:10px;
-opacity:0.8;
-}
-
-/* ===== CARD ===== */
-
-.card{
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(10px);
-border:1px solid rgba(255,255,255,0.1);
-border-radius:16px;
+height:100%;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
 padding:20px;
 }
 
-/* ===== SECTION ===== */
-
-.section{
-margin-top:30px;
-}
-
-.section-title{
+.premium-title{
+margin:0;
 font-family:'Playfair Display',serif;
-font-size:22px;
-margin-bottom:10px;
+font-size:44px;
+line-height:1.12;
+letter-spacing:0.02em;
+color:var(--premium-title);
+max-width:900px;
+word-break:break-word;
 }
 
-/* ===== GRID ===== */
+.premium-studio{
+margin-top:14px;
+font-size:19px;
+font-weight:600;
+color:#ffffff;
+word-break:break-word;
+}
 
-.grid{
+.premium-phone{
+margin-top:6px;
+font-size:14px;
+color:var(--premium-muted);
+word-break:break-word;
+}
+
+.premium-content{
+max-width:980px;
+margin:-54px auto 0;
+padding:0 18px;
+position:relative;
+z-index:3;
+}
+
+.premium-card,
+.premium-panel{
+background:var(--premium-card);
+backdrop-filter:blur(16px);
+-webkit-backdrop-filter:blur(16px);
+border:1px solid var(--premium-border);
+border-radius:24px;
+padding:22px;
+box-shadow:0 12px 40px rgba(0,0,0,0.18);
+box-sizing:border-box;
+}
+
+.premium-card + .premium-card,
+.premium-panel + .premium-panel{
+margin-top:18px;
+}
+
+.premium-grid{
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:15px;
+gap:16px;
 }
 
-.item{
-background:rgba(255,255,255,0.05);
-padding:10px;
-border-radius:8px;
+.premium-info{
 display:flex;
 justify-content:space-between;
+gap:16px;
+padding:15px 16px;
+border-radius:16px;
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,255,255,0.08);
+font-size:15px;
+box-sizing:border-box;
 }
 
-/* ===== FOOTER ===== */
+.premium-info span:first-child{
+color:var(--premium-soft);
+}
 
-.footer{
-margin-top:40px;
+.premium-two-col{
+display:grid;
+grid-template-columns:minmax(0,1.2fr) minmax(0,0.8fr);
+gap:18px;
+margin-top:18px;
+}
+
+.premium-section-title{
+margin:0 0 14px 0;
+font-family:'Playfair Display',serif;
+font-size:24px;
+line-height:1.2;
+color:#ffffff;
+word-break:break-word;
+}
+
+.premium-row{
+display:flex;
+justify-content:space-between;
+gap:16px;
+padding:12px 0;
+border-bottom:1px solid rgba(255,255,255,0.10);
+font-size:15px;
+box-sizing:border-box;
+}
+
+.premium-row:last-child{
+border-bottom:none;
+}
+
+.premium-row span:first-child{
+color:var(--premium-muted);
+}
+
+.premium-row span:last-child{
+text-align:right;
+}
+
+.premium-list{
+margin:0;
+padding-left:18px;
+line-height:1.9;
+color:var(--premium-muted);
+font-size:15px;
+}
+
+.premium-summary-row{
+display:flex;
+justify-content:space-between;
+gap:16px;
+padding:11px 0;
+border-bottom:1px solid rgba(255,255,255,0.10);
+font-size:15px;
+}
+
+.premium-summary-row:last-child{
+border-bottom:none;
+}
+
+.premium-summary-row strong:first-child{
+color:#ffffff;
+font-weight:600;
+}
+
+.premium-summary-row strong:last-child{
+color:#ffffff;
+font-weight:700;
+text-align:right;
+}
+
+.premium-copy{
+color:var(--premium-muted);
+line-height:1.85;
+font-size:15px;
+}
+
+.premium-copy ul{
+margin:10px 0 0;
+padding-left:18px;
+}
+
+.premium-actions{
+margin-top:22px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+}
+
+.premium-btn{
+border:none;
+border-radius:14px;
+padding:14px 18px;
+font-size:14px;
+font-weight:600;
+cursor:pointer;
+transition:.2s ease;
+font-family:'Inter',sans-serif;
+}
+
+.premium-btn-whatsapp{
+background:#25D366;
+color:white;
+}
+
+.premium-btn-whatsapp:hover{
+opacity:.92;
+}
+
+.premium-btn-pdf{
+background:var(--premium-title);
+color:white;
+}
+
+.premium-btn-pdf:hover{
+opacity:.92;
+}
+
+.premium-footer{
+margin-top:24px;
 text-align:center;
-opacity:0.6;
 font-size:12px;
+color:var(--premium-soft);
+line-height:1.7;
+}
+
+.premium-footer p{
+margin:0;
+}
+
+.premium-footer p + p{
+margin-top:4px;
+}
+
+/* ===== TABLET ===== */
+
+@media (max-width: 1024px){
+.premium-hero{
+height:300px;
+}
+.premium-title{
+font-size:36px;
+}
+.premium-two-col{
+grid-template-columns:1fr;
+}
 }
 
 /* ===== MOBILE ===== */
 
-@media(max-width:768px){
+@media (max-width: 768px){
 
-.hero{
-height:300px;
+.premium-page{
+padding-bottom:22px;
 }
 
-.hero h1{
-font-size:24px;
+.premium-hero{
+height:250px;
 }
 
-.grid{
+.premium-hero-content{
+padding:16px;
+}
+
+.premium-title{
+font-size:26px;
+line-height:1.2;
+max-width:100%;
+}
+
+.premium-studio{
+font-size:16px;
+margin-top:10px;
+}
+
+.premium-phone{
+font-size:13px;
+margin-top:4px;
+}
+
+.premium-content{
+margin:-26px auto 0;
+padding:0 12px;
+}
+
+.premium-card,
+.premium-panel{
+padding:16px;
+border-radius:18px;
+}
+
+.premium-grid{
+grid-template-columns:1fr;
+gap:12px;
+}
+
+.premium-info{
+padding:12px 14px;
+font-size:14px;
+flex-direction:column;
+align-items:flex-start;
+gap:6px;
+}
+
+.premium-info span:last-child{
+text-align:left;
+word-break:break-word;
+}
+
+.premium-section-title{
+font-size:21px;
+margin-bottom:12px;
+}
+
+.premium-row{
+font-size:14px;
+flex-direction:column;
+align-items:flex-start;
+gap:4px;
+}
+
+.premium-row span:last-child{
+text-align:left;
+}
+
+.premium-list{
+font-size:14px;
+line-height:1.8;
+}
+
+.premium-summary-row{
+font-size:14px;
+}
+
+.premium-actions{
 grid-template-columns:1fr;
 }
 
+.premium-btn{
+width:100%;
+}
 }
 
+/* ===== PRINT / PDF ===== */
+
+@page{
+size:A4;
+margin:0;
+}
+
+@media print{
+html,
+body{
+background:#ffffff !important;
+margin:0 !important;
+padding:0 !important;
+}
+
+body{
+-webkit-print-color-adjust:exact !important;
+print-color-adjust:exact !important;
+}
+
+#proposalPage{
+width:794px !important;
+max-width:794px !important;
+margin:0 auto !important;
+}
+
+.premium-shell{
+background:#ffffff !important;
+min-height:auto !important;
+}
+
+.premium-page{
+max-width:794px !important;
+padding-bottom:0 !important;
+}
+
+.premium-hero{
+height:300px !important;
+}
+
+.premium-content{
+margin:0 !important;
+padding:0 !important;
+max-width:794px !important;
+}
+
+.premium-card,
+.premium-panel{
+box-shadow:none !important;
+break-inside:avoid;
+page-break-inside:avoid;
+border-radius:0 !important;
+backdrop-filter:none !important;
+-webkit-backdrop-filter:none !important;
+background:#111827 !important;
+}
+
+.premium-actions{
+display:none !important;
+}
+}
 </style>
 
 </head>
 
 <body>
 
-<!-- HERO -->
+<div id="proposalPage">
 
-<div class="hero">
+<div class="premium-shell">
+  <div class="premium-page">
 
-<img id="coverImage" src="team-sheet.jpg">
+    <!-- HERO -->
+    <div class="premium-hero">
+      <img
+        id="coverImage"
+        class="premium-hero-image"
+        src="team-sheet.jpg"
+        alt="Premium Proposal Cover"
+      >
 
-<div class="hero-content">
-<h1 id="proposalTitle">Photography Proposal</h1>
-<p id="studioName"></p>
-<p id="studioPhone"></p>
-</div>
+      <div class="premium-hero-overlay"></div>
 
-</div>
+      <div class="premium-hero-content">
+        <h1 id="proposalTitle" class="premium-title">
+          Photography Proposal
+        </h1>
 
-<!-- CONTENT -->
+        <div id="studioName" class="premium-studio"></div>
+        <div id="studioPhone" class="premium-phone"></div>
+      </div>
+    </div>
 
-<div class="max-w-3xl mx-auto p-4">
+    <!-- CONTENT -->
+    <div class="premium-content">
 
-<!-- CLIENT INFO -->
+      <!-- CLIENT INFO -->
+      <div class="premium-card">
+        <div class="premium-grid">
+          <div class="premium-info">
+            <span>Prepared For</span>
+            <span id="clientName"></span>
+          </div>
 
-<div class="card section">
+          <div class="premium-info">
+            <span>Event Dates</span>
+            <span id="eventDate"></span>
+          </div>
+        </div>
+      </div>
 
-<div class="grid">
-<div class="item">
-<span>Client</span>
-<span id="clientName"></span>
-</div>
+      <!-- MAIN GRID -->
+      <div class="premium-two-col">
 
-<div class="item">
-<span>Date</span>
-<span id="eventDate"></span>
-</div>
-</div>
+        <!-- SERVICES -->
+        <div class="premium-panel">
+          <h2 class="premium-section-title">Services & Coverage</h2>
 
-</div>
+          <div class="premium-row">
+            <span>Candid Photographer</span>
+            <span id="candidQty"></span>
+          </div>
 
-<!-- SERVICES -->
+          <div class="premium-row">
+            <span>Traditional Photographer</span>
+            <span id="traditionalPhotoQty"></span>
+          </div>
 
-<div class="card section">
+          <div class="premium-row">
+            <span>Traditional Videographer</span>
+            <span id="traditionalVideoQty"></span>
+          </div>
 
-<h2 class="section-title">Services</h2>
+          <div class="premium-row">
+            <span>Cinematographer</span>
+            <span id="cinemaQty"></span>
+          </div>
 
-<div class="grid">
+          <div class="premium-row">
+            <span>Drone</span>
+            <span id="droneQty"></span>
+          </div>
 
-<div class="item">
-<span>Candid</span>
-<span id="candidQty"></span>
-</div>
+          <div class="premium-row">
+            <span>LED Screen Wall</span>
+            <span id="ledQty"></span>
+          </div>
 
-<div class="item">
-<span>Traditional</span>
-<span id="traditionalPhotoQty"></span>
-</div>
+          <div class="premium-row">
+            <span>Assistant</span>
+            <span id="assistantQty"></span>
+          </div>
+        </div>
 
-<div class="item">
-<span>Video</span>
-<span id="traditionalVideoQty"></span>
-</div>
+        <!-- SUMMARY -->
+        <div class="premium-panel">
+          <h2 class="premium-section-title">Investment Summary</h2>
 
-<div class="item">
-<span>Cinematic</span>
-<span id="cinemaQty"></span>
-</div>
+          <div class="premium-summary-row">
+            <strong>Total Investment</strong>
+            <strong id="total"></strong>
+          </div>
 
-<div class="item">
-<span>Drone</span>
-<span id="droneQty"></span>
-</div>
+          <div class="premium-summary-row">
+            <strong>Advance Required</strong>
+            <strong id="advance"></strong>
+          </div>
 
-<div class="item">
-<span>LED</span>
-<span id="ledQty"></span>
-</div>
+          <div class="premium-summary-row">
+            <strong>Balance</strong>
+            <strong id="balance"></strong>
+          </div>
+        </div>
 
-<div class="item">
-<span>Assistant</span>
-<span id="assistantQty"></span>
-</div>
+      </div>
 
-</div>
+      <!-- DELIVERABLES -->
+      <div class="premium-panel" style="margin-top:18px;">
+        <h2 class="premium-section-title">Deliverables</h2>
+        <ul id="deliverablesList" class="premium-list"></ul>
+      </div>
 
-</div>
+      <!-- WHY CHOOSE US -->
+      <div class="premium-panel" style="margin-top:18px;">
+        <h2 class="premium-section-title">Why Choose Us</h2>
 
-<!-- DELIVERABLES -->
+        <div class="premium-copy">
+          We believe every celebration has a story worth preserving forever.
+          Our team focuses on capturing real emotions, beautiful details, and timeless moments.
 
-<div class="card section">
+          <ul>
+            <li>Professional and experienced photography team</li>
+            <li>Creative cinematic storytelling approach</li>
+            <li>High quality editing and color grading</li>
+            <li>Premium album design and printing</li>
+            <li>Reliable service and timely delivery</li>
+          </ul>
+        </div>
+      </div>
 
-<h2 class="section-title">Deliverables</h2>
-<ul id="deliverablesList"></ul>
+      <!-- TERMS -->
+      <div class="premium-panel" style="margin-top:18px;">
+        <h2 class="premium-section-title">Booking Terms</h2>
 
-</div>
+        <div class="premium-copy">
+          <ul>
+            <li>Booking will be confirmed only after advance payment.</li>
+            <li>Event date will be reserved only after confirmation.</li>
+            <li>Remaining balance must be cleared before final delivery.</li>
+            <li>Delivery timeline may vary depending on project scope.</li>
+            <li>Any additional services will be charged separately.</li>
+          </ul>
+        </div>
 
-<!-- PRICE -->
+        <div class="premium-actions">
+          <button class="premium-btn premium-btn-whatsapp" onclick="sendWhatsApp()">
+            Send Proposal on WhatsApp
+          </button>
 
-<div class="card section">
+          <button class="premium-btn premium-btn-pdf" onclick="downloadPDF()">
+            Download Proposal PDF
+          </button>
+        </div>
 
-<h2 class="section-title">Investment</h2>
+        <div class="premium-footer">
+          <p><strong>Generated by StudioOS</strong></p>
+          <p>Professional Photography Business Operating System</p>
+        </div>
+      </div>
 
-<div class="grid">
-<div class="item"><span>Total</span><span id="total"></span></div>
-<div class="item"><span>Advance</span><span id="advance"></span></div>
-<div class="item"><span>Balance</span><span id="balance"></span></div>
-</div>
-
-</div>
-
-<!-- ACTION -->
-
-<div class="section text-center">
-
-<button onclick="sendWhatsApp()" class="bg-green-500 px-6 py-3 rounded-lg mt-4">
-Share on WhatsApp
-</button>
-
-<br>
-
-<button onclick="downloadPDF()" class="bg-indigo-500 px-6 py-3 rounded-lg mt-3">
-Download PDF
-</button>
-
-</div>
-
-<!-- FOOTER -->
-
-<div class="footer">
-Generated by StudioOS
+    </div>
+  </div>
 </div>
 
 </div>
