@@ -1273,5 +1273,4 @@ await downloadProposalPdf()
 
 window.addEventListener("load", function(){
 loadProposal()
-})
 }
