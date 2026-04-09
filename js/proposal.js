@@ -384,16 +384,15 @@ body.proposal-pdf-export-mode .proposal-premium-actions{
 display:none !important;
 }
 body.proposal-pdf-export-mode #proposalPdfRenderRoot{
-position:absolute !important;
-top:0 !important;
+position:fixed !important;
 left:0 !important;
-transform:translateX(-200vw) !important;
+top:0 !important;
 width:794px !important;
 min-width:794px !important;
 max-width:794px !important;
 background:#ffffff !important;
 z-index:-1 !important;
-opacity:1 !important;
+opacity:0.01 !important;
 pointer-events:none !important;
 overflow:visible !important;
 display:block !important;
@@ -401,17 +400,26 @@ display:block !important;
 body.proposal-pdf-export-mode #proposalPdfRenderRoot *{
 box-sizing:border-box !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-shell{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone{
+position:relative !important;
+left:0 !important;
+top:0 !important;
+transform:none !important;
 width:794px !important;
 min-width:794px !important;
 max-width:794px !important;
+margin:0 !important;
 background:#ffffff !important;
+display:block !important;
+visibility:visible !important;
+opacity:1 !important;
+}
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone.proposal-premium-shell{
 padding:0 !important;
 min-height:auto !important;
-margin:0 !important;
-display:block !important;
+background:#ffffff !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-page{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-page{
 width:794px !important;
 min-width:794px !important;
 max-width:794px !important;
@@ -424,84 +432,86 @@ display:grid !important;
 grid-template-columns:318px 476px !important;
 background:#f6f1ea !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-image-column{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-image-column{
 min-height:100% !important;
 height:auto !important;
 background:#d7cdc2 !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-image{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-image{
+display:block !important;
 width:100% !important;
 height:100% !important;
 min-height:100% !important;
-display:block !important;
+max-height:none !important;
 object-fit:cover !important;
 object-position:center !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-image-overlay{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-image-overlay{
 display:block !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-content{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-content{
 padding:28px 24px 22px !important;
 display:flex !important;
 flex-direction:column !important;
+box-sizing:border-box !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-title{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-title{
 font-size:34px !important;
 line-height:1.12 !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-studio{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-studio{
 font-size:22px !important;
 margin-top:16px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-phone{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-phone{
 font-size:13px !important;
 margin-top:6px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-meta{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-meta{
 grid-template-columns:1fr !important;
 padding:14px 16px !important;
 gap:10px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-row-grid{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-row-grid{
 grid-template-columns:1fr 1fr !important;
 gap:14px !important;
 margin-top:14px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-section,
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-meta{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-section,
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-meta{
 background:#ffffff !important;
 box-shadow:none !important;
 break-inside:avoid !important;
 page-break-inside:avoid !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-section{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-section{
 padding:16px !important;
 margin-top:14px !important;
 border-radius:18px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-section-title{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-section-title{
 font-size:24px !important;
 margin-bottom:10px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-service-row,
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-summary-row{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-service-row,
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-summary-row{
 font-size:13px !important;
 padding:10px 0 !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-summary-row strong:first-child,
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-summary-row strong:last-child{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-summary-row strong:first-child,
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-summary-row strong:last-child{
 font-size:13px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-list,
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-copy{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-list,
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-copy{
 font-size:13px !important;
 line-height:1.7 !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-footer{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-footer{
 margin-top:10px !important;
 font-size:11px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .page{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .page{
 width:794px !important;
 max-width:794px !important;
 min-width:794px !important;
@@ -557,7 +567,7 @@ resolve()
 img.addEventListener("load", finish, { once:true })
 img.addEventListener("error", finish, { once:true })
 
-setTimeout(finish, 6000)
+setTimeout(finish, 8000)
 })
 }))
 
@@ -589,6 +599,8 @@ root.remove()
 function normalizeCloneForPdf(clone){
 
 if(!clone) return
+
+clone.classList.add("proposal-pdf-clone")
 
 clone.querySelectorAll(".proposal-premium-actions").forEach((el) => {
 el.remove()
