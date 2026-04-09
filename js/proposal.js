@@ -331,7 +331,7 @@ return !!document.querySelector("#proposalPage .proposal-premium-page")
 
 function getPdfExportTarget(){
 if(isPremiumProposalRendered()){
-return document.querySelector("#proposalPage .proposal-premium-page")
+return document.querySelector("#proposalPage .proposal-premium-shell")
 }
 return document.getElementById("proposalPage")
 }
@@ -371,35 +371,47 @@ body.proposal-pdf-export-mode #proposalLoadingOverlay{
 display:none !important;
 }
 body.proposal-pdf-export-mode #proposalPage{
-width:794px !important;
-max-width:794px !important;
-min-width:794px !important;
-margin:0 auto !important;
+width:100% !important;
+max-width:100% !important;
+min-width:0 !important;
+margin:0 !important;
 background:#ffffff !important;
-overflow:hidden !important;
+overflow:visible !important;
 box-shadow:none !important;
-}
-body.proposal-pdf-export-mode .page{
-width:794px !important;
-max-width:794px !important;
-min-width:794px !important;
-margin:0 auto !important;
-box-shadow:none !important;
-background:#ffffff !important;
 }
 body.proposal-pdf-export-mode .whatsappBox,
 body.proposal-pdf-export-mode .proposal-premium-actions{
 display:none !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-shell{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot{
+position:fixed !important;
+left:-100000px !important;
+top:0 !important;
+width:794px !important;
+min-width:794px !important;
+max-width:794px !important;
+background:#ffffff !important;
+z-index:-1 !important;
+visibility:visible !important;
+pointer-events:none !important;
+overflow:visible !important;
+}
+body.proposal-pdf-export-mode #proposalPdfRenderRoot *{
+box-sizing:border-box !important;
+}
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-shell{
+width:794px !important;
+min-width:794px !important;
+max-width:794px !important;
 background:#ffffff !important;
 padding:0 !important;
 min-height:auto !important;
+margin:0 !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-page{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-page{
 width:794px !important;
-max-width:794px !important;
 min-width:794px !important;
+max-width:794px !important;
 min-height:auto !important;
 margin:0 !important;
 border-radius:0 !important;
@@ -409,77 +421,90 @@ display:grid !important;
 grid-template-columns:318px 476px !important;
 background:#f6f1ea !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-image-column{
-min-height:auto !important;
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-image-column{
+min-height:100% !important;
 height:auto !important;
+background:#d7cdc2 !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-image{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-image{
 width:100% !important;
 height:100% !important;
+min-height:100% !important;
 display:block !important;
 object-fit:cover !important;
 object-position:center !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-image-overlay{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-image-overlay{
 display:block !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-content{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-content{
 padding:28px 24px 22px !important;
+display:flex !important;
+flex-direction:column !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-title{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-title{
 font-size:34px !important;
 line-height:1.12 !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-studio{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-studio{
 font-size:22px !important;
 margin-top:16px !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-phone{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-phone{
 font-size:13px !important;
 margin-top:6px !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-meta{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-meta{
 grid-template-columns:1fr !important;
 padding:14px 16px !important;
 gap:10px !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-row-grid{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-row-grid{
 grid-template-columns:1fr 1fr !important;
 gap:14px !important;
+margin-top:14px !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-section,
-body.proposal-pdf-export-mode .proposal-premium-meta{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-section,
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-meta{
 background:#ffffff !important;
 box-shadow:none !important;
 break-inside:avoid !important;
 page-break-inside:avoid !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-section{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-section{
 padding:16px !important;
 margin-top:14px !important;
 border-radius:18px !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-section-title{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-section-title{
 font-size:24px !important;
 margin-bottom:10px !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-service-row,
-body.proposal-pdf-export-mode .proposal-premium-summary-row{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-service-row,
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-summary-row{
 font-size:13px !important;
 padding:10px 0 !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-summary-row strong:first-child,
-body.proposal-pdf-export-mode .proposal-premium-summary-row strong:last-child{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-summary-row strong:first-child,
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-summary-row strong:last-child{
 font-size:13px !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-list,
-body.proposal-pdf-export-mode .proposal-premium-copy{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-list,
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-copy{
 font-size:13px !important;
 line-height:1.7 !important;
 }
-body.proposal-pdf-export-mode .proposal-premium-footer{
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-footer{
 margin-top:10px !important;
 font-size:11px !important;
+}
+body.proposal-pdf-export-mode #proposalPdfRenderRoot .page{
+width:794px !important;
+max-width:794px !important;
+min-width:794px !important;
+margin:0 auto !important;
+box-shadow:none !important;
+background:#ffffff !important;
 }
 `
 document.head.appendChild(style)
@@ -492,6 +517,16 @@ requestAnimationFrame(() => {
 requestAnimationFrame(resolve)
 })
 })
+}
+
+async function waitForFonts(){
+if(document.fonts && document.fonts.ready){
+try{
+await document.fonts.ready
+}catch(e){
+console.log("Font readiness skipped", e)
+}
+}
 }
 
 async function waitForImagesInElement(element){
@@ -519,9 +554,80 @@ resolve()
 img.addEventListener("load", finish, { once:true })
 img.addEventListener("error", finish, { once:true })
 
-setTimeout(finish, 4000)
+setTimeout(finish, 5000)
 })
 }))
+
+}
+
+function createPdfRenderRoot(){
+
+let root = document.getElementById("proposalPdfRenderRoot")
+
+if(root){
+root.innerHTML = ""
+return root
+}
+
+root = document.createElement("div")
+root.id = "proposalPdfRenderRoot"
+document.body.appendChild(root)
+return root
+
+}
+
+function destroyPdfRenderRoot(){
+const root = document.getElementById("proposalPdfRenderRoot")
+if(root){
+root.remove()
+}
+}
+
+function normalizeCloneForPdf(clone){
+
+if(!clone) return
+
+clone.querySelectorAll(".proposal-premium-actions").forEach((el) => {
+el.remove()
+})
+
+clone.querySelectorAll("[onclick]").forEach((el) => {
+el.removeAttribute("onclick")
+})
+
+clone.querySelectorAll("#proposalDownloadPdfBtn").forEach((el) => {
+el.removeAttribute("id")
+})
+
+clone.querySelectorAll("script").forEach((el) => {
+el.remove()
+})
+
+}
+
+async function buildPdfExportElement(){
+
+const liveTarget = getPdfExportTarget()
+
+if(!liveTarget){
+throw new Error("Proposal export target not found")
+}
+
+if(!isPremiumProposalRendered()){
+return liveTarget
+}
+
+const root = createPdfRenderRoot()
+const clone = liveTarget.cloneNode(true)
+
+normalizeCloneForPdf(clone)
+root.appendChild(clone)
+
+await waitForFonts()
+await waitForImagesInElement(root)
+await waitForNextPaint()
+
+return root
 
 }
 
@@ -538,6 +644,7 @@ return
 }
 
 document.body.classList.remove("proposal-pdf-export-mode")
+destroyPdfRenderRoot()
 await waitForNextPaint()
 window.scrollTo(0,pdfExportScrollTop)
 
@@ -556,12 +663,13 @@ try{
 
 await setPdfExportMode(true)
 
-const exportTarget = getPdfExportTarget()
+const exportTarget = await buildPdfExportElement()
 
 if(!exportTarget){
 throw new Error("Proposal export target not found")
 }
 
+await waitForFonts()
 await waitForImagesInElement(exportTarget)
 await waitForNextPaint()
 
@@ -588,7 +696,7 @@ format:"a4",
 orientation:"portrait"
 },
 pagebreak:{
-mode:["css","legacy"]
+mode:["css","legacy","avoid-all"]
 }
 }
 
