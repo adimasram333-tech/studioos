@@ -50,17 +50,12 @@ shortId = slugParts[slugParts.length - 1]
 
 
 // ======================
-// SHARED STATE
+// SHARED PROPOSAL STATE
 // ======================
 
-<<<<<<< HEAD
 let activeProposalData = null
 let activeProposalProfile = null
 let pdfExportScrollTop = 0
-=======
-let currentProposalData = null
-let currentProposalProfile = null
->>>>>>> parent of 3929cab (Update proposal.js)
 
 
 // ======================
@@ -203,6 +198,34 @@ return String(value || "")
 
 
 // ======================
+// LOADING STATE HELPERS
+// ======================
+
+function finishProposalLoading(){
+document.body.classList.remove("proposal-loading")
+}
+
+function showProposalUnavailable(message){
+
+const page = document.getElementById("proposalPage")
+
+if(page){
+page.innerHTML = `
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;background:#f4f4f4;">
+  <div style="width:min(100%,520px);background:#ffffff;border-radius:20px;padding:28px 24px;box-shadow:0 14px 40px rgba(0,0,0,0.08);text-align:center;">
+    <h2 style="margin:0 0 10px 0;font-family:'Playfair Display',serif;font-size:32px;color:#2f2823;">Proposal not available</h2>
+    <p style="margin:0;color:#7b7268;line-height:1.7;font-size:15px;">${escapeHtml(message || "Unable to load this proposal right now.")}</p>
+  </div>
+</div>
+`
+}
+
+finishProposalLoading()
+
+}
+
+
+// ======================
 // GET BRANDING VALUES
 // ======================
 
@@ -300,6 +323,17 @@ return html
 
 function isHtml2PdfReady(){
 return typeof window.html2pdf !== "undefined"
+}
+
+function isPremiumProposalRendered(){
+return !!document.querySelector("#proposalPage .proposal-premium-page")
+}
+
+function getPdfExportTarget(){
+if(isPremiumProposalRendered()){
+return document.querySelector("#proposalPage .proposal-premium-page")
+}
+return document.getElementById("proposalPage")
 }
 
 function setDownloadButtonState(isLoading){
@@ -460,6 +494,37 @@ requestAnimationFrame(resolve)
 })
 }
 
+async function waitForImagesInElement(element){
+
+if(!element) return
+
+const images = Array.from(element.querySelectorAll("img"))
+
+if(!images.length) return
+
+await Promise.all(images.map((img) => {
+if(img.complete && img.naturalWidth > 0){
+return Promise.resolve()
+}
+
+return new Promise((resolve) => {
+let done = false
+
+const finish = () => {
+if(done) return
+done = true
+resolve()
+}
+
+img.addEventListener("load", finish, { once:true })
+img.addEventListener("error", finish, { once:true })
+
+setTimeout(finish, 4000)
+})
+}))
+
+}
+
 async function setPdfExportMode(enabled){
 
 injectPdfExportStyles()
@@ -485,18 +550,22 @@ alert("PDF library not loaded")
 return
 }
 
-const element = document.getElementById("proposalPage")
-
-if(!element){
-alert("Proposal not found")
-return
-}
-
 setDownloadButtonState(true)
 
 try{
 
 await setPdfExportMode(true)
+
+const exportTarget = getPdfExportTarget()
+
+if(!exportTarget){
+throw new Error("Proposal export target not found")
+}
+
+await waitForImagesInElement(exportTarget)
+await waitForNextPaint()
+
+const targetWidth = 794
 
 const opt = {
 margin:0,
@@ -508,8 +577,8 @@ useCORS:true,
 allowTaint:false,
 scrollX:0,
 scrollY:0,
-windowWidth:794,
-width:794,
+windowWidth:targetWidth,
+width:targetWidth,
 backgroundColor:"#ffffff",
 logging:false
 },
@@ -523,7 +592,7 @@ mode:["css","legacy"]
 }
 }
 
-await window.html2pdf().set(opt).from(element).save()
+await window.html2pdf().set(opt).from(exportTarget).save()
 
 }catch(err){
 console.error("PDF DOWNLOAD ERROR:",err)
@@ -537,7 +606,7 @@ setDownloadButtonState(false)
 
 
 // ======================
-// GLOBAL ACTIONS
+// GLOBAL ACTION HELPERS
 // ======================
 
 function buildProposalShortLink(data){
@@ -549,7 +618,8 @@ let clientSlug =
 .toLowerCase()
 .replace(/[^a-z0-9 ]/g,"")
 .replace(/\s+/g,"-")
-.replace(/^-+|-+$/g,"")
+.replace(/-+/g,"-")
+.replace(/^-|-$/g,"")
 
 if(!clientSlug){
 clientSlug = "proposal"
@@ -567,22 +637,20 @@ return window.location.href
 
 }
 
-function buildWhatsAppUrl(data, profile){
+function buildWhatsAppLink(data, profile){
 
-const phoneRaw = String(data?.phone || "").trim()
-const phoneDigits = phoneRaw.replace(/\D/g,"")
+const phone = String(data?.phone || "").replace(/\D/g,"")
 
-if(!phoneDigits){
+if(!phone){
 return null
 }
 
-const normalizedPhone =
-phoneDigits.length === 10 ? "91" + phoneDigits : phoneDigits
+const normalizedPhone = phone.length === 10 ? "91" + phone : phone
 
 const shortLink = buildProposalShortLink(data)
 
 const message =
-`Hello ${data?.client_name || "Client"},
+`Hello ${data.client_name || ""},
 
 Your photography proposal is ready.
 
@@ -600,35 +668,34 @@ return "https://wa.me/" + normalizedPhone + "?text=" + encodeURIComponent(messag
 
 }
 
-function openProposalWhatsApp(){
 
-const data = currentProposalData
-const profile = currentProposalProfile
+// ======================
+// GLOBAL BUTTON ACTIONS
+// ======================
 
-if(!data){
+window.sendWhatsApp = function(){
+
+if(!activeProposalData){
 alert("Proposal data not available")
 return
 }
 
-const url = buildWhatsAppUrl(data, profile)
+const url = buildWhatsAppLink(activeProposalData, activeProposalProfile)
 
 if(!url){
 alert("Client phone number not available")
 return
 }
 
-window.open(url,"_blank","noopener,noreferrer")
+window.open(url,"_blank")
 
 }
 
-async function handleProposalDownloadPdf(){
+window.sendProposalOnWhatsApp = window.sendWhatsApp
+
+window.downloadPDF = async function(){
 await downloadProposalPdf()
 }
-
-window.sendWhatsApp = openProposalWhatsApp
-window.sendProposalOnWhatsApp = openProposalWhatsApp
-window.downloadPDF = handleProposalDownloadPdf
-window.downloadProposalPdf = handleProposalDownloadPdf
 
 
 // ======================
@@ -1216,6 +1283,8 @@ page.innerHTML = `
 
 async function loadProposal(){
 
+try{
+
 await waitForSupabase()
 
 const supabase = await window.getSupabase()
@@ -1277,14 +1346,7 @@ quotationId = row.id
 if(!data){
 
 console.warn("Proposal not found:", quotationId || shortId)
-
-const page = document.getElementById("proposalPage")
-
-if(page){
-page.innerHTML =
-"<h2 style='text-align:center;margin-top:40px'>Proposal not available</h2>"
-}
-
+showProposalUnavailable("This proposal could not be found.")
 return
 
 }
@@ -1315,11 +1377,11 @@ console.log("Profile load error",e)
 
 
 // ======================
-// SAVE SHARED STATE
+// SAVE ACTIVE STATE
 // ======================
 
-currentProposalData = data
-currentProposalProfile = profile
+activeProposalData = data
+activeProposalProfile = profile
 
 
 // ======================
@@ -1353,6 +1415,7 @@ const deliverables = parseDeliverables(data.deliverables)
 
 if(isPremiumUser(profile)){
 renderPremiumProposal(data, profile, services, deliverables)
+finishProposalLoading()
 return
 }
 
@@ -1495,21 +1558,12 @@ list.innerHTML += "<li>Complimentary Gift : " + escapeHtml(deliverables.gift.nam
 
 }
 
+finishProposalLoading()
 
-// ======================
-// WHATSAPP SHARE
-// ======================
-
-window.sendWhatsApp = openProposalWhatsApp
-window.sendProposalOnWhatsApp = openProposalWhatsApp
-
-
-// ======================
-// PDF EXPORT
-// ======================
-
-window.downloadPDF = handleProposalDownloadPdf
-window.downloadProposalPdf = handleProposalDownloadPdf
+}catch(error){
+console.error("PROPOSAL LOAD ERROR:", error)
+showProposalUnavailable("Something went wrong while loading this proposal.")
+}
 
 }
 
