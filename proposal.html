@@ -39,6 +39,93 @@ color:var(--text);
 print-color-adjust:exact;
 }
 
+body.proposal-loading{
+overflow:hidden;
+}
+
+body.proposal-loading #proposalPage{
+opacity:0;
+pointer-events:none;
+}
+
+#proposalLoadingOverlay{
+position:fixed;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+background:#d9d2ca;
+z-index:9999;
+padding:24px;
+box-sizing:border-box;
+}
+
+body.proposal-loading #proposalLoadingOverlay{
+display:flex;
+}
+
+.proposal-loading-card{
+width:min(100%, 420px);
+background:rgba(255,255,255,0.88);
+border:1px solid rgba(0,0,0,0.06);
+border-radius:24px;
+padding:28px 24px;
+box-sizing:border-box;
+text-align:center;
+box-shadow:0 20px 50px rgba(0,0,0,0.08);
+backdrop-filter:blur(12px);
+}
+
+.proposal-loading-title{
+font-family:'Playfair Display',serif;
+font-size:28px;
+line-height:1.2;
+margin:0 0 10px 0;
+color:#2f2823;
+}
+
+.proposal-loading-text{
+margin:0;
+font-size:14px;
+line-height:1.7;
+color:#7b7268;
+}
+
+.proposal-loading-dots{
+margin:18px auto 0;
+display:flex;
+justify-content:center;
+gap:8px;
+}
+
+.proposal-loading-dots span{
+width:10px;
+height:10px;
+border-radius:50%;
+background:#c6a348;
+opacity:0.35;
+animation:proposalLoadingPulse 1.2s infinite ease-in-out;
+}
+
+.proposal-loading-dots span:nth-child(2){
+animation-delay:0.15s;
+}
+
+.proposal-loading-dots span:nth-child(3){
+animation-delay:0.3s;
+}
+
+@keyframes proposalLoadingPulse{
+0%, 80%, 100%{
+transform:scale(0.9);
+opacity:0.35;
+}
+40%{
+transform:scale(1.1);
+opacity:1;
+}
+}
+
 /* ===== PAGE WRAPPER ===== */
 
 .page{
@@ -58,6 +145,7 @@ max-width:794px;
 margin:auto;
 box-sizing:border-box;
 overflow:hidden;
+transition:opacity .2s ease;
 }
 
 /* ===== HERO ===== */
@@ -287,6 +375,15 @@ width:100%;
 font-size:15px;
 }
 
+.proposal-loading-card{
+padding:24px 18px;
+border-radius:20px;
+}
+
+.proposal-loading-title{
+font-size:24px;
+}
+
 }
 
 /* ===== PRINT / PDF MODE ===== */
@@ -310,6 +407,10 @@ body{
 print-color-adjust:exact;
 }
 
+#proposalLoadingOverlay{
+display:none !important;
+}
+
 .page{
 box-shadow:none;
 margin:0 auto !important;
@@ -321,6 +422,8 @@ max-width:794px !important;
 width:794px !important;
 max-width:794px !important;
 margin:0 auto !important;
+opacity:1 !important;
+pointer-events:auto !important;
 }
 
 .whatsappBox{
@@ -349,7 +452,19 @@ break-inside:avoid !important;
 
 </head>
 
-<body>
+<body class="proposal-loading">
+
+<div id="proposalLoadingOverlay">
+  <div class="proposal-loading-card">
+    <h2 class="proposal-loading-title">Preparing Proposal</h2>
+    <p class="proposal-loading-text">Please wait while StudioOS loads the correct proposal design.</p>
+    <div class="proposal-loading-dots">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</div>
 
 <div class="page" id="proposalPage">
 
@@ -419,7 +534,7 @@ Send Proposal on WhatsApp
 
 <br>
 
-<button class="pdfBtn" onclick="downloadPDF()">
+<button class="pdfBtn" id="proposalDownloadPdfBtn" onclick="downloadPDF()">
 Download Proposal PDF
 </button>
 
@@ -462,7 +577,7 @@ Our team focuses on capturing real emotions, beautiful details, and timeless mom
 </div>
 
 <script src="js/supabase.js?v=2"></script>
-<script src="js/proposal.js?v=3"></script>
+<script src="js/proposal.js?v=4"></script>
 
 </body>
 </html>
