@@ -279,6 +279,11 @@ return `
 
 }
 
+
+// ======================
+// PREMIUM DELIVERABLES HTML
+// ======================
+
 function buildPremiumDeliverablesHtml(deliverables){
 
 let html = ""
@@ -377,7 +382,7 @@ resolve()
 img.addEventListener("load", finish, { once:true })
 img.addEventListener("error", finish, { once:true })
 
-setTimeout(finish, 10000)
+setTimeout(finish, 12000)
 })
 }))
 
@@ -407,15 +412,16 @@ body.proposal-pdf-export #proposalLoadingOverlay{
 display:none !important;
 }
 
-body.proposal-pdf-export #proposalPage{
-box-shadow:none !important;
-background:#ffffff !important;
-overflow:visible !important;
-}
-
 body.proposal-pdf-export .whatsappBox,
 body.proposal-pdf-export .proposal-premium-actions{
 display:none !important;
+}
+
+body.proposal-pdf-export #proposalPage,
+body.proposal-pdf-export .page{
+box-shadow:none !important;
+margin:0 auto !important;
+overflow:visible !important;
 }
 
 body.proposal-pdf-export .page,
@@ -423,7 +429,7 @@ body.proposal-pdf-export #proposalPage{
 width:794px !important;
 max-width:794px !important;
 min-width:794px !important;
-margin:0 auto !important;
+background:#ffffff !important;
 }
 
 body.proposal-pdf-export .hero h1{
@@ -438,8 +444,6 @@ body.proposal-pdf-export table,
 body.proposal-pdf-export tr,
 body.proposal-pdf-export .info-grid{
 overflow:visible !important;
-break-inside:auto !important;
-page-break-inside:auto !important;
 }
 
 body.proposal-pdf-export #proposalPage.proposal-premium-root{
@@ -447,13 +451,13 @@ width:794px !important;
 max-width:794px !important;
 min-width:794px !important;
 margin:0 auto !important;
-background:#ffffff !important;
+background:#f6f1ea !important;
 box-shadow:none !important;
 overflow:visible !important;
 }
 
 body.proposal-pdf-export .proposal-premium-shell{
-background:#ffffff !important;
+background:#f6f1ea !important;
 padding:0 !important;
 min-height:auto !important;
 overflow:visible !important;
@@ -463,46 +467,119 @@ body.proposal-pdf-export .proposal-premium-page{
 width:794px !important;
 max-width:794px !important;
 min-width:794px !important;
-min-height:auto !important;
+margin:0 auto !important;
+background:#f6f1ea !important;
 border-radius:0 !important;
 box-shadow:none !important;
 display:grid !important;
 grid-template-columns:318px 476px !important;
+min-height:auto !important;
 overflow:visible !important;
 }
 
 body.proposal-pdf-export .proposal-premium-image-column{
 min-height:auto !important;
-overflow:visible !important;
+overflow:hidden !important;
+background:#d7cdc2 !important;
 }
 
 body.proposal-pdf-export .proposal-premium-image{
+width:100% !important;
 height:100% !important;
+min-height:100% !important;
 object-fit:cover !important;
+object-position:center !important;
+display:block !important;
+}
+
+body.proposal-pdf-export .proposal-premium-image-overlay{
+display:block !important;
 }
 
 body.proposal-pdf-export .proposal-premium-content{
 padding:28px 24px 22px !important;
 overflow:visible !important;
+display:flex !important;
+flex-direction:column !important;
+}
+
+body.proposal-pdf-export .proposal-premium-title{
+font-size:34px !important;
+line-height:1.14 !important;
+}
+
+body.proposal-pdf-export .proposal-premium-studio{
+font-size:22px !important;
+margin-top:18px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-phone{
+font-size:13px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-meta{
 grid-template-columns:1fr !important;
 padding:14px 16px !important;
+gap:10px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-meta-item{
 flex-direction:row !important;
 align-items:center !important;
+gap:12px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-row-grid{
+grid-template-columns:1fr 1fr !important;
+gap:16px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-section{
+margin-top:16px !important;
+padding:18px 18px !important;
+background:rgba(255,255,255,0.78) !important;
+break-inside:avoid !important;
+page-break-inside:avoid !important;
+overflow:visible !important;
+}
+
+body.proposal-pdf-export .proposal-premium-section-title{
+font-size:24px !important;
+line-height:1.18 !important;
+margin-bottom:12px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-service-row,
+body.proposal-pdf-export .proposal-premium-summary-row{
+font-size:14px !important;
+line-height:1.45 !important;
+}
+
+body.proposal-pdf-export .proposal-premium-list,
+body.proposal-pdf-export .proposal-premium-copy{
+font-size:14px !important;
+line-height:1.75 !important;
+}
+
+body.proposal-pdf-export .proposal-premium-footer{
+margin-top:14px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-section,
 body.proposal-pdf-export .proposal-premium-meta{
-background:#ffffff !important;
 box-shadow:none !important;
-break-inside:avoid !important;
-page-break-inside:avoid !important;
-overflow:visible !important;
+}
+
+body.proposal-pdf-export .proposal-premium-page,
+body.proposal-pdf-export .proposal-premium-shell,
+body.proposal-pdf-export #proposalPage,
+body.proposal-pdf-export .page{
+transform:none !important;
+}
+
+body.proposal-pdf-export *{
+animation:none !important;
+transition:none !important;
 }
 `
 document.head.appendChild(style)
@@ -514,6 +591,7 @@ function applyPdfExportMode(){
 ensurePdfExportStyles()
 
 const page = document.getElementById("proposalPage")
+
 if(!page){
 throw new Error("Proposal content not available")
 }
@@ -543,17 +621,11 @@ await waitForDocumentFonts(document)
 await waitForImagesInElement(element)
 await waitForNextPaint()
 
-const exportWidth = Math.max(
-794,
-Math.ceil(element.scrollWidth || 0),
-Math.ceil(element.offsetWidth || 0)
-)
-
 const worker = window.html2pdf()
 
 await worker
 .set({
-margin: 0,
+margin: [0, 0, 0, 0],
 filename: filename,
 image: { type: "jpeg", quality: 0.98 },
 html2canvas: {
@@ -563,13 +635,13 @@ allowTaint: false,
 backgroundColor: "#ffffff",
 scrollX: 0,
 scrollY: 0,
-windowWidth: exportWidth,
-width: exportWidth,
+windowWidth: 794,
+width: 794,
 logging: false
 },
 jsPDF: {
 unit: "pt",
-format: "a4",
+format: [595.28, 841.89],
 orientation: "portrait",
 compress: true
 },
