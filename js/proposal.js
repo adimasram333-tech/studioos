@@ -450,20 +450,33 @@ document.head.appendChild(style)
 
 }
 
+function getPdfExportTarget(){
+
+const root = document.getElementById("proposalPage")
+
+if(!root){
+throw new Error("Proposal content not available")
+}
+
+if(isPremiumUser(activeProposalProfile)){
+return root.querySelector(".proposal-premium-page") || root
+}
+
+return root.querySelector(".page") || root
+}
+
 function applyPdfExportMode(){
 
 ensurePdfExportStyles()
 
-const page = document.getElementById("proposalPage")
+document.body.classList.add("proposal-pdf-export")
 
-if(!page){
-throw new Error("Proposal content not available")
+const root = document.getElementById("proposalPage")
+if(root){
+root.classList.add("proposal-pdf-export-target")
 }
 
-document.body.classList.add("proposal-pdf-export")
-page.classList.add("proposal-pdf-export-target")
-
-return page
+return getPdfExportTarget()
 }
 
 function removePdfExportMode(){
