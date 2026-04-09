@@ -76,6 +76,122 @@ tries++
 
 
 // ======================
+// PDF EXPORT HELPERS
+// ======================
+
+function injectPremiumPdfModeStyles(){
+
+if(document.getElementById("premium-pdf-mode-styles")) return
+
+const style = document.createElement("style")
+style.id = "premium-pdf-mode-styles"
+style.innerHTML = `
+body.pdf-mode{
+background:#ffffff !important;
+overflow:visible !important;
+}
+
+body.pdf-mode #proposalPage{
+width:794px !important;
+max-width:794px !important;
+min-width:794px !important;
+margin:0 auto !important;
+background:#ffffff !important;
+}
+
+body.pdf-mode .premium-shell{
+background:#ffffff !important;
+min-height:auto !important;
+}
+
+body.pdf-mode .premium-page{
+width:794px !important;
+max-width:794px !important;
+min-width:794px !important;
+margin:0 auto !important;
+padding-bottom:0 !important;
+}
+
+body.pdf-mode .premium-hero{
+height:300px !important;
+}
+
+body.pdf-mode .premium-content{
+margin:0 !important;
+padding:0 !important;
+max-width:794px !important;
+}
+
+body.pdf-mode .premium-card,
+body.pdf-mode .premium-panel{
+box-shadow:none !important;
+break-inside:avoid !important;
+page-break-inside:avoid !important;
+border-radius:0 !important;
+backdrop-filter:none !important;
+-webkit-backdrop-filter:none !important;
+background:#111827 !important;
+}
+
+body.pdf-mode .premium-actions{
+display:none !important;
+}
+`
+document.head.appendChild(style)
+
+}
+
+async function waitForImagesInElement(element){
+
+if(!element) return
+
+const images = Array.from(element.querySelectorAll("img"))
+
+if(!images.length) return
+
+await Promise.all(images.map((img) => {
+if(img.complete && img.naturalWidth > 0){
+return Promise.resolve()
+}
+
+return new Promise((resolve) => {
+let done = false
+
+const finish = () => {
+if(done) return
+done = true
+resolve()
+}
+
+img.addEventListener("load", finish, { once:true })
+img.addEventListener("error", finish, { once:true })
+
+setTimeout(finish, 10000)
+})
+}))
+
+}
+
+async function waitForFonts(){
+if(document.fonts && document.fonts.ready){
+try{
+await document.fonts.ready
+}catch(e){
+console.log("Font readiness skipped", e)
+}
+}
+}
+
+function waitForNextPaint(){
+return new Promise((resolve) => {
+requestAnimationFrame(() => {
+requestAnimationFrame(resolve)
+})
+})
+}
+
+
+// ======================
 // LOAD PROPOSAL
 // ======================
 
@@ -342,21 +458,78 @@ window.open(
 // PDF
 // ======================
 
-window.downloadPDF = function(){
+window.downloadPDF = async function(){
+
+const button = document.querySelector(".premium-btn-pdf")
+
+try{
+
+if(button){
+button.disabled = true
+button.dataset.originalText = button.dataset.originalText || button.innerText
+button.innerText = "Preparing PDF..."
+button.style.opacity = "0.75"
+button.style.cursor = "not-allowed"
+}
 
 window.scrollTo(0,0)
 
-const element = document.body
+const element = document.getElementById("proposalPage")
+
+if(!element){
+alert("Proposal container not found")
+return
+}
+
+injectPremiumPdfModeStyles()
+
+document.body.classList.add("pdf-mode")
+
+await waitForFonts()
+await waitForImagesInElement(element)
+await waitForNextPaint()
+await waitForNextPaint()
 
 const opt = {
 margin:0,
 filename:"premium-proposal.pdf",
 image:{ type:"jpeg", quality:1 },
-html2canvas:{ scale:2 },
-jsPDF:{ unit:"mm", format:[210,297] }
+html2canvas:{
+scale:2,
+useCORS:true,
+allowTaint:false,
+scrollX:0,
+scrollY:0,
+windowWidth:794,
+width:794,
+backgroundColor:"#ffffff",
+logging:false
+},
+jsPDF:{
+unit:"mm",
+format:"a4",
+orientation:"portrait"
+},
+pagebreak:{
+mode:["css","legacy"]
+}
 }
 
-html2pdf().set(opt).from(element).save()
+await html2pdf().set(opt).from(element).save()
+
+}catch(e){
+console.error("PREMIUM PDF ERROR:", e)
+alert("PDF download failed")
+}finally{
+document.body.classList.remove("pdf-mode")
+
+if(button){
+button.disabled = false
+button.innerText = button.dataset.originalText || "Download Proposal PDF"
+button.style.opacity = "1"
+button.style.cursor = "pointer"
+}
+}
 
 }
 
