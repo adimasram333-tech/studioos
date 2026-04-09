@@ -375,7 +375,7 @@ width:100% !important;
 max-width:100% !important;
 min-width:0 !important;
 margin:0 !important;
-background:#ffffff !important;
+background:transparent !important;
 overflow:visible !important;
 box-shadow:none !important;
 }
@@ -384,17 +384,19 @@ body.proposal-pdf-export-mode .proposal-premium-actions{
 display:none !important;
 }
 body.proposal-pdf-export-mode #proposalPdfRenderRoot{
-position:fixed !important;
-left:-100000px !important;
+position:absolute !important;
 top:0 !important;
+left:0 !important;
+transform:translateX(-200vw) !important;
 width:794px !important;
 min-width:794px !important;
 max-width:794px !important;
 background:#ffffff !important;
 z-index:-1 !important;
-visibility:visible !important;
+opacity:1 !important;
 pointer-events:none !important;
 overflow:visible !important;
+display:block !important;
 }
 body.proposal-pdf-export-mode #proposalPdfRenderRoot *{
 box-sizing:border-box !important;
@@ -407,6 +409,7 @@ background:#ffffff !important;
 padding:0 !important;
 min-height:auto !important;
 margin:0 !important;
+display:block !important;
 }
 body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-premium-page{
 width:794px !important;
@@ -554,7 +557,7 @@ resolve()
 img.addEventListener("load", finish, { once:true })
 img.addEventListener("error", finish, { once:true })
 
-setTimeout(finish, 5000)
+setTimeout(finish, 6000)
 })
 }))
 
@@ -624,10 +627,11 @@ normalizeCloneForPdf(clone)
 root.appendChild(clone)
 
 await waitForFonts()
-await waitForImagesInElement(root)
+await waitForImagesInElement(clone)
+await waitForNextPaint()
 await waitForNextPaint()
 
-return root
+return clone
 
 }
 
@@ -672,6 +676,7 @@ throw new Error("Proposal export target not found")
 await waitForFonts()
 await waitForImagesInElement(exportTarget)
 await waitForNextPaint()
+await waitForNextPaint()
 
 const targetWidth = 794
 
@@ -696,7 +701,7 @@ format:"a4",
 orientation:"portrait"
 },
 pagebreak:{
-mode:["css","legacy","avoid-all"]
+mode:["css","legacy"]
 }
 }
 
