@@ -59,6 +59,14 @@ let pdfExportScrollTop = 0
 
 
 // ======================
+// PDF EXPORT CONSTANTS
+// ======================
+
+const PREMIUM_PDF_EXPORT_WIDTH = 794
+const PREMIUM_PDF_EXPORT_PAGE_HEIGHT = 1123
+
+
+// ======================
 // FORMAT MONEY
 // ======================
 
@@ -405,6 +413,7 @@ style.id = "proposal-pdf-export-styles"
 style.innerHTML = `
 body.proposal-pdf-export{
 overflow:visible !important;
+background:#ffffff !important;
 }
 
 body.proposal-pdf-export #proposalLoadingOverlay{
@@ -444,6 +453,149 @@ display:block !important;
 body.proposal-pdf-export .hero h1{
 white-space:normal !important;
 word-break:break-word !important;
+}
+
+body.proposal-pdf-export #proposalPage.proposal-premium-root{
+width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
+max-width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
+margin:0 auto !important;
+background:#ffffff !important;
+box-shadow:none !important;
+}
+
+body.proposal-pdf-export .proposal-premium-shell{
+width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
+max-width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
+margin:0 auto !important;
+padding:0 !important;
+background:#ffffff !important;
+box-sizing:border-box !important;
+}
+
+body.proposal-pdf-export .proposal-premium-page{
+width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
+max-width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
+margin:0 !important;
+display:grid !important;
+grid-template-columns:46% 54% !important;
+min-height:${PREMIUM_PDF_EXPORT_PAGE_HEIGHT}px !important;
+background:var(--proposal-premium-paper) !important;
+border-radius:0 !important;
+box-shadow:none !important;
+page-break-inside:auto !important;
+break-inside:auto !important;
+}
+
+body.proposal-pdf-export .proposal-premium-image-column{
+min-height:${PREMIUM_PDF_EXPORT_PAGE_HEIGHT}px !important;
+height:100% !important;
+background:#d7cdc2 !important;
+}
+
+body.proposal-pdf-export .proposal-premium-image{
+width:100% !important;
+height:100% !important;
+min-height:${PREMIUM_PDF_EXPORT_PAGE_HEIGHT}px !important;
+object-fit:cover !important;
+object-position:center !important;
+}
+
+body.proposal-pdf-export .proposal-premium-image-overlay{
+display:block !important;
+}
+
+body.proposal-pdf-export .proposal-premium-content{
+padding:34px 30px 24px !important;
+display:flex !important;
+flex-direction:column !important;
+box-sizing:border-box !important;
+}
+
+body.proposal-pdf-export .proposal-premium-title{
+font-size:48px !important;
+line-height:1.08 !important;
+}
+
+body.proposal-pdf-export .proposal-premium-studio{
+font-size:27px !important;
+margin-top:18px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-phone{
+font-size:15px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-meta{
+margin-top:22px !important;
+padding:16px 18px !important;
+grid-template-columns:1fr 1fr !important;
+gap:10px 14px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-meta-item{
+font-size:13px !important;
+gap:10px !important;
+align-items:flex-start !important;
+}
+
+body.proposal-pdf-export .proposal-premium-row-grid{
+grid-template-columns:1.12fr 0.88fr !important;
+gap:14px !important;
+margin-top:14px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-section{
+margin-top:14px !important;
+padding:18px !important;
+border-radius:20px !important;
+page-break-inside:avoid !important;
+break-inside:avoid !important;
+}
+
+body.proposal-pdf-export .proposal-premium-section-title{
+font-size:26px !important;
+margin-bottom:12px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-service-row{
+font-size:13px !important;
+padding:10px 0 !important;
+gap:12px !important;
+flex-direction:row !important;
+align-items:flex-start !important;
+}
+
+body.proposal-pdf-export .proposal-premium-service-row span:last-child{
+text-align:right !important;
+}
+
+body.proposal-pdf-export .proposal-premium-summary-row{
+font-size:13px !important;
+padding:10px 0 !important;
+}
+
+body.proposal-pdf-export .proposal-premium-summary-row strong:first-child,
+body.proposal-pdf-export .proposal-premium-summary-row strong:last-child{
+font-size:13px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-list{
+font-size:13px !important;
+line-height:1.75 !important;
+}
+
+body.proposal-pdf-export .proposal-premium-copy{
+font-size:13px !important;
+line-height:1.72 !important;
+}
+
+body.proposal-pdf-export .proposal-premium-footer{
+margin-top:10px !important;
+font-size:11px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-btn{
+display:none !important;
 }
 `
 document.head.appendChild(style)
@@ -491,6 +643,10 @@ page.classList.remove("proposal-pdf-export-target")
 }
 
 function getElementExportWidth(element){
+
+if(isPremiumUser(activeProposalProfile)){
+return PREMIUM_PDF_EXPORT_WIDTH
+}
 
 const rectWidth = Math.ceil(element.getBoundingClientRect().width || 0)
 const offsetWidth = Math.ceil(element.offsetWidth || 0)
