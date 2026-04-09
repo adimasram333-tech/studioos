@@ -279,38 +279,6 @@ return `
 
 }
 
-function buildPremiumServicesHtmlForPdf(services){
-
-const serviceMap = [
-{ key:"candid", label:"Candid Photographer" },
-{ key:"traditional_photo", label:"Traditional Photographer" },
-{ key:"traditional_video", label:"Traditional Videographer" },
-{ key:"cinematographer", label:"Cinematographer" },
-{ key:"drone", label:"Drone Operator" },
-{ key:"led_wall", label:"LED Screen Wall" },
-{ key:"assistant", label:"Assistant" }
-]
-
-return serviceMap.map((item) => {
-const row = services[item.key] || {}
-const qty = row.qty || 0
-const days = row.days || 0
-
-return `
-<div class="proposal-pdf-service-row">
-  <span>${escapeHtml(item.label)}</span>
-  <span>${qty} x ${days} Days</span>
-</div>
-`
-}).join("")
-
-}
-
-
-// ======================
-// PREMIUM DELIVERABLES HTML
-// ======================
-
 function buildPremiumDeliverablesHtml(deliverables){
 
 let html = ""
@@ -368,11 +336,6 @@ btn.style.cursor = "pointer"
 
 }
 
-function getThemeHref(){
-const themeLink = document.getElementById("theme-style")
-return themeLink?.href || ""
-}
-
 function ensureHtml2PdfReady(){
 if(typeof window.html2pdf !== "function"){
 throw new Error("PDF library not loaded")
@@ -428,506 +391,148 @@ requestAnimationFrame(resolve)
 })
 }
 
-function cleanupPdfSandbox(){
-const existing = document.getElementById("proposalPdfSandbox")
-if(existing){
-existing.remove()
-}
-}
+function ensurePdfExportStyles(){
 
-function buildPremiumPdfStyles(){
-return `
-<style>
-:root{
---proposal-pdf-paper:#f7f1ea;
---proposal-pdf-card:#fffdf9;
---proposal-pdf-border:#e7ddd2;
---proposal-pdf-text:#2f2823;
---proposal-pdf-muted:#7b7268;
---proposal-pdf-soft:#a09487;
-}
-*{
-box-sizing:border-box;
--webkit-print-color-adjust:exact !important;
-print-color-adjust:exact !important;
-}
-html,body{
-margin:0;
-padding:0;
-background:#ffffff;
-font-family:'Inter',sans-serif;
-color:var(--proposal-pdf-text);
-}
-body{
--webkit-font-smoothing:antialiased;
-}
-.proposal-pdf-root{
-width:794px;
-max-width:794px;
-min-width:794px;
-margin:0 auto;
-background:var(--proposal-pdf-paper);
-}
-.proposal-pdf-page{
-width:794px;
-max-width:794px;
-min-width:794px;
-background:var(--proposal-pdf-paper);
-padding:18px;
-}
-.proposal-pdf-card{
-background:var(--proposal-pdf-paper);
-border-radius:28px;
-overflow:visible;
-}
-.proposal-pdf-cover{
-width:100%;
-background:#d7cdc2;
-border-radius:28px 28px 0 0;
-overflow:hidden;
-}
-.proposal-pdf-cover img{
-display:block;
-width:100%;
-height:auto;
-max-height:none;
-object-fit:cover;
-object-position:center;
-}
-.proposal-pdf-content{
-padding:0;
-overflow:visible;
-}
-.proposal-pdf-title-wrap{
-padding:26px 26px 10px;
-text-align:center;
-}
-.proposal-pdf-title{
-margin:0;
-font-family:'Playfair Display',serif;
-font-size:34px;
-font-weight:600;
-line-height:1.14;
-letter-spacing:0.01em;
-word-break:break-word;
-}
-.proposal-pdf-studio{
-margin-top:16px;
-font-family:'Playfair Display',serif;
-font-size:24px;
-line-height:1.2;
-}
-.proposal-pdf-phone{
-margin-top:6px;
-font-size:16px;
-color:var(--proposal-pdf-muted);
-word-break:break-word;
-}
-.proposal-pdf-meta{
-margin:0 20px 18px;
-padding:16px 18px;
-background:var(--proposal-pdf-card);
-border:1px solid var(--proposal-pdf-border);
-border-radius:20px;
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px 18px;
-page-break-inside:avoid;
-break-inside:avoid;
-}
-.proposal-pdf-meta-item{
-display:flex;
-justify-content:space-between;
-gap:14px;
-font-size:15px;
-line-height:1.45;
-}
-.proposal-pdf-meta-item span:first-child{
-color:var(--proposal-pdf-muted);
-}
-.proposal-pdf-section{
-margin:0 20px 18px;
-padding:18px 20px;
-background:var(--proposal-pdf-card);
-border:1px solid var(--proposal-pdf-border);
-border-radius:22px;
-page-break-inside:avoid;
-break-inside:avoid;
-overflow:visible;
-}
-.proposal-pdf-section-title{
-margin:0 0 14px 0;
-font-family:'Playfair Display',serif;
-font-size:26px;
-line-height:1.15;
-}
-.proposal-pdf-service-row{
-display:flex;
-justify-content:space-between;
-gap:16px;
-padding:11px 0;
-border-bottom:1px solid var(--proposal-pdf-border);
-font-size:15px;
-line-height:1.45;
-}
-.proposal-pdf-service-row:last-child{
-border-bottom:none;
-}
-.proposal-pdf-service-row span:first-child{
-color:var(--proposal-pdf-muted);
-}
-.proposal-pdf-service-row span:last-child{
-text-align:right;
-font-weight:500;
-}
-.proposal-pdf-summary-row{
-display:flex;
-justify-content:space-between;
-gap:16px;
-padding:11px 0;
-border-bottom:1px solid var(--proposal-pdf-border);
-font-size:15px;
-line-height:1.45;
-}
-.proposal-pdf-summary-row:last-child{
-border-bottom:none;
-}
-.proposal-pdf-list{
-margin:0;
-padding-left:22px;
-font-size:15px;
-line-height:1.8;
-color:var(--proposal-pdf-muted);
-}
-.proposal-pdf-copy{
-font-size:15px;
-line-height:1.8;
-color:var(--proposal-pdf-muted);
-}
-.proposal-pdf-copy ul{
-margin:10px 0 0;
-padding-left:22px;
-}
-.proposal-pdf-footer{
-padding:4px 0 2px;
-text-align:center;
-font-size:12px;
-line-height:1.7;
-color:var(--proposal-pdf-soft);
-}
-.proposal-pdf-footer p{
-margin:0;
-}
-.proposal-pdf-footer p + p{
-margin-top:4px;
-}
-</style>
-`
-}
+if(document.getElementById("proposal-pdf-export-styles")) return
 
-function buildPremiumPdfBody(data, profile){
-
-const services = parseServices(data?.services)
-const deliverables = parseDeliverables(data?.deliverables)
-const coverImage = getProposalCoverImage(data, profile)
-const accentColor = getProposalAccentColor(data, profile)
-const proposalTitle = getProposalTitle(data)
-const eventDateText = getEventDateText(data)
-
-return `
-<div class="proposal-pdf-root">
-  <div class="proposal-pdf-page">
-    <div class="proposal-pdf-card">
-      <div class="proposal-pdf-cover">
-        <img src="${escapeHtml(coverImage)}" alt="Proposal Cover">
-      </div>
-
-      <div class="proposal-pdf-content">
-        <div class="proposal-pdf-title-wrap">
-          <h1 class="proposal-pdf-title" style="color:${escapeHtml(accentColor)}">${escapeHtml(proposalTitle)}</h1>
-          <div class="proposal-pdf-studio">${escapeHtml(profile?.studio_name || "")}</div>
-          <div class="proposal-pdf-phone">${escapeHtml(profile?.phone || "")}</div>
-        </div>
-
-        <div class="proposal-pdf-meta">
-          <div class="proposal-pdf-meta-item">
-            <span>Prepared For</span>
-            <span>${escapeHtml(data?.client_name || "")}</span>
-          </div>
-          <div class="proposal-pdf-meta-item">
-            <span>Event Dates</span>
-            <span>${escapeHtml(eventDateText)}</span>
-          </div>
-        </div>
-
-        <div class="proposal-pdf-section">
-          <h2 class="proposal-pdf-section-title">Services & Coverage</h2>
-          ${buildPremiumServicesHtmlForPdf(services)}
-        </div>
-
-        <div class="proposal-pdf-section">
-          <h2 class="proposal-pdf-section-title">Investment Summary</h2>
-
-          <div class="proposal-pdf-summary-row">
-            <strong>Total Investment</strong>
-            <strong>${escapeHtml(formatMoney(data?.total))}</strong>
-          </div>
-
-          <div class="proposal-pdf-summary-row">
-            <strong>Advance Required</strong>
-            <strong>${escapeHtml(formatMoney(data?.advance))}</strong>
-          </div>
-
-          <div class="proposal-pdf-summary-row">
-            <strong>Balance</strong>
-            <strong>${escapeHtml(formatMoney(data?.balance))}</strong>
-          </div>
-        </div>
-
-        <div class="proposal-pdf-section">
-          <h2 class="proposal-pdf-section-title">Deliverables</h2>
-          <ul class="proposal-pdf-list">
-            ${buildPremiumDeliverablesHtml(deliverables)}
-          </ul>
-        </div>
-
-        <div class="proposal-pdf-section">
-          <h2 class="proposal-pdf-section-title">Why Choose Us</h2>
-          <div class="proposal-pdf-copy">
-            We believe every celebration has a story worth preserving forever.
-            Our team focuses on capturing real emotions, beautiful details, and timeless moments.
-
-            <ul>
-              <li>Professional and experienced photography team</li>
-              <li>Creative cinematic storytelling approach</li>
-              <li>High quality editing and color grading</li>
-              <li>Premium album design and printing</li>
-              <li>Reliable service and timely delivery</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="proposal-pdf-section">
-          <h2 class="proposal-pdf-section-title">Booking Terms</h2>
-          <div class="proposal-pdf-copy">
-            <ul>
-              <li>Booking will be confirmed only after advance payment.</li>
-              <li>Event date will be reserved only after confirmation.</li>
-              <li>Remaining balance must be cleared before final delivery.</li>
-              <li>Delivery timeline may vary depending on project scope.</li>
-              <li>Any additional services will be charged separately.</li>
-            </ul>
-          </div>
-
-          <div class="proposal-pdf-footer">
-            <p><strong>Generated by StudioOS</strong></p>
-            <p>Professional Photography Business Operating System</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-`
-}
-
-function buildDefaultPdfStyles(){
-
-const themeHref = getThemeHref()
-
-return `
-<link rel="stylesheet" href="${escapeHtml(themeHref)}">
-<style>
-:root{
---primary:#C6A348;
---accent:#222;
---bg:#faf7ef;
---text:#1a1a1a;
-}
-*{
-box-sizing:border-box;
--webkit-print-color-adjust:exact !important;
-print-color-adjust:exact !important;
-}
-html,
-body{
-margin:0;
-padding:0;
+const style = document.createElement("style")
+style.id = "proposal-pdf-export-styles"
+style.innerHTML = `
+body.proposal-pdf-export{
 background:#ffffff !important;
-font-family:'Inter',sans-serif;
-color:var(--text);
+overflow:visible !important;
 }
-#proposalPdfSandbox .page,
-#proposalPdfSandbox #proposalPage{
-width:794px !important;
-max-width:794px !important;
-min-width:794px !important;
-margin:0 auto !important;
+
+body.proposal-pdf-export #proposalLoadingOverlay{
+display:none !important;
+}
+
+body.proposal-pdf-export #proposalPage{
 box-shadow:none !important;
 background:#ffffff !important;
 overflow:visible !important;
 }
-#proposalPdfSandbox .hero{
-width:100%;
-min-height:320px;
-padding:80px 20px;
-background-size:cover !important;
-background-position:center !important;
-background-repeat:no-repeat !important;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-color:white;
-text-align:center;
-position:relative;
-overflow:hidden;
-}
-#proposalPdfSandbox .hero::after{
-content:'';
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.45);
-z-index:0;
-pointer-events:none;
-}
-#proposalPdfSandbox .hero h1,
-#proposalPdfSandbox .hero p{
-position:relative;
-z-index:2;
-display:block;
-width:100%;
-color:white;
-}
-#proposalPdfSandbox .hero h1{
-font-family:'Playfair Display',serif;
-font-size:36px;
-margin:0;
-white-space:normal !important;
-word-break:break-word;
-}
-#proposalPdfSandbox .hero p{
-margin-top:10px;
-font-size:18px;
-}
-#proposalPdfSandbox .content{
-padding:50px;
-box-sizing:border-box;
-overflow:visible !important;
-}
-#proposalPdfSandbox .section-title{
-font-family:'Playfair Display',serif;
-font-size:20px;
-margin-bottom:10px;
-border-bottom:1px solid #eee;
-padding-bottom:6px;
-page-break-after:avoid;
-break-after:avoid;
-}
-#proposalPdfSandbox .info-grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
-margin-bottom:30px;
-page-break-inside:avoid;
-break-inside:avoid;
-}
-#proposalPdfSandbox .info-box{
-background:#fafafa;
-padding:15px;
-border-left:3px solid var(--primary);
-box-sizing:border-box;
-}
-#proposalPdfSandbox ul{
-line-height:1.8;
-}
-#proposalPdfSandbox .summary{
-border:2px solid var(--primary);
-padding:25px;
-background:var(--bg);
-margin-top:30px;
-page-break-inside:avoid;
-break-inside:avoid;
-box-sizing:border-box;
-}
-#proposalPdfSandbox table{
-width:100%;
-border-collapse:collapse;
-page-break-inside:auto;
-break-inside:auto;
-}
-#proposalPdfSandbox tr{
-page-break-inside:avoid;
-break-inside:avoid;
-}
-#proposalPdfSandbox td{
-padding:10px;
-border-bottom:1px solid #eee;
-vertical-align:top;
-}
-#proposalPdfSandbox .footer{
-margin-top:60px;
-text-align:center;
-font-size:13px;
-color:#666;
-page-break-inside:avoid;
-break-inside:avoid;
-}
-#proposalPdfSandbox .whatsappBox{
+
+body.proposal-pdf-export .whatsappBox,
+body.proposal-pdf-export .proposal-premium-actions{
 display:none !important;
 }
-</style>
+
+body.proposal-pdf-export .page,
+body.proposal-pdf-export #proposalPage{
+width:794px !important;
+max-width:794px !important;
+min-width:794px !important;
+margin:0 auto !important;
+}
+
+body.proposal-pdf-export .hero h1{
+white-space:normal !important;
+word-break:break-word !important;
+}
+
+body.proposal-pdf-export .content,
+body.proposal-pdf-export .summary,
+body.proposal-pdf-export .footer,
+body.proposal-pdf-export table,
+body.proposal-pdf-export tr,
+body.proposal-pdf-export .info-grid{
+overflow:visible !important;
+break-inside:auto !important;
+page-break-inside:auto !important;
+}
+
+body.proposal-pdf-export #proposalPage.proposal-premium-root{
+width:794px !important;
+max-width:794px !important;
+min-width:794px !important;
+margin:0 auto !important;
+background:#ffffff !important;
+box-shadow:none !important;
+overflow:visible !important;
+}
+
+body.proposal-pdf-export .proposal-premium-shell{
+background:#ffffff !important;
+padding:0 !important;
+min-height:auto !important;
+overflow:visible !important;
+}
+
+body.proposal-pdf-export .proposal-premium-page{
+width:794px !important;
+max-width:794px !important;
+min-width:794px !important;
+min-height:auto !important;
+border-radius:0 !important;
+box-shadow:none !important;
+display:grid !important;
+grid-template-columns:318px 476px !important;
+overflow:visible !important;
+}
+
+body.proposal-pdf-export .proposal-premium-image-column{
+min-height:auto !important;
+overflow:visible !important;
+}
+
+body.proposal-pdf-export .proposal-premium-image{
+height:100% !important;
+object-fit:cover !important;
+}
+
+body.proposal-pdf-export .proposal-premium-content{
+padding:28px 24px 22px !important;
+overflow:visible !important;
+}
+
+body.proposal-pdf-export .proposal-premium-meta{
+grid-template-columns:1fr !important;
+padding:14px 16px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-meta-item{
+flex-direction:row !important;
+align-items:center !important;
+}
+
+body.proposal-pdf-export .proposal-premium-section,
+body.proposal-pdf-export .proposal-premium-meta{
+background:#ffffff !important;
+box-shadow:none !important;
+break-inside:avoid !important;
+page-break-inside:avoid !important;
+overflow:visible !important;
+}
 `
+document.head.appendChild(style)
+
 }
 
-function createPdfSandbox(innerHtml, extraStyles){
+function applyPdfExportMode(){
 
-cleanupPdfSandbox()
+ensurePdfExportStyles()
 
-const sandbox = document.createElement("div")
-sandbox.id = "proposalPdfSandbox"
-sandbox.setAttribute("aria-hidden", "true")
-sandbox.style.position = "absolute"
-sandbox.style.left = "0"
-sandbox.style.top = "0"
-sandbox.style.width = "794px"
-sandbox.style.minWidth = "794px"
-sandbox.style.maxWidth = "794px"
-sandbox.style.opacity = "0.01"
-sandbox.style.pointerEvents = "none"
-sandbox.style.zIndex = "-1"
-sandbox.style.overflow = "visible"
-sandbox.style.background = "#ffffff"
-
-sandbox.innerHTML = `
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-${extraStyles || ""}
-${innerHtml}
-`
-
-document.body.appendChild(sandbox)
-
-return sandbox
-}
-
-function createPremiumPdfSandbox(data, profile){
-return createPdfSandbox(buildPremiumPdfBody(data, profile), buildPremiumPdfStyles())
-}
-
-function createDefaultPdfSandbox(){
-const proposalPage = document.getElementById("proposalPage")
-
-if(!proposalPage){
+const page = document.getElementById("proposalPage")
+if(!page){
 throw new Error("Proposal content not available")
 }
 
-const clone = proposalPage.cloneNode(true)
-clone.id = "proposalPage"
+document.body.classList.add("proposal-pdf-export")
+page.classList.add("proposal-pdf-export-target")
 
-return createPdfSandbox(clone.outerHTML, buildDefaultPdfStyles())
+return page
+}
+
+function removePdfExportMode(){
+
+document.body.classList.remove("proposal-pdf-export")
+
+const page = document.getElementById("proposalPage")
+if(page){
+page.classList.remove("proposal-pdf-export-target")
+}
+
 }
 
 async function downloadElementAsPdf(element, filename){
@@ -937,6 +542,12 @@ ensureHtml2PdfReady()
 await waitForDocumentFonts(document)
 await waitForImagesInElement(element)
 await waitForNextPaint()
+
+const exportWidth = Math.max(
+794,
+Math.ceil(element.scrollWidth || 0),
+Math.ceil(element.offsetWidth || 0)
+)
 
 const worker = window.html2pdf()
 
@@ -948,12 +559,12 @@ image: { type: "jpeg", quality: 0.98 },
 html2canvas: {
 scale: 2,
 useCORS: true,
-allowTaint: true,
+allowTaint: false,
 backgroundColor: "#ffffff",
 scrollX: 0,
 scrollY: 0,
-windowWidth: 794,
-width: 794,
+windowWidth: exportWidth,
+width: exportWidth,
 logging: false
 },
 jsPDF: {
@@ -975,8 +586,6 @@ async function downloadProposalPdf(){
 
 setDownloadButtonState(true)
 
-let sandbox = null
-
 try{
 
 pdfExportScrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
@@ -985,19 +594,16 @@ let filename = "photography-proposal.pdf"
 
 if(isPremiumUser(activeProposalProfile)){
 filename = "premium-photography-proposal.pdf"
-sandbox = createPremiumPdfSandbox(activeProposalData, activeProposalProfile)
-}else{
-filename = "photography-proposal.pdf"
-sandbox = createDefaultPdfSandbox()
 }
 
-await downloadElementAsPdf(sandbox, filename)
+const target = applyPdfExportMode()
+await downloadElementAsPdf(target, filename)
 
 }catch(err){
 console.error("PDF DOWNLOAD ERROR:", err)
 alert(err?.message || "PDF download failed")
 }finally{
-cleanupPdfSandbox()
+removePdfExportMode()
 window.scrollTo(0, pdfExportScrollTop)
 setDownloadButtonState(false)
 }
