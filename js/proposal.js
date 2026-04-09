@@ -281,6 +281,88 @@ return html
 
 
 // ======================
+// PDF HELPERS
+// ======================
+
+function isMobileView(){
+return window.innerWidth <= 768
+}
+
+function isHtml2PdfReady(){
+return typeof window.html2pdf !== "undefined"
+}
+
+function setDownloadButtonState(isLoading){
+
+const btn = document.getElementById("proposalDownloadPdfBtn")
+if(!btn) return
+
+if(isLoading){
+btn.disabled = true
+btn.dataset.originalText = btn.dataset.originalText || btn.innerText
+btn.innerText = "Preparing PDF..."
+btn.style.opacity = "0.75"
+btn.style.cursor = "not-allowed"
+}else{
+btn.disabled = false
+btn.innerText = btn.dataset.originalText || "Download PDF"
+btn.style.opacity = "1"
+btn.style.cursor = "pointer"
+}
+
+}
+
+async function downloadProposalPdf(){
+
+if(!isHtml2PdfReady()){
+alert("PDF library not loaded")
+return
+}
+
+const element = document.getElementById("proposalPage")
+
+if(!element){
+alert("Proposal not found")
+return
+}
+
+setDownloadButtonState(true)
+
+try{
+
+window.scrollTo(0,0)
+
+const opt = {
+margin:0,
+filename:"photography-proposal.pdf",
+image:{ type:"jpeg", quality:1 },
+html2canvas:{
+scale:isMobileView() ? 2 : 2.5,
+useCORS:true,
+scrollX:0,
+scrollY:0,
+backgroundColor:"#f6f1ea"
+},
+jsPDF:{
+unit:"mm",
+format:"a4",
+orientation:"portrait"
+}
+}
+
+await window.html2pdf().set(opt).from(element).save()
+
+}catch(err){
+console.error("PDF DOWNLOAD ERROR:",err)
+alert("PDF download failed")
+}finally{
+setDownloadButtonState(false)
+}
+
+}
+
+
+// ======================
 // INJECT PREMIUM STYLES
 // ======================
 
@@ -291,15 +373,18 @@ if(document.getElementById("proposal-premium-styles")) return
 const style = document.createElement("style")
 style.id = "proposal-premium-styles"
 style.innerHTML = `
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
 :root{
 --proposal-premium-bg:#d9d2ca;
---proposal-premium-paper:#f5f2ee;
---proposal-premium-card:#fbfaf8;
---proposal-premium-border:#e7ddd2;
---proposal-premium-text:#2e2925;
---proposal-premium-muted:#7c746b;
---proposal-premium-soft:#9b9187;
---proposal-premium-shadow:0 22px 60px rgba(46,34,28,0.13);
+--proposal-premium-paper:#f6f1ea;
+--proposal-premium-card:#fdfbf8;
+--proposal-premium-border:#e5d9cd;
+--proposal-premium-text:#2f2823;
+--proposal-premium-muted:#7b7268;
+--proposal-premium-soft:#a09487;
+--proposal-premium-shadow:0 24px 64px rgba(46,34,28,0.14);
+--proposal-premium-dark:#1f1a17;
 }
 html,
 body{
@@ -321,28 +406,27 @@ margin:0;
 .proposal-premium-shell{
 min-height:100vh;
 background:var(--proposal-premium-bg);
-padding:20px;
+padding:18px;
 box-sizing:border-box;
 }
 .proposal-premium-page{
-max-width:1380px;
+max-width:1360px;
 margin:0 auto;
 background:var(--proposal-premium-paper);
-border-radius:32px;
+border-radius:34px;
 overflow:hidden;
 box-shadow:var(--proposal-premium-shadow);
 display:grid;
-grid-template-columns:44% 56%;
-min-height:calc(100vh - 40px);
+grid-template-columns:46% 54%;
+min-height:calc(100vh - 36px);
 }
 .proposal-premium-image-column{
 position:relative;
+background:#d7cdc2;
 min-height:100%;
-background:#d8cec4;
 }
 .proposal-premium-image{
-position:absolute;
-inset:0;
+display:block;
 width:100%;
 height:100%;
 object-fit:cover;
@@ -351,10 +435,11 @@ object-position:center;
 .proposal-premium-image-overlay{
 position:absolute;
 inset:0;
-background:linear-gradient(to bottom,rgba(0,0,0,0.03),rgba(0,0,0,0.08));
+pointer-events:none;
+background:linear-gradient(to bottom,rgba(0,0,0,0.02),rgba(0,0,0,0.06));
 }
 .proposal-premium-content{
-padding:42px 42px 28px;
+padding:40px 38px 26px;
 display:flex;
 flex-direction:column;
 box-sizing:border-box;
@@ -365,16 +450,16 @@ text-align:center;
 .proposal-premium-title{
 margin:0;
 font-family:'Playfair Display',serif;
-font-size:58px;
+font-size:56px;
 font-weight:600;
 line-height:1.08;
 letter-spacing:0.01em;
 word-break:break-word;
 }
 .proposal-premium-studio{
-margin-top:26px;
+margin-top:24px;
 font-family:'Playfair Display',serif;
-font-size:30px;
+font-size:29px;
 line-height:1.2;
 color:var(--proposal-premium-text);
 word-break:break-word;
@@ -386,10 +471,10 @@ color:var(--proposal-premium-muted);
 word-break:break-word;
 }
 .proposal-premium-meta{
-margin-top:30px;
+margin-top:28px;
 padding:18px 20px;
 border-radius:22px;
-background:rgba(255,255,255,0.78);
+background:rgba(255,255,255,0.76);
 border:1px solid var(--proposal-premium-border);
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -400,13 +485,14 @@ display:flex;
 justify-content:space-between;
 gap:14px;
 font-size:14px;
+line-height:1.45;
 }
 .proposal-premium-meta-item span:first-child{
 color:var(--proposal-premium-muted);
 }
 .proposal-premium-row-grid{
 display:grid;
-grid-template-columns:1.1fr 0.9fr;
+grid-template-columns:1.12fr 0.88fr;
 gap:18px;
 margin-top:18px;
 }
@@ -421,7 +507,8 @@ box-sizing:border-box;
 .proposal-premium-section-title{
 margin:0 0 14px 0;
 font-family:'Playfair Display',serif;
-font-size:31px;
+font-size:30px;
+font-weight:600;
 line-height:1.12;
 color:var(--proposal-premium-text);
 }
@@ -432,6 +519,7 @@ gap:18px;
 padding:12px 0;
 border-bottom:1px solid var(--proposal-premium-border);
 font-size:15px;
+line-height:1.45;
 }
 .proposal-premium-service-row:last-child{
 border-bottom:none;
@@ -447,20 +535,26 @@ color:var(--proposal-premium-text);
 .proposal-premium-summary-row{
 display:flex;
 justify-content:space-between;
+align-items:flex-start;
 gap:16px;
 padding:12px 0;
 border-bottom:1px solid var(--proposal-premium-border);
-font-size:15px;
+font-size:14px;
+line-height:1.45;
 }
 .proposal-premium-summary-row:last-child{
 border-bottom:none;
 }
 .proposal-premium-summary-row strong:first-child{
 font-weight:600;
+font-size:14px;
+color:var(--proposal-premium-text);
 }
 .proposal-premium-summary-row strong:last-child{
-font-weight:700;
+font-weight:600;
+font-size:14px;
 text-align:right;
+color:var(--proposal-premium-text);
 }
 .proposal-premium-list{
 margin:0;
@@ -482,17 +576,21 @@ padding-left:20px;
 margin-top:22px;
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:12px;
+gap:14px;
 }
 .proposal-premium-btn{
 border:none;
-border-radius:14px;
-padding:14px 18px;
-font-size:14px;
+border-radius:16px;
+padding:16px 18px;
+font-size:15px;
 font-weight:600;
 cursor:pointer;
 transition:.2s ease;
 font-family:'Inter',sans-serif;
+}
+.proposal-premium-btn:disabled{
+opacity:.75;
+cursor:not-allowed;
 }
 .proposal-premium-btn-whatsapp{
 background:#25D366;
@@ -502,7 +600,11 @@ color:#ffffff;
 opacity:.92;
 }
 .proposal-premium-btn-pdf{
+background:var(--proposal-premium-dark);
 color:#ffffff;
+}
+.proposal-premium-btn-pdf:hover{
+opacity:.92;
 }
 .proposal-premium-footer{
 margin-top:16px;
@@ -522,7 +624,7 @@ margin-top:4px;
 font-size:50px;
 }
 .proposal-premium-studio{
-font-size:28px;
+font-size:27px;
 }
 }
 @media (max-width: 1024px){
@@ -530,7 +632,10 @@ font-size:28px;
 grid-template-columns:1fr;
 }
 .proposal-premium-image-column{
-min-height:440px;
+min-height:460px;
+}
+.proposal-premium-image{
+height:460px;
 }
 .proposal-premium-content{
 padding:28px 24px 22px;
@@ -550,9 +655,23 @@ padding:0;
 border-radius:0;
 min-height:100vh;
 box-shadow:none;
+display:block;
 }
 .proposal-premium-image-column{
-min-height:320px;
+position:relative;
+min-height:auto;
+background:#d7cdc2;
+}
+.proposal-premium-image{
+position:relative;
+width:100%;
+height:auto;
+max-height:none;
+object-fit:contain;
+object-position:center;
+}
+.proposal-premium-image-overlay{
+display:none;
 }
 .proposal-premium-content{
 padding:22px 16px 18px;
@@ -598,11 +717,23 @@ text-align:left;
 .proposal-premium-summary-row{
 font-size:14px;
 }
+.proposal-premium-summary-row strong:first-child,
+.proposal-premium-summary-row strong:last-child{
+font-size:14px;
+font-weight:600;
+}
 .proposal-premium-actions{
 grid-template-columns:1fr;
+gap:16px;
 }
 .proposal-premium-btn{
 width:100%;
+padding:18px 18px;
+font-size:17px;
+border-radius:18px;
+}
+.proposal-premium-btn-pdf{
+background:var(--proposal-premium-dark);
 }
 }
 @page{
@@ -636,9 +767,14 @@ min-height:auto !important;
 border-radius:0 !important;
 box-shadow:none !important;
 grid-template-columns:40% 60% !important;
+display:grid !important;
 }
 .proposal-premium-image-column{
 min-height:auto !important;
+}
+.proposal-premium-image{
+height:100% !important;
+object-fit:cover !important;
 }
 .proposal-premium-content{
 padding:28px 24px 22px !important;
@@ -787,7 +923,7 @@ page.innerHTML = `
 
         <div class="proposal-premium-actions">
           <button class="proposal-premium-btn proposal-premium-btn-whatsapp" onclick="sendWhatsApp()">Send Proposal on WhatsApp</button>
-          <button class="proposal-premium-btn proposal-premium-btn-pdf" style="background:${escapeHtml(accentColor)}" onclick="downloadPDF()">Download Proposal PDF</button>
+          <button id="proposalDownloadPdfBtn" class="proposal-premium-btn proposal-premium-btn-pdf" onclick="downloadPDF()">Download PDF</button>
         </div>
 
         <div class="proposal-premium-footer">
@@ -1114,8 +1250,8 @@ ${shortLink}
 
 For booking contact:
 
-${studioName}
-Phone: ${studioPhone}
+${profile?.studio_name || ""}
+Phone: ${profile?.phone || ""}
 
 Powered by StudioOS`
 
@@ -1131,38 +1267,8 @@ window.open(url,"_blank")
 // PDF EXPORT
 // ======================
 
-window.downloadPDF = function(){
-
-window.scrollTo(0,0)
-
-const element = document.getElementById("proposalPage")
-
-const opt = {
-
-margin:0,
-filename:"photography-proposal.pdf",
-
-image:{ type:"jpeg", quality:1 },
-
-html2canvas:{
-scale:2,
-useCORS:true,
-scrollX:0,
-scrollY:0
-},
-
-jsPDF:{
-unit:"mm",
-format:[210,297],
-orientation:"portrait"
-}
-
-}
-
-html2pdf().set(opt).from(element).save()
-
-}
-
+window.downloadPDF = async function(){
+await downloadProposalPdf()
 }
 
 window.addEventListener("load", function(){
