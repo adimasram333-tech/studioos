@@ -292,14 +292,14 @@ const style = document.createElement("style")
 style.id = "proposal-premium-styles"
 style.innerHTML = `
 :root{
---proposal-premium-bg:#e8e1d9;
---proposal-premium-paper:#f7f5f2;
---proposal-premium-card:#ffffff;
---proposal-premium-border:#e8e0d7;
---proposal-premium-text:#2d2926;
---proposal-premium-muted:#7a736b;
---proposal-premium-soft:#a19890;
---proposal-premium-shadow:0 18px 48px rgba(33,26,21,0.12);
+--proposal-premium-bg:#d9d2ca;
+--proposal-premium-paper:#f5f2ee;
+--proposal-premium-card:#fbfaf8;
+--proposal-premium-border:#e7ddd2;
+--proposal-premium-text:#2e2925;
+--proposal-premium-muted:#7c746b;
+--proposal-premium-soft:#9b9187;
+--proposal-premium-shadow:0 22px 60px rgba(46,34,28,0.13);
 }
 html,
 body{
@@ -321,19 +321,19 @@ margin:0;
 .proposal-premium-shell{
 min-height:100vh;
 background:var(--proposal-premium-bg);
-padding:28px 16px;
+padding:20px;
 box-sizing:border-box;
 }
 .proposal-premium-page{
-max-width:1180px;
+max-width:1380px;
 margin:0 auto;
 background:var(--proposal-premium-paper);
-border-radius:30px;
+border-radius:32px;
 overflow:hidden;
 box-shadow:var(--proposal-premium-shadow);
 display:grid;
-grid-template-columns:42% 58%;
-min-height:calc(100vh - 56px);
+grid-template-columns:44% 56%;
+min-height:calc(100vh - 40px);
 }
 .proposal-premium-image-column{
 position:relative;
@@ -351,10 +351,10 @@ object-position:center;
 .proposal-premium-image-overlay{
 position:absolute;
 inset:0;
-background:linear-gradient(to bottom,rgba(0,0,0,0.08),rgba(0,0,0,0.12));
+background:linear-gradient(to bottom,rgba(0,0,0,0.03),rgba(0,0,0,0.08));
 }
 .proposal-premium-content{
-padding:44px 42px 30px;
+padding:42px 42px 28px;
 display:flex;
 flex-direction:column;
 box-sizing:border-box;
@@ -365,16 +365,16 @@ text-align:center;
 .proposal-premium-title{
 margin:0;
 font-family:'Playfair Display',serif;
-font-size:52px;
+font-size:58px;
 font-weight:600;
-line-height:1.12;
+line-height:1.08;
 letter-spacing:0.01em;
 word-break:break-word;
 }
 .proposal-premium-studio{
 margin-top:26px;
 font-family:'Playfair Display',serif;
-font-size:28px;
+font-size:30px;
 line-height:1.2;
 color:var(--proposal-premium-text);
 word-break:break-word;
@@ -386,49 +386,50 @@ color:var(--proposal-premium-muted);
 word-break:break-word;
 }
 .proposal-premium-meta{
-margin-top:32px;
+margin-top:30px;
 padding:18px 20px;
 border-radius:22px;
-background:rgba(255,255,255,0.72);
+background:rgba(255,255,255,0.78);
 border:1px solid var(--proposal-premium-border);
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:14px 22px;
+gap:12px 18px;
 }
 .proposal-premium-meta-item{
 display:flex;
 justify-content:space-between;
-gap:16px;
+gap:14px;
 font-size:14px;
 }
 .proposal-premium-meta-item span:first-child{
 color:var(--proposal-premium-muted);
 }
+.proposal-premium-row-grid{
+display:grid;
+grid-template-columns:1.1fr 0.9fr;
+gap:18px;
+margin-top:18px;
+}
 .proposal-premium-section{
 margin-top:18px;
 padding:22px;
-background:rgba(255,255,255,0.72);
+background:rgba(255,255,255,0.78);
 border:1px solid var(--proposal-premium-border);
-border-radius:22px;
-}
-.proposal-premium-two-col{
-display:grid;
-grid-template-columns:1.12fr 0.88fr;
-gap:18px;
-margin-top:18px;
+border-radius:24px;
+box-sizing:border-box;
 }
 .proposal-premium-section-title{
 margin:0 0 14px 0;
 font-family:'Playfair Display',serif;
-font-size:28px;
-line-height:1.15;
+font-size:31px;
+line-height:1.12;
 color:var(--proposal-premium-text);
 }
 .proposal-premium-service-row{
 display:flex;
 justify-content:space-between;
 gap:18px;
-padding:11px 0;
+padding:12px 0;
 border-bottom:1px solid var(--proposal-premium-border);
 font-size:15px;
 }
@@ -440,8 +441,8 @@ color:var(--proposal-premium-muted);
 }
 .proposal-premium-service-row span:last-child{
 text-align:right;
-color:var(--proposal-premium-text);
 font-weight:500;
+color:var(--proposal-premium-text);
 }
 .proposal-premium-summary-row{
 display:flex;
@@ -456,11 +457,9 @@ border-bottom:none;
 }
 .proposal-premium-summary-row strong:first-child{
 font-weight:600;
-color:var(--proposal-premium-text);
 }
 .proposal-premium-summary-row strong:last-child{
 font-weight:700;
-color:var(--proposal-premium-text);
 text-align:right;
 }
 .proposal-premium-list{
@@ -506,7 +505,7 @@ opacity:.92;
 color:#ffffff;
 }
 .proposal-premium-footer{
-margin-top:18px;
+margin-top:16px;
 text-align:center;
 font-size:12px;
 line-height:1.7;
@@ -518,12 +517,29 @@ margin:0;
 .proposal-premium-footer p + p{
 margin-top:4px;
 }
-@media (max-width: 1100px){
+@media (max-width: 1200px){
+.proposal-premium-title{
+font-size:50px;
+}
+.proposal-premium-studio{
+font-size:28px;
+}
+}
+@media (max-width: 1024px){
 .proposal-premium-page{
 grid-template-columns:1fr;
 }
 .proposal-premium-image-column{
-min-height:360px;
+min-height:440px;
+}
+.proposal-premium-content{
+padding:28px 24px 22px;
+}
+.proposal-premium-title{
+font-size:44px;
+}
+.proposal-premium-row-grid{
+grid-template-columns:1fr;
 }
 }
 @media (max-width: 768px){
@@ -536,17 +552,18 @@ min-height:100vh;
 box-shadow:none;
 }
 .proposal-premium-image-column{
-min-height:260px;
+min-height:320px;
 }
 .proposal-premium-content{
-padding:24px 16px 22px;
+padding:22px 16px 18px;
 }
 .proposal-premium-title{
 font-size:34px;
+line-height:1.14;
 }
 .proposal-premium-studio{
 margin-top:18px;
-font-size:22px;
+font-size:23px;
 }
 .proposal-premium-phone{
 font-size:14px;
@@ -558,18 +575,16 @@ gap:10px;
 }
 .proposal-premium-meta-item{
 flex-direction:column;
+align-items:flex-start;
 gap:4px;
-}
-.proposal-premium-two-col{
-grid-template-columns:1fr;
-gap:16px;
 }
 .proposal-premium-section{
 padding:16px;
 border-radius:18px;
+margin-top:14px;
 }
 .proposal-premium-section-title{
-font-size:23px;
+font-size:24px;
 }
 .proposal-premium-service-row{
 flex-direction:column;
@@ -620,7 +635,7 @@ max-width:794px !important;
 min-height:auto !important;
 border-radius:0 !important;
 box-shadow:none !important;
-grid-template-columns:38% 62% !important;
+grid-template-columns:40% 60% !important;
 }
 .proposal-premium-image-column{
 min-height:auto !important;
@@ -638,7 +653,7 @@ font-size:22px !important;
 font-size:13px !important;
 }
 .proposal-premium-meta{
-grid-template-columns:1fr 1fr !important;
+grid-template-columns:1fr !important;
 padding:14px 16px !important;
 }
 .proposal-premium-section,
@@ -705,7 +720,7 @@ page.innerHTML = `
         </div>
       </div>
 
-      <div class="proposal-premium-two-col">
+      <div class="proposal-premium-row-grid">
 
         <div class="proposal-premium-section">
           <h2 class="proposal-premium-section-title">Services & Coverage</h2>
