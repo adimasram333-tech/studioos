@@ -1271,6 +1271,8 @@ window.downloadPDF = async function(){
 await downloadProposalPdf()
 }
 
+}
+
 window.addEventListener("load", function(){
 loadProposal()
 })
