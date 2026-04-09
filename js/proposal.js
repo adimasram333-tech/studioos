@@ -381,9 +381,10 @@ body.proposal-pdf-export-mode .proposal-premium-actions{
 display:none !important;
 }
 body.proposal-pdf-export-mode #proposalPage.proposal-premium-root{
+margin:0 auto !important;
+background:#ffffff !important;
 box-shadow:none !important;
 border-radius:0 !important;
-background:#ffffff !important;
 }
 body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-shell{
 width:794px !important;
@@ -448,6 +449,7 @@ padding:14px 16px !important;
 gap:10px !important;
 }
 body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-meta-item{
+flex-direction:row !important;
 align-items:center !important;
 }
 body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-row-grid{
@@ -587,9 +589,10 @@ await waitForNextPaint()
 await waitForNextPaint()
 
 const targetWidth = 794
+const targetHeight = exportTarget.scrollHeight || exportTarget.offsetHeight || 1123
 
 const opt = {
-margin:0,
+margin:[0,0,0,0],
 filename:"photography-proposal.pdf",
 image:{ type:"jpeg", quality:0.98 },
 html2canvas:{
@@ -599,14 +602,15 @@ allowTaint:false,
 scrollX:0,
 scrollY:0,
 windowWidth:targetWidth,
-windowHeight:exportTarget.scrollHeight || exportTarget.offsetHeight || 1123,
+windowHeight:targetHeight,
 width:targetWidth,
+height:targetHeight,
 backgroundColor:"#ffffff",
 logging:false
 },
 jsPDF:{
-unit:"mm",
-format:"a4",
+unit:"px",
+format:[794, 1123],
 orientation:"portrait"
 },
 pagebreak:{
@@ -758,14 +762,14 @@ print-color-adjust:exact;
 }
 #proposalPage.proposal-premium-root{
 width:100%;
-max-width:100%;
-margin:0 auto;
+max-width:1360px;
+margin:18px auto;
 background:transparent;
 box-shadow:none;
 overflow:visible;
 }
 .proposal-premium-shell{
-min-height:100vh;
+min-height:auto;
 background:var(--proposal-premium-bg);
 padding:18px;
 box-sizing:border-box;
@@ -989,6 +993,10 @@ font-size:27px;
 }
 }
 @media (max-width: 1024px){
+#proposalPage.proposal-premium-root{
+max-width:100%;
+margin:0 auto;
+}
 .proposal-premium-page{
 grid-template-columns:1fr;
 }
@@ -1162,6 +1170,10 @@ font-size:13px !important;
 .proposal-premium-meta{
 grid-template-columns:1fr !important;
 padding:14px 16px !important;
+}
+.proposal-premium-meta-item{
+flex-direction:row !important;
+align-items:center !important;
 }
 .proposal-premium-section,
 .proposal-premium-meta{
