@@ -330,9 +330,6 @@ return !!document.querySelector("#proposalPage .proposal-premium-page")
 }
 
 function getPdfExportTarget(){
-if(isPremiumProposalRendered()){
-return document.querySelector("#proposalPage .proposal-premium-shell")
-}
 return document.getElementById("proposalPage")
 }
 
@@ -371,11 +368,11 @@ body.proposal-pdf-export-mode #proposalLoadingOverlay{
 display:none !important;
 }
 body.proposal-pdf-export-mode #proposalPage{
-width:100% !important;
-max-width:100% !important;
-min-width:0 !important;
-margin:0 !important;
-background:transparent !important;
+width:794px !important;
+max-width:794px !important;
+min-width:794px !important;
+margin:0 auto !important;
+background:#ffffff !important;
 overflow:visible !important;
 box-shadow:none !important;
 }
@@ -383,48 +380,26 @@ body.proposal-pdf-export-mode .whatsappBox,
 body.proposal-pdf-export-mode .proposal-premium-actions{
 display:none !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot{
-position:fixed !important;
-left:0 !important;
-top:0 !important;
-width:794px !important;
-min-width:794px !important;
-max-width:794px !important;
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root{
+box-shadow:none !important;
+border-radius:0 !important;
 background:#ffffff !important;
-z-index:-1 !important;
-opacity:0.01 !important;
-pointer-events:none !important;
-overflow:visible !important;
-display:block !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot *{
-box-sizing:border-box !important;
-}
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone{
-position:relative !important;
-left:0 !important;
-top:0 !important;
-transform:none !important;
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-shell{
 width:794px !important;
-min-width:794px !important;
 max-width:794px !important;
-margin:0 !important;
-background:#ffffff !important;
-display:block !important;
-visibility:visible !important;
-opacity:1 !important;
-}
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone.proposal-premium-shell{
+min-width:794px !important;
 padding:0 !important;
+margin:0 !important;
 min-height:auto !important;
 background:#ffffff !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-page{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-page{
 width:794px !important;
-min-width:794px !important;
 max-width:794px !important;
-min-height:auto !important;
+min-width:794px !important;
 margin:0 !important;
+min-height:auto !important;
 border-radius:0 !important;
 box-shadow:none !important;
 overflow:hidden !important;
@@ -432,12 +407,12 @@ display:grid !important;
 grid-template-columns:318px 476px !important;
 background:#f6f1ea !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-image-column{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-image-column{
 min-height:100% !important;
 height:auto !important;
 background:#d7cdc2 !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-image{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-image{
 display:block !important;
 width:100% !important;
 height:100% !important;
@@ -446,78 +421,73 @@ max-height:none !important;
 object-fit:cover !important;
 object-position:center !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-image-overlay{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-image-overlay{
 display:block !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-content{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-content{
 padding:28px 24px 22px !important;
 display:flex !important;
 flex-direction:column !important;
 box-sizing:border-box !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-title{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-title{
 font-size:34px !important;
 line-height:1.12 !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-studio{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-studio{
 font-size:22px !important;
 margin-top:16px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-phone{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-phone{
 font-size:13px !important;
 margin-top:6px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-meta{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-meta{
 grid-template-columns:1fr !important;
 padding:14px 16px !important;
 gap:10px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-row-grid{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-meta-item{
+align-items:center !important;
+}
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-row-grid{
 grid-template-columns:1fr 1fr !important;
 gap:14px !important;
 margin-top:14px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-section,
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-meta{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-section,
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-meta{
 background:#ffffff !important;
 box-shadow:none !important;
 break-inside:avoid !important;
 page-break-inside:avoid !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-section{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-section{
 padding:16px !important;
 margin-top:14px !important;
 border-radius:18px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-section-title{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-section-title{
 font-size:24px !important;
 margin-bottom:10px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-service-row,
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-summary-row{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-service-row,
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-summary-row{
 font-size:13px !important;
 padding:10px 0 !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-summary-row strong:first-child,
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-summary-row strong:last-child{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-summary-row strong:first-child,
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-summary-row strong:last-child{
 font-size:13px !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-list,
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-copy{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-list,
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-copy{
 font-size:13px !important;
 line-height:1.7 !important;
 }
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .proposal-premium-footer{
+body.proposal-pdf-export-mode #proposalPage.proposal-premium-root .proposal-premium-footer{
 margin-top:10px !important;
 font-size:11px !important;
-}
-body.proposal-pdf-export-mode #proposalPdfRenderRoot .proposal-pdf-clone .page{
-width:794px !important;
-max-width:794px !important;
-min-width:794px !important;
-margin:0 auto !important;
-box-shadow:none !important;
-background:#ffffff !important;
 }
 `
 document.head.appendChild(style)
@@ -573,80 +543,6 @@ setTimeout(finish, 8000)
 
 }
 
-function createPdfRenderRoot(){
-
-let root = document.getElementById("proposalPdfRenderRoot")
-
-if(root){
-root.innerHTML = ""
-return root
-}
-
-root = document.createElement("div")
-root.id = "proposalPdfRenderRoot"
-document.body.appendChild(root)
-return root
-
-}
-
-function destroyPdfRenderRoot(){
-const root = document.getElementById("proposalPdfRenderRoot")
-if(root){
-root.remove()
-}
-}
-
-function normalizeCloneForPdf(clone){
-
-if(!clone) return
-
-clone.classList.add("proposal-pdf-clone")
-
-clone.querySelectorAll(".proposal-premium-actions").forEach((el) => {
-el.remove()
-})
-
-clone.querySelectorAll("[onclick]").forEach((el) => {
-el.removeAttribute("onclick")
-})
-
-clone.querySelectorAll("#proposalDownloadPdfBtn").forEach((el) => {
-el.removeAttribute("id")
-})
-
-clone.querySelectorAll("script").forEach((el) => {
-el.remove()
-})
-
-}
-
-async function buildPdfExportElement(){
-
-const liveTarget = getPdfExportTarget()
-
-if(!liveTarget){
-throw new Error("Proposal export target not found")
-}
-
-if(!isPremiumProposalRendered()){
-return liveTarget
-}
-
-const root = createPdfRenderRoot()
-const clone = liveTarget.cloneNode(true)
-
-normalizeCloneForPdf(clone)
-root.appendChild(clone)
-
-await waitForFonts()
-await waitForImagesInElement(clone)
-await waitForNextPaint()
-await waitForNextPaint()
-
-return clone
-
-}
-
 async function setPdfExportMode(enabled){
 
 injectPdfExportStyles()
@@ -656,11 +552,11 @@ pdfExportScrollTop = window.pageYOffset || document.documentElement.scrollTop ||
 document.body.classList.add("proposal-pdf-export-mode")
 window.scrollTo(0,0)
 await waitForNextPaint()
+await waitForNextPaint()
 return
 }
 
 document.body.classList.remove("proposal-pdf-export-mode")
-destroyPdfRenderRoot()
 await waitForNextPaint()
 window.scrollTo(0,pdfExportScrollTop)
 
@@ -679,7 +575,7 @@ try{
 
 await setPdfExportMode(true)
 
-const exportTarget = await buildPdfExportElement()
+const exportTarget = getPdfExportTarget()
 
 if(!exportTarget){
 throw new Error("Proposal export target not found")
@@ -703,6 +599,7 @@ allowTaint:false,
 scrollX:0,
 scrollY:0,
 windowWidth:targetWidth,
+windowHeight:exportTarget.scrollHeight || exportTarget.offsetHeight || 1123,
 width:targetWidth,
 backgroundColor:"#ffffff",
 logging:false
@@ -859,10 +756,13 @@ color:var(--proposal-premium-text);
 -webkit-print-color-adjust:exact;
 print-color-adjust:exact;
 }
-#proposalPage{
+#proposalPage.proposal-premium-root{
 width:100%;
 max-width:100%;
-margin:0;
+margin:0 auto;
+background:transparent;
+box-shadow:none;
+overflow:visible;
 }
 .proposal-premium-shell{
 min-height:100vh;
@@ -1109,6 +1009,11 @@ grid-template-columns:1fr;
 }
 }
 @media (max-width: 768px){
+#proposalPage.proposal-premium-root{
+width:100%;
+max-width:100%;
+margin:0 auto;
+}
 .proposal-premium-shell{
 padding:0;
 }
@@ -1212,10 +1117,13 @@ body{
 -webkit-print-color-adjust:exact !important;
 print-color-adjust:exact !important;
 }
-#proposalPage{
+#proposalPage.proposal-premium-root{
 width:794px !important;
 max-width:794px !important;
+min-width:794px !important;
 margin:0 auto !important;
+background:#ffffff !important;
+box-shadow:none !important;
 }
 .proposal-premium-shell{
 background:#ffffff !important;
@@ -1223,11 +1131,13 @@ padding:0 !important;
 min-height:auto !important;
 }
 .proposal-premium-page{
+width:794px !important;
 max-width:794px !important;
+min-width:794px !important;
 min-height:auto !important;
 border-radius:0 !important;
 box-shadow:none !important;
-grid-template-columns:40% 60% !important;
+grid-template-columns:318px 476px !important;
 display:grid !important;
 }
 .proposal-premium-image-column{
@@ -1287,7 +1197,8 @@ const accentColor = getProposalAccentColor(data,profile)
 const proposalTitle = getProposalTitle(data)
 const eventDateText = getEventDateText(data)
 
-page.className = ""
+page.classList.add("proposal-premium-root")
+
 page.innerHTML = `
 <div class="proposal-premium-shell">
   <div class="proposal-premium-page">
@@ -1548,6 +1459,11 @@ return
 // ======================
 // LOAD STUDIO INFO
 // ======================
+
+const page = document.getElementById("proposalPage")
+if(page){
+page.classList.remove("proposal-premium-root")
+}
 
 const studioNameEl = document.getElementById("studioName")
 const studioPhoneEl = document.getElementById("studioPhone")
