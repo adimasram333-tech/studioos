@@ -279,6 +279,33 @@ return `
 
 }
 
+function buildPremiumServicesHtmlForPdf(services){
+
+const serviceMap = [
+{ key:"candid", label:"Candid Photographer" },
+{ key:"traditional_photo", label:"Traditional Photographer" },
+{ key:"traditional_video", label:"Traditional Videographer" },
+{ key:"cinematographer", label:"Cinematographer" },
+{ key:"drone", label:"Drone Operator" },
+{ key:"led_wall", label:"LED Screen Wall" },
+{ key:"assistant", label:"Assistant" }
+]
+
+return serviceMap.map((item) => {
+const row = services[item.key] || {}
+const qty = row.qty || 0
+const days = row.days || 0
+
+return `
+<div class="proposal-pdf-service-row">
+  <span>${escapeHtml(item.label)}</span>
+  <span>${qty} x ${days} Days</span>
+</div>
+`
+}).join("")
+
+}
+
 
 // ======================
 // PREMIUM DELIVERABLES HTML
@@ -346,6 +373,109 @@ const themeLink = document.getElementById("theme-style")
 return themeLink?.href || ""
 }
 
+function isPopupBlocked(win){
+return !win || win.closed || typeof win.closed === "undefined"
+}
+
+async function waitForFontsInWindow(printWindow){
+try{
+if(printWindow?.document?.fonts?.ready){
+await printWindow.document.fonts.ready
+}
+}catch(e){
+console.log("Print font readiness skipped", e)
+}
+}
+
+async function waitForImagesInWindow(printWindow){
+
+if(!printWindow?.document) return
+
+const images = Array.from(printWindow.document.images || [])
+
+if(!images.length) return
+
+await Promise.all(images.map((img) => {
+if(img.complete && img.naturalWidth > 0){
+return Promise.resolve()
+}
+
+return new Promise((resolve) => {
+let done = false
+
+const finish = () => {
+if(done) return
+done = true
+resolve()
+}
+
+img.addEventListener("load", finish, { once:true })
+img.addEventListener("error", finish, { once:true })
+
+setTimeout(finish, 10000)
+})
+}))
+
+}
+
+function buildPrintLifecycleScript(){
+return `
+<script>
+(function(){
+  let alreadyPrinted = false;
+
+  async function waitForAssets(){
+    const images = Array.from(document.images || []);
+    await Promise.all(images.map((img) => {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      return new Promise((resolve) => {
+        let done = false;
+        const finish = () => {
+          if (done) return;
+          done = true;
+          resolve();
+        };
+        img.addEventListener('load', finish, { once:true });
+        img.addEventListener('error', finish, { once:true });
+        setTimeout(finish, 10000);
+      });
+    }));
+
+    if (document.fonts && document.fonts.ready) {
+      try {
+        await document.fonts.ready;
+      } catch(e){}
+    }
+  }
+
+  async function runPrint(){
+    if (alreadyPrinted) return;
+    alreadyPrinted = true;
+
+    await waitForAssets();
+
+    setTimeout(() => {
+      window.focus();
+      window.print();
+    }, 300);
+  }
+
+  window.addEventListener('load', runPrint);
+
+  if (document.readyState === 'complete') {
+    runPrint();
+  }
+
+  window.addEventListener('afterprint', () => {
+    setTimeout(() => {
+      try { window.close(); } catch(e){}
+    }, 200);
+  });
+})();
+</script>
+`
+}
+
 function buildPremiumPrintDocument(data, profile){
 
 const services = parseServices(data?.services)
@@ -365,11 +495,12 @@ return `
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
---proposal-premium-paper:#f6f1ea;
---proposal-premium-border:#e5d9cd;
---proposal-premium-text:#2f2823;
---proposal-premium-muted:#7b7268;
---proposal-premium-soft:#a09487;
+--proposal-pdf-paper:#f7f1ea;
+--proposal-pdf-card:#fffdf9;
+--proposal-pdf-border:#e7ddd2;
+--proposal-pdf-text:#2f2823;
+--proposal-pdf-muted:#7b7268;
+--proposal-pdf-soft:#a09487;
 }
 *{
 box-sizing:border-box;
@@ -381,7 +512,7 @@ margin:0;
 padding:0;
 background:#ffffff;
 font-family:'Inter',sans-serif;
-color:var(--proposal-premium-text);
+color:var(--proposal-pdf-text);
 }
 body{
 -webkit-font-smoothing:antialiased;
@@ -391,168 +522,152 @@ width:794px;
 min-width:794px;
 max-width:794px;
 margin:0 auto;
-background:#ffffff;
+background:var(--proposal-pdf-paper);
 }
-.proposal-premium-page{
+.proposal-pdf-page{
 width:794px;
 min-width:794px;
 max-width:794px;
-margin:0;
-background:var(--proposal-premium-paper);
-display:grid;
-grid-template-columns:318px 476px;
+background:var(--proposal-pdf-paper);
+padding:18px;
+}
+.proposal-pdf-card{
+background:var(--proposal-pdf-paper);
+border-radius:28px;
 overflow:hidden;
 }
-.proposal-premium-image-column{
+.proposal-pdf-cover{
+width:100%;
 background:#d7cdc2;
-height:1123px;
-position:relative;
-overflow:hidden;
 }
-.proposal-premium-image{
+.proposal-pdf-cover img{
 display:block;
 width:100%;
-height:100%;
+height:auto;
+max-height:none;
 object-fit:cover;
 object-position:center;
 }
-.proposal-premium-image-overlay{
-position:absolute;
-inset:0;
-background:linear-gradient(to bottom,rgba(0,0,0,0.02),rgba(0,0,0,0.06));
-pointer-events:none;
+.proposal-pdf-content{
+padding:0;
 }
-.proposal-premium-content{
-padding:28px 24px 22px;
-display:flex;
-flex-direction:column;
-}
-.proposal-premium-header{
+.proposal-pdf-title-wrap{
+padding:26px 26px 10px;
 text-align:center;
 }
-.proposal-premium-title{
+.proposal-pdf-title{
 margin:0;
 font-family:'Playfair Display',serif;
 font-size:34px;
 font-weight:600;
-line-height:1.12;
+line-height:1.14;
 letter-spacing:0.01em;
 word-break:break-word;
 }
-.proposal-premium-studio{
+.proposal-pdf-studio{
 margin-top:16px;
 font-family:'Playfair Display',serif;
-font-size:22px;
+font-size:24px;
 line-height:1.2;
-word-break:break-word;
 }
-.proposal-premium-phone{
+.proposal-pdf-phone{
 margin-top:6px;
-font-size:13px;
-color:var(--proposal-premium-muted);
-word-break:break-word;
+font-size:16px;
+color:var(--proposal-pdf-muted);
 }
-.proposal-premium-meta{
-margin-top:18px;
-padding:14px 16px;
-border-radius:18px;
-background:#ffffff;
-border:1px solid var(--proposal-premium-border);
-display:grid;
-grid-template-columns:1fr;
-gap:10px;
-}
-.proposal-premium-meta-item{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:14px;
-font-size:13px;
-line-height:1.45;
-}
-.proposal-premium-meta-item span:first-child{
-color:var(--proposal-premium-muted);
-}
-.proposal-premium-row-grid{
+.proposal-pdf-meta{
+margin:0 20px 18px;
+padding:16px 18px;
+background:var(--proposal-pdf-card);
+border:1px solid var(--proposal-pdf-border);
+border-radius:20px;
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:14px;
-margin-top:14px;
+gap:12px 18px;
 }
-.proposal-premium-section{
-margin-top:14px;
-padding:16px;
-background:#ffffff;
-border:1px solid var(--proposal-premium-border);
-border-radius:18px;
-break-inside:avoid;
-page-break-inside:avoid;
-}
-.proposal-premium-section-title{
-margin:0 0 10px 0;
-font-family:'Playfair Display',serif;
-font-size:24px;
-font-weight:600;
-line-height:1.12;
-}
-.proposal-premium-service-row{
+.proposal-pdf-meta-item{
 display:flex;
 justify-content:space-between;
-gap:12px;
-padding:10px 0;
-border-bottom:1px solid var(--proposal-premium-border);
-font-size:13px;
+gap:14px;
+font-size:15px;
 line-height:1.45;
 }
-.proposal-premium-service-row:last-child{
+.proposal-pdf-meta-item span:first-child{
+color:var(--proposal-pdf-muted);
+}
+.proposal-pdf-section{
+margin:0 20px 18px;
+padding:18px 20px;
+background:var(--proposal-pdf-card);
+border:1px solid var(--proposal-pdf-border);
+border-radius:22px;
+page-break-inside:avoid;
+break-inside:avoid;
+}
+.proposal-pdf-section-title{
+margin:0 0 14px 0;
+font-family:'Playfair Display',serif;
+font-size:26px;
+line-height:1.15;
+}
+.proposal-pdf-service-row{
+display:flex;
+justify-content:space-between;
+gap:16px;
+padding:11px 0;
+border-bottom:1px solid var(--proposal-pdf-border);
+font-size:15px;
+line-height:1.45;
+}
+.proposal-pdf-service-row:last-child{
 border-bottom:none;
 }
-.proposal-premium-service-row span:first-child{
-color:var(--proposal-premium-muted);
+.proposal-pdf-service-row span:first-child{
+color:var(--proposal-pdf-muted);
 }
-.proposal-premium-service-row span:last-child{
+.proposal-pdf-service-row span:last-child{
 text-align:right;
 font-weight:500;
 }
-.proposal-premium-summary-row{
+.proposal-pdf-summary-row{
 display:flex;
 justify-content:space-between;
-gap:12px;
-padding:10px 0;
-border-bottom:1px solid var(--proposal-premium-border);
-font-size:13px;
+gap:16px;
+padding:11px 0;
+border-bottom:1px solid var(--proposal-pdf-border);
+font-size:15px;
 line-height:1.45;
 }
-.proposal-premium-summary-row:last-child{
+.proposal-pdf-summary-row:last-child{
 border-bottom:none;
 }
-.proposal-premium-list{
+.proposal-pdf-list{
 margin:0;
-padding-left:20px;
-line-height:1.7;
-font-size:13px;
-color:var(--proposal-premium-muted);
+padding-left:22px;
+font-size:15px;
+line-height:1.8;
+color:var(--proposal-pdf-muted);
 }
-.proposal-premium-copy{
-color:var(--proposal-premium-muted);
-font-size:13px;
-line-height:1.7;
+.proposal-pdf-copy{
+font-size:15px;
+line-height:1.8;
+color:var(--proposal-pdf-muted);
 }
-.proposal-premium-copy ul{
+.proposal-pdf-copy ul{
 margin:10px 0 0;
-padding-left:20px;
+padding-left:22px;
 }
-.proposal-premium-footer{
-margin-top:10px;
+.proposal-pdf-footer{
+padding:4px 0 2px;
 text-align:center;
-font-size:11px;
+font-size:12px;
 line-height:1.7;
-color:var(--proposal-premium-soft);
+color:var(--proposal-pdf-soft);
 }
-.proposal-premium-footer p{
+.proposal-pdf-footer p{
 margin:0;
 }
-.proposal-premium-footer p + p{
+.proposal-pdf-footer p + p{
 margin-top:4px;
 }
 @page{
@@ -565,136 +680,108 @@ margin:0 !important;
 padding:0 !important;
 background:#ffffff !important;
 }
+body{
+-webkit-print-color-adjust:exact !important;
+print-color-adjust:exact !important;
+}
 }
 </style>
 </head>
 <body>
 <div class="print-root">
-  <div class="proposal-premium-page">
-    <div class="proposal-premium-image-column">
-      <img class="proposal-premium-image" src="${escapeHtml(coverImage)}" alt="Proposal Cover">
-      <div class="proposal-premium-image-overlay"></div>
-    </div>
-
-    <div class="proposal-premium-content">
-      <div class="proposal-premium-header">
-        <h1 class="proposal-premium-title" style="color:${escapeHtml(accentColor)}">${escapeHtml(proposalTitle)}</h1>
-        <div class="proposal-premium-studio">${escapeHtml(profile?.studio_name || "")}</div>
-        <div class="proposal-premium-phone">${escapeHtml(profile?.phone || "")}</div>
+  <div class="proposal-pdf-page">
+    <div class="proposal-pdf-card">
+      <div class="proposal-pdf-cover">
+        <img src="${escapeHtml(coverImage)}" alt="Proposal Cover">
       </div>
 
-      <div class="proposal-premium-meta">
-        <div class="proposal-premium-meta-item">
-          <span>Prepared For</span>
-          <span>${escapeHtml(data?.client_name || "")}</span>
-        </div>
-        <div class="proposal-premium-meta-item">
-          <span>Event Dates</span>
-          <span>${escapeHtml(eventDateText)}</span>
-        </div>
-      </div>
-
-      <div class="proposal-premium-row-grid">
-        <div class="proposal-premium-section">
-          <h2 class="proposal-premium-section-title">Services & Coverage</h2>
-          ${buildPremiumServicesHtml(services)}
+      <div class="proposal-pdf-content">
+        <div class="proposal-pdf-title-wrap">
+          <h1 class="proposal-pdf-title" style="color:${escapeHtml(accentColor)}">${escapeHtml(proposalTitle)}</h1>
+          <div class="proposal-pdf-studio">${escapeHtml(profile?.studio_name || "")}</div>
+          <div class="proposal-pdf-phone">${escapeHtml(profile?.phone || "")}</div>
         </div>
 
-        <div class="proposal-premium-section">
-          <h2 class="proposal-premium-section-title">Investment Summary</h2>
+        <div class="proposal-pdf-meta">
+          <div class="proposal-pdf-meta-item">
+            <span>Prepared For</span>
+            <span>${escapeHtml(data?.client_name || "")}</span>
+          </div>
+          <div class="proposal-pdf-meta-item">
+            <span>Event Dates</span>
+            <span>${escapeHtml(eventDateText)}</span>
+          </div>
+        </div>
 
-          <div class="proposal-premium-summary-row">
+        <div class="proposal-pdf-section">
+          <h2 class="proposal-pdf-section-title">Services & Coverage</h2>
+          ${buildPremiumServicesHtmlForPdf(services)}
+        </div>
+
+        <div class="proposal-pdf-section">
+          <h2 class="proposal-pdf-section-title">Investment Summary</h2>
+
+          <div class="proposal-pdf-summary-row">
             <strong>Total Investment</strong>
             <strong>${escapeHtml(formatMoney(data?.total))}</strong>
           </div>
 
-          <div class="proposal-premium-summary-row">
+          <div class="proposal-pdf-summary-row">
             <strong>Advance Required</strong>
             <strong>${escapeHtml(formatMoney(data?.advance))}</strong>
           </div>
 
-          <div class="proposal-premium-summary-row">
+          <div class="proposal-pdf-summary-row">
             <strong>Balance</strong>
             <strong>${escapeHtml(formatMoney(data?.balance))}</strong>
           </div>
         </div>
-      </div>
 
-      <div class="proposal-premium-section">
-        <h2 class="proposal-premium-section-title">Deliverables</h2>
-        <ul class="proposal-premium-list">
-          ${buildPremiumDeliverablesHtml(deliverables)}
-        </ul>
-      </div>
-
-      <div class="proposal-premium-section">
-        <h2 class="proposal-premium-section-title">Why Choose Us</h2>
-        <div class="proposal-premium-copy">
-          We believe every celebration has a story worth preserving forever.
-          Our team focuses on capturing real emotions, beautiful details, and timeless moments.
-
-          <ul>
-            <li>Professional and experienced photography team</li>
-            <li>Creative cinematic storytelling approach</li>
-            <li>High quality editing and color grading</li>
-            <li>Premium album design and printing</li>
-            <li>Reliable service and timely delivery</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="proposal-premium-section">
-        <h2 class="proposal-premium-section-title">Booking Terms</h2>
-        <div class="proposal-premium-copy">
-          <ul>
-            <li>Booking will be confirmed only after advance payment.</li>
-            <li>Event date will be reserved only after confirmation.</li>
-            <li>Remaining balance must be cleared before final delivery.</li>
-            <li>Delivery timeline may vary depending on project scope.</li>
-            <li>Any additional services will be charged separately.</li>
+        <div class="proposal-pdf-section">
+          <h2 class="proposal-pdf-section-title">Deliverables</h2>
+          <ul class="proposal-pdf-list">
+            ${buildPremiumDeliverablesHtml(deliverables)}
           </ul>
         </div>
 
-        <div class="proposal-premium-footer">
-          <p><strong>Generated by StudioOS</strong></p>
-          <p>Professional Photography Business Operating System</p>
+        <div class="proposal-pdf-section">
+          <h2 class="proposal-pdf-section-title">Why Choose Us</h2>
+          <div class="proposal-pdf-copy">
+            We believe every celebration has a story worth preserving forever.
+            Our team focuses on capturing real emotions, beautiful details, and timeless moments.
+
+            <ul>
+              <li>Professional and experienced photography team</li>
+              <li>Creative cinematic storytelling approach</li>
+              <li>High quality editing and color grading</li>
+              <li>Premium album design and printing</li>
+              <li>Reliable service and timely delivery</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="proposal-pdf-section">
+          <h2 class="proposal-pdf-section-title">Booking Terms</h2>
+          <div class="proposal-pdf-copy">
+            <ul>
+              <li>Booking will be confirmed only after advance payment.</li>
+              <li>Event date will be reserved only after confirmation.</li>
+              <li>Remaining balance must be cleared before final delivery.</li>
+              <li>Delivery timeline may vary depending on project scope.</li>
+              <li>Any additional services will be charged separately.</li>
+            </ul>
+          </div>
+
+          <div class="proposal-pdf-footer">
+            <p><strong>Generated by StudioOS</strong></p>
+            <p>Professional Photography Business Operating System</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-<script>
-(function(){
-  const triggerPrint = async () => {
-    const images = Array.from(document.images || []);
-    await Promise.all(images.map((img) => {
-      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-      return new Promise((resolve) => {
-        let done = false;
-        const finish = () => {
-          if (done) return;
-          done = true;
-          resolve();
-        };
-        img.addEventListener('load', finish, { once:true });
-        img.addEventListener('error', finish, { once:true });
-        setTimeout(finish, 8000);
-      });
-    }));
-
-    if (document.fonts && document.fonts.ready) {
-      try { await document.fonts.ready; } catch(e){}
-    }
-
-    setTimeout(() => {
-      window.focus();
-      window.print();
-    }, 300);
-  };
-
-  window.addEventListener('load', triggerPrint);
-})();
-</script>
+${buildPrintLifecycleScript()}
 </body>
 </html>
 `
@@ -758,38 +845,7 @@ margin:0;
 </head>
 <body>
 ${proposalPage.outerHTML}
-<script>
-(function(){
-  const triggerPrint = async () => {
-    const images = Array.from(document.images || []);
-    await Promise.all(images.map((img) => {
-      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-      return new Promise((resolve) => {
-        let done = false;
-        const finish = () => {
-          if (done) return;
-          done = true;
-          resolve();
-        };
-        img.addEventListener('load', finish, { once:true });
-        img.addEventListener('error', finish, { once:true });
-        setTimeout(finish, 8000);
-      });
-    }));
-
-    if (document.fonts && document.fonts.ready) {
-      try { await document.fonts.ready; } catch(e){}
-    }
-
-    setTimeout(() => {
-      window.focus();
-      window.print();
-    }, 300);
-  };
-
-  window.addEventListener('load', triggerPrint);
-})();
-</script>
+${buildPrintLifecycleScript()}
 </body>
 </html>
 `
@@ -803,13 +859,16 @@ throw new Error("Print document not available")
 
 const printWindow = window.open("", "_blank")
 
-if(!printWindow){
+if(isPopupBlocked(printWindow)){
 throw new Error("Popup blocked. Please allow popups and try again.")
 }
 
 printWindow.document.open()
 printWindow.document.write(html)
 printWindow.document.close()
+
+await waitForFontsInWindow(printWindow)
+await waitForImagesInWindow(printWindow)
 
 return printWindow
 }
@@ -824,7 +883,7 @@ pdfExportScrollTop = window.pageYOffset || document.documentElement.scrollTop ||
 
 let printHtml = ""
 
-if(isPremiumProposalRendered()){
+if(isPremiumUser(activeProposalProfile)){
 printHtml = buildPremiumPrintDocument(activeProposalData, activeProposalProfile)
 }else{
 printHtml = buildDefaultPrintDocument()
@@ -1531,6 +1590,7 @@ page.innerHTML = `
     </div>
 
   </div>
+
 </div>
 `
 
