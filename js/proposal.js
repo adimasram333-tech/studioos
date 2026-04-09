@@ -345,7 +345,7 @@ return html
 
 
 // ======================
-// PDF / PRINT HELPERS
+// PDF / DOWNLOAD HELPERS
 // ======================
 
 function setDownloadButtonState(isLoading){
@@ -373,25 +373,27 @@ const themeLink = document.getElementById("theme-style")
 return themeLink?.href || ""
 }
 
-function isPopupBlocked(win){
-return !win || win.closed || typeof win.closed === "undefined"
+function ensureHtml2PdfReady(){
+if(typeof window.html2pdf !== "function"){
+throw new Error("PDF library not loaded")
+}
 }
 
-async function waitForFontsInWindow(printWindow){
+async function waitForDocumentFonts(){
 try{
-if(printWindow?.document?.fonts?.ready){
-await printWindow.document.fonts.ready
+if(document?.fonts?.ready){
+await document.fonts.ready
 }
 }catch(e){
-console.log("Print font readiness skipped", e)
+console.log("Document font readiness skipped", e)
 }
 }
 
-async function waitForImagesInWindow(printWindow){
+async function waitForImagesInElement(root){
 
-if(!printWindow?.document) return
+if(!root) return
 
-const images = Array.from(printWindow.document.images || [])
+const images = Array.from(root.querySelectorAll("img") || [])
 
 if(!images.length) return
 
@@ -418,62 +420,44 @@ setTimeout(finish, 10000)
 
 }
 
-function buildPrintLifecycleScript(){
-return `
-<script>
-(function(){
-  let alreadyPrinted = false;
+function cleanupPdfSandbox(){
+const existing = document.getElementById("proposalPdfSandbox")
+if(existing){
+existing.remove()
+}
+}
 
-  async function waitForAssets(){
-    const images = Array.from(document.images || []);
-    await Promise.all(images.map((img) => {
-      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-      return new Promise((resolve) => {
-        let done = false;
-        const finish = () => {
-          if (done) return;
-          done = true;
-          resolve();
-        };
-        img.addEventListener('load', finish, { once:true });
-        img.addEventListener('error', finish, { once:true });
-        setTimeout(finish, 10000);
-      });
-    }));
+function extractBodyMarkupFromHtml(html){
+const parser = new DOMParser()
+const doc = parser.parseFromString(html, "text/html")
+doc.querySelectorAll("script").forEach((el) => el.remove())
+return doc.body ? doc.body.innerHTML : ""
+}
 
-    if (document.fonts && document.fonts.ready) {
-      try {
-        await document.fonts.ready;
-      } catch(e){}
-    }
-  }
+function createPdfSandbox(innerHtml){
 
-  async function runPrint(){
-    if (alreadyPrinted) return;
-    alreadyPrinted = true;
+cleanupPdfSandbox()
 
-    await waitForAssets();
+const sandbox = document.createElement("div")
+sandbox.id = "proposalPdfSandbox"
+sandbox.setAttribute("aria-hidden", "true")
+sandbox.style.position = "fixed"
+sandbox.style.left = "-100000px"
+sandbox.style.top = "0"
+sandbox.style.width = "794px"
+sandbox.style.minWidth = "794px"
+sandbox.style.maxWidth = "794px"
+sandbox.style.background = "#ffffff"
+sandbox.style.opacity = "1"
+sandbox.style.pointerEvents = "none"
+sandbox.style.zIndex = "-1"
+sandbox.style.overflow = "visible"
 
-    setTimeout(() => {
-      window.focus();
-      window.print();
-    }, 300);
-  }
+sandbox.innerHTML = innerHtml
 
-  window.addEventListener('load', runPrint);
+document.body.appendChild(sandbox)
 
-  if (document.readyState === 'complete') {
-    runPrint();
-  }
-
-  window.addEventListener('afterprint', () => {
-    setTimeout(() => {
-      try { window.close(); } catch(e){}
-    }, 200);
-  });
-})();
-</script>
-`
+return sandbox
 }
 
 function buildPremiumPrintDocument(data, profile){
@@ -518,13 +502,13 @@ body{
 -webkit-font-smoothing:antialiased;
 }
 .print-root{
-width:100%;
+width:794px;
 max-width:794px;
 margin:0 auto;
 background:var(--proposal-pdf-paper);
 }
 .proposal-pdf-page{
-width:100%;
+width:794px;
 background:var(--proposal-pdf-paper);
 padding:18px;
 }
@@ -674,45 +658,6 @@ margin:0;
 .proposal-pdf-footer p + p{
 margin-top:4px;
 }
-@page{
-size:A4;
-margin:10mm;
-}
-@media print{
-html,body{
-margin:0 !important;
-padding:0 !important;
-background:#ffffff !important;
-width:auto !important;
-height:auto !important;
-overflow:visible !important;
-}
-body{
--webkit-print-color-adjust:exact !important;
-print-color-adjust:exact !important;
-}
-.print-root{
-width:100% !important;
-max-width:none !important;
-margin:0 !important;
-background:var(--proposal-pdf-paper) !important;
-overflow:visible !important;
-}
-.proposal-pdf-page{
-width:100% !important;
-padding:0 !important;
-overflow:visible !important;
-}
-.proposal-pdf-card{
-border-radius:0 !important;
-overflow:visible !important;
-}
-.proposal-pdf-cover{
-border-radius:0 !important;
-page-break-inside:avoid;
-break-inside:avoid;
-}
-}
 </style>
 </head>
 <body>
@@ -809,7 +754,6 @@ break-inside:avoid;
     </div>
   </div>
 </div>
-${buildPrintLifecycleScript()}
 </body>
 </html>
 `
@@ -859,18 +803,18 @@ body{
 print-color-adjust:exact !important;
 }
 #proposalPage{
-width:100% !important;
+width:794px !important;
 max-width:794px !important;
-min-width:0 !important;
+min-width:794px !important;
 margin:0 auto !important;
 box-shadow:none !important;
 background:#ffffff !important;
 overflow:visible !important;
 }
 .page{
-width:100% !important;
+width:794px !important;
 max-width:794px !important;
-min-width:0 !important;
+min-width:794px !important;
 margin:0 auto !important;
 box-shadow:none !important;
 background:#ffffff !important;
@@ -989,54 +933,65 @@ break-inside:avoid;
 .whatsappBox{
 display:none !important;
 }
-@page{
-size:A4;
-margin:10mm;
-}
-@media print{
-html,
-body{
-margin:0 !important;
-padding:0 !important;
-background:#ffffff !important;
-overflow:visible !important;
-}
-#proposalPage,
-.page,
-.content{
-overflow:visible !important;
-}
-}
 </style>
 </head>
 <body>
 ${proposalPage.outerHTML}
-${buildPrintLifecycleScript()}
 </body>
 </html>
 `
 }
 
-async function openPrintWindowWithDocument(html){
+async function downloadHtmlAsPdf(html, filename){
 
-if(!html){
-throw new Error("Print document not available")
+ensureHtml2PdfReady()
+
+const markup = extractBodyMarkupFromHtml(html)
+
+if(!markup){
+throw new Error("PDF content not available")
 }
 
-const printWindow = window.open("", "_blank")
+const sandbox = createPdfSandbox(markup)
 
-if(isPopupBlocked(printWindow)){
-throw new Error("Popup blocked. Please allow popups and try again.")
+try{
+await waitForDocumentFonts()
+await waitForImagesInElement(sandbox)
+
+const worker = window.html2pdf()
+
+await worker
+.set({
+margin: 0,
+filename: filename,
+image: { type: "jpeg", quality: 0.98 },
+html2canvas: {
+scale: 2,
+useCORS: true,
+allowTaint: false,
+backgroundColor: "#ffffff",
+scrollX: 0,
+scrollY: 0,
+windowWidth: 794,
+width: 794
+},
+jsPDF: {
+unit: "pt",
+format: "a4",
+orientation: "portrait",
+compress: true
+},
+pagebreak: {
+mode: ["css", "legacy"]
+}
+})
+.from(sandbox)
+.save()
+
+}finally{
+cleanupPdfSandbox()
 }
 
-printWindow.document.open()
-printWindow.document.write(html)
-printWindow.document.close()
-
-await waitForFontsInWindow(printWindow)
-await waitForImagesInWindow(printWindow)
-
-return printWindow
 }
 
 async function downloadProposalPdf(){
@@ -1047,19 +1002,22 @@ try{
 
 pdfExportScrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
 
-let printHtml = ""
+let pdfHtml = ""
+let filename = "photography-proposal.pdf"
 
 if(isPremiumUser(activeProposalProfile)){
-printHtml = buildPremiumPrintDocument(activeProposalData, activeProposalProfile)
+pdfHtml = buildPremiumPrintDocument(activeProposalData, activeProposalProfile)
+filename = "premium-photography-proposal.pdf"
 }else{
-printHtml = buildDefaultPrintDocument()
+pdfHtml = buildDefaultPrintDocument()
+filename = "photography-proposal.pdf"
 }
 
-await openPrintWindowWithDocument(printHtml)
+await downloadHtmlAsPdf(pdfHtml, filename)
 
 }catch(err){
 console.error("PDF DOWNLOAD ERROR:", err)
-alert(err?.message || "PDF open failed")
+alert(err?.message || "PDF download failed")
 }finally{
 window.scrollTo(0, pdfExportScrollTop)
 setDownloadButtonState(false)
@@ -1545,89 +1503,6 @@ border-radius:18px;
 }
 .proposal-premium-btn-pdf{
 background:var(--proposal-premium-dark);
-}
-}
-@page{
-size:A4;
-margin:0;
-}
-@media print{
-html,
-body{
-background:#ffffff !important;
-margin:0 !important;
-padding:0 !important;
-overflow:visible !important;
-}
-body{
--webkit-print-color-adjust:exact !important;
-print-color-adjust:exact !important;
-}
-#proposalPage.proposal-premium-root{
-width:794px !important;
-max-width:794px !important;
-min-width:794px !important;
-margin:0 auto !important;
-background:#ffffff !important;
-box-shadow:none !important;
-overflow:visible !important;
-}
-.proposal-premium-shell{
-background:#ffffff !important;
-padding:0 !important;
-min-height:auto !important;
-overflow:visible !important;
-}
-.proposal-premium-page{
-width:794px !important;
-max-width:794px !important;
-min-width:794px !important;
-min-height:auto !important;
-border-radius:0 !important;
-box-shadow:none !important;
-grid-template-columns:318px 476px !important;
-display:grid !important;
-overflow:visible !important;
-}
-.proposal-premium-image-column{
-min-height:auto !important;
-overflow:visible !important;
-}
-.proposal-premium-image{
-height:100% !important;
-object-fit:cover !important;
-}
-.proposal-premium-content{
-padding:28px 24px 22px !important;
-overflow:visible !important;
-}
-.proposal-premium-title{
-font-size:34px !important;
-}
-.proposal-premium-studio{
-font-size:22px !important;
-}
-.proposal-premium-phone{
-font-size:13px !important;
-}
-.proposal-premium-meta{
-grid-template-columns:1fr !important;
-padding:14px 16px !important;
-}
-.proposal-premium-meta-item{
-flex-direction:row !important;
-align-items:center !important;
-}
-.proposal-premium-section,
-.proposal-premium-meta{
-background:#ffffff !important;
-box-shadow:none !important;
-break-inside:avoid;
-page-break-inside:avoid;
-overflow:visible !important;
-}
-.proposal-premium-actions{
-display:none !important;
 }
 }
 `
