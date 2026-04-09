@@ -50,6 +50,14 @@ shortId = slugParts[slugParts.length - 1]
 
 
 // ======================
+// SHARED STATE
+// ======================
+
+let currentProposalData = null
+let currentProposalProfile = null
+
+
+// ======================
 // FORMAT MONEY
 // ======================
 
@@ -360,6 +368,101 @@ setDownloadButtonState(false)
 }
 
 }
+
+
+// ======================
+// GLOBAL ACTIONS
+// ======================
+
+function buildProposalShortLink(data){
+
+if(!data) return window.location.href
+
+let clientSlug =
+(data.client_name || "")
+.toLowerCase()
+.replace(/[^a-z0-9 ]/g,"")
+.replace(/\s+/g,"-")
+.replace(/^-+|-+$/g,"")
+
+if(!clientSlug){
+clientSlug = "proposal"
+}
+
+if(data.short_id){
+return window.location.origin + "/studioos/p/" + clientSlug + "-" + data.short_id
+}
+
+if(data.id){
+return window.location.origin + "/studioos/proposal.html?id=" + data.id
+}
+
+return window.location.href
+
+}
+
+function buildWhatsAppUrl(data, profile){
+
+const phoneRaw = String(data?.phone || "").trim()
+const phoneDigits = phoneRaw.replace(/\D/g,"")
+
+if(!phoneDigits){
+return null
+}
+
+const normalizedPhone =
+phoneDigits.length === 10 ? "91" + phoneDigits : phoneDigits
+
+const shortLink = buildProposalShortLink(data)
+
+const message =
+`Hello ${data?.client_name || "Client"},
+
+Your photography proposal is ready.
+
+View your proposal:
+${shortLink}
+
+For booking contact:
+
+${profile?.studio_name || ""}
+Phone: ${profile?.phone || ""}
+
+Powered by StudioOS`
+
+return "https://wa.me/" + normalizedPhone + "?text=" + encodeURIComponent(message)
+
+}
+
+function openProposalWhatsApp(){
+
+const data = currentProposalData
+const profile = currentProposalProfile
+
+if(!data){
+alert("Proposal data not available")
+return
+}
+
+const url = buildWhatsAppUrl(data, profile)
+
+if(!url){
+alert("Client phone number not available")
+return
+}
+
+window.open(url,"_blank","noopener,noreferrer")
+
+}
+
+async function handleProposalDownloadPdf(){
+await downloadProposalPdf()
+}
+
+window.sendWhatsApp = openProposalWhatsApp
+window.sendProposalOnWhatsApp = openProposalWhatsApp
+window.downloadPDF = handleProposalDownloadPdf
+window.downloadProposalPdf = handleProposalDownloadPdf
 
 
 // ======================
@@ -1046,6 +1149,14 @@ console.log("Profile load error",e)
 
 
 // ======================
+// SAVE SHARED STATE
+// ======================
+
+currentProposalData = data
+currentProposalProfile = profile
+
+
+// ======================
 // THEME ENGINE
 // ======================
 
@@ -1223,53 +1334,16 @@ list.innerHTML += "<li>Complimentary Gift : " + escapeHtml(deliverables.gift.nam
 // WHATSAPP SHARE
 // ======================
 
-window.sendWhatsApp = function(){
-
-const phone = data.phone || ""
-
-let clientSlug =
-(data.client_name || "")
-.toLowerCase()
-.replace(/[^a-z0-9 ]/g,"")
-.replace(/\s+/g,"-")
-
-const shortLink =
-window.location.origin +
-"/studioos/p/" +
-clientSlug +
-"-" +
-(data.short_id || "")
-
-const message =
-`Hello ${data.client_name},
-
-Your photography proposal is ready.
-
-View your proposal:
-${shortLink}
-
-For booking contact:
-
-${profile?.studio_name || ""}
-Phone: ${profile?.phone || ""}
-
-Powered by StudioOS`
-
-const url =
-"https://wa.me/91" + phone + "?text=" + encodeURIComponent(message)
-
-window.open(url,"_blank")
-
-}
+window.sendWhatsApp = openProposalWhatsApp
+window.sendProposalOnWhatsApp = openProposalWhatsApp
 
 
 // ======================
 // PDF EXPORT
 // ======================
 
-window.downloadPDF = async function(){
-await downloadProposalPdf()
-}
+window.downloadPDF = handleProposalDownloadPdf
+window.downloadProposalPdf = handleProposalDownloadPdf
 
 }
 
