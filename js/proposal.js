@@ -889,54 +889,11 @@ printHtml = buildPremiumPrintDocument(activeProposalData, activeProposalProfile)
 printHtml = buildDefaultPrintDocument()
 }
 
-// CREATE HIDDEN IFRAME (NO POPUP WINDOW)
-const iframe = document.createElement("iframe")
-iframe.style.position = "fixed"
-iframe.style.right = "0"
-iframe.style.bottom = "0"
-iframe.style.width = "0"
-iframe.style.height = "0"
-iframe.style.border = "0"
-iframe.style.opacity = "0"
-iframe.style.pointerEvents = "none"
-
-document.body.appendChild(iframe)
-
-const doc = iframe.contentWindow.document
-doc.open()
-doc.write(printHtml)
-doc.close()
-
-await new Promise((resolve) => {
-let done = false
-
-const finish = () => {
-if(done) return
-done = true
-resolve()
-}
-
-iframe.onload = finish
-setTimeout(finish, 1000)
-})
-
-await waitForFontsInWindow(iframe.contentWindow)
-await waitForImagesInWindow(iframe.contentWindow)
-
-iframe.contentWindow.focus()
-iframe.contentWindow.print()
-
-setTimeout(() => {
-try{
-document.body.removeChild(iframe)
-}catch(e){
-console.log("Iframe cleanup skipped", e)
-}
-}, 1500)
+await openPrintWindowWithDocument(printHtml)
 
 }catch(err){
 console.error("PDF DOWNLOAD ERROR:", err)
-alert("PDF download failed")
+alert(err?.message || "PDF open failed")
 }finally{
 window.scrollTo(0, pdfExportScrollTop)
 setDownloadButtonState(false)
