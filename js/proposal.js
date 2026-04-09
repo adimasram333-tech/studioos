@@ -341,13 +341,9 @@ btn.style.cursor = "pointer"
 
 }
 
-function ensurePdfLibrariesReady(){
-if(typeof window.html2canvas !== "function"){
-throw new Error("PDF canvas library not loaded")
-}
-
-if(!window.jspdf?.jsPDF){
-throw new Error("PDF generator not loaded")
+function ensurePdfLibraryReady(){
+if(typeof window.html2pdf !== "function"){
+throw new Error("PDF library not loaded")
 }
 }
 
@@ -481,108 +477,55 @@ page.classList.remove("proposal-pdf-export-target")
 
 }
 
-async function renderProposalCanvas(element){
+function getElementExportWidth(element){
 
-ensurePdfLibrariesReady()
+const rectWidth = Math.ceil(element.getBoundingClientRect().width || 0)
+const offsetWidth = Math.ceil(element.offsetWidth || 0)
+const scrollWidth = Math.ceil(element.scrollWidth || 0)
+
+return Math.max(rectWidth, offsetWidth, scrollWidth, 320)
+}
+
+async function downloadElementAsPdf(element, filename){
+
+ensurePdfLibraryReady()
 
 await waitForDocumentFonts(document)
 await waitForImagesInElement(element)
 await waitForNextPaint()
 
-const rect = element.getBoundingClientRect()
-const exportWidth = Math.max(
-Math.ceil(rect.width || 0),
-Math.ceil(element.offsetWidth || 0),
-Math.ceil(element.scrollWidth || 0),
-320
-)
+const exportWidth = getElementExportWidth(element)
 
-const exportHeight = Math.max(
-Math.ceil(element.scrollHeight || 0),
-Math.ceil(element.offsetHeight || 0),
-Math.ceil(rect.height || 0),
-1
-)
+const worker = window.html2pdf()
 
-return await window.html2canvas(element, {
+await worker
+.set({
+margin: [0, 0, 0, 0],
+filename: filename,
+image: { type: "jpeg", quality: 0.98 },
+html2canvas: {
 scale: 2,
 useCORS: true,
 allowTaint: false,
 backgroundColor: "#ffffff",
 scrollX: 0,
-scrollY: -window.scrollY,
-windowWidth: document.documentElement.clientWidth,
-windowHeight: document.documentElement.clientHeight,
+scrollY: 0,
+windowWidth: exportWidth,
 width: exportWidth,
-height: exportHeight,
 logging: false
-})
-
-}
-
-function addCanvasAsPagedPdf(canvas, filename){
-
-const { jsPDF } = window.jspdf
-const pdf = new jsPDF({
-orientation: "portrait",
+},
+jsPDF: {
 unit: "pt",
 format: "a4",
+orientation: "portrait",
 compress: true
+},
+pagebreak: {
+mode: ["css", "legacy"]
+}
 })
-
-const pageWidth = pdf.internal.pageSize.getWidth()
-const pageHeight = pdf.internal.pageSize.getHeight()
-
-const sliceHeightPx = Math.max(
-1,
-Math.floor(canvas.width * (pageHeight / pageWidth))
-)
-
-let renderedHeight = 0
-let pageIndex = 0
-
-while(renderedHeight < canvas.height){
-
-const pageCanvas = document.createElement("canvas")
-pageCanvas.width = canvas.width
-pageCanvas.height = Math.min(sliceHeightPx, canvas.height - renderedHeight)
-
-const pageCtx = pageCanvas.getContext("2d")
-pageCtx.drawImage(
-canvas,
-0,
-renderedHeight,
-canvas.width,
-pageCanvas.height,
-0,
-0,
-canvas.width,
-pageCanvas.height
-)
-
-const pageImageData = pageCanvas.toDataURL("image/jpeg", 0.98)
-const pageImageHeight = (pageCanvas.height * pageWidth) / pageCanvas.width
-
-if(pageIndex > 0){
-pdf.addPage()
-}
-
-pdf.addImage(
-pageImageData,
-"JPEG",
-0,
-0,
-pageWidth,
-pageImageHeight,
-undefined,
-"FAST"
-)
-
-renderedHeight += pageCanvas.height
-pageIndex += 1
-}
-
-pdf.save(filename)
+.from(element)
+.save()
 
 }
 
@@ -601,8 +544,7 @@ filename = "premium-photography-proposal.pdf"
 }
 
 const target = applyPdfExportMode()
-const canvas = await renderProposalCanvas(target)
-addCanvasAsPagedPdf(canvas, filename)
+await downloadElementAsPdf(target, filename)
 
 }catch(err){
 console.error("PDF DOWNLOAD ERROR:", err)
