@@ -379,10 +379,10 @@ throw new Error("PDF library not loaded")
 }
 }
 
-async function waitForDocumentFonts(){
+async function waitForDocumentFonts(doc = document){
 try{
-if(document?.fonts?.ready){
-await document.fonts.ready
+if(doc?.fonts?.ready){
+await doc.fonts.ready
 }
 }catch(e){
 console.log("Document font readiness skipped", e)
@@ -420,6 +420,14 @@ setTimeout(finish, 10000)
 
 }
 
+function waitForNextPaint(){
+return new Promise((resolve) => {
+requestAnimationFrame(() => {
+requestAnimationFrame(resolve)
+})
+})
+}
+
 function cleanupPdfSandbox(){
 const existing = document.getElementById("proposalPdfSandbox")
 if(existing){
@@ -427,56 +435,8 @@ existing.remove()
 }
 }
 
-function extractBodyMarkupFromHtml(html){
-const parser = new DOMParser()
-const doc = parser.parseFromString(html, "text/html")
-doc.querySelectorAll("script").forEach((el) => el.remove())
-return doc.body ? doc.body.innerHTML : ""
-}
-
-function createPdfSandbox(innerHtml){
-
-cleanupPdfSandbox()
-
-const sandbox = document.createElement("div")
-sandbox.id = "proposalPdfSandbox"
-sandbox.setAttribute("aria-hidden", "true")
-sandbox.style.position = "fixed"
-sandbox.style.left = "-100000px"
-sandbox.style.top = "0"
-sandbox.style.width = "794px"
-sandbox.style.minWidth = "794px"
-sandbox.style.maxWidth = "794px"
-sandbox.style.background = "#ffffff"
-sandbox.style.opacity = "1"
-sandbox.style.pointerEvents = "none"
-sandbox.style.zIndex = "-1"
-sandbox.style.overflow = "visible"
-
-sandbox.innerHTML = innerHtml
-
-document.body.appendChild(sandbox)
-
-return sandbox
-}
-
-function buildPremiumPrintDocument(data, profile){
-
-const services = parseServices(data?.services)
-const deliverables = parseDeliverables(data?.deliverables)
-const coverImage = getProposalCoverImage(data, profile)
-const accentColor = getProposalAccentColor(data, profile)
-const proposalTitle = getProposalTitle(data)
-const eventDateText = getEventDateText(data)
-
+function buildPremiumPdfStyles(){
 return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Photography Proposal PDF</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
 --proposal-pdf-paper:#f7f1ea;
@@ -501,14 +461,17 @@ color:var(--proposal-pdf-text);
 body{
 -webkit-font-smoothing:antialiased;
 }
-.print-root{
+.proposal-pdf-root{
 width:794px;
 max-width:794px;
+min-width:794px;
 margin:0 auto;
 background:var(--proposal-pdf-paper);
 }
 .proposal-pdf-page{
 width:794px;
+max-width:794px;
+min-width:794px;
 background:var(--proposal-pdf-paper);
 padding:18px;
 }
@@ -659,9 +622,20 @@ margin:0;
 margin-top:4px;
 }
 </style>
-</head>
-<body>
-<div class="print-root">
+`
+}
+
+function buildPremiumPdfBody(data, profile){
+
+const services = parseServices(data?.services)
+const deliverables = parseDeliverables(data?.deliverables)
+const coverImage = getProposalCoverImage(data, profile)
+const accentColor = getProposalAccentColor(data, profile)
+const proposalTitle = getProposalTitle(data)
+const eventDateText = getEventDateText(data)
+
+return `
+<div class="proposal-pdf-root">
   <div class="proposal-pdf-page">
     <div class="proposal-pdf-card">
       <div class="proposal-pdf-cover">
@@ -754,29 +728,15 @@ margin-top:4px;
     </div>
   </div>
 </div>
-</body>
-</html>
 `
 }
 
-function buildDefaultPrintDocument(){
+function buildDefaultPdfStyles(){
 
-const proposalPage = document.getElementById("proposalPage")
 const themeHref = getThemeHref()
 
-if(!proposalPage){
-return ""
-}
-
 return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Photography Proposal PDF</title>
 <link rel="stylesheet" href="${escapeHtml(themeHref)}">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
 --primary:#C6A348;
@@ -796,13 +756,9 @@ padding:0;
 background:#ffffff !important;
 font-family:'Inter',sans-serif;
 color:var(--text);
-overflow:visible !important;
 }
-body{
--webkit-print-color-adjust:exact !important;
-print-color-adjust:exact !important;
-}
-#proposalPage{
+#proposalPdfSandbox .page,
+#proposalPdfSandbox #proposalPage{
 width:794px !important;
 max-width:794px !important;
 min-width:794px !important;
@@ -811,17 +767,7 @@ box-shadow:none !important;
 background:#ffffff !important;
 overflow:visible !important;
 }
-.page{
-width:794px !important;
-max-width:794px !important;
-min-width:794px !important;
-margin:0 auto !important;
-box-shadow:none !important;
-background:#ffffff !important;
-overflow:visible !important;
-position:relative;
-}
-.hero{
+#proposalPdfSandbox .hero{
 width:100%;
 min-height:320px;
 padding:80px 20px;
@@ -837,7 +783,7 @@ text-align:center;
 position:relative;
 overflow:hidden;
 }
-.hero::after{
+#proposalPdfSandbox .hero::after{
 content:'';
 position:absolute;
 top:0;
@@ -848,31 +794,31 @@ background:rgba(0,0,0,0.45);
 z-index:0;
 pointer-events:none;
 }
-.hero h1,
-.hero p{
+#proposalPdfSandbox .hero h1,
+#proposalPdfSandbox .hero p{
 position:relative;
 z-index:2;
 display:block;
 width:100%;
 color:white;
 }
-.hero h1{
+#proposalPdfSandbox .hero h1{
 font-family:'Playfair Display',serif;
 font-size:36px;
 margin:0;
 white-space:normal !important;
 word-break:break-word;
 }
-.hero p{
+#proposalPdfSandbox .hero p{
 margin-top:10px;
 font-size:18px;
 }
-.content{
+#proposalPdfSandbox .content{
 padding:50px;
 box-sizing:border-box;
 overflow:visible !important;
 }
-.section-title{
+#proposalPdfSandbox .section-title{
 font-family:'Playfair Display',serif;
 font-size:20px;
 margin-bottom:10px;
@@ -881,7 +827,7 @@ padding-bottom:6px;
 page-break-after:avoid;
 break-after:avoid;
 }
-.info-grid{
+#proposalPdfSandbox .info-grid{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:20px;
@@ -889,16 +835,16 @@ margin-bottom:30px;
 page-break-inside:avoid;
 break-inside:avoid;
 }
-.info-box{
+#proposalPdfSandbox .info-box{
 background:#fafafa;
 padding:15px;
 border-left:3px solid var(--primary);
 box-sizing:border-box;
 }
-ul{
+#proposalPdfSandbox ul{
 line-height:1.8;
 }
-.summary{
+#proposalPdfSandbox .summary{
 border:2px solid var(--primary);
 padding:25px;
 background:var(--bg);
@@ -907,22 +853,22 @@ page-break-inside:avoid;
 break-inside:avoid;
 box-sizing:border-box;
 }
-table{
+#proposalPdfSandbox table{
 width:100%;
 border-collapse:collapse;
 page-break-inside:auto;
 break-inside:auto;
 }
-tr{
+#proposalPdfSandbox tr{
 page-break-inside:avoid;
 break-inside:avoid;
 }
-td{
+#proposalPdfSandbox td{
 padding:10px;
 border-bottom:1px solid #eee;
 vertical-align:top;
 }
-.footer{
+#proposalPdfSandbox .footer{
 margin-top:60px;
 text-align:center;
 font-size:13px;
@@ -930,33 +876,67 @@ color:#666;
 page-break-inside:avoid;
 break-inside:avoid;
 }
-.whatsappBox{
+#proposalPdfSandbox .whatsappBox{
 display:none !important;
 }
 </style>
-</head>
-<body>
-${proposalPage.outerHTML}
-</body>
-</html>
 `
 }
 
-async function downloadHtmlAsPdf(html, filename){
+function createPdfSandbox(innerHtml, extraStyles){
+
+cleanupPdfSandbox()
+
+const sandbox = document.createElement("div")
+sandbox.id = "proposalPdfSandbox"
+sandbox.setAttribute("aria-hidden", "true")
+sandbox.style.position = "absolute"
+sandbox.style.left = "0"
+sandbox.style.top = "0"
+sandbox.style.width = "794px"
+sandbox.style.minWidth = "794px"
+sandbox.style.maxWidth = "794px"
+sandbox.style.opacity = "0.01"
+sandbox.style.pointerEvents = "none"
+sandbox.style.zIndex = "-1"
+sandbox.style.overflow = "visible"
+sandbox.style.background = "#ffffff"
+
+sandbox.innerHTML = `
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+${extraStyles || ""}
+${innerHtml}
+`
+
+document.body.appendChild(sandbox)
+
+return sandbox
+}
+
+function createPremiumPdfSandbox(data, profile){
+return createPdfSandbox(buildPremiumPdfBody(data, profile), buildPremiumPdfStyles())
+}
+
+function createDefaultPdfSandbox(){
+const proposalPage = document.getElementById("proposalPage")
+
+if(!proposalPage){
+throw new Error("Proposal content not available")
+}
+
+const clone = proposalPage.cloneNode(true)
+clone.id = "proposalPage"
+
+return createPdfSandbox(clone.outerHTML, buildDefaultPdfStyles())
+}
+
+async function downloadElementAsPdf(element, filename){
 
 ensureHtml2PdfReady()
 
-const markup = extractBodyMarkupFromHtml(html)
-
-if(!markup){
-throw new Error("PDF content not available")
-}
-
-const sandbox = createPdfSandbox(markup)
-
-try{
-await waitForDocumentFonts()
-await waitForImagesInElement(sandbox)
+await waitForDocumentFonts(document)
+await waitForImagesInElement(element)
+await waitForNextPaint()
 
 const worker = window.html2pdf()
 
@@ -968,12 +948,13 @@ image: { type: "jpeg", quality: 0.98 },
 html2canvas: {
 scale: 2,
 useCORS: true,
-allowTaint: false,
+allowTaint: true,
 backgroundColor: "#ffffff",
 scrollX: 0,
 scrollY: 0,
 windowWidth: 794,
-width: 794
+width: 794,
+logging: false
 },
 jsPDF: {
 unit: "pt",
@@ -985,12 +966,8 @@ pagebreak: {
 mode: ["css", "legacy"]
 }
 })
-.from(sandbox)
+.from(element)
 .save()
-
-}finally{
-cleanupPdfSandbox()
-}
 
 }
 
@@ -998,27 +975,29 @@ async function downloadProposalPdf(){
 
 setDownloadButtonState(true)
 
+let sandbox = null
+
 try{
 
 pdfExportScrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
 
-let pdfHtml = ""
 let filename = "photography-proposal.pdf"
 
 if(isPremiumUser(activeProposalProfile)){
-pdfHtml = buildPremiumPrintDocument(activeProposalData, activeProposalProfile)
 filename = "premium-photography-proposal.pdf"
+sandbox = createPremiumPdfSandbox(activeProposalData, activeProposalProfile)
 }else{
-pdfHtml = buildDefaultPrintDocument()
 filename = "photography-proposal.pdf"
+sandbox = createDefaultPdfSandbox()
 }
 
-await downloadHtmlAsPdf(pdfHtml, filename)
+await downloadElementAsPdf(sandbox, filename)
 
 }catch(err){
 console.error("PDF DOWNLOAD ERROR:", err)
 alert(err?.message || "PDF download failed")
 }finally{
+cleanupPdfSandbox()
 window.scrollTo(0, pdfExportScrollTop)
 setDownloadButtonState(false)
 }
