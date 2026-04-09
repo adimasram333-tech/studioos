@@ -404,7 +404,6 @@ const style = document.createElement("style")
 style.id = "proposal-pdf-export-styles"
 style.innerHTML = `
 body.proposal-pdf-export{
-background:#ffffff !important;
 overflow:visible !important;
 }
 
@@ -417,169 +416,34 @@ body.proposal-pdf-export .proposal-premium-actions{
 display:none !important;
 }
 
-body.proposal-pdf-export #proposalPage,
-body.proposal-pdf-export .page{
-box-shadow:none !important;
-margin:0 auto !important;
-overflow:visible !important;
-}
-
 body.proposal-pdf-export .page,
-body.proposal-pdf-export #proposalPage{
-width:794px !important;
-max-width:794px !important;
-min-width:794px !important;
-background:#ffffff !important;
-}
-
-body.proposal-pdf-export .hero h1{
-white-space:normal !important;
-word-break:break-word !important;
-}
-
+body.proposal-pdf-export #proposalPage,
 body.proposal-pdf-export .content,
 body.proposal-pdf-export .summary,
 body.proposal-pdf-export .footer,
 body.proposal-pdf-export table,
 body.proposal-pdf-export tr,
-body.proposal-pdf-export .info-grid{
-overflow:visible !important;
-}
-
-body.proposal-pdf-export #proposalPage.proposal-premium-root{
-width:794px !important;
-max-width:794px !important;
-min-width:794px !important;
-margin:0 auto !important;
-background:#f6f1ea !important;
-box-shadow:none !important;
-overflow:visible !important;
-}
-
-body.proposal-pdf-export .proposal-premium-shell{
-background:#f6f1ea !important;
-padding:0 !important;
-min-height:auto !important;
-overflow:visible !important;
-}
-
-body.proposal-pdf-export .proposal-premium-page{
-width:794px !important;
-max-width:794px !important;
-min-width:794px !important;
-margin:0 auto !important;
-background:#f6f1ea !important;
-border-radius:0 !important;
-box-shadow:none !important;
-display:grid !important;
-grid-template-columns:318px 476px !important;
-min-height:auto !important;
-overflow:visible !important;
-}
-
-body.proposal-pdf-export .proposal-premium-image-column{
-min-height:auto !important;
-overflow:hidden !important;
-background:#d7cdc2 !important;
-}
-
-body.proposal-pdf-export .proposal-premium-image{
-width:100% !important;
-height:100% !important;
-min-height:100% !important;
-object-fit:cover !important;
-object-position:center !important;
-display:block !important;
-}
-
-body.proposal-pdf-export .proposal-premium-image-overlay{
-display:block !important;
-}
-
-body.proposal-pdf-export .proposal-premium-content{
-padding:28px 24px 22px !important;
-overflow:visible !important;
-display:flex !important;
-flex-direction:column !important;
-}
-
-body.proposal-pdf-export .proposal-premium-title{
-font-size:34px !important;
-line-height:1.14 !important;
-}
-
-body.proposal-pdf-export .proposal-premium-studio{
-font-size:22px !important;
-margin-top:18px !important;
-}
-
-body.proposal-pdf-export .proposal-premium-phone{
-font-size:13px !important;
-}
-
-body.proposal-pdf-export .proposal-premium-meta{
-grid-template-columns:1fr !important;
-padding:14px 16px !important;
-gap:10px !important;
-}
-
-body.proposal-pdf-export .proposal-premium-meta-item{
-flex-direction:row !important;
-align-items:center !important;
-gap:12px !important;
-}
-
-body.proposal-pdf-export .proposal-premium-row-grid{
-grid-template-columns:1fr 1fr !important;
-gap:16px !important;
-}
-
-body.proposal-pdf-export .proposal-premium-section{
-margin-top:16px !important;
-padding:18px 18px !important;
-background:rgba(255,255,255,0.78) !important;
-break-inside:avoid !important;
-page-break-inside:avoid !important;
-overflow:visible !important;
-}
-
-body.proposal-pdf-export .proposal-premium-section-title{
-font-size:24px !important;
-line-height:1.18 !important;
-margin-bottom:12px !important;
-}
-
-body.proposal-pdf-export .proposal-premium-service-row,
-body.proposal-pdf-export .proposal-premium-summary-row{
-font-size:14px !important;
-line-height:1.45 !important;
-}
-
-body.proposal-pdf-export .proposal-premium-list,
-body.proposal-pdf-export .proposal-premium-copy{
-font-size:14px !important;
-line-height:1.75 !important;
-}
-
-body.proposal-pdf-export .proposal-premium-footer{
-margin-top:14px !important;
-}
-
+body.proposal-pdf-export .info-grid,
+body.proposal-pdf-export .proposal-premium-shell,
+body.proposal-pdf-export .proposal-premium-page,
+body.proposal-pdf-export .proposal-premium-content,
 body.proposal-pdf-export .proposal-premium-section,
 body.proposal-pdf-export .proposal-premium-meta{
-box-shadow:none !important;
-}
-
-body.proposal-pdf-export .proposal-premium-page,
-body.proposal-pdf-export .proposal-premium-shell,
-body.proposal-pdf-export #proposalPage,
-body.proposal-pdf-export .page{
-transform:none !important;
+overflow:visible !important;
 }
 
 body.proposal-pdf-export *{
 animation:none !important;
 transition:none !important;
+}
+
+body.proposal-pdf-export .proposal-premium-image{
+display:block !important;
+}
+
+body.proposal-pdf-export .hero h1{
+white-space:normal !important;
+word-break:break-word !important;
 }
 `
 document.head.appendChild(style)
@@ -613,6 +477,15 @@ page.classList.remove("proposal-pdf-export-target")
 
 }
 
+function getElementExportWidth(element){
+
+const rectWidth = Math.ceil(element.getBoundingClientRect().width || 0)
+const offsetWidth = Math.ceil(element.offsetWidth || 0)
+const scrollWidth = Math.ceil(element.scrollWidth || 0)
+
+return Math.max(rectWidth, offsetWidth, scrollWidth, 320)
+}
+
 async function downloadElementAsPdf(element, filename){
 
 ensureHtml2PdfReady()
@@ -620,6 +493,13 @@ ensureHtml2PdfReady()
 await waitForDocumentFonts(document)
 await waitForImagesInElement(element)
 await waitForNextPaint()
+
+const exportWidth = getElementExportWidth(element)
+const exportHeight = Math.max(
+Math.ceil(element.scrollHeight || 0),
+Math.ceil(element.offsetHeight || 0),
+Math.ceil(element.getBoundingClientRect().height || 0)
+)
 
 const worker = window.html2pdf()
 
@@ -632,16 +512,17 @@ html2canvas: {
 scale: 2,
 useCORS: true,
 allowTaint: false,
-backgroundColor: "#ffffff",
+backgroundColor: null,
 scrollX: 0,
 scrollY: 0,
-windowWidth: 794,
-width: 794,
+windowWidth: exportWidth,
+width: exportWidth,
+height: exportHeight,
 logging: false
 },
 jsPDF: {
 unit: "pt",
-format: [595.28, 841.89],
+format: "a4",
 orientation: "portrait",
 compress: true
 },
@@ -1192,7 +1073,7 @@ page.innerHTML = `
   <div class="proposal-premium-page">
 
     <div class="proposal-premium-image-column">
-      <img class="proposal-premium-image" src="${escapeHtml(coverImage)}" alt="Proposal Cover">
+      <img class="proposal-premium-image" src="${escapeHtml(coverImage)}" alt="Proposal Cover" crossorigin="anonymous">
       <div class="proposal-premium-image-overlay"></div>
     </div>
 
