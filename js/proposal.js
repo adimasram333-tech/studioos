@@ -55,6 +55,7 @@ shortId = slugParts[slugParts.length - 1]
 
 let activeProposalData = null
 let activeProposalProfile = null
+let pdfExportScrollTop = 0
 
 
 // ======================
@@ -320,10 +321,6 @@ return html
 // PDF HELPERS
 // ======================
 
-function isMobileView(){
-return window.innerWidth <= 768
-}
-
 function isHtml2PdfReady(){
 return typeof window.html2pdf !== "undefined"
 }
@@ -355,51 +352,43 @@ if(document.getElementById("proposal-pdf-export-styles")) return
 const style = document.createElement("style")
 style.id = "proposal-pdf-export-styles"
 style.innerHTML = `
-.proposal-pdf-export-root{
-position:fixed !important;
-left:-20000px !important;
-top:0 !important;
-width:794px !important;
-min-width:794px !important;
-max-width:794px !important;
+body.proposal-pdf-export-mode{
 background:#ffffff !important;
-z-index:-1 !important;
-opacity:1 !important;
-pointer-events:none !important;
 overflow:visible !important;
-box-sizing:border-box !important;
 }
-.proposal-pdf-export-root *{
-box-sizing:border-box !important;
-}
-.proposal-pdf-export-root .proposal-page-export-clone{
-width:794px !important;
-min-width:794px !important;
-max-width:794px !important;
-margin:0 !important;
-background:#ffffff !important;
-overflow:hidden !important;
-}
-.proposal-pdf-export-root .page{
-width:794px !important;
-min-width:794px !important;
-max-width:794px !important;
-margin:0 !important;
-box-shadow:none !important;
-}
-.proposal-pdf-export-root .whatsappBox,
-.proposal-pdf-export-root .proposal-premium-actions{
+body.proposal-pdf-export-mode #proposalLoadingOverlay{
 display:none !important;
 }
-.proposal-pdf-export-root .proposal-premium-shell{
+body.proposal-pdf-export-mode #proposalPage{
+width:794px !important;
+max-width:794px !important;
+min-width:794px !important;
+margin:0 auto !important;
+background:#ffffff !important;
+overflow:hidden !important;
+box-shadow:none !important;
+}
+body.proposal-pdf-export-mode .page{
+width:794px !important;
+max-width:794px !important;
+min-width:794px !important;
+margin:0 auto !important;
+box-shadow:none !important;
+background:#ffffff !important;
+}
+body.proposal-pdf-export-mode .whatsappBox,
+body.proposal-pdf-export-mode .proposal-premium-actions{
+display:none !important;
+}
+body.proposal-pdf-export-mode .proposal-premium-shell{
 background:#ffffff !important;
 padding:0 !important;
 min-height:auto !important;
 }
-.proposal-pdf-export-root .proposal-premium-page{
+body.proposal-pdf-export-mode .proposal-premium-page{
 width:794px !important;
-min-width:794px !important;
 max-width:794px !important;
+min-width:794px !important;
 min-height:auto !important;
 margin:0 !important;
 border-radius:0 !important;
@@ -409,76 +398,75 @@ display:grid !important;
 grid-template-columns:318px 476px !important;
 background:#f6f1ea !important;
 }
-.proposal-pdf-export-root .proposal-premium-image-column{
+body.proposal-pdf-export-mode .proposal-premium-image-column{
 min-height:auto !important;
 height:auto !important;
 }
-.proposal-pdf-export-root .proposal-premium-image{
+body.proposal-pdf-export-mode .proposal-premium-image{
 width:100% !important;
 height:100% !important;
-min-height:100% !important;
 display:block !important;
 object-fit:cover !important;
 object-position:center !important;
 }
-.proposal-pdf-export-root .proposal-premium-image-overlay{
+body.proposal-pdf-export-mode .proposal-premium-image-overlay{
 display:block !important;
 }
-.proposal-pdf-export-root .proposal-premium-content{
+body.proposal-pdf-export-mode .proposal-premium-content{
 padding:28px 24px 22px !important;
 }
-.proposal-pdf-export-root .proposal-premium-title{
+body.proposal-pdf-export-mode .proposal-premium-title{
 font-size:34px !important;
 line-height:1.12 !important;
 }
-.proposal-pdf-export-root .proposal-premium-studio{
+body.proposal-pdf-export-mode .proposal-premium-studio{
 font-size:22px !important;
 margin-top:16px !important;
 }
-.proposal-pdf-export-root .proposal-premium-phone{
+body.proposal-pdf-export-mode .proposal-premium-phone{
 font-size:13px !important;
 margin-top:6px !important;
 }
-.proposal-pdf-export-root .proposal-premium-meta{
+body.proposal-pdf-export-mode .proposal-premium-meta{
 grid-template-columns:1fr !important;
 padding:14px 16px !important;
 gap:10px !important;
 }
-.proposal-pdf-export-root .proposal-premium-row-grid{
+body.proposal-pdf-export-mode .proposal-premium-row-grid{
 grid-template-columns:1fr 1fr !important;
 gap:14px !important;
 }
-.proposal-pdf-export-root .proposal-premium-section,
-.proposal-pdf-export-root .proposal-premium-meta{
+body.proposal-pdf-export-mode .proposal-premium-section,
+body.proposal-pdf-export-mode .proposal-premium-meta{
 background:#ffffff !important;
 box-shadow:none !important;
 break-inside:avoid !important;
 page-break-inside:avoid !important;
 }
-.proposal-pdf-export-root .proposal-premium-section{
+body.proposal-pdf-export-mode .proposal-premium-section{
 padding:16px !important;
 margin-top:14px !important;
 border-radius:18px !important;
 }
-.proposal-pdf-export-root .proposal-premium-section-title{
+body.proposal-pdf-export-mode .proposal-premium-section-title{
 font-size:24px !important;
 margin-bottom:10px !important;
 }
-.proposal-pdf-export-root .proposal-premium-service-row,
-.proposal-pdf-export-root .proposal-premium-summary-row{
+body.proposal-pdf-export-mode .proposal-premium-service-row,
+body.proposal-pdf-export-mode .proposal-premium-summary-row{
 font-size:13px !important;
 padding:10px 0 !important;
 }
-.proposal-pdf-export-root .proposal-premium-summary-row strong:first-child,
-.proposal-pdf-export-root .proposal-premium-summary-row strong:last-child{
+body.proposal-pdf-export-mode .proposal-premium-summary-row strong:first-child,
+body.proposal-pdf-export-mode .proposal-premium-summary-row strong:last-child{
 font-size:13px !important;
 }
-.proposal-pdf-export-root .proposal-premium-list,
-.proposal-pdf-export-root .proposal-premium-copy{
+body.proposal-pdf-export-mode .proposal-premium-list,
+body.proposal-pdf-export-mode .proposal-premium-copy{
 font-size:13px !important;
 line-height:1.7 !important;
 }
-.proposal-pdf-export-root .proposal-premium-footer{
+body.proposal-pdf-export-mode .proposal-premium-footer{
 margin-top:10px !important;
 font-size:11px !important;
 }
@@ -487,25 +475,29 @@ document.head.appendChild(style)
 
 }
 
-function createPdfExportNode(){
+function waitForNextPaint(){
+return new Promise((resolve) => {
+requestAnimationFrame(() => {
+requestAnimationFrame(resolve)
+})
+})
+}
+
+async function setPdfExportMode(enabled){
 
 injectPdfExportStyles()
 
-const source = document.getElementById("proposalPage")
+if(enabled){
+pdfExportScrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
+document.body.classList.add("proposal-pdf-export-mode")
+window.scrollTo(0,0)
+await waitForNextPaint()
+return
+}
 
-if(!source) return null
-
-const exportRoot = document.createElement("div")
-exportRoot.className = "proposal-pdf-export-root"
-
-const clone = source.cloneNode(true)
-clone.removeAttribute("id")
-clone.classList.add("proposal-page-export-clone")
-
-exportRoot.appendChild(clone)
-document.body.appendChild(exportRoot)
-
-return exportRoot
+document.body.classList.remove("proposal-pdf-export-mode")
+await waitForNextPaint()
+window.scrollTo(0,pdfExportScrollTop)
 
 }
 
@@ -525,29 +517,24 @@ return
 
 setDownloadButtonState(true)
 
-let exportNode = null
-
 try{
 
-window.scrollTo(0,0)
-
-exportNode = createPdfExportNode()
-
-if(!exportNode){
-throw new Error("PDF export node could not be created")
-}
+await setPdfExportMode(true)
 
 const opt = {
 margin:0,
 filename:"photography-proposal.pdf",
-image:{ type:"jpeg", quality:1 },
+image:{ type:"jpeg", quality:0.98 },
 html2canvas:{
 scale:2,
 useCORS:true,
+allowTaint:false,
 scrollX:0,
 scrollY:0,
 windowWidth:794,
-backgroundColor:"#ffffff"
+width:794,
+backgroundColor:"#ffffff",
+logging:false
 },
 jsPDF:{
 unit:"mm",
@@ -559,15 +546,13 @@ mode:["css","legacy"]
 }
 }
 
-await window.html2pdf().set(opt).from(exportNode).save()
+await window.html2pdf().set(opt).from(element).save()
 
 }catch(err){
 console.error("PDF DOWNLOAD ERROR:",err)
 alert("PDF download failed")
 }finally{
-if(exportNode && exportNode.parentNode){
-exportNode.parentNode.removeChild(exportNode)
-}
+await setPdfExportMode(false)
 setDownloadButtonState(false)
 }
 
