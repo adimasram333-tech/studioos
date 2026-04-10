@@ -385,79 +385,7 @@ function isDesktopTeamSheetPdfExport() {
   return window.innerWidth > 768;
 }
 
-function ensureTeamSheetPdfExportStyles() {
-  if (document.getElementById("team-sheet-pdf-export-styles")) return;
-
-  const style = document.createElement("style");
-  style.id = "team-sheet-pdf-export-styles";
-  style.innerHTML = `
-body.team-sheet-pdf-export{
-  overflow:visible !important;
-}
-
-body.team-sheet-pdf-export *{
-  animation:none !important;
-  transition:none !important;
-}
-
-body.team-sheet-pdf-export .sheet-page{
-  overflow:visible !important;
-}
-
-/* =========================================================
-   DESKTOP ONLY PDF FIX
-   Mobile path untouched. This applies only when desktop
-   export adds .team-sheet-pdf-export-desktop class.
-   Proposal-style fix: export-time mobile-like printable flow.
-   ========================================================= */
-
-body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .sheet-page{
-  width:100% !important;
-  max-width:100% !important;
-  margin:0 auto !important;
-  box-shadow:none !important;
-}
-
-body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .member-card{
-  padding:16px !important;
-  border-radius:18px !important;
-  break-inside:avoid !important;
-  page-break-inside:avoid !important;
-}
-
-body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .member-card > div:first-child{
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:flex-start !important;
-  justify-content:flex-start !important;
-  gap:8px !important;
-}
-
-body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .member-card > div:first-child > div:last-child{
-  text-align:left !important;
-  min-width:0 !important;
-  width:100% !important;
-}
-
-body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .role-title{
-  font-size:20px !important;
-  line-height:1.2 !important;
-}
-
-body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .role-subtitle{
-  font-size:13px !important;
-}
-
-body.team-sheet-pdf-export.team-sheet-pdf-export-desktop #teamList{
-  overflow:visible !important;
-}
-`;
-  document.head.appendChild(style);
-}
-
 function applyTeamSheetPdfExportMode() {
-  ensureTeamSheetPdfExportStyles();
-
   document.body.classList.add("team-sheet-pdf-export");
 
   if (isDesktopTeamSheetPdfExport()) {
@@ -482,7 +410,7 @@ async function downloadPDF() {
       return;
     }
 
-    const element = document.querySelector(".sheet-page");
+    const element = document.querySelector(".print-shell");
 
     if (!element) {
       console.error("Printable sheet container not found");
