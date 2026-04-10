@@ -285,27 +285,80 @@ return "₹" + amount.toLocaleString("en-IN")
 
 
 // =============================
-// LOAD STUDIO
+// ENSURE PHOTOGRAPHER SETTINGS
 // =============================
 
-async function loadStudio(){
+async function ensurePhotographerSettings(){
 
 const supabase = await window.getSupabase()
 
 const user = await getCurrentUser()
 
-if(!user) return
+if(!user) return null
 
-const { data } =
+const { data: existing, error: fetchError } =
 await supabase
 .from("photographer_settings")
-.select("studio_name")
+.select("id,studio_name")
 .eq("user_id", user.id)
+.maybeSingle()
+
+if(fetchError){
+console.error("Photographer settings fetch failed:", fetchError)
+return null
+}
+
+if(existing){
+return existing
+}
+
+const insertPayload = {
+user_id: user.id,
+email: user.email || null
+}
+
+const { data: inserted, error: insertError } =
+await supabase
+.from("photographer_settings")
+.insert([insertPayload])
+.select("id,studio_name")
 .single()
 
-if(data){
+if(insertError){
+console.error("Photographer settings auto-create failed:", insertError)
+
+const { data: retryData, error: retryError } =
+await supabase
+.from("photographer_settings")
+.select("id,studio_name")
+.eq("user_id", user.id)
+.maybeSingle()
+
+if(retryError){
+console.error("Photographer settings retry fetch failed:", retryError)
+return null
+}
+
+return retryData || null
+}
+
+return inserted || null
+
+}
+
+
+
+// =============================
+// LOAD STUDIO
+// =============================
+
+async function loadStudio(){
+
+const settings = await ensurePhotographerSettings()
+
+if(settings?.studio_name){
 document.getElementById("studioDisplay").innerText =
-data.studio_name
+settings.studio_name
 }
 
 }
@@ -428,7 +481,7 @@ monthlyRevenue += Number(p.amount || 0)
 
 
 
-for(const q of allQuotes){
+for(const q of (allQuotes || [])){
 
 const payments =
 allPayments?.filter(p=>p.quotation_id === q.id) || []
