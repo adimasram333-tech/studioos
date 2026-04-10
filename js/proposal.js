@@ -396,6 +396,10 @@ requestAnimationFrame(resolve)
 })
 }
 
+function isDesktopPdfExport(){
+return window.innerWidth > 768
+}
+
 function ensurePdfExportStyles(){
 
 if(document.getElementById("proposal-pdf-export-styles")) return
@@ -440,6 +444,149 @@ body.proposal-pdf-export .hero h1{
 white-space:normal !important;
 word-break:break-word !important;
 }
+
+/* =========================================================
+   DESKTOP ONLY PDF FIX
+   Mobile path untouched. This applies only when desktop
+   export adds .proposal-pdf-export-desktop class.
+   ========================================================= */
+
+body.proposal-pdf-export.proposal-pdf-export-desktop #proposalPage.proposal-premium-root{
+width:100% !important;
+max-width:100% !important;
+margin:0 auto !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-shell{
+padding:0 !important;
+background:var(--proposal-premium-bg) !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-page{
+display:block !important;
+width:100% !important;
+max-width:100% !important;
+min-height:auto !important;
+border-radius:0 !important;
+box-shadow:none !important;
+overflow:visible !important;
+background:var(--proposal-premium-paper) !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-image-column{
+position:relative !important;
+min-height:auto !important;
+background:#d7cdc2 !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-image{
+position:relative !important;
+display:block !important;
+width:100% !important;
+height:auto !important;
+max-height:none !important;
+object-fit:contain !important;
+object-position:center !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-image-overlay{
+display:none !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-content{
+padding:22px 16px 18px !important;
+display:flex !important;
+flex-direction:column !important;
+box-sizing:border-box !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-title{
+font-size:34px !important;
+line-height:1.14 !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-studio{
+margin-top:18px !important;
+font-size:23px !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-phone{
+font-size:14px !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-meta{
+display:grid !important;
+grid-template-columns:1fr !important;
+padding:16px !important;
+gap:10px !important;
+margin-top:18px !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-meta-item{
+display:flex !important;
+flex-direction:column !important;
+align-items:flex-start !important;
+gap:4px !important;
+font-size:14px !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-row-grid{
+display:grid !important;
+grid-template-columns:1fr !important;
+gap:14px !important;
+margin-top:14px !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-section{
+padding:16px !important;
+border-radius:18px !important;
+margin-top:14px !important;
+page-break-inside:avoid !important;
+break-inside:avoid !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-section-title{
+font-size:24px !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-service-row{
+display:flex !important;
+flex-direction:column !important;
+align-items:flex-start !important;
+gap:4px !important;
+font-size:14px !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-service-row span:last-child{
+text-align:left !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-summary-row{
+font-size:14px !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-summary-row strong:first-child,
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-summary-row strong:last-child{
+font-size:14px !important;
+font-weight:600 !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-list{
+font-size:15px !important;
+line-height:1.9 !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-copy{
+font-size:15px !important;
+line-height:1.85 !important;
+}
+
+body.proposal-pdf-export.proposal-pdf-export-desktop .proposal-premium-footer{
+margin-top:16px !important;
+text-align:center !important;
+font-size:12px !important;
+line-height:1.7 !important;
+}
 `
 document.head.appendChild(style)
 
@@ -466,6 +613,10 @@ ensurePdfExportStyles()
 
 document.body.classList.add("proposal-pdf-export")
 
+if(isPremiumUser(activeProposalProfile) && isDesktopPdfExport()){
+document.body.classList.add("proposal-pdf-export-desktop")
+}
+
 const root = document.getElementById("proposalPage")
 if(root){
 root.classList.add("proposal-pdf-export-target")
@@ -477,6 +628,7 @@ return getPdfExportTarget()
 function removePdfExportMode(){
 
 document.body.classList.remove("proposal-pdf-export")
+document.body.classList.remove("proposal-pdf-export-desktop")
 
 const page = document.getElementById("proposalPage")
 if(page){
