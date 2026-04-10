@@ -67,6 +67,7 @@ display:none !important;
 }
 .print-shell{
 max-width:none !important;
+width:100% !important;
 margin:0 !important;
 padding:0 !important;
 }
@@ -75,6 +76,90 @@ min-height:auto !important;
 border-radius:0 !important;
 box-shadow:none !important;
 }
+}
+
+/* =========================================
+   DESKTOP PDF EXPORT ONLY
+   mobile untouched
+   ========================================= */
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop{
+background:#ffffff !important;
+padding:0 !important;
+margin:0 !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .print-shell{
+max-width:none !important;
+width:100% !important;
+margin:0 !important;
+padding:0 !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .print-sheet{
+min-height:auto !important;
+border-radius:0 !important;
+box-shadow:none !important;
+display:flex !important;
+flex-direction:column !important;
+overflow:visible !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .print-sheet > div:first-child{
+width:100% !important;
+min-height:auto !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .print-sheet > div:first-child img{
+width:100% !important;
+height:auto !important;
+object-fit:contain !important;
+display:block !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .sheet-panel{
+width:100% !important;
+padding:16px !important;
+display:flex !important;
+flex-direction:column !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .mobile-safe-padding{
+padding:16px !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop #teamList{
+margin-top:24px !important;
+space-y:0 !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .member-card{
+padding:16px !important;
+border-radius:18px !important;
+break-inside:avoid !important;
+page-break-inside:avoid !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .member-card > div:first-child{
+display:flex !important;
+flex-direction:column !important;
+align-items:flex-start !important;
+justify-content:flex-start !important;
+gap:8px !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .member-card > div:first-child > div:last-child{
+text-align:left !important;
+min-width:0 !important;
+width:100% !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .role-title{
+font-size:20px !important;
+line-height:1.2 !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .role-subtitle{
+font-size:13px !important;
 }
 
 @media (max-width: 1023px){
