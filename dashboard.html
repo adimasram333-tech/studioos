@@ -72,6 +72,65 @@ margin-top:8px;
 min-height:80px;
 }
 
+.menu-wrapper{
+position:relative;
+}
+
+.menu-btn{
+display:flex;
+align-items:center;
+justify-content:center;
+width:42px;
+height:42px;
+border-radius:0.75rem;
+background: rgba(255,255,255,0.05);
+border:1px solid rgba(255,255,255,0.1);
+font-size:1.25rem;
+line-height:1;
+}
+
+.menu-btn:hover{
+background: rgba(255,255,255,0.1);
+}
+
+.dropdown-menu{
+position:absolute;
+top:calc(100% + 8px);
+right:0;
+min-width:180px;
+padding:0.5rem;
+border-radius:1rem;
+background: rgba(15,23,42,0.96);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:0 12px 30px rgba(0,0,0,0.28);
+z-index:50;
+}
+
+.dropdown-menu.hidden{
+display:none;
+}
+
+.menu-item{
+display:block;
+width:100%;
+text-align:left;
+padding:0.75rem 0.9rem;
+border-radius:0.75rem;
+font-size:0.95rem;
+color:white;
+background:transparent;
+transition:background .2s ease;
+}
+
+.menu-item:hover{
+background: rgba(255,255,255,0.08);
+}
+
+.menu-item-danger{
+color:#fca5a5;
+}
+
 @media (min-width: 640px){
 .stat-card{
 padding:1rem;
@@ -109,12 +168,47 @@ margin-top:6px;
 
 <body class="text-white min-h-screen p-4 relative">
 
-<div class="max-w-md mx-auto mb-4 flex justify-end">
+<!-- TOP APP HEADER -->
+<div class="max-w-md mx-auto mb-4">
+<div class="flex justify-between items-start gap-3">
+
+<div class="min-w-0 flex-1">
+<h1 class="text-2xl font-bold break-words">StudioOS</h1>
+<p class="text-gray-400 text-xs mt-1">Photography Business System</p>
+</div>
+
+<div class="menu-wrapper">
+<button
+id="menuBtn"
+type="button"
+class="menu-btn shrink-0"
+aria-label="Open menu"
+aria-expanded="false"
+aria-controls="dashboardMenu"
+>
+⋮
+</button>
+
+<div id="dashboardMenu" class="dropdown-menu hidden">
+<a
+href="#"
+id="websiteBuilderBtn"
+class="menu-item"
+>
+Website Builder
+</a>
+
 <button
 id="logoutBtn"
-class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl text-sm">
+type="button"
+class="menu-item menu-item-danger"
+>
 Logout
 </button>
+</div>
+</div>
+
+</div>
 </div>
 
 <div id="dashboard" class="max-w-md mx-auto">
@@ -122,8 +216,7 @@ Logout
 <div class="glass rounded-2xl p-4 flex justify-between items-center gap-3 mb-5">
 
 <div class="min-w-0 flex-1">
-<h1 id="studioDisplay" class="text-xl font-bold break-words">StudioOS</h1>
-<p class="text-gray-400 text-xs">Photography Business System</p>
+<h2 id="studioDisplay" class="text-xl font-bold break-words">StudioOS</h2>
 </div>
 
 <a
@@ -268,6 +361,57 @@ document
 .getElementById("logoutBtn")
 .addEventListener("click", logout)
 
+
+// =============================
+// MENU LOGIC
+// =============================
+
+const menuBtn =
+document.getElementById("menuBtn")
+
+const dashboardMenu =
+document.getElementById("dashboardMenu")
+
+const websiteBuilderBtn =
+document.getElementById("websiteBuilderBtn")
+
+menuBtn.addEventListener("click",(e)=>{
+
+e.stopPropagation()
+
+const isHidden =
+dashboardMenu.classList.contains("hidden")
+
+if(isHidden){
+dashboardMenu.classList.remove("hidden")
+menuBtn.setAttribute("aria-expanded","true")
+}else{
+dashboardMenu.classList.add("hidden")
+menuBtn.setAttribute("aria-expanded","false")
+}
+
+})
+
+document.addEventListener("click",(e)=>{
+
+if(
+!dashboardMenu.contains(e.target) &&
+!menuBtn.contains(e.target)
+){
+dashboardMenu.classList.add("hidden")
+menuBtn.setAttribute("aria-expanded","false")
+}
+
+})
+
+websiteBuilderBtn.addEventListener("click",(e)=>{
+
+e.preventDefault()
+dashboardMenu.classList.add("hidden")
+menuBtn.setAttribute("aria-expanded","false")
+alert("Website Builder will be added for paid users.")
+
+})
 
 
 // =============================
