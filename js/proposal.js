@@ -429,45 +429,21 @@ overflow:visible !important;
 }
 
 body.proposal-pdf-export .proposal-premium-page{
-box-shadow:none !important;
-}
-
-body.proposal-pdf-export .proposal-premium-image{
-display:block !important;
-}
-
-body.proposal-pdf-export .hero h1{
-white-space:normal !important;
-word-break:break-word !important;
-}
-
-@media screen and (max-width: 1024px){
-body.proposal-pdf-export .proposal-premium-page{
-grid-template-columns:46% 54% !important;
 display:grid !important;
+grid-template-columns:46% 54% !important;
+box-shadow:none !important;
+border-radius:34px !important;
+min-height:auto !important;
 }
 
-body.proposal-pdf-export .proposal-premium-image-column{
-min-height:100% !important;
-}
-
-body.proposal-pdf-export .proposal-premium-image{
-height:100% !important;
-object-fit:cover !important;
-}
-}
-
-@media screen and (max-width: 768px){
 body.proposal-pdf-export .proposal-premium-shell{
 padding:18px !important;
 }
 
-body.proposal-pdf-export .proposal-premium-page{
-display:grid !important;
-grid-template-columns:46% 54% !important;
-border-radius:34px !important;
-min-height:calc(100vh - 36px) !important;
-box-shadow:none !important;
+body.proposal-pdf-export #proposalPage.proposal-premium-root{
+width:100% !important;
+max-width:1360px !important;
+margin:18px auto !important;
 }
 
 body.proposal-pdf-export .proposal-premium-image-column{
@@ -477,6 +453,7 @@ background:#d7cdc2 !important;
 }
 
 body.proposal-pdf-export .proposal-premium-image{
+display:block !important;
 position:relative !important;
 width:100% !important;
 height:100% !important;
@@ -515,6 +492,7 @@ gap:12px 18px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-meta-item{
+display:flex !important;
 flex-direction:row !important;
 justify-content:space-between !important;
 align-items:flex-start !important;
@@ -523,6 +501,7 @@ font-size:14px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-row-grid{
+display:grid !important;
 grid-template-columns:1.12fr 0.88fr !important;
 gap:18px !important;
 margin-top:18px !important;
@@ -532,6 +511,8 @@ body.proposal-pdf-export .proposal-premium-section{
 padding:22px !important;
 border-radius:24px !important;
 margin-top:18px !important;
+break-inside:avoid !important;
+page-break-inside:avoid !important;
 }
 
 body.proposal-pdf-export .proposal-premium-section-title{
@@ -571,9 +552,9 @@ font-size:15px !important;
 line-height:1.85 !important;
 }
 
-body.proposal-pdf-export .proposal-premium-actions{
-display:none !important;
-}
+body.proposal-pdf-export .hero h1{
+white-space:normal !important;
+word-break:break-word !important;
 }
 `
 document.head.appendChild(style)
@@ -645,6 +626,9 @@ jsPDF: {
 unit: "mm",
 format: "a4",
 orientation: "portrait"
+},
+pagebreak: {
+mode: ["css", "legacy"]
 }
 }
 
