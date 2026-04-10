@@ -75,8 +75,42 @@ Save Profile
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 
+<script type="module">
 
-<script>
+import { protectPage } from "./js/auth.js"
+
+
+// ============================
+// PROTECT PAGE
+// ============================
+
+await protectPage()
+
+
+// ============================
+// GET SUPABASE
+// ============================
+
+async function getSupabaseClient(){
+return await window.getSupabase()
+}
+
+
+// ============================
+// GET CURRENT USER
+// ============================
+
+async function getCurrentUser(){
+
+const supabase = await getSupabaseClient()
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+return user
+
+}
+
 
 // ============================
 // SAVE PROFILE
@@ -86,10 +120,9 @@ document.getElementById("saveBtn").addEventListener("click", saveProfile)
 
 async function saveProfile(){
 
-const { data: userData } =
-await supabase.auth.getUser()
+const supabase = await getSupabaseClient()
 
-const user = userData.user
+const user = await getCurrentUser()
 
 if(!user){
 
@@ -146,7 +179,7 @@ return
 
 }
 
-window.location.href="dashboard.html"
+window.location.href = "dashboard.html"
 
 }
 
@@ -158,20 +191,24 @@ window.location.href="dashboard.html"
 
 async function loadProfile(){
 
-const { data: userData } =
-await supabase.auth.getUser()
+const supabase = await getSupabaseClient()
 
-const user = userData.user
+const user = await getCurrentUser()
 
 if(!user) return
 
 
-const { data } =
+const { data, error } =
 await supabase
 .from("photographer_settings")
 .select("*")
 .eq("user_id", user.id)
-.single()
+.maybeSingle()
+
+if(error){
+console.error("Profile load error:", error)
+return
+}
 
 
 if(data){
