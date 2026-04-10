@@ -138,37 +138,151 @@ color:#fca5a5;
 .app-header{
 display:flex;
 justify-content:space-between;
-align-items:center;
+align-items:flex-start;
 gap:0.75rem;
 }
 
-.app-brand{
-display:flex;
-align-items:center;
-gap:0.75rem;
+.search-wrap{
+position:relative;
+flex:1;
 min-width:0;
 }
 
-.app-logo{
-width:40px;
-height:40px;
-border-radius:0.85rem;
-object-fit:cover;
-display:none;
-border:1px solid rgba(255,255,255,0.1);
-background: rgba(255,255,255,0.05);
+.search-shell{
+display:flex;
+align-items:center;
+height:42px;
+border-radius:999px;
+background: rgba(255,255,255,0.04);
+border:1px solid rgba(255,255,255,0.18);
+overflow:hidden;
 }
 
-.app-title{
-font-family:"Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-font-size:clamp(1.9rem,6vw,2.3rem);
-line-height:1;
-font-weight:800;
+.search-input{
+width:100%;
+height:100%;
+background:transparent;
+border:none;
+outline:none;
+color:white;
+padding:0 1rem;
+font-size:0.95rem;
+}
+
+.search-input::placeholder{
+color:rgba(255,255,255,0.42);
+transition:opacity .25s ease;
+}
+
+.search-input:focus::placeholder{
+opacity:0.55;
+}
+
+.search-btn{
+display:flex;
+align-items:center;
+justify-content:center;
+width:52px;
+height:100%;
+background:transparent;
+border:none;
+border-left:1px solid rgba(255,255,255,0.18);
+color:white;
+cursor:pointer;
+flex-shrink:0;
+}
+
+.search-btn svg{
+width:20px;
+height:20px;
+opacity:0.88;
+}
+
+.search-results{
+position:absolute;
+top:calc(100% + 10px);
+left:0;
+right:0;
+padding:0.45rem;
+border-radius:1rem;
+background: rgba(15,23,42,0.98);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:0 12px 30px rgba(0,0,0,0.28);
+z-index:60;
+max-height:280px;
+overflow:auto;
+}
+
+.search-results.hidden{
+display:none;
+}
+
+.search-result-item{
+display:block;
+width:100%;
+text-align:left;
+padding:0.8rem 0.9rem;
+border-radius:0.85rem;
+background:transparent;
+color:white;
+transition:background .2s ease;
+}
+
+.search-result-item:hover{
+background: rgba(255,255,255,0.08);
+}
+
+.search-result-name{
+font-size:0.95rem;
+font-weight:600;
+line-height:1.25;
 word-break:break-word;
-letter-spacing:-0.03em;
-text-rendering:optimizeLegibility;
--webkit-font-smoothing:antialiased;
--moz-osx-font-smoothing:grayscale;
+}
+
+.search-result-meta{
+font-size:0.78rem;
+line-height:1.35;
+color:rgb(156 163 175);
+margin-top:0.18rem;
+word-break:break-word;
+}
+
+.search-empty{
+padding:0.85rem 0.9rem;
+font-size:0.85rem;
+color:rgb(156 163 175);
+}
+
+.search-hint{
+position:absolute;
+left:1rem;
+top:50%;
+transform:translateY(-50%);
+font-size:0.92rem;
+color:rgba(255,255,255,0.42);
+pointer-events:none;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+max-width:calc(100% - 4.5rem);
+animation:softHint 3.2s ease-in-out infinite;
+}
+
+.search-shell.has-value .search-hint,
+.search-shell.is-focused .search-hint{
+opacity:0;
+}
+
+@keyframes softHint{
+0%,100%{
+opacity:0.32;
+transform:translateY(-50%) translateX(0);
+}
+50%{
+opacity:0.6;
+transform:translateY(-50%) translateX(2px);
+}
 }
 
 @media (min-width: 640px){
@@ -203,12 +317,20 @@ margin-top:6px;
 width:40px;
 height:40px;
 }
-.app-logo{
-width:36px;
-height:36px;
+.search-shell{
+height:40px;
 }
-.app-title{
-font-size:1.8rem;
+.search-btn{
+width:48px;
+}
+.search-input{
+font-size:0.9rem;
+padding:0 0.9rem;
+}
+.search-hint{
+font-size:0.86rem;
+left:0.9rem;
+max-width:calc(100% - 4rem);
 }
 }
 
@@ -224,14 +346,33 @@ font-size:1.8rem;
 
 <div class="app-header">
 
-<div class="app-brand">
-<img
-id="appLogo"
-class="app-logo"
-alt="StudioOS Logo"
-src=""
+<div class="search-wrap">
+
+<div id="searchShell" class="search-shell">
+<input
+id="clientSearchInput"
+type="text"
+class="search-input"
+autocomplete="off"
+aria-label="Search client name"
 >
-<h1 class="app-title">StudioOS</h1>
+<span id="searchHint" class="search-hint">Search client details</span>
+
+<button
+id="clientSearchBtn"
+type="button"
+class="search-btn"
+aria-label="Search client"
+>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="11" cy="11" r="7"></circle>
+<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+</svg>
+</button>
+</div>
+
+<div id="searchResults" class="search-results hidden"></div>
+
 </div>
 
 <div class="menu-wrapper">
@@ -468,6 +609,199 @@ e.preventDefault()
 dashboardMenu.classList.add("hidden")
 menuBtn.setAttribute("aria-expanded","false")
 alert("Website Builder will be added for paid users.")
+
+})
+
+
+// =============================
+// SEARCH LOGIC
+// =============================
+
+const clientSearchInput =
+document.getElementById("clientSearchInput")
+
+const clientSearchBtn =
+document.getElementById("clientSearchBtn")
+
+const searchResults =
+document.getElementById("searchResults")
+
+const searchShell =
+document.getElementById("searchShell")
+
+let searchDebounceTimer = null
+let activeSearchToken = 0
+
+function escapeHtml(value){
+return String(value ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;")
+}
+
+function closeSearchResults(){
+searchResults.classList.add("hidden")
+searchResults.innerHTML = ""
+}
+
+function formatResultDate(value){
+if(!value) return "No date"
+const parsed = new Date(value)
+if(Number.isNaN(parsed.getTime())) return "No date"
+return parsed.toLocaleDateString("en-IN")
+}
+
+function updateSearchShellState(){
+const hasValue = clientSearchInput.value.trim().length > 0
+searchShell.classList.toggle("has-value", hasValue)
+}
+
+function renderSearchResults(results){
+
+if(!results.length){
+searchResults.innerHTML =
+`<div class="search-empty">No client found</div>`
+searchResults.classList.remove("hidden")
+return
+}
+
+searchResults.innerHTML = ""
+
+results.forEach(item=>{
+
+const btn = document.createElement("button")
+btn.type = "button"
+btn.className = "search-result-item"
+
+const clientName = escapeHtml(item.client_name || "Unnamed client")
+const eventDate = escapeHtml(formatResultDate(item.event_date))
+const amount = escapeHtml(formatCurrency(item.total || 0))
+
+btn.innerHTML = `
+<div class="search-result-name">${clientName}</div>
+<div class="search-result-meta">${eventDate} • ${amount}</div>
+`
+
+btn.addEventListener("click", ()=>{
+window.location.href = `client.html?quotation=${encodeURIComponent(item.id)}`
+})
+
+searchResults.appendChild(btn)
+
+})
+
+searchResults.classList.remove("hidden")
+
+}
+
+async function searchClientsByName(query){
+
+const supabase = await window.getSupabase()
+const user = await getCurrentUser()
+
+if(!user) return []
+
+const { data, error } =
+await supabase
+.from("quotations")
+.select("id,client_name,event_date,total")
+.eq("user_id", user.id)
+.ilike("client_name", `%${query}%`)
+.order("created_at",{ascending:false})
+.limit(8)
+
+if(error){
+console.error("Client search failed:", error)
+return []
+}
+
+return data || []
+
+}
+
+async function performClientSearch(){
+
+const query = clientSearchInput.value.trim()
+
+updateSearchShellState()
+
+if(query.length < 2){
+closeSearchResults()
+return
+}
+
+const currentToken = ++activeSearchToken
+
+const results = await searchClientsByName(query)
+
+if(currentToken !== activeSearchToken) return
+
+renderSearchResults(results)
+
+}
+
+clientSearchInput.addEventListener("focus", ()=>{
+searchShell.classList.add("is-focused")
+if(clientSearchInput.value.trim().length >= 2 && searchResults.innerHTML.trim()){
+searchResults.classList.remove("hidden")
+}
+})
+
+clientSearchInput.addEventListener("blur", ()=>{
+searchShell.classList.remove("is-focused")
+})
+
+clientSearchInput.addEventListener("input", ()=>{
+
+updateSearchShellState()
+
+clearTimeout(searchDebounceTimer)
+
+searchDebounceTimer = setTimeout(()=>{
+performClientSearch()
+},220)
+
+})
+
+clientSearchInput.addEventListener("keydown", async (e)=>{
+
+if(e.key === "Escape"){
+closeSearchResults()
+clientSearchInput.blur()
+return
+}
+
+if(e.key === "Enter"){
+e.preventDefault()
+
+const firstResultButton =
+searchResults.querySelector(".search-result-item")
+
+if(firstResultButton){
+firstResultButton.click()
+return
+}
+
+await performClientSearch()
+}
+
+})
+
+clientSearchBtn.addEventListener("click", async ()=>{
+await performClientSearch()
+})
+
+document.addEventListener("click",(e)=>{
+
+if(
+!searchResults.contains(e.target) &&
+!clientSearchInput.contains(e.target) &&
+!clientSearchBtn.contains(e.target)
+){
+closeSearchResults()
+}
 
 })
 
