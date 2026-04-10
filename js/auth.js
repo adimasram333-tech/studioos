@@ -77,6 +77,35 @@ alert("Account created. Please login.")
 
 
 // =============================
+// GOOGLE LOGIN
+// =============================
+
+export async function googleLogin(){
+
+const supabase = await getSupabase()
+
+const { error } =
+await supabase.auth.signInWithOAuth({
+
+provider: "google",
+options: {
+redirectTo: `${window.location.origin}${window.location.pathname}`
+}
+
+})
+
+if(error){
+
+alert(error.message)
+return
+
+}
+
+}
+
+
+
+// =============================
 // PROTECT PAGE (SESSION SAFE)
 // =============================
 
