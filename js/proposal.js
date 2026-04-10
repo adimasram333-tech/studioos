@@ -59,14 +59,6 @@ let pdfExportScrollTop = 0
 
 
 // ======================
-// PDF EXPORT CONSTANTS
-// ======================
-
-const PREMIUM_PDF_EXPORT_WIDTH = 794
-const PREMIUM_PDF_EXPORT_PAGE_HEIGHT = 1123
-
-
-// ======================
 // FORMAT MONEY
 // ======================
 
@@ -413,7 +405,6 @@ style.id = "proposal-pdf-export-styles"
 style.innerHTML = `
 body.proposal-pdf-export{
 overflow:visible !important;
-background:#ffffff !important;
 }
 
 body.proposal-pdf-export #proposalLoadingOverlay{
@@ -425,25 +416,20 @@ body.proposal-pdf-export .proposal-premium-actions{
 display:none !important;
 }
 
-body.proposal-pdf-export .page,
-body.proposal-pdf-export #proposalPage,
-body.proposal-pdf-export .content,
-body.proposal-pdf-export .summary,
-body.proposal-pdf-export .footer,
-body.proposal-pdf-export table,
-body.proposal-pdf-export tr,
-body.proposal-pdf-export .info-grid,
-body.proposal-pdf-export .proposal-premium-shell,
-body.proposal-pdf-export .proposal-premium-page,
-body.proposal-pdf-export .proposal-premium-content,
-body.proposal-pdf-export .proposal-premium-section,
-body.proposal-pdf-export .proposal-premium-meta{
-overflow:visible !important;
-}
-
 body.proposal-pdf-export *{
 animation:none !important;
 transition:none !important;
+}
+
+body.proposal-pdf-export .proposal-premium-page,
+body.proposal-pdf-export .proposal-premium-shell,
+body.proposal-pdf-export #proposalPage,
+body.proposal-pdf-export .page{
+overflow:visible !important;
+}
+
+body.proposal-pdf-export .proposal-premium-page{
+box-shadow:none !important;
 }
 
 body.proposal-pdf-export .proposal-premium-image{
@@ -455,47 +441,46 @@ white-space:normal !important;
 word-break:break-word !important;
 }
 
-body.proposal-pdf-export #proposalPage.proposal-premium-root{
-width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
-max-width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
-margin:0 auto !important;
-background:#ffffff !important;
-box-shadow:none !important;
-}
-
-body.proposal-pdf-export .proposal-premium-shell{
-width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
-max-width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
-margin:0 auto !important;
-padding:0 !important;
-background:#ffffff !important;
-box-sizing:border-box !important;
-}
-
+@media screen and (max-width: 1024px){
 body.proposal-pdf-export .proposal-premium-page{
-width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
-max-width:${PREMIUM_PDF_EXPORT_WIDTH}px !important;
-margin:0 !important;
-display:grid !important;
 grid-template-columns:46% 54% !important;
-min-height:${PREMIUM_PDF_EXPORT_PAGE_HEIGHT}px !important;
-background:var(--proposal-premium-paper) !important;
-border-radius:0 !important;
-box-shadow:none !important;
-page-break-inside:auto !important;
-break-inside:auto !important;
+display:grid !important;
 }
 
 body.proposal-pdf-export .proposal-premium-image-column{
-min-height:${PREMIUM_PDF_EXPORT_PAGE_HEIGHT}px !important;
+min-height:100% !important;
+}
+
+body.proposal-pdf-export .proposal-premium-image{
 height:100% !important;
+object-fit:cover !important;
+}
+}
+
+@media screen and (max-width: 768px){
+body.proposal-pdf-export .proposal-premium-shell{
+padding:18px !important;
+}
+
+body.proposal-pdf-export .proposal-premium-page{
+display:grid !important;
+grid-template-columns:46% 54% !important;
+border-radius:34px !important;
+min-height:calc(100vh - 36px) !important;
+box-shadow:none !important;
+}
+
+body.proposal-pdf-export .proposal-premium-image-column{
+position:relative !important;
+min-height:100% !important;
 background:#d7cdc2 !important;
 }
 
 body.proposal-pdf-export .proposal-premium-image{
+position:relative !important;
 width:100% !important;
 height:100% !important;
-min-height:${PREMIUM_PDF_EXPORT_PAGE_HEIGHT}px !important;
+max-height:none !important;
 object-fit:cover !important;
 object-position:center !important;
 }
@@ -505,64 +490,61 @@ display:block !important;
 }
 
 body.proposal-pdf-export .proposal-premium-content{
-padding:34px 30px 24px !important;
-display:flex !important;
-flex-direction:column !important;
-box-sizing:border-box !important;
+padding:40px 38px 26px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-title{
-font-size:48px !important;
+font-size:56px !important;
 line-height:1.08 !important;
 }
 
 body.proposal-pdf-export .proposal-premium-studio{
-font-size:27px !important;
-margin-top:18px !important;
+margin-top:24px !important;
+font-size:29px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-phone{
-font-size:15px !important;
+font-size:16px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-meta{
-margin-top:22px !important;
-padding:16px 18px !important;
+margin-top:28px !important;
+padding:18px 20px !important;
 grid-template-columns:1fr 1fr !important;
-gap:10px 14px !important;
+gap:12px 18px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-meta-item{
-font-size:13px !important;
-gap:10px !important;
+flex-direction:row !important;
+justify-content:space-between !important;
 align-items:flex-start !important;
+gap:14px !important;
+font-size:14px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-row-grid{
 grid-template-columns:1.12fr 0.88fr !important;
-gap:14px !important;
-margin-top:14px !important;
+gap:18px !important;
+margin-top:18px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-section{
-margin-top:14px !important;
-padding:18px !important;
-border-radius:20px !important;
-page-break-inside:avoid !important;
-break-inside:avoid !important;
+padding:22px !important;
+border-radius:24px !important;
+margin-top:18px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-section-title{
-font-size:26px !important;
-margin-bottom:12px !important;
+font-size:30px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-service-row{
-font-size:13px !important;
-padding:10px 0 !important;
-gap:12px !important;
+display:flex !important;
 flex-direction:row !important;
+justify-content:space-between !important;
 align-items:flex-start !important;
+gap:18px !important;
+font-size:15px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-service-row span:last-child{
@@ -570,32 +552,28 @@ text-align:right !important;
 }
 
 body.proposal-pdf-export .proposal-premium-summary-row{
-font-size:13px !important;
-padding:10px 0 !important;
+font-size:14px !important;
 }
 
 body.proposal-pdf-export .proposal-premium-summary-row strong:first-child,
 body.proposal-pdf-export .proposal-premium-summary-row strong:last-child{
-font-size:13px !important;
+font-size:14px !important;
+font-weight:600 !important;
 }
 
 body.proposal-pdf-export .proposal-premium-list{
-font-size:13px !important;
-line-height:1.75 !important;
+font-size:15px !important;
+line-height:1.9 !important;
 }
 
 body.proposal-pdf-export .proposal-premium-copy{
-font-size:13px !important;
-line-height:1.72 !important;
+font-size:15px !important;
+line-height:1.85 !important;
 }
 
-body.proposal-pdf-export .proposal-premium-footer{
-margin-top:10px !important;
-font-size:11px !important;
-}
-
-body.proposal-pdf-export .proposal-premium-btn{
+body.proposal-pdf-export .proposal-premium-actions{
 display:none !important;
+}
 }
 `
 document.head.appendChild(style)
@@ -611,7 +589,7 @@ throw new Error("Proposal content not available")
 }
 
 if(isPremiumUser(activeProposalProfile)){
-return root.querySelector(".proposal-premium-page") || root
+return root
 }
 
 return root.querySelector(".page") || root
@@ -642,19 +620,6 @@ page.classList.remove("proposal-pdf-export-target")
 
 }
 
-function getElementExportWidth(element){
-
-if(isPremiumUser(activeProposalProfile)){
-return PREMIUM_PDF_EXPORT_WIDTH
-}
-
-const rectWidth = Math.ceil(element.getBoundingClientRect().width || 0)
-const offsetWidth = Math.ceil(element.offsetWidth || 0)
-const scrollWidth = Math.ceil(element.scrollWidth || 0)
-
-return Math.max(rectWidth, offsetWidth, scrollWidth, 320)
-}
-
 async function downloadElementAsPdf(element, filename){
 
 ensurePdfLibraryReady()
@@ -663,15 +628,10 @@ await waitForDocumentFonts(document)
 await waitForImagesInElement(element)
 await waitForNextPaint()
 
-const exportWidth = getElementExportWidth(element)
-
-const worker = window.html2pdf()
-
-await worker
-.set({
-margin: [0, 0, 0, 0],
+const opt = {
+margin: 0,
 filename: filename,
-image: { type: "jpeg", quality: 0.98 },
+image: { type: "jpeg", quality: 1 },
 html2canvas: {
 scale: 2,
 useCORS: true,
@@ -679,22 +639,16 @@ allowTaint: false,
 backgroundColor: "#ffffff",
 scrollX: 0,
 scrollY: 0,
-windowWidth: exportWidth,
-width: exportWidth,
 logging: false
 },
 jsPDF: {
-unit: "pt",
+unit: "mm",
 format: "a4",
-orientation: "portrait",
-compress: true
-},
-pagebreak: {
-mode: ["css", "legacy"]
+orientation: "portrait"
 }
-})
-.from(element)
-.save()
+}
+
+await window.html2pdf().set(opt).from(element).save()
 
 }
 
