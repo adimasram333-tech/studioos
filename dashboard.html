@@ -131,6 +131,38 @@ background: rgba(255,255,255,0.08);
 color:#fca5a5;
 }
 
+.app-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:0.75rem;
+}
+
+.app-brand{
+display:flex;
+align-items:center;
+gap:0.75rem;
+min-width:0;
+}
+
+.app-logo{
+width:40px;
+height:40px;
+border-radius:0.85rem;
+object-fit:cover;
+display:none;
+border:1px solid rgba(255,255,255,0.1);
+background: rgba(255,255,255,0.05);
+}
+
+.app-title{
+font-size:clamp(1.9rem,6vw,2.3rem);
+line-height:1;
+font-weight:800;
+word-break:break-word;
+letter-spacing:-0.02em;
+}
+
 @media (min-width: 640px){
 .stat-card{
 padding:1rem;
@@ -159,6 +191,17 @@ font-size:0.8rem;
 font-size:1rem;
 margin-top:6px;
 }
+.menu-btn{
+width:40px;
+height:40px;
+}
+.app-logo{
+width:36px;
+height:36px;
+}
+.app-title{
+font-size:1.8rem;
+}
 }
 
 </style>
@@ -169,12 +212,18 @@ margin-top:6px;
 <body class="text-white min-h-screen p-4 relative">
 
 <!-- TOP APP HEADER -->
-<div class="max-w-md mx-auto mb-4">
-<div class="flex justify-between items-start gap-3">
+<div class="max-w-md mx-auto mb-5">
 
-<div class="min-w-0 flex-1">
-<h1 class="text-2xl font-bold break-words">StudioOS</h1>
-<p class="text-gray-400 text-xs mt-1">Photography Business System</p>
+<div class="app-header">
+
+<div class="app-brand">
+<img
+id="appLogo"
+class="app-logo"
+alt="StudioOS Logo"
+src=""
+>
+<h1 class="app-title">StudioOS</h1>
 </div>
 
 <div class="menu-wrapper">
@@ -209,6 +258,7 @@ Logout
 </div>
 
 </div>
+
 </div>
 
 <div id="dashboard" class="max-w-md mx-auto">
