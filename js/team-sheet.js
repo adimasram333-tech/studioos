@@ -411,7 +411,7 @@ body.team-sheet-pdf-export .sheet-page{
 body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .sheet-page{
   width:100% !important;
   max-width:100% !important;
-  margin:0 auto !important;
+  margin:0 !important;
   box-shadow:none !important;
 }
 
@@ -473,13 +473,16 @@ function removeTeamSheetPdfExportMode() {
 // =============================
 
 async function downloadPDF() {
+  let element = null;
+  let originalStyle = "";
+
   try {
     if (typeof window.html2pdf === "undefined") {
       console.error("PDF library not loaded");
       return;
     }
 
-    const element = document.querySelector(".sheet-page");
+    element = document.querySelector(".sheet-page");
 
     if (!element) {
       console.error("Printable sheet container not found");
@@ -490,12 +493,21 @@ async function downloadPDF() {
 
     applyTeamSheetPdfExportMode();
 
+    const isDesktop = isDesktopTeamSheetPdfExport();
+
+    if (isDesktop) {
+      originalStyle = element.getAttribute("style") || "";
+      element.style.width = "100%";
+      element.style.maxWidth = "100%";
+      element.style.margin = "0";
+    }
+
     const opt = {
       margin: 0,
       filename: "team-sheet.pdf",
       image: { type: "jpeg", quality: 1 },
       html2canvas: {
-        scale: 2,
+        scale: isDesktop ? 1 : 2,
         useCORS: true,
         backgroundColor: "#f4f1ed",
         scrollX: 0,
@@ -516,6 +528,14 @@ async function downloadPDF() {
   } catch (err) {
     console.error("DOWNLOAD PDF ERROR:", err);
   } finally {
+    if (element) {
+      if (originalStyle) {
+        element.setAttribute("style", originalStyle);
+      } else {
+        element.removeAttribute("style");
+      }
+    }
+
     removeTeamSheetPdfExportMode();
     window.scrollTo(0, teamSheetPdfScrollTop);
   }
