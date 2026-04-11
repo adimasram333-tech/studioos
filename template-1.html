@@ -279,6 +279,48 @@ text-decoration:none;
 color:var(--gold);
 }
 
+.page-state{
+position:fixed;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+background:rgba(251,250,247,0.82);
+backdrop-filter:blur(8px);
+z-index:80;
+padding:1.5rem;
+}
+
+.page-state.hidden{
+display:none;
+}
+
+.page-state-card{
+max-width:420px;
+width:100%;
+background:rgba(255,255,255,0.95);
+border:1px solid rgba(182,139,60,0.12);
+border-radius:1.75rem;
+box-shadow:0 18px 60px rgba(24,24,24,0.08);
+padding:1.5rem;
+text-align:center;
+}
+
+.page-state-title{
+font-family:"Cormorant Garamond",serif;
+font-size:2.2rem;
+line-height:1;
+font-weight:700;
+color:var(--text);
+}
+
+.page-state-text{
+color:var(--muted);
+font-size:0.95rem;
+line-height:1.7;
+margin-top:0.9rem;
+}
+
 @media (max-width: 768px){
 
 .hero-image{
@@ -301,14 +343,33 @@ grid-template-columns:1fr;
 
 <body>
 
+<div id="pageLoading" class="page-state">
+<div class="page-state-card">
+<p class="page-state-title">Loading Preview</p>
+<p class="page-state-text">Fetching your website details and preparing Template 1.</p>
+</div>
+</div>
+
+<div id="pageError" class="page-state hidden">
+<div class="page-state-card">
+<p class="page-state-title">Website Not Found</p>
+<p id="pageErrorText" class="page-state-text">
+This website preview is not available right now.
+</p>
+<a href="website-builder.html" class="cta-btn primary mt-6">Back to Builder</a>
+</div>
+</div>
+
+<div id="templateRoot" class="hidden">
+
 <!-- NAVBAR -->
 <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[var(--line)]">
 <div class="section-container">
 <div class="flex items-center justify-between py-4 gap-4">
 
 <div class="min-w-0">
-<p class="luxury-font text-3xl font-semibold tracking-tight">Aurelia Frames</p>
-<p class="text-xs uppercase tracking-[0.18em] text-stone-500 mt-1">Wedding & Editorial Photography</p>
+<p id="navStudioName" class="luxury-font text-3xl font-semibold tracking-tight">Aurelia Frames</p>
+<p id="navStudioTagline" class="text-xs uppercase tracking-[0.18em] text-stone-500 mt-1">Wedding & Editorial Photography</p>
 </div>
 
 <nav class="hidden md:flex items-center gap-8">
@@ -318,7 +379,7 @@ grid-template-columns:1fr;
 <a href="#contact" class="nav-link">Contact</a>
 </nav>
 
-<a href="#contact" class="cta-btn primary text-sm shrink-0">Book Now</a>
+<a id="navBookBtn" href="#contact" class="cta-btn primary text-sm shrink-0">Book Now</a>
 
 </div>
 </div>
@@ -334,11 +395,11 @@ grid-template-columns:1fr;
 <span>2026 Luxury Template</span>
 </div>
 
-<h1 class="hero-heading luxury-font text-stone-900">
+<h1 id="heroHeading" class="hero-heading luxury-font text-stone-900">
 Timeless photographs for modern love stories.
 </h1>
 
-<p class="hero-sub mt-6 max-w-xl">
+<p id="heroTagline" class="hero-sub mt-6 max-w-xl">
 Crafting elegant wedding imagery with a refined editorial touch — made for couples who want memories that feel intimate, cinematic, and unforgettable.
 </p>
 
@@ -367,8 +428,8 @@ Crafting elegant wedding imagery with a refined editorial touch — made for cou
 <div class="relative portfolio-card hero-image min-h-[440px] md:min-h-[620px]">
 <div class="floating-badge">
 <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Featured Story</p>
-<p class="luxury-font text-xl font-semibold text-stone-900 mt-1">Anaya & Vihaan</p>
-<p class="text-sm text-stone-600 mt-1">Jaipur Celebration</p>
+<p id="featuredStoryTitle" class="luxury-font text-xl font-semibold text-stone-900 mt-1">Aurelia Frames</p>
+<p id="featuredStoryLocation" class="text-sm text-stone-600 mt-1">Luxury Celebration</p>
 </div>
 </div>
 </div>
@@ -391,22 +452,22 @@ For couples who love elegance, emotion, and detail.
 </div>
 
 <div class="glass-card rounded-[2rem] p-6 md:p-8">
-<p class="small-muted">
+<p id="aboutPrimary" class="small-muted">
 We create visual stories that feel effortless, editorial, and deeply personal. From intimate moments to grand celebrations, every frame is crafted to preserve atmosphere, emotion, and timeless beauty.
 </p>
 
-<p class="small-muted mt-5">
+<p id="aboutSecondary" class="small-muted mt-5">
 Whether it is a wedding, pre-wedding session, or luxury celebration, our approach is calm, intentional, and focused on making you feel confident in front of the camera.
 </p>
 
 <div class="grid sm:grid-cols-2 gap-4 mt-8">
 <div class="outline-soft rounded-2xl p-4 bg-white/70">
 <p class="text-sm text-stone-500 uppercase tracking-[0.12em]">Base City</p>
-<p class="luxury-font text-2xl font-semibold text-stone-900 mt-2">Pune, India</p>
+<p id="aboutCity" class="luxury-font text-2xl font-semibold text-stone-900 mt-2">Pune, India</p>
 </div>
 <div class="outline-soft rounded-2xl p-4 bg-white/70">
 <p class="text-sm text-stone-500 uppercase tracking-[0.12em]">Speciality</p>
-<p class="luxury-font text-2xl font-semibold text-stone-900 mt-2">Luxury Weddings</p>
+<p id="aboutSpeciality" class="luxury-font text-2xl font-semibold text-stone-900 mt-2">Luxury Weddings</p>
 </div>
 </div>
 </div>
@@ -594,23 +655,23 @@ Share your event details and we will get back with availability, collections, an
 </p>
 
 <div class="flex flex-wrap gap-3 mt-8">
-<a href="https://wa.me/919876543210" class="cta-btn primary">WhatsApp Now</a>
-<a href="tel:+919876543210" class="cta-btn secondary">Call Studio</a>
+<a id="whatsappBtn" href="https://wa.me/919876543210" class="cta-btn primary">WhatsApp Now</a>
+<a id="callBtn" href="tel:+919876543210" class="cta-btn secondary">Call Studio</a>
 </div>
 </div>
 
 <div class="grid sm:grid-cols-2 gap-4">
 <div class="outline-soft rounded-2xl p-5 bg-white/75">
 <p class="text-sm uppercase tracking-[0.12em] text-stone-500">Phone</p>
-<p class="luxury-font text-3xl font-semibold text-stone-900 mt-2">+91 98765 43210</p>
+<p id="contactPhone" class="luxury-font text-3xl font-semibold text-stone-900 mt-2">+91 98765 43210</p>
 </div>
 <div class="outline-soft rounded-2xl p-5 bg-white/75">
 <p class="text-sm uppercase tracking-[0.12em] text-stone-500">Instagram</p>
-<p class="luxury-font text-3xl font-semibold text-stone-900 mt-2">@aureliaframes</p>
+<p id="contactInstagram" class="luxury-font text-3xl font-semibold text-stone-900 mt-2">@aureliaframes</p>
 </div>
 <div class="outline-soft rounded-2xl p-5 bg-white/75 sm:col-span-2">
 <p class="text-sm uppercase tracking-[0.12em] text-stone-500">Location</p>
-<p class="luxury-font text-3xl font-semibold text-stone-900 mt-2">Pune, Maharashtra</p>
+<p id="contactCity" class="luxury-font text-3xl font-semibold text-stone-900 mt-2">Pune, Maharashtra</p>
 </div>
 </div>
 
@@ -625,7 +686,7 @@ Share your event details and we will get back with availability, collections, an
 <div class="section-container">
 <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
 <div>
-<p class="luxury-font text-3xl font-semibold text-stone-900">Aurelia Frames</p>
+<p id="footerStudioName" class="luxury-font text-3xl font-semibold text-stone-900">Aurelia Frames</p>
 <p class="text-sm text-stone-500 mt-1">Minimal White Luxury Template</p>
 </div>
 
@@ -638,6 +699,179 @@ Share your event details and we will get back with availability, collections, an
 </div>
 </div>
 </footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+
+<script type="module">
+
+const loadingState = document.getElementById("pageLoading")
+const errorState = document.getElementById("pageError")
+const errorText = document.getElementById("pageErrorText")
+const templateRoot = document.getElementById("templateRoot")
+
+function showLoading(){
+loadingState.classList.remove("hidden")
+errorState.classList.add("hidden")
+templateRoot.classList.add("hidden")
+}
+
+function showError(message){
+loadingState.classList.add("hidden")
+errorState.classList.remove("hidden")
+templateRoot.classList.add("hidden")
+errorText.innerText = message
+}
+
+function showTemplate(){
+loadingState.classList.add("hidden")
+errorState.classList.add("hidden")
+templateRoot.classList.remove("hidden")
+}
+
+function getSlugFromUrl(){
+const params = new URLSearchParams(window.location.search)
+return (params.get("slug") || "").trim().toLowerCase()
+}
+
+function formatPhoneForDisplay(phone){
+const raw = String(phone || "").trim()
+if(!raw) return "+91 98765 43210"
+return raw
+}
+
+function formatPhoneForTel(phone){
+const raw = String(phone || "").replace(/[^\d+]/g, "")
+if(!raw) return "+919876543210"
+return raw.startsWith("+") ? raw : `+${raw}`
+}
+
+function formatPhoneForWhatsApp(phone){
+const raw = String(phone || "").replace(/\D/g, "")
+if(!raw) return "919876543210"
+if(raw.startsWith("91")) return raw
+return `91${raw}`
+}
+
+function normalizeInstagram(value){
+const raw = String(value || "").trim()
+if(!raw) return "@yourstudio"
+return raw.startsWith("@") ? raw : `@${raw}`
+}
+
+function toTitleCase(text){
+return String(text || "")
+.replace(/\b\w/g, char => char.toUpperCase())
+}
+
+function applyWebsiteData(website){
+
+const name = website.name?.trim() || "Your Studio Name"
+const tagline = website.tagline?.trim() || "Capturing timeless wedding stories with emotion, elegance and detail."
+const about = website.about?.trim() || "Write a short introduction about your photography brand."
+const phoneDisplay = formatPhoneForDisplay(website.phone)
+const phoneTel = formatPhoneForTel(website.phone)
+const whatsappPhone = formatPhoneForWhatsApp(website.phone)
+const instagramDisplay = normalizeInstagram(website.instagram)
+const city = website.city?.trim() || "Your City"
+const heroLocation = city ? `${city} Celebration` : "Luxury Celebration"
+
+document.title = `${name} - Template 1`
+
+document.getElementById("navStudioName").innerText = name
+document.getElementById("navStudioTagline").innerText = tagline
+
+document.getElementById("heroHeading").innerText = name
+document.getElementById("heroTagline").innerText = tagline
+
+document.getElementById("featuredStoryTitle").innerText = name
+document.getElementById("featuredStoryLocation").innerText = heroLocation
+
+document.getElementById("aboutPrimary").innerText = about
+document.getElementById("aboutSecondary").innerText =
+`${name} creates elegant imagery with calm direction, refined composition, and a premium client experience from start to finish.`
+
+document.getElementById("aboutCity").innerText = city
+document.getElementById("aboutSpeciality").innerText = "Luxury Weddings"
+
+document.getElementById("contactPhone").innerText = phoneDisplay
+document.getElementById("contactInstagram").innerText = instagramDisplay
+document.getElementById("contactCity").innerText = city
+
+document.getElementById("footerStudioName").innerText = name
+
+document.getElementById("whatsappBtn").href = `https://wa.me/${whatsappPhone}`
+document.getElementById("callBtn").href = `tel:${phoneTel}`
+document.getElementById("navBookBtn").href = "#contact"
+}
+
+async function fetchWebsiteBySlug(slug){
+
+const supabase = await window.getSupabase()
+
+const { data: authData } = await supabase.auth.getUser()
+const currentUserId = authData?.user?.id || null
+
+let query = supabase
+.from("user_websites")
+.select("*")
+.eq("site_slug", slug)
+.eq("template_id", 1)
+.limit(1)
+
+if(currentUserId){
+query = query.or(`is_published.eq.true,user_id.eq.${currentUserId}`)
+}
+else{
+query = query.eq("is_published", true)
+}
+
+const { data, error } = await query.maybeSingle()
+
+if(error){
+throw error
+}
+
+return data || null
+
+}
+
+async function initTemplate(){
+
+showLoading()
+
+const slug = getSlugFromUrl()
+
+if(!slug){
+showError("Missing website slug. Open this page like template-1.html?slug=your-site-slug")
+return
+}
+
+try{
+
+const website = await fetchWebsiteBySlug(slug)
+
+if(!website){
+showError("No website data found for this slug. Save your Website Builder first, then open this template using the correct slug.")
+return
+}
+
+applyWebsiteData(website)
+showTemplate()
+
+}
+catch(error){
+console.error("Template 1 load failed:", error)
+showError("Unable to load website preview right now.")
+}
+
+}
+
+await initTemplate()
+
+</script>
 
 </body>
 </html>
