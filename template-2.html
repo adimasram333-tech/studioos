@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Template 2 - Luxury Wedding</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+--bg:#120f14;
+--bg-soft:#1a141c;
+--card:#1f1822;
+--card-2:#241d28;
+--text:#f7f2ec;
+--muted:#d3c7bc;
+--line:rgba(255,255,255,0.08);
+--gold:#d6ae67;
+--gold-soft:rgba(214,174,103,0.16);
+--rose:#8f6c73;
+--shadow:0 24px 80px rgba(0,0,0,0.34);
+}
+
+html{
+scroll-behavior:smooth;
+}
+
+body{
+margin:0;
+font-family:"Inter",sans-serif;
+background:
+radial-gradient(circle at top left, rgba(214,174,103,0.12), transparent 26%),
+radial-gradient(circle at top right, rgba(143,108,115,0.16), transparent 28%),
+linear-gradient(180deg,#100d12,var(--bg));
+color:var(--text);
+}
+
+.luxury-font{
+font-family:"Cormorant Garamond",serif;
+}
+
+.section-container{
+max-width:1200px;
+margin:0 auto;
+padding-left:1.25rem;
+padding-right:1.25rem;
+}
+
+.glow-card{
+background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+border:1px solid var(--line);
+box-shadow:var(--shadow);
+backdrop-filter:blur(10px);
+}
+
+.soft-border{
+border:1px solid rgba(214,174,103,0.18);
+}
+
+.hero-shell{
+border-radius:2rem;
+overflow:hidden;
+border:1px solid rgba(214,174,103,0.16);
+background:
+linear-gradient(180deg, rgba(17,17,17,0.18), rgba(17,17,17,0.5)),
+url("https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1500&q=80");
+background-size:cover;
+background-position:center;
+box-shadow:var(--shadow);
+}
+
+.story-image-large{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.12), rgba(17,17,17,0.3)),
+url("https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.story-image-small-1{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.08), rgba(17,17,17,0.26)),
+url("https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1000&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.story-image-small-2{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.08), rgba(17,17,17,0.26)),
+url("https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1000&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.story-image-small-3{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.08), rgba(17,17,17,0.26)),
+url("https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1000&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.story-image-small-4{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.08), rgba(17,17,17,0.26)),
+url("https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1000&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.image-card{
+border-radius:1.6rem;
+overflow:hidden;
+border:1px solid rgba(214,174,103,0.14);
+background:var(--card);
+box-shadow:0 18px 48px rgba(0,0,0,0.26);
+}
+
+.story-thumb{
+height:240px;
+}
+
+.badge-soft{
+display:inline-flex;
+align-items:center;
+gap:0.45rem;
+padding:0.48rem 0.9rem;
+border-radius:999px;
+font-size:0.78rem;
+letter-spacing:0.06em;
+text-transform:uppercase;
+background:var(--gold-soft);
+color:#f3d7a0;
+border:1px solid rgba(214,174,103,0.18);
+}
+
+.nav-link{
+font-size:0.95rem;
+font-weight:500;
+color:rgba(255,255,255,0.82);
+text-decoration:none;
+}
+
+.nav-link:hover{
+color:var(--gold);
+}
+
+.cta-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:0.95rem 1.35rem;
+border-radius:999px;
+font-weight:600;
+transition:all .2s ease;
+text-decoration:none;
+}
+
+.cta-btn.primary{
+background:linear-gradient(180deg,#e1bc7c,#cda15a);
+color:#1b1613;
+}
+
+.cta-btn.primary:hover{
+transform:translateY(-1px);
+filter:brightness(1.03);
+}
+
+.cta-btn.secondary{
+background:rgba(255,255,255,0.04);
+color:var(--text);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+.cta-btn.secondary:hover{
+background:rgba(255,255,255,0.08);
+transform:translateY(-1px);
+}
+
+.hero-heading{
+font-size:clamp(3rem,8vw,6.6rem);
+line-height:0.88;
+font-weight:700;
+letter-spacing:-0.045em;
+}
+
+.section-heading{
+font-size:clamp(2.2rem,4vw,4rem);
+line-height:0.92;
+font-weight:700;
+letter-spacing:-0.03em;
+}
+
+.text-soft{
+color:rgba(255,255,255,0.72);
+line-height:1.8;
+font-size:0.98rem;
+}
+
+.kpi-card{
+padding:1.1rem;
+border-radius:1.3rem;
+background:rgba(255,255,255,0.03);
+border:1px solid rgba(255,255,255,0.08);
+text-align:center;
+}
+
+.kpi-grid{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:0.85rem;
+}
+
+.service-card{
+padding:1.35rem;
+border-radius:1.5rem;
+background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+border:1px solid rgba(214,174,103,0.12);
+box-shadow:0 16px 44px rgba(0,0,0,0.18);
+}
+
+.timeline-card{
+padding:1.3rem;
+border-radius:1.5rem;
+background:rgba(255,255,255,0.04);
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.quote-card{
+padding:1.5rem;
+border-radius:1.6rem;
+background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+border:1px solid rgba(214,174,103,0.12);
+box-shadow:0 16px 44px rgba(0,0,0,0.2);
+}
+
+.contact-card{
+padding:1.6rem;
+border-radius:1.8rem;
+background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+border:1px solid rgba(214,174,103,0.12);
+box-shadow:0 20px 54px rgba(0,0,0,0.22);
+}
+
+.glow-line{
+height:1px;
+width:84px;
+background:linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.highlight-dot{
+width:0.65rem;
+height:0.65rem;
+border-radius:999px;
+background:var(--gold);
+box-shadow:0 0 20px rgba(214,174,103,0.4);
+}
+
+.footer-link{
+color:rgba(255,255,255,0.78);
+text-decoration:none;
+}
+
+.footer-link:hover{
+color:var(--gold);
+}
+
+@media (max-width: 900px){
+.kpi-grid{
+grid-template-columns:1fr;
+}
+}
+
+@media (max-width: 768px){
+.hero-shell{
+min-height:420px;
+}
+.story-thumb{
+height:220px;
+}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="sticky top-0 z-50 bg-[#120f14]/84 backdrop-blur-xl border-b border-white/10">
+<div class="section-container">
+<div class="flex items-center justify-between py-4 gap-4">
+
+<div class="min-w-0">
+<p class="luxury-font text-3xl font-semibold tracking-tight text-white">Veloura Weddings</p>
+<p class="text-xs uppercase tracking-[0.18em] text-[#d8cab9] mt-1">Luxury Wedding Storytelling</p>
+</div>
+
+<nav class="hidden md:flex items-center gap-8">
+<a href="#story" class="nav-link">Story</a>
+<a href="#services" class="nav-link">Collections</a>
+<a href="#moments" class="nav-link">Moments</a>
+<a href="#contact" class="nav-link">Contact</a>
+</nav>
+
+<a href="#contact" class="cta-btn primary text-sm shrink-0">Reserve Date</a>
+
+</div>
+</div>
+</header>
+
+<!-- HERO -->
+<section class="pt-8 md:pt-10">
+<div class="section-container">
+<div class="hero-shell min-h-[620px] flex items-end">
+<div class="w-full p-6 md:p-10 lg:p-14">
+
+<div class="max-w-3xl">
+<div class="badge-soft mb-5">
+<span>Luxury Wedding Template</span>
+</div>
+
+<h1 class="hero-heading luxury-font text-white">
+Made for couples who want their wedding to feel cinematic, intimate, and unforgettable.
+</h1>
+
+<p class="text-soft mt-6 max-w-2xl">
+A romantic storytelling layout crafted for premium wedding photographers — designed to elevate every frame, every detail, and every beautiful moment.
+</p>
+
+<div class="flex flex-wrap gap-3 mt-8">
+<a href="#moments" class="cta-btn primary">Explore Story</a>
+<a href="#contact" class="cta-btn secondary">Book Consultation</a>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<!-- INTRO -->
+<section id="story" class="py-16 md:py-24">
+<div class="section-container">
+<div class="grid lg:grid-cols-[0.88fr_1.12fr] gap-8 items-start">
+
+<div>
+<div class="glow-line mb-5"></div>
+<p class="text-sm uppercase tracking-[0.18em] text-[#cbb394] mb-4">Our Signature Style</p>
+<h2 class="section-heading luxury-font text-white">
+Romantic frames with editorial depth.
+</h2>
+</div>
+
+<div class="glow-card rounded-[2rem] p-6 md:p-8">
+<p class="text-soft">
+This template is built for photographers who want a rich emotional atmosphere, timeless luxury, and a refined brand presence. Every section is designed to feel elevated, warm, and deeply intentional.
+</p>
+
+<p class="text-soft mt-5">
+From grand wedding celebrations to intimate pre-wedding sessions, this layout helps present your work as a high-end storytelling experience — not just a photo gallery.
+</p>
+
+<div class="kpi-grid mt-8">
+<div class="kpi-card">
+<p class="luxury-font text-4xl text-white font-semibold">150+</p>
+<p class="text-sm text-[#cfc2b7] mt-2">Wedding Stories</p>
+</div>
+<div class="kpi-card">
+<p class="luxury-font text-4xl text-white font-semibold">10+</p>
+<p class="text-sm text-[#cfc2b7] mt-2">Years Experience</p>
+</div>
+<div class="kpi-card">
+<p class="luxury-font text-4xl text-white font-semibold">5★</p>
+<p class="text-sm text-[#cfc2b7] mt-2">Premium Reviews</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- FEATURED MOMENTS -->
+<section id="moments" class="pb-16 md:pb-24">
+<div class="section-container">
+
+<div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+<div>
+<div class="glow-line mb-5"></div>
+<p class="text-sm uppercase tracking-[0.18em] text-[#cbb394] mb-4">Featured Moments</p>
+<h2 class="section-heading luxury-font text-white">
+A wedding gallery that feels immersive and alive.
+</h2>
+</div>
+
+<p class="text-soft max-w-md">
+Big frames, luxurious spacing, and emotional highlights — built to instantly impress modern couples.
+</p>
+</div>
+
+<div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-6">
+<div class="image-card story-image-large min-h-[560px] relative">
+<div class="absolute inset-x-0 bottom-0 p-6 md:p-8 bg-gradient-to-t from-black/55 to-transparent">
+<p class="text-sm uppercase tracking-[0.18em] text-[#ead6b2]">Featured Celebration</p>
+<h3 class="luxury-font text-4xl md:text-5xl text-white font-semibold mt-2">Anika & Reyansh</h3>
+<p class="text-soft mt-2 max-w-lg">A grand evening filled with graceful portraits, warm light, and deeply personal moments.</p>
+</div>
+</div>
+
+<div class="grid sm:grid-cols-2 gap-6">
+<div class="image-card">
+<div class="story-thumb story-image-small-1"></div>
+<div class="p-5">
+<p class="text-sm uppercase tracking-[0.14em] text-[#d8b883]">Couple Story</p>
+<h3 class="luxury-font text-3xl text-white font-semibold mt-2">Quiet Intimacy</h3>
+</div>
+</div>
+
+<div class="image-card">
+<div class="story-thumb story-image-small-2"></div>
+<div class="p-5">
+<p class="text-sm uppercase tracking-[0.14em] text-[#d8b883]">Ceremony</p>
+<h3 class="luxury-font text-3xl text-white font-semibold mt-2">Sacred Vows</h3>
+</div>
+</div>
+
+<div class="image-card">
+<div class="story-thumb story-image-small-3"></div>
+<div class="p-5">
+<p class="text-sm uppercase tracking-[0.14em] text-[#d8b883]">Portraits</p>
+<h3 class="luxury-font text-3xl text-white font-semibold mt-2">Golden Grace</h3>
+</div>
+</div>
+
+<div class="image-card">
+<div class="story-thumb story-image-small-4"></div>
+<div class="p-5">
+<p class="text-sm uppercase tracking-[0.14em] text-[#d8b883]">Details</p>
+<h3 class="luxury-font text-3xl text-white font-semibold mt-2">Styled Beauty</h3>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" class="pb-16 md:pb-24">
+<div class="section-container">
+
+<div class="mb-8">
+<div class="glow-line mb-5"></div>
+<p class="text-sm uppercase tracking-[0.18em] text-[#cbb394] mb-4">Collections</p>
+<h2 class="section-heading luxury-font text-white">
+Experiences tailored for luxury celebrations.
+</h2>
+</div>
+
+<div class="grid md:grid-cols-3 gap-5">
+
+<div class="service-card">
+<div class="flex items-center gap-3 mb-4">
+<span class="highlight-dot"></span>
+<p class="text-sm uppercase tracking-[0.14em] text-[#dfc39a]">01</p>
+</div>
+<h3 class="luxury-font text-3xl text-white font-semibold">Wedding Day Coverage</h3>
+<p class="text-soft mt-3">
+Complete event storytelling with candid moments, portraits, rituals, decor details, and emotional highlights.
+</p>
+</div>
+
+<div class="service-card">
+<div class="flex items-center gap-3 mb-4">
+<span class="highlight-dot"></span>
+<p class="text-sm uppercase tracking-[0.14em] text-[#dfc39a]">02</p>
+</div>
+<h3 class="luxury-font text-3xl text-white font-semibold">Pre-Wedding Editorial</h3>
+<p class="text-soft mt-3">
+A concept-driven portrait session designed to reflect your chemistry, fashion, location, and personal story.
+</p>
+</div>
+
+<div class="service-card">
+<div class="flex items-center gap-3 mb-4">
+<span class="highlight-dot"></span>
+<p class="text-sm uppercase tracking-[0.14em] text-[#dfc39a]">03</p>
+</div>
+<h3 class="luxury-font text-3xl text-white font-semibold">Destination Weddings</h3>
+<p class="text-soft mt-3">
+Travel-ready coverage for intimate and large-scale luxury weddings in elegant venues and scenic destinations.
+</p>
+</div>
+
+</div>
+
+</div>
+</section>
+
+<!-- TIMELINE / STORY -->
+<section class="pb-16 md:pb-24">
+<div class="section-container">
+
+<div class="mb-8">
+<div class="glow-line mb-5"></div>
+<p class="text-sm uppercase tracking-[0.18em] text-[#cbb394] mb-4">Story Flow</p>
+<h2 class="section-heading luxury-font text-white">
+A timeline designed for romance and emotion.
+</h2>
+</div>
+
+<div class="grid md:grid-cols-3 gap-5">
+
+<div class="timeline-card">
+<p class="text-sm uppercase tracking-[0.14em] text-[#dfc39a]">Before</p>
+<h3 class="luxury-font text-3xl text-white font-semibold mt-2">The Build-Up</h3>
+<p class="text-soft mt-3">
+Preparation moments, anticipation, styling, and all the quiet emotions before the celebration begins.
+</p>
+</div>
+
+<div class="timeline-card">
+<p class="text-sm uppercase tracking-[0.14em] text-[#dfc39a]">During</p>
+<h3 class="luxury-font text-3xl text-white font-semibold mt-2">The Vows</h3>
+<p class="text-soft mt-3">
+Sacred rituals, grand entrances, family emotion, and the heart of the day captured with editorial balance.
+</p>
+</div>
+
+<div class="timeline-card">
+<p class="text-sm uppercase tracking-[0.14em] text-[#dfc39a]">After</p>
+<h3 class="luxury-font text-3xl text-white font-semibold mt-2">The Celebration</h3>
+<p class="text-soft mt-3">
+Reception atmosphere, movement, laughter, lighting, and portraits that feel cinematic and alive.
+</p>
+</div>
+
+</div>
+
+</div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="pb-16 md:pb-24">
+<div class="section-container">
+
+<div class="mb-8">
+<div class="glow-line mb-5"></div>
+<p class="text-sm uppercase tracking-[0.18em] text-[#cbb394] mb-4">Kind Words</p>
+<h2 class="section-heading luxury-font text-white">
+Loved by couples who wanted more than standard wedding photos.
+</h2>
+</div>
+
+<div class="grid md:grid-cols-3 gap-5">
+
+<div class="quote-card">
+<p class="text-soft">
+“This looked like cinema and felt like us. The entire gallery had luxury, softness, and real emotion in every frame.”
+</p>
+<p class="luxury-font text-2xl font-semibold text-white mt-5">Meher & Shaurya</p>
+</div>
+
+<div class="quote-card">
+<p class="text-soft">
+“The layout, style, and storytelling were exactly what we wanted. It felt premium from the first photo to the last.”
+</p>
+<p class="luxury-font text-2xl font-semibold text-white mt-5">Kiara & Rohan</p>
+</div>
+
+<div class="quote-card">
+<p class="text-soft">
+“Our moments were captured beautifully, and the final presentation felt timeless, luxurious, and truly personal.”
+</p>
+<p class="luxury-font text-2xl font-semibold text-white mt-5">Aarohi & Dev</p>
+</div>
+
+</div>
+
+</div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="pb-16 md:pb-24">
+<div class="section-container">
+
+<div class="contact-card">
+<div class="grid lg:grid-cols-[1fr_0.9fr] gap-8 items-center">
+
+<div>
+<p class="text-sm uppercase tracking-[0.18em] text-[#d8b883] mb-4">Reserve Your Date</p>
+<h2 class="section-heading luxury-font text-white">
+Let’s create a wedding story that feels iconic.
+</h2>
+<p class="text-soft mt-5 max-w-xl">
+Share your celebration details and receive a curated response with availability, collections, and a refined wedding photography plan.
+</p>
+
+<div class="flex flex-wrap gap-3 mt-8">
+<a href="https://wa.me/919876543210" class="cta-btn primary">WhatsApp Enquiry</a>
+<a href="tel:+919876543210" class="cta-btn secondary">Call Studio</a>
+</div>
+</div>
+
+<div class="grid sm:grid-cols-2 gap-4">
+<div class="soft-border rounded-2xl p-5 bg-white/5">
+<p class="text-sm uppercase tracking-[0.12em] text-[#d8b883]">Phone</p>
+<p class="luxury-font text-3xl text-white font-semibold mt-2">+91 98765 43210</p>
+</div>
+<div class="soft-border rounded-2xl p-5 bg-white/5">
+<p class="text-sm uppercase tracking-[0.12em] text-[#d8b883]">Instagram</p>
+<p class="luxury-font text-3xl text-white font-semibold mt-2">@velouraweddings</p>
+</div>
+<div class="soft-border rounded-2xl p-5 bg-white/5 sm:col-span-2">
+<p class="text-sm uppercase tracking-[0.12em] text-[#d8b883]">Location</p>
+<p class="luxury-font text-3xl text-white font-semibold mt-2">Mumbai, India</p>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-white/10 py-8">
+<div class="section-container">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+<div>
+<p class="luxury-font text-3xl text-white font-semibold">Veloura Weddings</p>
+<p class="text-sm text-[#cbb9a9] mt-1">Luxury Wedding Template</p>
+</div>
+
+<div class="flex flex-wrap gap-5">
+<a href="#story" class="footer-link text-sm">Story</a>
+<a href="#services" class="footer-link text-sm">Collections</a>
+<a href="#moments" class="footer-link text-sm">Moments</a>
+<a href="#contact" class="footer-link text-sm">Contact</a>
+</div>
+</div>
+</div>
+</footer>
+
+</body>
+</html>
