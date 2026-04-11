@@ -1050,26 +1050,17 @@ function normalizeInstagram(value){
 return String(value || "").trim()
 }
 
+function slugify(value){
 
-// =============================
-// GET CURRENT USER
-// =============================
-
-async function getCurrentUser(){
-
-const supabase = await window.getSupabase()
-
-const { data:{ user } } =
-await supabase.auth.getUser()
-
-return user
+return String(value || "")
+.toLowerCase()
+.trim()
+.replace(/[^a-z0-9\s-]/g, "")
+.replace(/\s+/g, "-")
+.replace(/-+/g, "-")
+.replace(/^-|-$/g, "")
 
 }
-
-
-// =============================
-// TEMPLATE SELECTION
-// =============================
 
 function getTemplateLabel(templateId){
 const labels = {
@@ -1094,6 +1085,34 @@ const labels = {
 }
 return labels[templateId] || "Template Preview"
 }
+
+function getTemplatePreviewPath(templateId){
+const pathMap = {
+1: "template-1.html"
+}
+return pathMap[templateId] || ""
+}
+
+
+// =============================
+// GET CURRENT USER
+// =============================
+
+async function getCurrentUser(){
+
+const supabase = await window.getSupabase()
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+return user
+
+}
+
+
+// =============================
+// TEMPLATE SELECTION
+// =============================
 
 function setSelectedTemplate(templateId){
 
@@ -1156,13 +1175,6 @@ previewFooterText.innerText = `${city} • ${phone}`
 
 }
 
-previewTopBtn.addEventListener("click", ()=>{
-document.querySelector(".preview-section").scrollIntoView({
-behavior:"smooth",
-block:"start"
-})
-})
-
 scrollToFormBtn.addEventListener("click", ()=>{
 builderFormSection.scrollIntoView({
 behavior:"smooth",
@@ -1175,23 +1187,6 @@ siteTaglineInput.addEventListener("input", syncLivePreview)
 siteAboutInput.addEventListener("input", syncLivePreview)
 sitePhoneInput.addEventListener("input", syncLivePreview)
 siteCityInput.addEventListener("input", syncLivePreview)
-
-
-// =============================
-// SLUG HELPERS
-// =============================
-
-function slugify(value){
-
-return String(value || "")
-.toLowerCase()
-.trim()
-.replace(/[^a-z0-9\s-]/g, "")
-.replace(/\s+/g, "-")
-.replace(/-+/g, "-")
-.replace(/^-|-$/g, "")
-
-}
 
 siteNameInput.addEventListener("input", ()=>{
 
@@ -1265,8 +1260,6 @@ await loadWebsiteBuilder()
 // SAVE WEBSITE BUILDER DATA
 // =============================
 
-saveWebsiteBtn.addEventListener("click", saveWebsiteBuilder)
-
 async function saveWebsiteBuilder(){
 
 const supabase = await window.getSupabase()
@@ -1274,7 +1267,7 @@ const user = await getCurrentUser()
 
 if(!user){
 setSaveFeedback("error", "User session not found. Please login again.")
-return
+return { ok:false }
 }
 
 const payload = {
@@ -1292,19 +1285,21 @@ city: siteCityInput.value.trim()
 if(!payload.name){
 setSaveFeedback("error", "Website / Studio Name is required.")
 siteNameInput.focus()
-return
+return { ok:false }
 }
 
 if(!payload.site_slug){
 setSaveFeedback("error", "Site slug is required.")
 siteSlugInput.focus()
-return
+return { ok:false }
 }
 
 try{
 
 saveWebsiteBtn.disabled = true
+previewTopBtn.disabled = true
 saveWebsiteBtn.innerText = "Saving..."
+previewTopBtn.innerText = "Preparing Preview..."
 builderStatus.innerText = "Saving..."
 setSaveFeedback("info", "Saving website builder details...")
 
@@ -1316,7 +1311,9 @@ await supabase
 .single()
 
 saveWebsiteBtn.disabled = false
+previewTopBtn.disabled = false
 saveWebsiteBtn.innerText = "Save Website Builder"
+previewTopBtn.innerText = "Preview Selected Template"
 
 if(error){
 console.error("Website builder save failed:", error)
@@ -1328,23 +1325,65 @@ setSaveFeedback("error", "This site slug is already in use. Please choose anothe
 setSaveFeedback("error", "Unable to save website builder details right now.")
 }
 
-return
+return { ok:false }
 }
 
 existingWebsiteRowId = data?.id || existingWebsiteRowId
 builderStatus.innerText = "Saved successfully"
 setSaveFeedback("success", "Website Builder saved successfully.")
 
+return {
+ok:true,
+data
+}
+
 }
 catch(error){
 console.error("Website builder unexpected save failed:", error)
 saveWebsiteBtn.disabled = false
+previewTopBtn.disabled = false
 saveWebsiteBtn.innerText = "Save Website Builder"
+previewTopBtn.innerText = "Preview Selected Template"
 builderStatus.innerText = "Save failed"
 setSaveFeedback("error", "Unexpected error while saving website builder.")
+return { ok:false }
 }
 
 }
+
+saveWebsiteBtn.addEventListener("click", saveWebsiteBuilder)
+
+
+// =============================
+// PREVIEW CONNECTION
+// =============================
+
+previewTopBtn.addEventListener("click", async ()=>{
+
+const previewPath = getTemplatePreviewPath(selectedTemplateId)
+
+if(!previewPath){
+setSaveFeedback("info", `${getTemplateLabel(selectedTemplateId)} preview file is not built yet. Abhi Template 1 connected hai.`)
+return
+}
+
+const saveResult = await saveWebsiteBuilder()
+
+if(!saveResult.ok || !saveResult.data){
+return
+}
+
+const slug = saveResult.data.site_slug
+
+if(!slug){
+setSaveFeedback("error", "Preview open karne ke liye valid site slug required hai.")
+siteSlugInput.focus()
+return
+}
+
+window.location.href = `${previewPath}?slug=${encodeURIComponent(slug)}&edit=true`
+
+})
 
 </script>
 
