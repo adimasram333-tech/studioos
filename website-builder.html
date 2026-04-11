@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Website Builder - StudioOS</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+}
+
+.glass{
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+.template-card{
+cursor:pointer;
+transition:all .2s ease;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.template-card:hover{
+transform:translateY(-2px);
+border-color:rgba(99,102,241,0.6);
+}
+
+.template-card.active{
+border-color:rgb(99 102 241);
+box-shadow:0 0 0 1px rgba(99,102,241,0.35);
+background:rgba(99,102,241,0.08);
+}
+
+.template-preview{
+height:96px;
+border-radius:0.9rem;
+border:1px solid rgba(255,255,255,0.08);
+background:
+linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)),
+radial-gradient(circle at top left, rgba(99,102,241,0.18), transparent 40%),
+rgba(255,255,255,0.03);
+}
+
+.input-field,
+.textarea-field{
+width:100%;
+background: rgba(255,255,255,0.08);
+color:white;
+border:1px solid rgba(255,255,255,0.08);
+border-radius:0.95rem;
+outline:none;
+}
+
+.input-field{
+padding:0.9rem 1rem;
+}
+
+.textarea-field{
+padding:1rem;
+min-height:120px;
+resize:vertical;
+}
+
+.input-field::placeholder,
+.textarea-field::placeholder{
+color:rgba(255,255,255,0.45);
+}
+
+.input-field:focus,
+.textarea-field:focus{
+border-color:rgba(99,102,241,0.7);
+box-shadow:0 0 0 1px rgba(99,102,241,0.35);
+}
+
+.helper-text{
+font-size:0.78rem;
+color:rgb(156 163 175);
+}
+
+.status-badge{
+display:inline-flex;
+align-items:center;
+gap:0.4rem;
+padding:0.45rem 0.8rem;
+border-radius:999px;
+font-size:0.78rem;
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.08);
+color:rgb(209 213 219);
+}
+
+</style>
+
+</head>
+
+<body class="text-white min-h-screen p-4">
+
+<div class="max-w-md mx-auto">
+
+<div class="flex items-center justify-between gap-3 mb-5">
+<a href="dashboard.html" class="text-sm text-gray-400 hover:text-white transition">← Back</a>
+<span id="builderStatus" class="status-badge">Builder Ready</span>
+</div>
+
+<div class="glass rounded-2xl p-5 mb-5">
+<h1 class="text-2xl font-bold">Website Builder</h1>
+<p class="text-sm text-gray-400 mt-2">
+Create your personal photography website with ready-made premium templates.
+</p>
+</div>
+
+<div class="glass rounded-2xl p-5 mb-5">
+<div class="flex items-center justify-between gap-3 mb-4">
+<h2 class="text-lg font-semibold">Choose Template</h2>
+<span id="selectedTemplateText" class="text-xs text-gray-400">Selected: Template 1</span>
+</div>
+
+<div id="templateGrid" class="grid grid-cols-2 gap-3">
+
+<div class="template-card active glass rounded-2xl p-3" data-template="1">
+<div class="template-preview mb-3"></div>
+<h3 class="text-sm font-semibold">Template 1</h3>
+<p class="text-xs text-gray-400 mt-1">Minimal Portfolio</p>
+</div>
+
+<div class="template-card glass rounded-2xl p-3" data-template="2">
+<div class="template-preview mb-3"></div>
+<h3 class="text-sm font-semibold">Template 2</h3>
+<p class="text-xs text-gray-400 mt-1">Luxury Wedding</p>
+</div>
+
+<div class="template-card glass rounded-2xl p-3" data-template="3">
+<div class="template-preview mb-3"></div>
+<h3 class="text-sm font-semibold">Template 3</h3>
+<p class="text-xs text-gray-400 mt-1">Dark Cinematic</p>
+</div>
+
+<div class="template-card glass rounded-2xl p-3" data-template="4">
+<div class="template-preview mb-3"></div>
+<h3 class="text-sm font-semibold">Template 4</h3>
+<p class="text-xs text-gray-400 mt-1">Modern Studio</p>
+</div>
+
+<div class="template-card glass rounded-2xl p-3" data-template="5">
+<div class="template-preview mb-3"></div>
+<h3 class="text-sm font-semibold">Template 5</h3>
+<p class="text-xs text-gray-400 mt-1">Instagram Style</p>
+</div>
+
+<div class="template-card glass rounded-2xl p-3" data-template="6">
+<div class="template-preview mb-3"></div>
+<h3 class="text-sm font-semibold">Template 6</h3>
+<p class="text-xs text-gray-400 mt-1">Premium Agency</p>
+</div>
+
+</div>
+</div>
+
+<div class="glass rounded-2xl p-5 mb-5 space-y-4">
+
+<h2 class="text-lg font-semibold">Website Details</h2>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">Website / Studio Name</label>
+<input id="siteName" class="input-field" type="text" placeholder="Aditya Masram Photography">
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">Tagline</label>
+<input id="siteTagline" class="input-field" type="text" placeholder="Capturing timeless wedding stories">
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">About</label>
+<textarea id="siteAbout" class="textarea-field" placeholder="Write a short introduction about your photography brand..."></textarea>
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">Phone</label>
+<input id="sitePhone" class="input-field" type="text" placeholder="9876543210">
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">Instagram</label>
+<input id="siteInstagram" class="input-field" type="text" placeholder="@yourstudio">
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">City</label>
+<input id="siteCity" class="input-field" type="text" placeholder="Pune">
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">Site Slug</label>
+<input id="siteSlug" class="input-field" type="text" placeholder="aditya-masram">
+<p class="helper-text mt-2">This will be used for your public website link later.</p>
+</div>
+
+<div class="pt-2">
+<button
+id="saveWebsiteBtn"
+type="button"
+class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl font-semibold transition"
+>
+Save Website Builder
+</button>
+</div>
+
+</div>
+
+<div class="glass rounded-2xl p-5">
+<h2 class="text-lg font-semibold mb-3">Current Status</h2>
+<div class="space-y-2 text-sm text-gray-300">
+<p>• 6 templates ready for selection</p>
+<p>• Builder data will save to your StudioOS account</p>
+<p>• Public website publish step will be added next</p>
+</div>
+</div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+
+<script type="module">
+
+import { protectPage } from "./js/auth.js"
+
+
+// =============================
+// PROTECT PAGE
+// =============================
+
+await protectPage()
+
+
+// =============================
+// ELEMENTS
+// =============================
+
+const templateCards = Array.from(document.querySelectorAll(".template-card"))
+const selectedTemplateText = document.getElementById("selectedTemplateText")
+const builderStatus = document.getElementById("builderStatus")
+
+const siteNameInput = document.getElementById("siteName")
+const siteTaglineInput = document.getElementById("siteTagline")
+const siteAboutInput = document.getElementById("siteAbout")
+const sitePhoneInput = document.getElementById("sitePhone")
+const siteInstagramInput = document.getElementById("siteInstagram")
+const siteCityInput = document.getElementById("siteCity")
+const siteSlugInput = document.getElementById("siteSlug")
+const saveWebsiteBtn = document.getElementById("saveWebsiteBtn")
+
+let selectedTemplateId = 1
+let existingWebsiteRowId = null
+
+
+// =============================
+// GET CURRENT USER
+// =============================
+
+async function getCurrentUser(){
+
+const supabase = await window.getSupabase()
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+return user
+
+}
+
+
+// =============================
+// TEMPLATE SELECTION
+// =============================
+
+function setSelectedTemplate(templateId){
+
+selectedTemplateId = Number(templateId)
+
+templateCards.forEach(card=>{
+card.classList.toggle("active", Number(card.dataset.template) === selectedTemplateId)
+})
+
+selectedTemplateText.innerText = `Selected: Template ${selectedTemplateId}`
+}
+
+templateCards.forEach(card=>{
+
+card.addEventListener("click", ()=>{
+setSelectedTemplate(card.dataset.template)
+})
+
+})
+
+
+// =============================
+// SLUG HELPERS
+// =============================
+
+function slugify(value){
+
+return String(value || "")
+.toLowerCase()
+.trim()
+.replace(/[^a-z0-9\s-]/g, "")
+.replace(/\s+/g, "-")
+.replace(/-+/g, "-")
+.replace(/^-|-$/g, "")
+
+}
+
+siteNameInput.addEventListener("input", ()=>{
+
+if(!siteSlugInput.dataset.userEdited){
+siteSlugInput.value = slugify(siteNameInput.value)
+}
+
+})
+
+siteSlugInput.addEventListener("input", ()=>{
+siteSlugInput.dataset.userEdited = "true"
+siteSlugInput.value = slugify(siteSlugInput.value)
+})
+
+
+// =============================
+// LOAD WEBSITE BUILDER DATA
+// =============================
+
+async function loadWebsiteBuilder(){
+
+const supabase = await window.getSupabase()
+const user = await getCurrentUser()
+
+if(!user) return
+
+const { data, error } =
+await supabase
+.from("user_websites")
+.select("*")
+.eq("user_id", user.id)
+.maybeSingle()
+
+if(error){
+console.error("Website builder load failed:", error)
+builderStatus.innerText = "Load failed"
+return
+}
+
+if(!data){
+builderStatus.innerText = "New website setup"
+return
+}
+
+existingWebsiteRowId = data.id || null
+
+siteNameInput.value = data.name || ""
+siteTaglineInput.value = data.tagline || ""
+siteAboutInput.value = data.about || ""
+sitePhoneInput.value = data.phone || ""
+siteInstagramInput.value = data.instagram || ""
+siteCityInput.value = data.city || ""
+siteSlugInput.value = data.site_slug || ""
+siteSlugInput.dataset.userEdited = data.site_slug ? "true" : ""
+
+setSelectedTemplate(data.template_id || 1)
+
+builderStatus.innerText = "Existing website loaded"
+
+}
+
+await loadWebsiteBuilder()
+
+
+// =============================
+// SAVE WEBSITE BUILDER DATA
+// =============================
+
+saveWebsiteBtn.addEventListener("click", saveWebsiteBuilder)
+
+async function saveWebsiteBuilder(){
+
+const supabase = await window.getSupabase()
+const user = await getCurrentUser()
+
+if(!user){
+alert("User not logged in")
+return
+}
+
+const payload = {
+user_id: user.id,
+template_id: selectedTemplateId,
+site_slug: slugify(siteSlugInput.value || siteNameInput.value),
+name: siteNameInput.value.trim(),
+tagline: siteTaglineInput.value.trim(),
+about: siteAboutInput.value.trim(),
+phone: sitePhoneInput.value.trim(),
+instagram: siteInstagramInput.value.trim(),
+city: siteCityInput.value.trim()
+}
+
+if(!payload.name){
+alert("Website / Studio Name is required")
+return
+}
+
+if(!payload.site_slug){
+alert("Site slug is required")
+return
+}
+
+saveWebsiteBtn.disabled = true
+saveWebsiteBtn.innerText = "Saving..."
+builderStatus.innerText = "Saving..."
+
+const { data, error } =
+await supabase
+.from("user_websites")
+.upsert(payload, { onConflict: "user_id" })
+.select("*")
+.single()
+
+saveWebsiteBtn.disabled = false
+saveWebsiteBtn.innerText = "Save Website Builder"
+
+if(error){
+console.error("Website builder save failed:", error)
+builderStatus.innerText = "Save failed"
+alert("Error saving website builder")
+return
+}
+
+existingWebsiteRowId = data?.id || existingWebsiteRowId
+builderStatus.innerText = "Saved successfully"
+
+alert("Website Builder saved successfully")
+
+}
+
+</script>
+
+</body>
+</html>
