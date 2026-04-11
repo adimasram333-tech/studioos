@@ -40,13 +40,184 @@ background:rgba(99,102,241,0.08);
 }
 
 .template-preview{
-height:96px;
-border-radius:0.9rem;
+height:120px;
+border-radius:1rem;
 border:1px solid rgba(255,255,255,0.08);
+overflow:hidden;
+position:relative;
+}
+
+.template-preview::after{
+content:"";
+position:absolute;
+inset:0;
+pointer-events:none;
+box-shadow:inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+.template-preview.t1{
 background:
-linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)),
-radial-gradient(circle at top left, rgba(99,102,241,0.18), transparent 40%),
-rgba(255,255,255,0.03);
+linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+radial-gradient(circle at top left, rgba(99,102,241,0.22), transparent 42%),
+#101826;
+}
+
+.template-preview.t2{
+background:
+linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.12)),
+radial-gradient(circle at top right, rgba(251,191,36,0.22), transparent 42%),
+#1b1620;
+}
+
+.template-preview.t3{
+background:
+linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
+radial-gradient(circle at center, rgba(59,130,246,0.18), transparent 36%),
+#090d16;
+}
+
+.template-preview.t4{
+background:
+linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)),
+radial-gradient(circle at top left, rgba(34,197,94,0.18), transparent 40%),
+#101a18;
+}
+
+.template-preview.t5{
+background:
+linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01)),
+radial-gradient(circle at top center, rgba(236,72,153,0.18), transparent 38%),
+#1b1020;
+}
+
+.template-preview.t6{
+background:
+linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)),
+radial-gradient(circle at top right, rgba(168,85,247,0.18), transparent 40%),
+#151320;
+}
+
+.preview-ui{
+position:absolute;
+inset:0;
+padding:0.75rem;
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+}
+
+.preview-topbar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:0.5rem;
+}
+
+.preview-brand{
+display:flex;
+align-items:center;
+gap:0.4rem;
+min-width:0;
+}
+
+.preview-brand-dot{
+width:0.65rem;
+height:0.65rem;
+border-radius:999px;
+background:rgba(255,255,255,0.78);
+flex-shrink:0;
+}
+
+.preview-brand-text{
+font-size:0.6rem;
+font-weight:700;
+letter-spacing:0.01em;
+color:rgba(255,255,255,0.92);
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.preview-nav{
+display:flex;
+gap:0.25rem;
+}
+
+.preview-nav span{
+display:block;
+width:1.05rem;
+height:0.22rem;
+border-radius:999px;
+background:rgba(255,255,255,0.18);
+}
+
+.preview-hero{
+display:flex;
+flex-direction:column;
+gap:0.32rem;
+}
+
+.preview-line-lg{
+height:0.58rem;
+border-radius:999px;
+background:rgba(255,255,255,0.9);
+width:62%;
+}
+
+.preview-line-md{
+height:0.4rem;
+border-radius:999px;
+background:rgba(255,255,255,0.55);
+width:78%;
+}
+
+.preview-line-sm{
+height:0.3rem;
+border-radius:999px;
+background:rgba(255,255,255,0.35);
+width:46%;
+}
+
+.preview-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:0.32rem;
+}
+
+.preview-grid div{
+height:1.55rem;
+border-radius:0.45rem;
+background:rgba(255,255,255,0.13);
+}
+
+.preview-grid.alt-2{
+grid-template-columns:1.3fr 1fr;
+}
+
+.preview-grid.alt-2 div:first-child{
+height:2rem;
+}
+
+.preview-grid.alt-2 div:last-child{
+height:2rem;
+}
+
+.preview-footer{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:0.5rem;
+}
+
+.preview-pill{
+height:0.55rem;
+width:3rem;
+border-radius:999px;
+background:rgba(255,255,255,0.22);
+}
+
+.preview-pill.short{
+width:2rem;
 }
 
 .input-field,
@@ -97,6 +268,292 @@ border:1px solid rgba(255,255,255,0.08);
 color:rgb(209 213 219);
 }
 
+.preview-section{
+overflow:hidden;
+}
+
+.live-preview-shell{
+border-radius:1.2rem;
+border:1px solid rgba(255,255,255,0.08);
+padding:1rem;
+background:
+linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
+rgba(255,255,255,0.02);
+}
+
+.live-preview-frame{
+border-radius:1.15rem;
+overflow:hidden;
+border:1px solid rgba(255,255,255,0.08);
+background:#0b1220;
+}
+
+.live-template{
+padding:1rem;
+min-height:420px;
+}
+
+.live-template.t1{
+background:
+radial-gradient(circle at top left, rgba(99,102,241,0.14), transparent 28%),
+linear-gradient(180deg,#0f172a,#111827);
+}
+
+.live-template.t2{
+background:
+radial-gradient(circle at top right, rgba(251,191,36,0.14), transparent 28%),
+linear-gradient(180deg,#1f1725,#121826);
+}
+
+.live-template.t3{
+background:
+radial-gradient(circle at center, rgba(59,130,246,0.14), transparent 26%),
+linear-gradient(180deg,#090d16,#111827);
+}
+
+.live-template.t4{
+background:
+radial-gradient(circle at top left, rgba(34,197,94,0.14), transparent 28%),
+linear-gradient(180deg,#101b18,#111827);
+}
+
+.live-template.t5{
+background:
+radial-gradient(circle at top center, rgba(236,72,153,0.14), transparent 30%),
+linear-gradient(180deg,#1b1020,#111827);
+}
+
+.live-template.t6{
+background:
+radial-gradient(circle at top right, rgba(168,85,247,0.14), transparent 30%),
+linear-gradient(180deg,#171125,#111827);
+}
+
+.live-nav{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:0.75rem;
+margin-bottom:1.1rem;
+}
+
+.live-brand{
+font-size:0.92rem;
+font-weight:700;
+letter-spacing:0.02em;
+color:white;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.live-nav-links{
+display:flex;
+gap:0.45rem;
+flex-wrap:wrap;
+justify-content:flex-end;
+}
+
+.live-nav-links span{
+font-size:0.68rem;
+color:rgba(255,255,255,0.62);
+padding:0.28rem 0.55rem;
+border-radius:999px;
+background:rgba(255,255,255,0.06);
+}
+
+.live-hero{
+padding:1.1rem 0 1.25rem;
+}
+
+.live-eyebrow{
+font-size:0.72rem;
+text-transform:uppercase;
+letter-spacing:0.14em;
+color:rgba(255,255,255,0.55);
+margin-bottom:0.55rem;
+}
+
+.live-heading{
+font-size:1.7rem;
+line-height:1.05;
+font-weight:800;
+color:white;
+margin:0;
+word-break:break-word;
+}
+
+.live-tagline{
+font-size:0.9rem;
+line-height:1.5;
+color:rgba(255,255,255,0.75);
+margin-top:0.8rem;
+}
+
+.live-cta-row{
+display:flex;
+gap:0.7rem;
+margin-top:1rem;
+flex-wrap:wrap;
+}
+
+.live-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:0.68rem 1rem;
+border-radius:999px;
+font-size:0.82rem;
+font-weight:600;
+}
+
+.live-btn.primary{
+background:white;
+color:#0f172a;
+}
+
+.live-btn.secondary{
+background:rgba(255,255,255,0.08);
+color:white;
+border:1px solid rgba(255,255,255,0.12);
+}
+
+.live-section-title{
+font-size:0.84rem;
+font-weight:700;
+color:white;
+margin-bottom:0.7rem;
+}
+
+.live-about{
+font-size:0.82rem;
+line-height:1.6;
+color:rgba(255,255,255,0.74);
+}
+
+.live-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:0.5rem;
+margin-top:0.9rem;
+}
+
+.live-grid div{
+height:72px;
+border-radius:0.85rem;
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.06);
+}
+
+.live-services{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:0.55rem;
+margin-top:1.1rem;
+}
+
+.live-service-card{
+padding:0.75rem;
+border-radius:0.9rem;
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.06);
+}
+
+.live-service-title{
+font-size:0.78rem;
+font-weight:700;
+color:white;
+}
+
+.live-service-text{
+font-size:0.72rem;
+line-height:1.45;
+color:rgba(255,255,255,0.6);
+margin-top:0.24rem;
+}
+
+.live-footer{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:0.75rem;
+margin-top:1.2rem;
+padding-top:0.95rem;
+border-top:1px solid rgba(255,255,255,0.07);
+}
+
+.live-footer-text{
+font-size:0.72rem;
+color:rgba(255,255,255,0.6);
+word-break:break-word;
+}
+
+.live-social{
+display:flex;
+gap:0.4rem;
+}
+
+.live-social span{
+width:1.8rem;
+height:1.8rem;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+border-radius:999px;
+background:rgba(255,255,255,0.08);
+font-size:0.72rem;
+color:white;
+}
+
+.preview-actions{
+display:flex;
+gap:0.7rem;
+flex-wrap:wrap;
+margin-top:1rem;
+}
+
+.preview-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:0.75rem 1rem;
+border-radius:0.95rem;
+font-size:0.85rem;
+font-weight:600;
+transition:all .2s ease;
+}
+
+.preview-btn.primary{
+background:rgb(79 70 229);
+color:white;
+}
+
+.preview-btn.primary:hover{
+background:rgb(67 56 202);
+}
+
+.preview-btn.secondary{
+background:rgba(255,255,255,0.06);
+color:white;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.preview-btn.secondary:hover{
+background:rgba(255,255,255,0.1);
+}
+
+@media (max-width: 380px){
+.template-preview{
+height:108px;
+}
+.live-heading{
+font-size:1.45rem;
+}
+.live-grid div{
+height:62px;
+}
+}
+
 </style>
 
 </head>
@@ -126,37 +583,146 @@ Create your personal photography website with ready-made premium templates.
 <div id="templateGrid" class="grid grid-cols-2 gap-3">
 
 <div class="template-card active glass rounded-2xl p-3" data-template="1">
-<div class="template-preview mb-3"></div>
+<div class="template-preview t1 mb-3">
+<div class="preview-ui">
+<div class="preview-topbar">
+<div class="preview-brand">
+<span class="preview-brand-dot"></span>
+<span class="preview-brand-text">Minimal Portfolio</span>
+</div>
+<div class="preview-nav"><span></span><span></span><span></span></div>
+</div>
+<div class="preview-hero">
+<div class="preview-line-lg"></div>
+<div class="preview-line-md"></div>
+<div class="preview-line-sm"></div>
+</div>
+<div class="preview-grid">
+<div></div><div></div><div></div>
+</div>
+</div>
+</div>
 <h3 class="text-sm font-semibold">Template 1</h3>
 <p class="text-xs text-gray-400 mt-1">Minimal Portfolio</p>
 </div>
 
 <div class="template-card glass rounded-2xl p-3" data-template="2">
-<div class="template-preview mb-3"></div>
+<div class="template-preview t2 mb-3">
+<div class="preview-ui">
+<div class="preview-topbar">
+<div class="preview-brand">
+<span class="preview-brand-dot"></span>
+<span class="preview-brand-text">Luxury Wedding</span>
+</div>
+<div class="preview-nav"><span></span><span></span></div>
+</div>
+<div class="preview-hero">
+<div class="preview-line-lg" style="width:70%"></div>
+<div class="preview-line-md" style="width:60%"></div>
+</div>
+<div class="preview-grid alt-2">
+<div></div><div></div>
+</div>
+<div class="preview-footer">
+<div class="preview-pill"></div>
+<div class="preview-pill short"></div>
+</div>
+</div>
+</div>
 <h3 class="text-sm font-semibold">Template 2</h3>
 <p class="text-xs text-gray-400 mt-1">Luxury Wedding</p>
 </div>
 
 <div class="template-card glass rounded-2xl p-3" data-template="3">
-<div class="template-preview mb-3"></div>
+<div class="template-preview t3 mb-3">
+<div class="preview-ui">
+<div class="preview-topbar">
+<div class="preview-brand">
+<span class="preview-brand-dot"></span>
+<span class="preview-brand-text">Dark Cinematic</span>
+</div>
+</div>
+<div class="preview-grid">
+<div></div><div></div><div></div>
+</div>
+<div class="preview-hero">
+<div class="preview-line-lg" style="width:58%"></div>
+<div class="preview-line-sm" style="width:36%"></div>
+</div>
+<div class="preview-footer">
+<div class="preview-pill"></div>
+<div class="preview-pill short"></div>
+</div>
+</div>
+</div>
 <h3 class="text-sm font-semibold">Template 3</h3>
 <p class="text-xs text-gray-400 mt-1">Dark Cinematic</p>
 </div>
 
 <div class="template-card glass rounded-2xl p-3" data-template="4">
-<div class="template-preview mb-3"></div>
+<div class="template-preview t4 mb-3">
+<div class="preview-ui">
+<div class="preview-topbar">
+<div class="preview-brand">
+<span class="preview-brand-dot"></span>
+<span class="preview-brand-text">Modern Studio</span>
+</div>
+<div class="preview-nav"><span></span><span></span></div>
+</div>
+<div class="preview-grid">
+<div></div><div></div><div></div>
+</div>
+<div class="preview-grid" style="margin-top:0.35rem;">
+<div></div><div></div><div></div>
+</div>
+</div>
+</div>
 <h3 class="text-sm font-semibold">Template 4</h3>
 <p class="text-xs text-gray-400 mt-1">Modern Studio</p>
 </div>
 
 <div class="template-card glass rounded-2xl p-3" data-template="5">
-<div class="template-preview mb-3"></div>
+<div class="template-preview t5 mb-3">
+<div class="preview-ui">
+<div class="preview-topbar">
+<div class="preview-brand">
+<span class="preview-brand-dot"></span>
+<span class="preview-brand-text">Instagram Style</span>
+</div>
+</div>
+<div class="preview-grid">
+<div></div><div></div><div></div>
+</div>
+<div class="preview-grid" style="margin-top:0.35rem;">
+<div></div><div></div><div></div>
+</div>
+<div class="preview-line-sm" style="width:52%;"></div>
+</div>
+</div>
 <h3 class="text-sm font-semibold">Template 5</h3>
 <p class="text-xs text-gray-400 mt-1">Instagram Style</p>
 </div>
 
 <div class="template-card glass rounded-2xl p-3" data-template="6">
-<div class="template-preview mb-3"></div>
+<div class="template-preview t6 mb-3">
+<div class="preview-ui">
+<div class="preview-topbar">
+<div class="preview-brand">
+<span class="preview-brand-dot"></span>
+<span class="preview-brand-text">Premium Agency</span>
+</div>
+<div class="preview-nav"><span></span><span></span><span></span></div>
+</div>
+<div class="preview-hero">
+<div class="preview-line-lg" style="width:66%"></div>
+<div class="preview-line-md" style="width:52%"></div>
+</div>
+<div class="preview-footer">
+<div class="preview-pill" style="width:4rem;"></div>
+<div class="preview-pill short"></div>
+</div>
+</div>
+</div>
 <h3 class="text-sm font-semibold">Template 6</h3>
 <p class="text-xs text-gray-400 mt-1">Premium Agency</p>
 </div>
@@ -164,7 +730,82 @@ Create your personal photography website with ready-made premium templates.
 </div>
 </div>
 
-<div class="glass rounded-2xl p-5 mb-5 space-y-4">
+<div class="glass rounded-2xl p-5 mb-5 preview-section">
+<div class="flex items-center justify-between gap-3 mb-4">
+<h2 class="text-lg font-semibold">Live Template Preview</h2>
+<span id="previewTemplateLabel" class="text-xs text-gray-400">Template 1</span>
+</div>
+
+<div class="live-preview-shell">
+<div class="live-preview-frame">
+<div id="liveTemplatePreview" class="live-template t1">
+
+<div class="live-nav">
+<div id="previewBrandName" class="live-brand">Your Studio Name</div>
+<div class="live-nav-links">
+<span>Home</span>
+<span>Portfolio</span>
+<span>Contact</span>
+</div>
+</div>
+
+<div class="live-hero">
+<div class="live-eyebrow">Minimal Portfolio</div>
+<h3 id="previewHeading" class="live-heading">Aditya Masram Photography</h3>
+<p id="previewTagline" class="live-tagline">Capturing timeless wedding stories with emotion, elegance and detail.</p>
+
+<div class="live-cta-row">
+<div class="live-btn primary">Book Now</div>
+<div class="live-btn secondary">View Portfolio</div>
+</div>
+</div>
+
+<div class="mt-4">
+<div class="live-section-title">Featured Portfolio</div>
+<div class="live-grid">
+<div></div>
+<div></div>
+<div></div>
+</div>
+</div>
+
+<div class="mt-5">
+<div class="live-section-title">About</div>
+<p id="previewAbout" class="live-about">
+Write a short introduction about your photography brand. This live preview updates with your builder details.
+</p>
+</div>
+
+<div class="live-services">
+<div class="live-service-card">
+<div class="live-service-title">Wedding Stories</div>
+<div class="live-service-text">Elegant coverage with cinematic portraits and real moments.</div>
+</div>
+<div class="live-service-card">
+<div class="live-service-title">Pre-Wedding</div>
+<div class="live-service-text">Creative concept shoots designed for your personal style.</div>
+</div>
+</div>
+
+<div class="live-footer">
+<div id="previewFooterText" class="live-footer-text">Pune • 9876543210</div>
+<div class="live-social">
+<span>IG</span>
+<span>WA</span>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="preview-actions">
+<button id="previewTopBtn" type="button" class="preview-btn primary">Preview Selected Template</button>
+<button id="scrollToFormBtn" type="button" class="preview-btn secondary">Edit Website Details</button>
+</div>
+</div>
+</div>
+
+<div id="builderFormSection" class="glass rounded-2xl p-5 mb-5 space-y-4">
 
 <h2 class="text-lg font-semibold">Website Details</h2>
 
@@ -219,8 +860,8 @@ Save Website Builder
 <div class="glass rounded-2xl p-5">
 <h2 class="text-lg font-semibold mb-3">Current Status</h2>
 <div class="space-y-2 text-sm text-gray-300">
-<p>• 6 templates ready for selection</p>
-<p>• Builder data will save to your StudioOS account</p>
+<p>• 6 templates now have visible preview styles</p>
+<p>• Live preview updates from your builder details</p>
 <p>• Public website publish step will be added next</p>
 </div>
 </div>
@@ -250,6 +891,16 @@ await protectPage()
 const templateCards = Array.from(document.querySelectorAll(".template-card"))
 const selectedTemplateText = document.getElementById("selectedTemplateText")
 const builderStatus = document.getElementById("builderStatus")
+const previewTemplateLabel = document.getElementById("previewTemplateLabel")
+const liveTemplatePreview = document.getElementById("liveTemplatePreview")
+const previewBrandName = document.getElementById("previewBrandName")
+const previewHeading = document.getElementById("previewHeading")
+const previewTagline = document.getElementById("previewTagline")
+const previewAbout = document.getElementById("previewAbout")
+const previewFooterText = document.getElementById("previewFooterText")
+const previewTopBtn = document.getElementById("previewTopBtn")
+const scrollToFormBtn = document.getElementById("scrollToFormBtn")
+const builderFormSection = document.getElementById("builderFormSection")
 
 const siteNameInput = document.getElementById("siteName")
 const siteTaglineInput = document.getElementById("siteTagline")
@@ -284,6 +935,30 @@ return user
 // TEMPLATE SELECTION
 // =============================
 
+function getTemplateLabel(templateId){
+const labels = {
+1: "Template 1",
+2: "Template 2",
+3: "Template 3",
+4: "Template 4",
+5: "Template 5",
+6: "Template 6"
+}
+return labels[templateId] || `Template ${templateId}`
+}
+
+function getTemplateEyebrow(templateId){
+const labels = {
+1: "Minimal Portfolio",
+2: "Luxury Wedding",
+3: "Dark Cinematic",
+4: "Modern Studio",
+5: "Instagram Style",
+6: "Premium Agency"
+}
+return labels[templateId] || "Template Preview"
+}
+
 function setSelectedTemplate(templateId){
 
 selectedTemplateId = Number(templateId)
@@ -293,15 +968,77 @@ card.classList.toggle("active", Number(card.dataset.template) === selectedTempla
 })
 
 selectedTemplateText.innerText = `Selected: Template ${selectedTemplateId}`
+previewTemplateLabel.innerText = getTemplateLabel(selectedTemplateId)
+
+liveTemplatePreview.className = `live-template t${selectedTemplateId}`
+
+const eyebrowElement =
+liveTemplatePreview.querySelector(".live-eyebrow")
+
+if(eyebrowElement){
+eyebrowElement.innerText = getTemplateEyebrow(selectedTemplateId)
+}
+
 }
 
 templateCards.forEach(card=>{
 
 card.addEventListener("click", ()=>{
 setSelectedTemplate(card.dataset.template)
+syncLivePreview()
 })
 
 })
+
+
+// =============================
+// LIVE PREVIEW
+// =============================
+
+function syncLivePreview(){
+
+const siteName =
+siteNameInput.value.trim() || "Your Studio Name"
+
+const tagline =
+siteTaglineInput.value.trim() || "Capturing timeless wedding stories with emotion, elegance and detail."
+
+const about =
+siteAboutInput.value.trim() || "Write a short introduction about your photography brand. This live preview updates with your builder details."
+
+const city =
+siteCityInput.value.trim() || "Your City"
+
+const phone =
+sitePhoneInput.value.trim() || "Your Phone"
+
+previewBrandName.innerText = siteName
+previewHeading.innerText = siteName
+previewTagline.innerText = tagline
+previewAbout.innerText = about
+previewFooterText.innerText = `${city} • ${phone}`
+
+}
+
+previewTopBtn.addEventListener("click", ()=>{
+document.querySelector(".preview-section").scrollIntoView({
+behavior:"smooth",
+block:"start"
+})
+})
+
+scrollToFormBtn.addEventListener("click", ()=>{
+builderFormSection.scrollIntoView({
+behavior:"smooth",
+block:"start"
+})
+})
+
+siteNameInput.addEventListener("input", syncLivePreview)
+siteTaglineInput.addEventListener("input", syncLivePreview)
+siteAboutInput.addEventListener("input", syncLivePreview)
+sitePhoneInput.addEventListener("input", syncLivePreview)
+siteCityInput.addEventListener("input", syncLivePreview)
 
 
 // =============================
@@ -360,6 +1097,7 @@ return
 
 if(!data){
 builderStatus.innerText = "New website setup"
+syncLivePreview()
 return
 }
 
@@ -375,6 +1113,7 @@ siteSlugInput.value = data.site_slug || ""
 siteSlugInput.dataset.userEdited = data.site_slug ? "true" : ""
 
 setSelectedTemplate(data.template_id || 1)
+syncLivePreview()
 
 builderStatus.innerText = "Existing website loaded"
 
