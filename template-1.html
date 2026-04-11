@@ -69,57 +69,16 @@ background:linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
 .hero-image{
-background:
-linear-gradient(180deg, rgba(17,17,17,0.04), rgba(17,17,17,0.1)),
-url("https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80");
 background-size:cover;
 background-position:center;
 }
 
-.image-one{
-background:
-linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
-url("https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1000&q=80");
-background-size:cover;
-background-position:center;
-}
-
-.image-two{
-background:
-linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
-url("https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80");
-background-size:cover;
-background-position:center;
-}
-
-.image-three{
-background:
-linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
-url("https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1000&q=80");
-background-size:cover;
-background-position:center;
-}
-
-.image-four{
-background:
-linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
-url("https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1000&q=80");
-background-size:cover;
-background-position:center;
-}
-
-.image-five{
-background:
-linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
-url("https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1000&q=80");
-background-size:cover;
-background-position:center;
-}
-
+.image-one,
+.image-two,
+.image-three,
+.image-four,
+.image-five,
 .image-six{
-background:
-linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
-url("https://images.unsplash.com/photo-1513279922550-250c2129b13a?auto=format&fit=crop&w=1000&q=80");
 background-size:cover;
 background-position:center;
 }
@@ -321,6 +280,136 @@ line-height:1.7;
 margin-top:0.9rem;
 }
 
+.edit-toolbar{
+position:fixed;
+top:1rem;
+right:1rem;
+z-index:90;
+display:flex;
+flex-direction:column;
+gap:0.6rem;
+align-items:flex-end;
+}
+
+.edit-toolbar.hidden{
+display:none;
+}
+
+.edit-chip{
+display:inline-flex;
+align-items:center;
+gap:0.6rem;
+padding:0.75rem 1rem;
+border-radius:999px;
+background:rgba(255,255,255,0.9);
+backdrop-filter:blur(12px);
+border:1px solid rgba(182,139,60,0.14);
+box-shadow:0 10px 30px rgba(24,24,24,0.08);
+}
+
+.edit-label{
+font-size:0.8rem;
+font-weight:600;
+color:#5c4720;
+}
+
+.toggle-btn{
+appearance:none;
+width:48px;
+height:28px;
+border-radius:999px;
+background:#d6d3d1;
+position:relative;
+cursor:pointer;
+transition:background .2s ease;
+border:none;
+}
+
+.toggle-btn::after{
+content:"";
+position:absolute;
+top:3px;
+left:3px;
+width:22px;
+height:22px;
+border-radius:999px;
+background:white;
+box-shadow:0 2px 8px rgba(0,0,0,0.12);
+transition:transform .2s ease;
+}
+
+.toggle-btn.active{
+background:#171717;
+}
+
+.toggle-btn.active::after{
+transform:translateX(20px);
+}
+
+.edit-status{
+max-width:320px;
+padding:0.8rem 1rem;
+border-radius:1rem;
+background:rgba(255,255,255,0.92);
+border:1px solid rgba(182,139,60,0.14);
+box-shadow:0 10px 30px rgba(24,24,24,0.08);
+font-size:0.82rem;
+line-height:1.5;
+color:#4b5563;
+}
+
+.editable-slot{
+position:relative;
+}
+
+.edit-overlay{
+position:absolute;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+background:rgba(17,17,17,0.34);
+backdrop-filter:blur(1px);
+color:white;
+font-size:0.9rem;
+font-weight:600;
+letter-spacing:0.01em;
+cursor:pointer;
+text-align:center;
+padding:1rem;
+}
+
+.editable-slot.edit-active .edit-overlay{
+display:flex;
+}
+
+.edit-overlay span{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:0.7rem 1rem;
+border-radius:999px;
+background:rgba(255,255,255,0.16);
+border:1px solid rgba(255,255,255,0.2);
+}
+
+.image-loading{
+position:absolute;
+top:0.8rem;
+right:0.8rem;
+display:none;
+padding:0.45rem 0.7rem;
+border-radius:999px;
+background:rgba(255,255,255,0.9);
+font-size:0.75rem;
+font-weight:600;
+color:#111827;
+}
+
+.editable-slot.uploading .image-loading{
+display:block;
+}
+
 @media (max-width: 768px){
 
 .hero-image{
@@ -333,6 +422,20 @@ height:210px;
 
 .stats-grid{
 grid-template-columns:1fr;
+}
+
+.edit-toolbar{
+left:1rem;
+right:1rem;
+align-items:stretch;
+}
+
+.edit-chip{
+justify-content:space-between;
+}
+
+.edit-status{
+max-width:none;
 }
 
 }
@@ -359,6 +462,16 @@ This website preview is not available right now.
 <a href="website-builder.html" class="cta-btn primary mt-6">Back to Builder</a>
 </div>
 </div>
+
+<div id="editToolbar" class="edit-toolbar hidden">
+<div class="edit-chip">
+<span class="edit-label">Edit Mode</span>
+<button id="editModeToggle" type="button" class="toggle-btn" aria-label="Toggle edit mode"></button>
+</div>
+<div id="editStatus" class="edit-status">You are viewing preview mode.</div>
+</div>
+
+<input id="imageFileInput" type="file" accept="image/*" class="hidden">
 
 <div id="templateRoot" class="hidden">
 
@@ -425,12 +538,18 @@ Crafting elegant wedding imagery with a refined editorial touch — made for cou
 </div>
 
 <div class="order-1 lg:order-2">
-<div class="relative portfolio-card hero-image min-h-[440px] md:min-h-[620px]">
+<div
+id="heroImageSlot"
+class="relative portfolio-card hero-image min-h-[440px] md:min-h-[620px] editable-slot"
+data-image-slot="hero_image_url"
+>
 <div class="floating-badge">
 <p class="text-xs uppercase tracking-[0.18em] text-stone-500">Featured Story</p>
 <p id="featuredStoryTitle" class="luxury-font text-xl font-semibold text-stone-900 mt-1">Aurelia Frames</p>
 <p id="featuredStoryLocation" class="text-sm text-stone-600 mt-1">Luxury Celebration</p>
 </div>
+<div class="image-loading">Uploading...</div>
+<div class="edit-overlay"><span>Replace Hero Image</span></div>
 </div>
 </div>
 
@@ -497,7 +616,14 @@ Every frame is curated to balance emotion, movement, intimacy, and timeless aest
 <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
 
 <div class="portfolio-card">
-<div class="portfolio-thumb image-one"></div>
+<div
+id="portfolioImage1Slot"
+class="portfolio-thumb image-one editable-slot"
+data-image-slot="portfolio_image_1_url"
+>
+<div class="image-loading">Uploading...</div>
+<div class="edit-overlay"><span>Replace Image</span></div>
+</div>
 <div class="p-5">
 <p class="text-sm uppercase tracking-[0.14em] text-stone-500">Pre-Wedding</p>
 <h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Sunlit Romance</h3>
@@ -506,7 +632,14 @@ Every frame is curated to balance emotion, movement, intimacy, and timeless aest
 </div>
 
 <div class="portfolio-card">
-<div class="portfolio-thumb image-two"></div>
+<div
+id="portfolioImage2Slot"
+class="portfolio-thumb image-two editable-slot"
+data-image-slot="portfolio_image_2_url"
+>
+<div class="image-loading">Uploading...</div>
+<div class="edit-overlay"><span>Replace Image</span></div>
+</div>
 <div class="p-5">
 <p class="text-sm uppercase tracking-[0.14em] text-stone-500">Wedding Day</p>
 <h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Ceremony Grace</h3>
@@ -515,7 +648,14 @@ Every frame is curated to balance emotion, movement, intimacy, and timeless aest
 </div>
 
 <div class="portfolio-card">
-<div class="portfolio-thumb image-three"></div>
+<div
+id="portfolioImage3Slot"
+class="portfolio-thumb image-three editable-slot"
+data-image-slot="portfolio_image_3_url"
+>
+<div class="image-loading">Uploading...</div>
+<div class="edit-overlay"><span>Replace Image</span></div>
+</div>
 <div class="p-5">
 <p class="text-sm uppercase tracking-[0.14em] text-stone-500">Couple Portraits</p>
 <h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">After Vows</h3>
@@ -524,7 +664,14 @@ Every frame is curated to balance emotion, movement, intimacy, and timeless aest
 </div>
 
 <div class="portfolio-card">
-<div class="portfolio-thumb image-four"></div>
+<div
+id="portfolioImage4Slot"
+class="portfolio-thumb image-four editable-slot"
+data-image-slot="portfolio_image_4_url"
+>
+<div class="image-loading">Uploading...</div>
+<div class="edit-overlay"><span>Replace Image</span></div>
+</div>
 <div class="p-5">
 <p class="text-sm uppercase tracking-[0.14em] text-stone-500">Celebration</p>
 <h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Reception Glow</h3>
@@ -533,7 +680,14 @@ Every frame is curated to balance emotion, movement, intimacy, and timeless aest
 </div>
 
 <div class="portfolio-card">
-<div class="portfolio-thumb image-five"></div>
+<div
+id="portfolioImage5Slot"
+class="portfolio-thumb image-five editable-slot"
+data-image-slot="portfolio_image_5_url"
+>
+<div class="image-loading">Uploading...</div>
+<div class="edit-overlay"><span>Replace Image</span></div>
+</div>
 <div class="p-5">
 <p class="text-sm uppercase tracking-[0.14em] text-stone-500">Detail Frames</p>
 <h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Styled Beauty</h3>
@@ -542,7 +696,14 @@ Every frame is curated to balance emotion, movement, intimacy, and timeless aest
 </div>
 
 <div class="portfolio-card">
-<div class="portfolio-thumb image-six"></div>
+<div
+id="portfolioImage6Slot"
+class="portfolio-thumb image-six editable-slot"
+data-image-slot="portfolio_image_6_url"
+>
+<div class="image-loading">Uploading...</div>
+<div class="edit-overlay"><span>Replace Image</span></div>
+</div>
 <div class="p-5">
 <p class="text-sm uppercase tracking-[0.14em] text-stone-500">Destination</p>
 <h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Travel Stories</h3>
@@ -707,165 +868,348 @@ Share your event details and we will get back with availability, collections, an
 
 <script type="module">
 
+import { replaceImageAsset } from "./js/storage.js"
+
 const loadingState = document.getElementById("pageLoading")
 const errorState = document.getElementById("pageError")
 const errorText = document.getElementById("pageErrorText")
 const templateRoot = document.getElementById("templateRoot")
+const editToolbar = document.getElementById("editToolbar")
+const editModeToggle = document.getElementById("editModeToggle")
+const editStatus = document.getElementById("editStatus")
+const imageFileInput = document.getElementById("imageFileInput")
+
+const DEFAULT_IMAGES = {
+  hero_image_url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+  portfolio_image_1_url: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1000&q=80",
+  portfolio_image_2_url: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80",
+  portfolio_image_3_url: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1000&q=80",
+  portfolio_image_4_url: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1000&q=80",
+  portfolio_image_5_url: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1000&q=80",
+  portfolio_image_6_url: "https://images.unsplash.com/photo-1513279922550-250c2129b13a?auto=format&fit=crop&w=1000&q=80"
+}
+
+let currentWebsite = null
+let currentUserId = null
+let editModeEnabled = false
+let pendingImageSlot = ""
 
 function showLoading(){
-loadingState.classList.remove("hidden")
-errorState.classList.add("hidden")
-templateRoot.classList.add("hidden")
+  loadingState.classList.remove("hidden")
+  errorState.classList.add("hidden")
+  templateRoot.classList.add("hidden")
 }
 
 function showError(message){
-loadingState.classList.add("hidden")
-errorState.classList.remove("hidden")
-templateRoot.classList.add("hidden")
-errorText.innerText = message
+  loadingState.classList.add("hidden")
+  errorState.classList.remove("hidden")
+  templateRoot.classList.add("hidden")
+  errorText.innerText = message
 }
 
 function showTemplate(){
-loadingState.classList.add("hidden")
-errorState.classList.add("hidden")
-templateRoot.classList.remove("hidden")
+  loadingState.classList.add("hidden")
+  errorState.classList.add("hidden")
+  templateRoot.classList.remove("hidden")
 }
 
 function getSlugFromUrl(){
-const params = new URLSearchParams(window.location.search)
-return (params.get("slug") || "").trim().toLowerCase()
+  const params = new URLSearchParams(window.location.search)
+  return (params.get("slug") || "").trim().toLowerCase()
+}
+
+function isEditRequestedFromUrl(){
+  const params = new URLSearchParams(window.location.search)
+  return params.get("edit") === "true"
 }
 
 function formatPhoneForDisplay(phone){
-const raw = String(phone || "").trim()
-if(!raw) return "+91 98765 43210"
-return raw
+  const raw = String(phone || "").trim()
+  if(!raw) return "+91 98765 43210"
+  return raw
 }
 
 function formatPhoneForTel(phone){
-const raw = String(phone || "").replace(/[^\d+]/g, "")
-if(!raw) return "+919876543210"
-return raw.startsWith("+") ? raw : `+${raw}`
+  const raw = String(phone || "").replace(/[^\d+]/g, "")
+  if(!raw) return "+919876543210"
+  return raw.startsWith("+") ? raw : `+${raw}`
 }
 
 function formatPhoneForWhatsApp(phone){
-const raw = String(phone || "").replace(/\D/g, "")
-if(!raw) return "919876543210"
-if(raw.startsWith("91")) return raw
-return `91${raw}`
+  const raw = String(phone || "").replace(/\D/g, "")
+  if(!raw) return "919876543210"
+  if(raw.startsWith("91")) return raw
+  return `91${raw}`
 }
 
 function normalizeInstagram(value){
-const raw = String(value || "").trim()
-if(!raw) return "@yourstudio"
-return raw.startsWith("@") ? raw : `@${raw}`
+  const raw = String(value || "").trim()
+  if(!raw) return "@yourstudio"
+  return raw.startsWith("@") ? raw : `@${raw}`
 }
 
-function toTitleCase(text){
-return String(text || "")
-.replace(/\b\w/g, char => char.toUpperCase())
+function escapeSelectorId(id){
+  return String(id || "").replace(/([ #;?%&,.+*~':"!^$[\]()=>|\/@])/g, "\\$1")
+}
+
+function setEditStatus(message){
+  editStatus.innerText = message
+}
+
+function showEditToolbar(show){
+  editToolbar.classList.toggle("hidden", !show)
+}
+
+function setEditMode(enabled){
+  editModeEnabled = enabled
+  editModeToggle.classList.toggle("active", enabled)
+
+  document.querySelectorAll(".editable-slot").forEach(slot=>{
+    slot.classList.toggle("edit-active", enabled)
+  })
+
+  if(enabled){
+    setEditStatus("Edit mode is ON. Click any image area to replace it.")
+  }else{
+    setEditStatus("You are viewing preview mode.")
+  }
+}
+
+function getSlotElement(slotName){
+  const all = Array.from(document.querySelectorAll(".editable-slot"))
+  return all.find(el => el.dataset.imageSlot === slotName) || null
+}
+
+function setSlotUploading(slotName, isUploading){
+  const slot = getSlotElement(slotName)
+  if(!slot) return
+  slot.classList.toggle("uploading", isUploading)
+}
+
+function buildImageBackground(url){
+  return `linear-gradient(180deg, rgba(17,17,17,0.04), rgba(17,17,17,0.1)), url("${url}")`
+}
+
+function buildPortfolioBackground(url){
+  return `linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)), url("${url}")`
+}
+
+function applyImages(website){
+  const heroUrl = website.hero_image_url || DEFAULT_IMAGES.hero_image_url
+  const portfolio1 = website.portfolio_image_1_url || DEFAULT_IMAGES.portfolio_image_1_url
+  const portfolio2 = website.portfolio_image_2_url || DEFAULT_IMAGES.portfolio_image_2_url
+  const portfolio3 = website.portfolio_image_3_url || DEFAULT_IMAGES.portfolio_image_3_url
+  const portfolio4 = website.portfolio_image_4_url || DEFAULT_IMAGES.portfolio_image_4_url
+  const portfolio5 = website.portfolio_image_5_url || DEFAULT_IMAGES.portfolio_image_5_url
+  const portfolio6 = website.portfolio_image_6_url || DEFAULT_IMAGES.portfolio_image_6_url
+
+  document.getElementById("heroImageSlot").style.backgroundImage = buildImageBackground(heroUrl)
+  document.getElementById("portfolioImage1Slot").style.backgroundImage = buildPortfolioBackground(portfolio1)
+  document.getElementById("portfolioImage2Slot").style.backgroundImage = buildPortfolioBackground(portfolio2)
+  document.getElementById("portfolioImage3Slot").style.backgroundImage = buildPortfolioBackground(portfolio3)
+  document.getElementById("portfolioImage4Slot").style.backgroundImage = buildPortfolioBackground(portfolio4)
+  document.getElementById("portfolioImage5Slot").style.backgroundImage = buildPortfolioBackground(portfolio5)
+  document.getElementById("portfolioImage6Slot").style.backgroundImage = buildPortfolioBackground(portfolio6)
 }
 
 function applyWebsiteData(website){
 
-const name = website.name?.trim() || "Your Studio Name"
-const tagline = website.tagline?.trim() || "Capturing timeless wedding stories with emotion, elegance and detail."
-const about = website.about?.trim() || "Write a short introduction about your photography brand."
-const phoneDisplay = formatPhoneForDisplay(website.phone)
-const phoneTel = formatPhoneForTel(website.phone)
-const whatsappPhone = formatPhoneForWhatsApp(website.phone)
-const instagramDisplay = normalizeInstagram(website.instagram)
-const city = website.city?.trim() || "Your City"
-const heroLocation = city ? `${city} Celebration` : "Luxury Celebration"
+  const name = website.name?.trim() || "Your Studio Name"
+  const tagline = website.tagline?.trim() || "Capturing timeless wedding stories with emotion, elegance and detail."
+  const about = website.about?.trim() || "Write a short introduction about your photography brand."
+  const phoneDisplay = formatPhoneForDisplay(website.phone)
+  const phoneTel = formatPhoneForTel(website.phone)
+  const whatsappPhone = formatPhoneForWhatsApp(website.phone)
+  const instagramDisplay = normalizeInstagram(website.instagram)
+  const city = website.city?.trim() || "Your City"
+  const heroLocation = city ? `${city} Celebration` : "Luxury Celebration"
 
-document.title = `${name} - Template 1`
+  document.title = `${name} - Template 1`
 
-document.getElementById("navStudioName").innerText = name
-document.getElementById("navStudioTagline").innerText = tagline
+  document.getElementById("navStudioName").innerText = name
+  document.getElementById("navStudioTagline").innerText = tagline
 
-document.getElementById("heroHeading").innerText = name
-document.getElementById("heroTagline").innerText = tagline
+  document.getElementById("heroHeading").innerText = name
+  document.getElementById("heroTagline").innerText = tagline
 
-document.getElementById("featuredStoryTitle").innerText = name
-document.getElementById("featuredStoryLocation").innerText = heroLocation
+  document.getElementById("featuredStoryTitle").innerText = name
+  document.getElementById("featuredStoryLocation").innerText = heroLocation
 
-document.getElementById("aboutPrimary").innerText = about
-document.getElementById("aboutSecondary").innerText =
-`${name} creates elegant imagery with calm direction, refined composition, and a premium client experience from start to finish.`
+  document.getElementById("aboutPrimary").innerText = about
+  document.getElementById("aboutSecondary").innerText =
+    `${name} creates elegant imagery with calm direction, refined composition, and a premium client experience from start to finish.`
 
-document.getElementById("aboutCity").innerText = city
-document.getElementById("aboutSpeciality").innerText = "Luxury Weddings"
+  document.getElementById("aboutCity").innerText = city
+  document.getElementById("aboutSpeciality").innerText = "Luxury Weddings"
 
-document.getElementById("contactPhone").innerText = phoneDisplay
-document.getElementById("contactInstagram").innerText = instagramDisplay
-document.getElementById("contactCity").innerText = city
+  document.getElementById("contactPhone").innerText = phoneDisplay
+  document.getElementById("contactInstagram").innerText = instagramDisplay
+  document.getElementById("contactCity").innerText = city
 
-document.getElementById("footerStudioName").innerText = name
+  document.getElementById("footerStudioName").innerText = name
 
-document.getElementById("whatsappBtn").href = `https://wa.me/${whatsappPhone}`
-document.getElementById("callBtn").href = `tel:${phoneTel}`
-document.getElementById("navBookBtn").href = "#contact"
+  document.getElementById("whatsappBtn").href = `https://wa.me/${whatsappPhone}`
+  document.getElementById("callBtn").href = `tel:${phoneTel}`
+  document.getElementById("navBookBtn").href = "#contact"
+
+  applyImages(website)
 }
 
 async function fetchWebsiteBySlug(slug){
 
-const supabase = await window.getSupabase()
+  const supabase = await window.getSupabase()
 
-const { data: authData } = await supabase.auth.getUser()
-const currentUserId = authData?.user?.id || null
+  const { data: authData } = await supabase.auth.getUser()
+  currentUserId = authData?.user?.id || null
 
-let query = supabase
-.from("user_websites")
-.select("*")
-.eq("site_slug", slug)
-.eq("template_id", 1)
-.limit(1)
+  let query = supabase
+    .from("user_websites")
+    .select("*")
+    .eq("site_slug", slug)
+    .eq("template_id", 1)
+    .limit(1)
 
-if(currentUserId){
-query = query.or(`is_published.eq.true,user_id.eq.${currentUserId}`)
+  if(currentUserId){
+    query = query.or(`is_published.eq.true,user_id.eq.${currentUserId}`)
+  }
+  else{
+    query = query.eq("is_published", true)
+  }
+
+  const { data, error } = await query.maybeSingle()
+
+  if(error){
+    throw error
+  }
+
+  return data || null
 }
-else{
-query = query.eq("is_published", true)
+
+function canCurrentUserEdit(website){
+  return Boolean(currentUserId && website?.user_id && currentUserId === website.user_id)
 }
 
-const { data, error } = await query.maybeSingle()
+async function updateWebsiteImage(slotName, newUrl){
+  const supabase = await window.getSupabase()
 
-if(error){
-throw error
+  const payload = {
+    [slotName]: newUrl
+  }
+
+  const { data, error } = await supabase
+    .from("user_websites")
+    .update(payload)
+    .eq("id", currentWebsite.id)
+    .eq("user_id", currentUserId)
+    .select("*")
+    .single()
+
+  if(error){
+    throw error
+  }
+
+  return data
 }
 
-return data || null
+async function handleImageSelection(file){
+  if(!pendingImageSlot || !currentWebsite) return
 
+  const slotName = pendingImageSlot
+  const oldUrl = currentWebsite[slotName] || ""
+  const folder = `studioos/websites/${currentWebsite.site_slug}`
+
+  try{
+    setSlotUploading(slotName, true)
+    setEditStatus("Uploading and replacing image...")
+
+    const replaceResult = await replaceImageAsset({
+      oldUrl,
+      file,
+      folder
+    })
+
+    const updatedWebsite = await updateWebsiteImage(slotName, replaceResult.newUrl)
+    currentWebsite = updatedWebsite
+    applyImages(currentWebsite)
+
+    if(replaceResult.deleteResult?.skipped){
+      setEditStatus("Image replaced. Old file cleanup skipped until secure delete endpoint is added.")
+    }else{
+      setEditStatus("Image replaced successfully.")
+    }
+  }
+  catch(error){
+    console.error("Image replace failed:", error)
+    setEditStatus(error.message || "Unable to replace image.")
+  }
+  finally{
+    setSlotUploading(slotName, false)
+    pendingImageSlot = ""
+    imageFileInput.value = ""
+  }
 }
+
+function registerEditableImageSlots(){
+  document.querySelectorAll(".editable-slot").forEach(slot=>{
+    slot.addEventListener("click", ()=>{
+      if(!editModeEnabled) return
+      pendingImageSlot = slot.dataset.imageSlot || ""
+      imageFileInput.click()
+    })
+  })
+}
+
+imageFileInput.addEventListener("change", async (e)=>{
+  const file = e.target.files?.[0]
+  if(file){
+    await handleImageSelection(file)
+  }
+})
+
+editModeToggle.addEventListener("click", ()=>{
+  setEditMode(!editModeEnabled)
+})
 
 async function initTemplate(){
 
-showLoading()
+  showLoading()
 
-const slug = getSlugFromUrl()
+  const slug = getSlugFromUrl()
 
-if(!slug){
-showError("Missing website slug. Open this page like template-1.html?slug=your-site-slug")
-return
-}
+  if(!slug){
+    showError("Missing website slug. Open this page like template-1.html?slug=your-site-slug")
+    return
+  }
 
-try{
+  try{
 
-const website = await fetchWebsiteBySlug(slug)
+    const website = await fetchWebsiteBySlug(slug)
 
-if(!website){
-showError("No website data found for this slug. Save your Website Builder first, then open this template using the correct slug.")
-return
-}
+    if(!website){
+      showError("No website data found for this slug. Save your Website Builder first, then open this template using the correct slug.")
+      return
+    }
 
-applyWebsiteData(website)
-showTemplate()
+    currentWebsite = website
 
-}
-catch(error){
-console.error("Template 1 load failed:", error)
-showError("Unable to load website preview right now.")
-}
+    applyWebsiteData(website)
+    registerEditableImageSlots()
+    showTemplate()
+
+    const editable = canCurrentUserEdit(website)
+    showEditToolbar(editable)
+
+    if(editable && isEditRequestedFromUrl()){
+      setEditMode(true)
+    }else{
+      setEditMode(false)
+    }
+
+  }
+  catch(error){
+    console.error("Template 1 load failed:", error)
+    showError("Unable to load website preview right now.")
+  }
 
 }
 
