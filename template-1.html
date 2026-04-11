@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Template 1 - Minimal White Luxury</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+--bg:#f7f4ee;
+--card:#ffffff;
+--text:#171717;
+--muted:#6b7280;
+--line:#e7dfd1;
+--gold:#b68b3c;
+--gold-soft:#ead8ae;
+--shadow:0 18px 60px rgba(24,24,24,0.08);
+}
+
+html{
+scroll-behavior:smooth;
+}
+
+body{
+margin:0;
+font-family:"Inter",sans-serif;
+background:
+radial-gradient(circle at top, rgba(234,216,174,0.22), transparent 28%),
+linear-gradient(180deg, #fbfaf7, var(--bg));
+color:var(--text);
+}
+
+.luxury-font{
+font-family:"Cormorant Garamond",serif;
+}
+
+.section-container{
+max-width:1180px;
+margin:0 auto;
+padding-left:1.25rem;
+padding-right:1.25rem;
+}
+
+.glass-card{
+background:rgba(255,255,255,0.78);
+backdrop-filter:blur(12px);
+border:1px solid rgba(182,139,60,0.12);
+box-shadow:var(--shadow);
+}
+
+.outline-soft{
+border:1px solid var(--line);
+}
+
+.gold-line{
+height:1px;
+width:78px;
+background:linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.hero-image{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.04), rgba(17,17,17,0.1)),
+url("https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.image-one{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
+url("https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1000&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.image-two{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
+url("https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.image-three{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
+url("https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1000&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.image-four{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
+url("https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1000&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.image-five{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
+url("https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1000&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.image-six{
+background:
+linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)),
+url("https://images.unsplash.com/photo-1513279922550-250c2129b13a?auto=format&fit=crop&w=1000&q=80");
+background-size:cover;
+background-position:center;
+}
+
+.portfolio-card{
+border-radius:1.5rem;
+overflow:hidden;
+border:1px solid rgba(182,139,60,0.12);
+background:#fff;
+box-shadow:0 12px 34px rgba(24,24,24,0.06);
+}
+
+.portfolio-thumb{
+height:260px;
+}
+
+.service-card{
+border-radius:1.5rem;
+padding:1.25rem;
+background:#fff;
+border:1px solid rgba(182,139,60,0.12);
+box-shadow:0 10px 30px rgba(24,24,24,0.05);
+}
+
+.testimonial-card{
+border-radius:1.5rem;
+padding:1.4rem;
+background:#fff;
+border:1px solid rgba(182,139,60,0.12);
+box-shadow:0 10px 30px rgba(24,24,24,0.05);
+}
+
+.contact-card{
+border-radius:1.75rem;
+padding:1.5rem;
+background:linear-gradient(180deg, #fff, #fcfaf5);
+border:1px solid rgba(182,139,60,0.14);
+box-shadow:0 12px 34px rgba(24,24,24,0.06);
+}
+
+.cta-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:0.95rem 1.35rem;
+border-radius:999px;
+font-weight:600;
+transition:all .2s ease;
+text-decoration:none;
+}
+
+.cta-btn.primary{
+background:var(--text);
+color:#fff;
+}
+
+.cta-btn.primary:hover{
+transform:translateY(-1px);
+background:#0f0f0f;
+}
+
+.cta-btn.secondary{
+background:transparent;
+color:var(--text);
+border:1px solid rgba(23,23,23,0.12);
+}
+
+.cta-btn.secondary:hover{
+background:#fff;
+transform:translateY(-1px);
+}
+
+.nav-link{
+font-size:0.95rem;
+font-weight:500;
+color:#2f2f2f;
+text-decoration:none;
+}
+
+.nav-link:hover{
+color:var(--gold);
+}
+
+.badge-soft{
+display:inline-flex;
+align-items:center;
+gap:0.45rem;
+padding:0.45rem 0.9rem;
+border-radius:999px;
+font-size:0.78rem;
+letter-spacing:0.04em;
+text-transform:uppercase;
+background:rgba(182,139,60,0.08);
+color:#6d5422;
+border:1px solid rgba(182,139,60,0.12);
+}
+
+.floating-badge{
+position:absolute;
+bottom:1.1rem;
+left:1.1rem;
+background:rgba(255,255,255,0.86);
+backdrop-filter:blur(10px);
+padding:0.8rem 0.95rem;
+border-radius:1rem;
+border:1px solid rgba(182,139,60,0.12);
+box-shadow:0 8px 24px rgba(24,24,24,0.08);
+}
+
+.small-muted{
+color:var(--muted);
+font-size:0.95rem;
+line-height:1.7;
+}
+
+.section-heading{
+font-size:clamp(2rem, 4vw, 3.7rem);
+line-height:0.95;
+font-weight:700;
+letter-spacing:-0.02em;
+}
+
+.hero-heading{
+font-size:clamp(2.9rem, 8vw, 6.2rem);
+line-height:0.9;
+font-weight:700;
+letter-spacing:-0.04em;
+}
+
+.hero-sub{
+font-size:clamp(1rem, 2vw, 1.15rem);
+line-height:1.8;
+color:var(--muted);
+}
+
+.stats-grid{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:0.85rem;
+}
+
+.stat-box{
+padding:1rem;
+border-radius:1.25rem;
+background:#fff;
+border:1px solid rgba(182,139,60,0.12);
+text-align:center;
+box-shadow:0 10px 24px rgba(24,24,24,0.04);
+}
+
+.footer-link{
+color:#444;
+text-decoration:none;
+}
+
+.footer-link:hover{
+color:var(--gold);
+}
+
+@media (max-width: 768px){
+
+.hero-image{
+min-height:360px;
+}
+
+.portfolio-thumb{
+height:210px;
+}
+
+.stats-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[var(--line)]">
+<div class="section-container">
+<div class="flex items-center justify-between py-4 gap-4">
+
+<div class="min-w-0">
+<p class="luxury-font text-3xl font-semibold tracking-tight">Aurelia Frames</p>
+<p class="text-xs uppercase tracking-[0.18em] text-stone-500 mt-1">Wedding & Editorial Photography</p>
+</div>
+
+<nav class="hidden md:flex items-center gap-8">
+<a href="#about" class="nav-link">About</a>
+<a href="#portfolio" class="nav-link">Portfolio</a>
+<a href="#services" class="nav-link">Services</a>
+<a href="#contact" class="nav-link">Contact</a>
+</nav>
+
+<a href="#contact" class="cta-btn primary text-sm shrink-0">Book Now</a>
+
+</div>
+</div>
+</header>
+
+<!-- HERO -->
+<section class="pt-8 md:pt-12">
+<div class="section-container">
+<div class="grid lg:grid-cols-[1.05fr_0.95fr] gap-8 items-center">
+
+<div class="order-2 lg:order-1">
+<div class="badge-soft mb-5">
+<span>2026 Luxury Template</span>
+</div>
+
+<h1 class="hero-heading luxury-font text-stone-900">
+Timeless photographs for modern love stories.
+</h1>
+
+<p class="hero-sub mt-6 max-w-xl">
+Crafting elegant wedding imagery with a refined editorial touch — made for couples who want memories that feel intimate, cinematic, and unforgettable.
+</p>
+
+<div class="flex flex-wrap gap-3 mt-8">
+<a href="#portfolio" class="cta-btn primary">View Portfolio</a>
+<a href="#contact" class="cta-btn secondary">Enquire Now</a>
+</div>
+
+<div class="stats-grid mt-10 max-w-xl">
+<div class="stat-box">
+<p class="luxury-font text-4xl font-semibold text-stone-900">120+</p>
+<p class="text-sm text-stone-500 mt-2">Weddings Captured</p>
+</div>
+<div class="stat-box">
+<p class="luxury-font text-4xl font-semibold text-stone-900">8+</p>
+<p class="text-sm text-stone-500 mt-2">Years Experience</p>
+</div>
+<div class="stat-box">
+<p class="luxury-font text-4xl font-semibold text-stone-900">4.9</p>
+<p class="text-sm text-stone-500 mt-2">Client Rating</p>
+</div>
+</div>
+</div>
+
+<div class="order-1 lg:order-2">
+<div class="relative portfolio-card hero-image min-h-[440px] md:min-h-[620px]">
+<div class="floating-badge">
+<p class="text-xs uppercase tracking-[0.18em] text-stone-500">Featured Story</p>
+<p class="luxury-font text-xl font-semibold text-stone-900 mt-1">Anaya & Vihaan</p>
+<p class="text-sm text-stone-600 mt-1">Jaipur Celebration</p>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="py-16 md:py-24">
+<div class="section-container">
+<div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-8 items-start">
+
+<div>
+<div class="gold-line mb-5"></div>
+<p class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4">About The Studio</p>
+<h2 class="section-heading luxury-font text-stone-900">
+For couples who love elegance, emotion, and detail.
+</h2>
+</div>
+
+<div class="glass-card rounded-[2rem] p-6 md:p-8">
+<p class="small-muted">
+We create visual stories that feel effortless, editorial, and deeply personal. From intimate moments to grand celebrations, every frame is crafted to preserve atmosphere, emotion, and timeless beauty.
+</p>
+
+<p class="small-muted mt-5">
+Whether it is a wedding, pre-wedding session, or luxury celebration, our approach is calm, intentional, and focused on making you feel confident in front of the camera.
+</p>
+
+<div class="grid sm:grid-cols-2 gap-4 mt-8">
+<div class="outline-soft rounded-2xl p-4 bg-white/70">
+<p class="text-sm text-stone-500 uppercase tracking-[0.12em]">Base City</p>
+<p class="luxury-font text-2xl font-semibold text-stone-900 mt-2">Pune, India</p>
+</div>
+<div class="outline-soft rounded-2xl p-4 bg-white/70">
+<p class="text-sm text-stone-500 uppercase tracking-[0.12em]">Speciality</p>
+<p class="luxury-font text-2xl font-semibold text-stone-900 mt-2">Luxury Weddings</p>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- PORTFOLIO -->
+<section id="portfolio" class="pb-16 md:pb-24">
+<div class="section-container">
+
+<div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+<div>
+<div class="gold-line mb-5"></div>
+<p class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4">Portfolio Highlights</p>
+<h2 class="section-heading luxury-font text-stone-900">
+A refined gallery with a soft editorial feel.
+</h2>
+</div>
+
+<p class="small-muted max-w-md">
+Every frame is curated to balance emotion, movement, intimacy, and timeless aesthetic.
+</p>
+</div>
+
+<div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+<div class="portfolio-card">
+<div class="portfolio-thumb image-one"></div>
+<div class="p-5">
+<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Pre-Wedding</p>
+<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Sunlit Romance</h3>
+<p class="small-muted mt-2">Golden hour portraits with effortless movement and warm storytelling.</p>
+</div>
+</div>
+
+<div class="portfolio-card">
+<div class="portfolio-thumb image-two"></div>
+<div class="p-5">
+<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Wedding Day</p>
+<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Ceremony Grace</h3>
+<p class="small-muted mt-2">Elegant moments captured with clean composition and emotional presence.</p>
+</div>
+</div>
+
+<div class="portfolio-card">
+<div class="portfolio-thumb image-three"></div>
+<div class="p-5">
+<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Couple Portraits</p>
+<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">After Vows</h3>
+<p class="small-muted mt-2">Intentional portraiture designed to feel cinematic and timeless.</p>
+</div>
+</div>
+
+<div class="portfolio-card">
+<div class="portfolio-thumb image-four"></div>
+<div class="p-5">
+<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Celebration</p>
+<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Reception Glow</h3>
+<p class="small-muted mt-2">A polished visual mix of style, energy, and real human connection.</p>
+</div>
+</div>
+
+<div class="portfolio-card">
+<div class="portfolio-thumb image-five"></div>
+<div class="p-5">
+<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Detail Frames</p>
+<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Styled Beauty</h3>
+<p class="small-muted mt-2">Rings, attire, floral artistry, and all the details that complete the story.</p>
+</div>
+</div>
+
+<div class="portfolio-card">
+<div class="portfolio-thumb image-six"></div>
+<div class="p-5">
+<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Destination</p>
+<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Travel Stories</h3>
+<p class="small-muted mt-2">Destination coverage with elegant composition and premium atmosphere.</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" class="pb-16 md:pb-24">
+<div class="section-container">
+
+<div class="mb-8">
+<div class="gold-line mb-5"></div>
+<p class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4">Services</p>
+<h2 class="section-heading luxury-font text-stone-900">
+Tailored experiences designed for premium celebrations.
+</h2>
+</div>
+
+<div class="grid md:grid-cols-3 gap-5">
+
+<div class="service-card">
+<p class="text-sm uppercase tracking-[0.14em] text-stone-500">01</p>
+<h3 class="luxury-font text-3xl font-semibold mt-3 text-stone-900">Wedding Coverage</h3>
+<p class="small-muted mt-3">
+Complete wedding-day storytelling with portraits, candid moments, rituals, and curated details.
+</p>
+</div>
+
+<div class="service-card">
+<p class="text-sm uppercase tracking-[0.14em] text-stone-500">02</p>
+<h3 class="luxury-font text-3xl font-semibold mt-3 text-stone-900">Pre-Wedding Shoots</h3>
+<p class="small-muted mt-3">
+Creative sessions crafted around your personality, location, mood, and styling preferences.
+</p>
+</div>
+
+<div class="service-card">
+<p class="text-sm uppercase tracking-[0.14em] text-stone-500">03</p>
+<h3 class="luxury-font text-3xl font-semibold mt-3 text-stone-900">Destination Events</h3>
+<p class="small-muted mt-3">
+Travel-ready photography for intimate luxury celebrations in scenic and meaningful locations.
+</p>
+</div>
+
+</div>
+
+</div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="pb-16 md:pb-24">
+<div class="section-container">
+
+<div class="mb-8">
+<div class="gold-line mb-5"></div>
+<p class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4">Client Words</p>
+<h2 class="section-heading luxury-font text-stone-900">
+Trusted by couples who wanted something elegant and real.
+</h2>
+</div>
+
+<div class="grid md:grid-cols-3 gap-5">
+
+<div class="testimonial-card">
+<p class="small-muted">
+“Our photos feel soft, rich, and emotional — exactly what we dreamed of. Every frame looks like a memory and a magazine cover at the same time.”
+</p>
+<p class="luxury-font text-2xl font-semibold mt-5 text-stone-900">Anaya & Vihaan</p>
+</div>
+
+<div class="testimonial-card">
+<p class="small-muted">
+“The whole experience was calm and premium. We never felt awkward, and the final gallery looked absolutely timeless.”
+</p>
+<p class="luxury-font text-2xl font-semibold mt-5 text-stone-900">Rhea & Kabir</p>
+</div>
+
+<div class="testimonial-card">
+<p class="small-muted">
+“Beautiful eye for detail, light, and emotion. The team captured our celebration in a way that felt intimate and luxurious.”
+</p>
+<p class="luxury-font text-2xl font-semibold mt-5 text-stone-900">Ira & Arjun</p>
+</div>
+
+</div>
+
+</div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="pb-16 md:pb-24">
+<div class="section-container">
+
+<div class="contact-card">
+<div class="grid lg:grid-cols-[1fr_0.95fr] gap-8 items-center">
+
+<div>
+<p class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4">Let’s Create Something Beautiful</p>
+<h2 class="section-heading luxury-font text-stone-900">
+Ready to book your date?
+</h2>
+<p class="small-muted mt-5 max-w-xl">
+Share your event details and we will get back with availability, collections, and a personalised photography plan for your celebration.
+</p>
+
+<div class="flex flex-wrap gap-3 mt-8">
+<a href="https://wa.me/919876543210" class="cta-btn primary">WhatsApp Now</a>
+<a href="tel:+919876543210" class="cta-btn secondary">Call Studio</a>
+</div>
+</div>
+
+<div class="grid sm:grid-cols-2 gap-4">
+<div class="outline-soft rounded-2xl p-5 bg-white/75">
+<p class="text-sm uppercase tracking-[0.12em] text-stone-500">Phone</p>
+<p class="luxury-font text-3xl font-semibold text-stone-900 mt-2">+91 98765 43210</p>
+</div>
+<div class="outline-soft rounded-2xl p-5 bg-white/75">
+<p class="text-sm uppercase tracking-[0.12em] text-stone-500">Instagram</p>
+<p class="luxury-font text-3xl font-semibold text-stone-900 mt-2">@aureliaframes</p>
+</div>
+<div class="outline-soft rounded-2xl p-5 bg-white/75 sm:col-span-2">
+<p class="text-sm uppercase tracking-[0.12em] text-stone-500">Location</p>
+<p class="luxury-font text-3xl font-semibold text-stone-900 mt-2">Pune, Maharashtra</p>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-[var(--line)] py-8">
+<div class="section-container">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+<div>
+<p class="luxury-font text-3xl font-semibold text-stone-900">Aurelia Frames</p>
+<p class="text-sm text-stone-500 mt-1">Minimal White Luxury Template</p>
+</div>
+
+<div class="flex flex-wrap gap-5">
+<a href="#about" class="footer-link text-sm">About</a>
+<a href="#portfolio" class="footer-link text-sm">Portfolio</a>
+<a href="#services" class="footer-link text-sm">Services</a>
+<a href="#contact" class="footer-link text-sm">Contact</a>
+</div>
+</div>
+</div>
+</footer>
+
+</body>
+</html>
