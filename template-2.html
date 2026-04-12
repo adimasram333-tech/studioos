@@ -14,7 +14,6 @@
       --accent: #bf7f5f;
       --border: rgba(191, 127, 95, 0.35);
       --shadow: 0 20px 60px rgba(120, 80, 55, 0.08);
-      --radius: 22px;
       --container: 1240px;
     }
 
@@ -31,6 +30,139 @@
     img { max-width: 100%; display: block; }
     a { color: inherit; text-decoration: none; }
     button, input, textarea { font: inherit; }
+
+    .hidden { display: none !important; }
+
+    .page-state {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(246, 240, 235, 0.86);
+      backdrop-filter: blur(10px);
+      z-index: 90;
+      padding: 1.5rem;
+    }
+
+    .page-state-card {
+      max-width: 440px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(191, 127, 95, 0.16);
+      border-radius: 1.75rem;
+      box-shadow: var(--shadow);
+      padding: 1.6rem;
+      text-align: center;
+    }
+
+    .page-state-title {
+      margin: 0;
+      font-size: 2.1rem;
+      line-height: 1;
+      font-weight: 300;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .page-state-text {
+      color: var(--text-soft);
+      font-size: 0.96rem;
+      line-height: 1.7;
+      margin-top: 0.85rem;
+    }
+
+    .page-state-btn {
+      margin-top: 1.4rem;
+      display: inline-flex;
+      min-height: 48px;
+      padding: 0 1.1rem;
+      border-radius: 999px;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent);
+      color: white;
+      border: 1px solid var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.75rem;
+    }
+
+    .edit-toolbar {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 95;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      align-items: flex-end;
+    }
+
+    .edit-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.8rem 1rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(191, 127, 95, 0.16);
+      box-shadow: var(--shadow);
+    }
+
+    .edit-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .toggle-btn {
+      appearance: none;
+      width: 48px;
+      height: 28px;
+      border-radius: 999px;
+      background: #d6d3d1;
+      position: relative;
+      cursor: pointer;
+      transition: background .2s ease;
+      border: none;
+    }
+
+    .toggle-btn::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      transition: transform .2s ease;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent);
+    }
+
+    .toggle-btn.active::after {
+      transform: translateX(20px);
+    }
+
+    .edit-status {
+      max-width: 340px;
+      padding: 0.85rem 1rem;
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(191, 127, 95, 0.16);
+      box-shadow: var(--shadow);
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: var(--text-soft);
+    }
 
     .container {
       width: min(var(--container), calc(100% - 32px));
@@ -85,16 +217,14 @@
       gap: 20px;
     }
 
-    .nav,
-    .nav-right {
+    .nav, .nav-right {
       display: flex;
       align-items: center;
       gap: 28px;
       flex-wrap: wrap;
     }
 
-    .nav a,
-    .nav-right a {
+    .nav a, .nav-right a {
       font-size: 13px;
       letter-spacing: 0.14em;
       text-transform: uppercase;
@@ -102,10 +232,7 @@
       transition: color 0.25s ease;
     }
 
-    .nav a:hover,
-    .nav-right a:hover,
-    .social-rail a:hover,
-    .footer-social a:hover {
+    .nav a:hover, .nav-right a:hover, .social-rail a:hover, .footer-social a:hover {
       color: var(--accent);
     }
 
@@ -169,8 +296,7 @@
       margin-top: 32px;
     }
 
-    .btn,
-    .btn-outline {
+    .btn, .btn-outline {
       min-height: 52px;
       padding: 0 24px;
       border-radius: 14px;
@@ -185,21 +311,9 @@
       transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
     }
 
-    .btn {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-      box-shadow: 0 18px 40px rgba(191, 127, 95, 0.22);
-      cursor: pointer;
-    }
-
-    .btn:hover,
-    .btn-outline:hover { transform: translateY(-2px); }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--accent);
-    }
+    .btn { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 18px 40px rgba(191, 127, 95, 0.22); }
+    .btn:hover, .btn-outline:hover { transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--accent); }
 
     .hero-stats {
       display: grid;
@@ -209,41 +323,76 @@
       max-width: 600px;
     }
 
-    .stat {
-      border-top: 1px solid var(--border);
-      padding-top: 18px;
+    .stat { border-top: 1px solid var(--border); padding-top: 18px; }
+    .stat strong { display: block; font-size: clamp(24px, 4vw, 34px); color: var(--accent); font-weight: 400; line-height: 1; }
+    .stat span { display: block; margin-top: 9px; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-soft); }
+
+    .editable-slot { position: relative; }
+    .editable-slot.edit-active { cursor: pointer; }
+    .editable-slot.edit-active:hover { outline: 1px solid rgba(255,255,255,0.55); }
+
+    .edit-overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(17,17,17,0.34);
+      backdrop-filter: blur(1px);
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      text-align: center;
+      padding: 1rem;
+      z-index: 2;
     }
 
-    .stat strong {
-      display: block;
-      font-size: clamp(24px, 4vw, 34px);
-      color: var(--accent);
-      font-weight: 400;
-      line-height: 1;
+    .editable-slot.edit-active .edit-overlay { display: flex; }
+    .edit-overlay span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.7rem 1rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.2);
     }
 
-    .stat span {
-      display: block;
-      margin-top: 9px;
-      font-size: 12px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--text-soft);
+    .image-loading {
+      position: absolute;
+      top: 0.85rem;
+      right: 0.85rem;
+      display: none;
+      padding: 0.45rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.92);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #111827;
+      z-index: 3;
     }
+
+    .editable-slot.uploading .image-loading { display: block; }
 
     .hero-visual {
       position: relative;
       min-height: 760px;
       border-radius: 30px 30px 0 0;
       overflow: hidden;
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(95,74,63,0.18)), url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80') center center / cover no-repeat;
       box-shadow: var(--shadow);
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(95,74,63,0.18));
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
     .hero-overlay {
       position: absolute;
       inset: 0;
       background: linear-gradient(180deg, rgba(246,240,235,0.03) 0%, rgba(246,240,235,0.12) 35%, rgba(246,240,235,0.02) 100%);
+      pointer-events: none;
+      z-index: 1;
     }
 
     .social-rail {
@@ -255,958 +404,638 @@
       flex-direction: column;
       align-items: center;
       gap: 16px;
-      z-index: 2;
+      z-index: 4;
     }
 
-    .social-line {
-      width: 1px;
-      height: 88px;
-      background: var(--border);
-    }
+    .social-line { width: 1px; height: 88px; background: var(--border); }
 
     .social-rail a {
-      width: 42px;
-      height: 42px;
-      border: 1px solid rgba(255,255,255,0.4);
-      background: rgba(251,247,243,0.65);
-      border-radius: 999px;
-      display: grid;
-      place-items: center;
-      color: var(--text-soft);
-      font-size: 17px;
+      width: 42px; height: 42px; border: 1px solid rgba(255,255,255,0.4); background: rgba(251,247,243,0.65);
+      border-radius: 999px; display: grid; place-items: center; color: var(--text-soft); font-size: 17px;
       transition: transform 0.25s ease, color 0.25s ease, background 0.25s ease;
     }
 
-    .social-rail a:hover {
-      transform: translateY(-2px);
-      background: rgba(251,247,243,0.95);
+    .social-rail a:hover { transform: translateY(-2px); background: rgba(251,247,243,0.95); }
+
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; }
+    .about-collage { position: relative; min-height: 620px; }
+    .about-card, .about-card-small, .about-card-photo {
+      position: absolute; border-radius: 26px; overflow: hidden; box-shadow: var(--shadow);
+      background-size: cover; background-position: center; background-repeat: no-repeat;
     }
 
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 44px;
-      align-items: center;
-    }
+    .about-card { left: 4%; top: 18%; width: 54%; height: 60%; background-color: var(--surface-2); }
+    .about-card-small { right: 9%; top: 5%; width: 48%; height: 34%; }
+    .about-card-photo { left: 14%; bottom: 4%; width: 50%; height: 46%; }
+    .about-connector { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); height: 1px; background: var(--border); z-index: -1; }
 
-    .about-collage {
-      position: relative;
-      min-height: 620px;
-    }
+    .about-copy h2, .contact-copy h2 { margin: 0; font-size: clamp(34px, 5vw, 54px); line-height: 1; font-weight: 300; letter-spacing: 0.03em; }
+    .about-copy p, .contact-copy p { margin: 18px 0 0; font-size: 15px; color: var(--text-soft); max-width: 58ch; }
 
-    .about-card,
-    .about-card-small,
-    .about-card-photo {
-      position: absolute;
-      border-radius: 26px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-    }
+    .about-points { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 28px; }
+    .point { background: rgba(255,255,255,0.45); border: 1px solid rgba(191,127,95,0.16); border-radius: 18px; padding: 18px; }
+    .point strong { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); margin-bottom: 8px; font-weight: 600; }
+    .point span { display: block; color: var(--text-soft); font-size: 14px; }
 
-    .about-card {
-      left: 4%;
-      top: 18%;
-      width: 54%;
-      height: 60%;
-      background: var(--surface-2);
-    }
-
-    .about-card-small {
-      right: 9%;
-      top: 5%;
-      width: 48%;
-      height: 34%;
-      background: url('https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80') center center / cover no-repeat;
-    }
-
-    .about-card-photo {
-      left: 14%;
-      bottom: 4%;
-      width: 50%;
-      height: 46%;
-      background: url('https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=900&q=80') center center / cover no-repeat;
-    }
-
-    .about-connector {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 1px;
-      background: var(--border);
-      z-index: -1;
-    }
-
-    .about-copy h2,
-    .contact-copy h2 {
-      margin: 0;
-      font-size: clamp(34px, 5vw, 54px);
-      line-height: 1;
-      font-weight: 300;
-      letter-spacing: 0.03em;
-    }
-
-    .about-copy p,
-    .contact-copy p {
-      margin: 18px 0 0;
-      font-size: 15px;
-      color: var(--text-soft);
-      max-width: 58ch;
-    }
-
-    .about-points {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-      margin-top: 28px;
-    }
-
-    .point {
-      background: rgba(255,255,255,0.45);
-      border: 1px solid rgba(191, 127, 95, 0.16);
-      border-radius: 18px;
-      padding: 18px;
-    }
-
-    .point strong {
-      display: block;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--accent);
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    .point span {
-      display: block;
-      color: var(--text-soft);
-      font-size: 14px;
-    }
-
-    .portfolio-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 20px;
-    }
-
-    .portfolio-card {
-      position: relative;
-      min-height: 500px;
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-    }
-
-    .portfolio-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.6s ease;
-    }
-
-    .portfolio-card:hover img { transform: scale(1.06); }
-
-    .portfolio-card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(50, 30, 20, 0.04) 0%, rgba(50, 30, 20, 0.32) 100%);
-    }
-
+    .portfolio-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+    .portfolio-card { position: relative; min-height: 500px; border-radius: 24px; overflow: hidden; box-shadow: var(--shadow); background-size: cover; background-position: center; background-repeat: no-repeat; }
+    .portfolio-card::after { content:""; position:absolute; inset:0; background: linear-gradient(180deg, rgba(50,30,20,0.04) 0%, rgba(50,30,20,0.32) 100%); pointer-events:none; }
     .portfolio-label {
-      position: absolute;
-      left: 18px;
-      right: 18px;
-      bottom: 18px;
-      z-index: 1;
-      background: rgba(255,255,255,0.18);
-      border: 1px solid rgba(255,255,255,0.28);
-      backdrop-filter: blur(8px);
-      border-radius: 16px;
-      padding: 18px 16px;
-      color: #fff;
+      position:absolute; left:18px; right:18px; bottom:18px; z-index:1; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.28);
+      backdrop-filter: blur(8px); border-radius:16px; padding:18px 16px; color:#fff;
     }
+    .portfolio-label strong { display:block; font-size:15px; letter-spacing:0.16em; text-transform:uppercase; font-weight:500; }
+    .portfolio-label span { display:block; margin-top:6px; font-size:13px; color:rgba(255,255,255,0.82); }
 
-    .portfolio-label strong {
-      display: block;
-      font-size: 15px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      font-weight: 500;
-    }
+    .services-grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:22px; }
+    .service-card { border-radius:24px; overflow:hidden; border:1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); }
+    .service-visual { position:relative; min-height:220px; background-size:cover; background-position:center; background-repeat:no-repeat; }
+    .service-visual::after { content:""; position:absolute; inset:0; background: linear-gradient(180deg, rgba(55,35,22,0.02), rgba(55,35,22,0.2)); }
+    .service-title { position:absolute; left:22px; right:22px; bottom:20px; z-index:1; color:#fff; }
+    .service-title strong { display:block; font-size:22px; line-height:1.1; font-weight:400; letter-spacing:0.04em; }
+    .service-title span { display:block; margin-top:6px; font-size:12px; text-transform:uppercase; letter-spacing:0.18em; color:rgba(255,255,255,0.85); }
+    .service-body { padding:22px; }
+    .service-price { margin:0 0 16px; font-size:30px; color:var(--accent); font-weight:400; }
+    .service-list { display:grid; gap:12px; margin-bottom:20px; }
+    .service-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-bottom:12px; border-bottom:1px solid rgba(191,127,95,0.18); color:var(--text-soft); font-size:14px; }
 
-    .portfolio-label span {
-      display: block;
-      margin-top: 6px;
-      font-size: 13px;
-      color: rgba(255,255,255,0.82);
-    }
+    .video-card { display:grid; grid-template-columns: 1.1fr 0.9fr; gap:26px; border-radius:30px; overflow:hidden; border:1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); }
+    .video-preview { min-height:420px; position:relative; background-size:cover; background-position:center; background-repeat:no-repeat; }
+    .video-preview::after { content:""; position:absolute; inset:0; background: linear-gradient(180deg, rgba(33,20,10,0.02), rgba(33,20,10,0.12)); }
+    .play-badge { position:absolute; left:28px; bottom:28px; width:78px; height:78px; border-radius:999px; display:grid; place-items:center; background:rgba(251,247,243,0.9); color:var(--accent); font-size:26px; box-shadow:var(--shadow); z-index:1; }
+    .video-copy { padding:40px; display:flex; flex-direction:column; justify-content:center; }
+    .video-copy h3 { margin:0; font-size:clamp(28px, 3vw, 44px); font-weight:300; line-height:1.05; letter-spacing:0.04em; }
+    .video-copy p { margin:18px 0 0; color:var(--text-soft); font-size:15px; }
+    .video-copy .hero-actions { margin-top:28px; }
 
-    .services-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 22px;
-    }
+    .testimonial-card { position:relative; border:1px solid var(--border); border-radius:28px; background:rgba(255,255,255,0.38); box-shadow:var(--shadow); padding:74px 38px 42px; text-align:center; }
+    .testimonial-avatar { position:absolute; top:-34px; left:50%; transform:translateX(-50%); width:78px; height:78px; border-radius:999px; overflow:hidden; border:6px solid var(--bg); box-shadow:var(--shadow); }
+    .testimonial-avatar img { width:100%; height:100%; object-fit:cover; }
+    .testimonial-card h3 { margin:0; font-size:28px; font-weight:300; letter-spacing:0.08em; text-transform:uppercase; }
+    .testimonial-card p { max-width:66ch; margin:18px auto 0; color:var(--text-soft); font-size:15px; }
 
-    .service-card {
-      border-radius: 24px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      box-shadow: var(--shadow);
-    }
+    .contact-wrap { display:grid; grid-template-columns: 1fr 1fr; gap:26px; align-items:stretch; }
+    .contact-card, .contact-form { background:rgba(255,255,255,0.38); border:1px solid var(--border); border-radius:28px; padding:30px; box-shadow:var(--shadow); }
+    .contact-links { display:grid; gap:14px; margin-top:26px; }
+    .contact-link { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:64px; padding:0 18px; border:1px solid rgba(191,127,95,0.18); border-radius:18px; background:rgba(251,247,243,0.55); transition: transform 0.25s ease, border-color 0.25s ease; }
+    .contact-link:hover { transform:translateY(-2px); border-color:var(--accent); }
+    .contact-link strong { display:block; font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); margin-bottom:4px; }
+    .contact-link span { display:block; color:var(--text-soft); font-size:14px; }
+    .contact-form h3 { margin:0 0 18px; font-size:24px; font-weight:400; letter-spacing:0.04em; }
+    .form-grid { display:grid; gap:14px; }
+    .field, .textarea { width:100%; border:1px solid rgba(191,127,95,0.22); background:rgba(255,255,255,0.72); border-radius:16px; padding:16px 18px; color:var(--text); outline:none; transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+    .field:focus, .textarea:focus { border-color:var(--accent); box-shadow:0 0 0 4px rgba(191,127,95,0.08); }
+    .textarea { min-height:150px; resize:vertical; }
 
-    .service-visual {
-      position: relative;
-      min-height: 220px;
-    }
+    .site-footer { padding:34px 0 44px; }
+    .footer-wrap { display:grid; grid-template-columns: 1.1fr 0.9fr 1fr; gap:26px; align-items:start; padding-top:34px; border-top:1px solid rgba(191,127,95,0.2); }
+    .footer-brand { font-size:28px; color:var(--accent); letter-spacing:0.12em; font-weight:300; margin-bottom:14px; }
+    .footer-copy, .footer-links a, .footer-subtext { color:var(--text-soft); font-size:14px; }
+    .footer-links { display:grid; gap:10px; }
+    .footer-links a { text-transform:uppercase; letter-spacing:0.12em; font-size:12px; }
+    .footer-social { display:flex; gap:12px; margin-top:18px; }
+    .footer-social a { width:42px; height:42px; border-radius:999px; display:grid; place-items:center; border:1px solid var(--border); color:var(--text-soft); background:rgba(255,255,255,0.42); }
+    .subscribe-box { display:flex; align-items:stretch; border:1px solid var(--border); border-radius:16px; overflow:hidden; background:rgba(255,255,255,0.55); margin-top:12px; }
+    .subscribe-box input { flex:1; border:0; outline:none; background:transparent; padding:15px 16px; color:var(--text); min-width:0; }
+    .subscribe-box button { border:0; background:var(--accent); color:#fff; padding:0 18px; letter-spacing:0.12em; text-transform:uppercase; font-size:12px; cursor:pointer; }
 
-    .service-visual img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .service-visual::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(55,35,22,0.02), rgba(55,35,22,0.2));
-    }
-
-    .service-title {
-      position: absolute;
-      left: 22px;
-      right: 22px;
-      bottom: 20px;
-      z-index: 1;
-      color: #fff;
-    }
-
-    .service-title strong {
-      display: block;
-      font-size: 22px;
-      line-height: 1.1;
-      font-weight: 400;
-      letter-spacing: 0.04em;
-    }
-
-    .service-title span {
-      display: block;
-      margin-top: 6px;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: rgba(255,255,255,0.85);
-    }
-
-    .service-body { padding: 22px; }
-
-    .service-price {
-      margin: 0 0 16px;
-      font-size: 30px;
-      color: var(--accent);
-      font-weight: 400;
-    }
-
-    .service-list {
-      display: grid;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .service-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(191, 127, 95, 0.18);
-      color: var(--text-soft);
-      font-size: 14px;
-    }
-
-    .video-card {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 26px;
-      border-radius: 30px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      box-shadow: var(--shadow);
-    }
-
-    .video-preview {
-      min-height: 420px;
-      background: linear-gradient(180deg, rgba(33, 20, 10, 0.02), rgba(33, 20, 10, 0.12)), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80') center center / cover no-repeat;
-      position: relative;
-    }
-
-    .play-badge {
-      position: absolute;
-      left: 28px;
-      bottom: 28px;
-      width: 78px;
-      height: 78px;
-      border-radius: 999px;
-      display: grid;
-      place-items: center;
-      background: rgba(251,247,243,0.9);
-      color: var(--accent);
-      font-size: 26px;
-      box-shadow: var(--shadow);
-    }
-
-    .video-copy {
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .video-copy h3 {
-      margin: 0;
-      font-size: clamp(28px, 3vw, 44px);
-      font-weight: 300;
-      line-height: 1.05;
-      letter-spacing: 0.04em;
-    }
-
-    .video-copy p {
-      margin: 18px 0 0;
-      color: var(--text-soft);
-      font-size: 15px;
-    }
-
-    .video-copy .hero-actions { margin-top: 28px; }
-
-    .testimonial-card {
-      position: relative;
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      background: rgba(255,255,255,0.38);
-      box-shadow: var(--shadow);
-      padding: 74px 38px 42px;
-      text-align: center;
-    }
-
-    .testimonial-avatar {
-      position: absolute;
-      top: -34px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 78px;
-      height: 78px;
-      border-radius: 999px;
-      overflow: hidden;
-      border: 6px solid var(--bg);
-      box-shadow: var(--shadow);
-    }
-
-    .testimonial-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .testimonial-card h3 {
-      margin: 0;
-      font-size: 28px;
-      font-weight: 300;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .testimonial-card p {
-      max-width: 66ch;
-      margin: 18px auto 0;
-      color: var(--text-soft);
-      font-size: 15px;
-    }
-
-    .contact-wrap {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 26px;
-      align-items: stretch;
-    }
-
-    .contact-card,
-    .contact-form {
-      background: rgba(255,255,255,0.38);
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      padding: 30px;
-      box-shadow: var(--shadow);
-    }
-
-    .contact-links {
-      display: grid;
-      gap: 14px;
-      margin-top: 26px;
-    }
-
-    .contact-link {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      min-height: 64px;
-      padding: 0 18px;
-      border: 1px solid rgba(191, 127, 95, 0.18);
-      border-radius: 18px;
-      background: rgba(251,247,243,0.55);
-      transition: transform 0.25s ease, border-color 0.25s ease;
-    }
-
-    .contact-link:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent);
-    }
-
-    .contact-link strong {
-      display: block;
-      font-size: 12px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 4px;
-    }
-
-    .contact-link span {
-      display: block;
-      color: var(--text-soft);
-      font-size: 14px;
-    }
-
-    .contact-form h3 {
-      margin: 0 0 18px;
-      font-size: 24px;
-      font-weight: 400;
-      letter-spacing: 0.04em;
-    }
-
-    .form-grid { display: grid; gap: 14px; }
-
-    .field,
-    .textarea {
-      width: 100%;
-      border: 1px solid rgba(191, 127, 95, 0.22);
-      background: rgba(255,255,255,0.72);
-      border-radius: 16px;
-      padding: 16px 18px;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.25s ease, box-shadow 0.25s ease;
-    }
-
-    .field:focus,
-    .textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px rgba(191, 127, 95, 0.08);
-    }
-
-    .textarea {
-      min-height: 150px;
-      resize: vertical;
-    }
-
-    .site-footer { padding: 34px 0 44px; }
-
-    .footer-wrap {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr 1fr;
-      gap: 26px;
-      align-items: start;
-      padding-top: 34px;
-      border-top: 1px solid rgba(191, 127, 95, 0.2);
-    }
-
-    .footer-brand {
-      font-size: 28px;
-      color: var(--accent);
-      letter-spacing: 0.12em;
-      font-weight: 300;
-      margin-bottom: 14px;
-    }
-
-    .footer-copy,
-    .footer-links a,
-    .footer-subtext {
-      color: var(--text-soft);
-      font-size: 14px;
-    }
-
-    .footer-links { display: grid; gap: 10px; }
-
-    .footer-links a {
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-size: 12px;
-    }
-
-    .footer-social {
-      display: flex;
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    .footer-social a {
-      width: 42px;
-      height: 42px;
-      border-radius: 999px;
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--border);
-      color: var(--text-soft);
-      background: rgba(255,255,255,0.42);
-    }
-
-    .subscribe-box {
-      display: flex;
-      align-items: stretch;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      background: rgba(255,255,255,0.55);
-      margin-top: 12px;
-    }
-
-    .subscribe-box input {
-      flex: 1;
-      border: 0;
-      outline: none;
-      background: transparent;
-      padding: 15px 16px;
-      color: var(--text);
-      min-width: 0;
-    }
-
-    .subscribe-box button {
-      border: 0;
-      background: var(--accent);
-      color: #fff;
-      padding: 0 18px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .mobile-menu-btn {
-      display: none;
-      min-height: 44px;
-      min-width: 44px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.5);
-      color: var(--accent);
-      cursor: pointer;
-    }
-
-    .page-message {
-      display: none;
-      width: min(var(--container), calc(100% - 32px));
-      margin: 18px auto 0;
-      padding: 14px 16px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.6);
-      border: 1px solid var(--border);
-      color: var(--text-soft);
-    }
-
-    .page-message.show { display: block; }
+    .mobile-menu-btn { display:none; min-height:44px; min-width:44px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,0.5); color:var(--accent); cursor:pointer; }
 
     @media (max-width: 1100px) {
-      .hero-wrap,
-      .about-grid,
-      .video-card,
-      .contact-wrap,
-      .footer-wrap { grid-template-columns: 1fr; }
-
-      .hero-visual { min-height: 680px; }
-      .portfolio-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero-wrap, .about-grid, .video-card, .contact-wrap, .footer-wrap { grid-template-columns: 1fr; }
+      .hero-visual { min-height:680px; }
+      .portfolio-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
       .services-grid { grid-template-columns: 1fr; }
-      .about-collage { min-height: 540px; }
+      .about-collage { min-height:540px; }
     }
 
     @media (max-width: 860px) {
       .header-inner { grid-template-columns: auto 1fr auto; }
-      .nav, .nav-right { display: none; }
-      .mobile-menu-btn { display: inline-grid; place-items: center; }
-      .mobile-nav-open .nav,
-      .mobile-nav-open .nav-right {
-        display: flex;
-        grid-column: 1 / -1;
-        padding: 8px 0 14px;
-        gap: 16px;
-      }
-      .hero { padding-top: 18px; }
-      .hero-copy { padding-top: 18px; }
-      .hero-copy h1 { max-width: none; }
-      .hero-stats { grid-template-columns: 1fr; max-width: 100%; }
+      .nav, .nav-right { display:none; }
+      .mobile-menu-btn { display:inline-grid; place-items:center; }
+      .mobile-nav-open .nav, .mobile-nav-open .nav-right { display:flex; grid-column:1 / -1; padding:8px 0 14px; gap:16px; }
+      .mobile-nav-open .header-inner { grid-template-columns: auto 1fr auto; align-items:start; }
+      .hero { padding-top:18px; }
+      .hero-copy { padding-top:18px; }
+      .hero-copy h1 { max-width:none; }
+      .hero-stats { grid-template-columns: 1fr; max-width:100%; }
       .portfolio-grid { grid-template-columns: 1fr; }
-      .portfolio-card { min-height: 420px; }
-      .about-collage { min-height: 500px; }
-      .about-card { width: 58%; }
-      .about-card-small { width: 50%; }
-      .about-card-photo { width: 56%; }
-      .about-points { grid-template-columns: 1fr; }
+      .portfolio-card { min-height:420px; }
+      .about-collage { min-height:500px; }
+      .about-card { width:58%; }
+      .about-card-small { width:50%; }
+      .about-card-photo { width:56%; }
+      .about-points { grid-template-columns:1fr; }
+      .edit-toolbar { left:1rem; right:1rem; align-items:stretch; }
+      .edit-chip { justify-content:space-between; }
+      .edit-status { max-width:none; }
     }
 
     @media (max-width: 640px) {
-      .container { width: min(100% - 22px, 100%); }
-      .section { padding: 52px 0; }
-      .hero-wrap { gap: 18px; min-height: auto; }
-      .hero-copy h1 { font-size: clamp(36px, 13vw, 58px); letter-spacing: 0.06em; }
-      .hero-tag { font-size: 13px; letter-spacing: 0.1em; }
-      .hero-desc { font-size: 14px; }
-      .hero-actions { flex-direction: column; }
-      .btn, .btn-outline { width: 100%; }
-      .hero-visual { min-height: 520px; border-radius: 24px; }
-      .social-rail { right: 14px; gap: 12px; }
-      .social-line { height: 60px; }
-      .social-rail a, .footer-social a { width: 38px; height: 38px; }
-      .about-collage { min-height: 420px; }
-      .about-card, .about-card-small, .about-card-photo { border-radius: 18px; }
-      .about-card { left: 0; width: 60%; height: 54%; }
-      .about-card-small { right: 0; width: 54%; height: 30%; }
-      .about-card-photo { left: 10%; width: 56%; height: 40%; }
-      .portfolio-card { min-height: 360px; }
-      .service-body, .video-copy, .contact-card, .contact-form, .testimonial-card { padding-left: 18px; padding-right: 18px; }
-      .testimonial-card { padding-top: 64px; }
-      .contact-link { min-height: 58px; }
-      .subscribe-box { flex-direction: column; }
-      .subscribe-box button { min-height: 48px; }
+      .container { width:min(100% - 22px, 100%); }
+      .section { padding:52px 0; }
+      .hero-wrap { gap:18px; min-height:auto; }
+      .hero-copy h1 { font-size:clamp(36px, 13vw, 58px); letter-spacing:0.06em; }
+      .hero-tag { font-size:13px; letter-spacing:0.1em; }
+      .hero-desc { font-size:14px; }
+      .hero-actions { flex-direction:column; }
+      .btn, .btn-outline { width:100%; }
+      .hero-visual { min-height:520px; border-radius:24px; }
+      .social-rail { right:14px; gap:12px; }
+      .social-line { height:60px; }
+      .social-rail a, .footer-social a { width:38px; height:38px; }
+      .about-collage { min-height:420px; }
+      .about-card, .about-card-small, .about-card-photo { border-radius:18px; }
+      .about-card { left:0; width:60%; height:54%; }
+      .about-card-small { right:0; width:54%; height:30%; }
+      .about-card-photo { left:10%; width:56%; height:40%; }
+      .portfolio-card { min-height:360px; }
+      .service-body, .video-copy, .contact-card, .contact-form, .testimonial-card { padding-left:18px; padding-right:18px; }
+      .testimonial-card { padding-top:64px; }
+      .contact-link { min-height:58px; }
+      .subscribe-box { flex-direction:column; }
+      .subscribe-box button { min-height:48px; }
     }
   </style>
 </head>
 <body>
-  <header class="site-header" id="top">
-    <div class="container header-inner" id="headerInner">
-      <nav class="nav" aria-label="Primary navigation">
-        <a href="#about">About Me</a>
-        <a href="#portfolio">Portfolio</a>
-      </nav>
-      <a class="brand-mark" href="#top" aria-label="Studio Brand" id="brandShort">MK</a>
-      <nav class="nav-right" aria-label="Secondary navigation">
-        <a href="#prices">Prices</a>
-        <a href="#contacts">Contacts</a>
-      </nav>
-      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">☰</button>
+  <div id="pageLoading" class="page-state">
+    <div class="page-state-card">
+      <p class="page-state-title">Loading Preview</p>
+      <p class="page-state-text">Fetching your website details and preparing Template 2.</p>
     </div>
-  </header>
+  </div>
 
-  <div class="page-message" id="pageMessage"></div>
+  <div id="pageError" class="page-state hidden">
+    <div class="page-state-card">
+      <p class="page-state-title">Website Not Found</p>
+      <p id="pageErrorText" class="page-state-text">This website preview is not available right now.</p>
+      <a href="website-builder.html" class="page-state-btn">Back to Builder</a>
+    </div>
+  </div>
 
-  <main>
-    <section class="hero">
-      <div class="container hero-wrap">
-        <div class="hero-copy">
-          <div class="eyebrow" id="locationText">Based in Pune · Available Across India</div>
-          <h1 id="heroName">Mary Kvitkova</h1>
-          <p class="hero-tag" id="heroTagline">Your Photographer</p>
-          <p class="hero-desc" id="heroDescription">Luxury wedding, portrait and editorial photographer creating timeless frames filled with softness, elegance and emotion. Available for destination weddings, intimate celebrations and personal storytelling sessions.</p>
-          <div class="hero-actions">
-            <a class="btn" href="#contacts">Contact</a>
-            <a class="btn-outline" href="#portfolio">View Portfolio</a>
-          </div>
-          <div class="hero-stats">
-            <div class="stat"><strong>7+</strong><span>Years Experience</span></div>
-            <div class="stat"><strong>500+</strong><span>Happy Clients</span></div>
-            <div class="stat"><strong>800+</strong><span>Curated Shoots</span></div>
-          </div>
-        </div>
+  <div id="editToolbar" class="edit-toolbar hidden">
+    <div class="edit-chip">
+      <span class="edit-label">Edit Mode</span>
+      <button id="editModeToggle" type="button" class="toggle-btn" aria-label="Toggle edit mode"></button>
+    </div>
+    <div id="editStatus" class="edit-status">You are viewing preview mode.</div>
+  </div>
 
-        <div class="hero-visual" aria-label="Hero photographer portrait image">
-          <div class="hero-overlay"></div>
-          <div class="social-rail" aria-label="Social links">
-            <div class="social-line"></div>
-            <a id="youtubeTopLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube">▶</a>
-            <a id="instagramTopLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>
-            <a id="whatsappTopLink" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">✆</a>
-            <div class="social-line"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+  <input id="imageFileInput" type="file" accept="image/*" class="hidden" />
 
-    <section class="section" id="about">
-      <div class="container about-grid">
-        <div class="about-collage">
-          <div class="about-connector"></div>
-          <div class="about-card"></div>
-          <div class="about-card-small" aria-hidden="true"></div>
-          <div class="about-card-photo" aria-hidden="true"></div>
-        </div>
-        <div class="about-copy">
-          <div class="eyebrow">Photographer Story</div>
-          <h2>About Me</h2>
-          <p id="aboutTextPrimary">I am a photographer who believes the most beautiful images never feel forced. They feel honest, warm and deeply personal. My work blends refined composition with natural emotion so every frame looks elegant today and timeless years later.</p>
-          <p id="aboutTextSecondary">From wedding mornings to intimate portraits, I guide each session with calm direction, thoughtful details and a luxury experience from first conversation to final gallery delivery.</p>
-          <div class="about-points">
-            <div class="point"><strong>Signature Style</strong><span>Editorial, candid and cinematic storytelling</span></div>
-            <div class="point"><strong>Best For</strong><span>Weddings, couples, portraits and personal brands</span></div>
-            <div class="point"><strong>Client Experience</strong><span>Relaxed guidance with premium attention to detail</span></div>
-            <div class="point"><strong>Travel</strong><span>Destination shoots available on request</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="portfolio">
-      <div class="container">
-        <div class="section-head">
-          <h2>Portfolio</h2>
-          <div class="section-line"></div>
-        </div>
-        <div class="portfolio-grid">
-          <a class="portfolio-card" href="#contacts" aria-label="Wedding portfolio"><img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=900&q=80" alt="Wedding" /><div class="portfolio-label"><strong>Wedding</strong><span>Elegant celebrations & timeless rituals</span></div></a>
-          <a class="portfolio-card" href="#contacts" aria-label="Family portfolio"><img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=900&q=80" alt="Family" /><div class="portfolio-label"><strong>Family</strong><span>Soft and emotional lifestyle stories</span></div></a>
-          <a class="portfolio-card" href="#contacts" aria-label="Love story portfolio"><img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=900&q=80" alt="Love Story" /><div class="portfolio-label"><strong>Love Story</strong><span>Romantic couple portraits with depth</span></div></a>
-          <a class="portfolio-card" href="#contacts" aria-label="Portrait portfolio"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80" alt="Portrait" /><div class="portfolio-label"><strong>Portrait</strong><span>Personal branding & editorial beauty</span></div></a>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="prices">
-      <div class="container">
-        <div class="section-head">
-          <h2>Prices</h2>
-          <div class="section-line"></div>
-        </div>
-        <div class="services-grid">
-          <article class="service-card">
-            <div class="service-visual"><img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1200&q=80" alt="Portrait Session" /><div class="service-title"><strong>Package Minimal</strong><span>Portrait Session</span></div></div>
-            <div class="service-body">
-              <p class="service-price">₹18,000</p>
-              <div class="service-list">
-                <div class="service-item"><span>Duration</span><strong>1 Hour</strong></div>
-                <div class="service-item"><span>Edited Photos</span><strong>25+</strong></div>
-                <div class="service-item"><span>Style Guidance</span><strong>Included</strong></div>
-                <div class="service-item"><span>Delivery</span><strong>Online Gallery</strong></div>
-              </div>
-              <a class="btn-outline" id="packageWhatsapp1" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
-            </div>
-          </article>
-          <article class="service-card">
-            <div class="service-visual"><img src="https://images.unsplash.com/photo-1516589091380-5d8e87df6999?auto=format&fit=crop&w=1200&q=80" alt="Couples / Pre-Wedding" /><div class="service-title"><strong>Package Standard</strong><span>Couples / Pre-Wedding</span></div></div>
-            <div class="service-body">
-              <p class="service-price">₹35,000</p>
-              <div class="service-list">
-                <div class="service-item"><span>Duration</span><strong>2 Hours</strong></div>
-                <div class="service-item"><span>Edited Photos</span><strong>60+</strong></div>
-                <div class="service-item"><span>Direction</span><strong>Posing + Storytelling</strong></div>
-                <div class="service-item"><span>Delivery</span><strong>Preview + Full Gallery</strong></div>
-              </div>
-              <a class="btn-outline" id="packageWhatsapp2" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
-            </div>
-          </article>
-          <article class="service-card">
-            <div class="service-visual"><img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1200&q=80" alt="Wedding Coverage" /><div class="service-title"><strong>Package Maximum</strong><span>Wedding Coverage</span></div></div>
-            <div class="service-body">
-              <p class="service-price">₹85,000</p>
-              <div class="service-list">
-                <div class="service-item"><span>Duration</span><strong>Half / Full Day</strong></div>
-                <div class="service-item"><span>Edited Photos</span><strong>All Best Frames</strong></div>
-                <div class="service-item"><span>Consultation</span><strong>Planning Call Included</strong></div>
-                <div class="service-item"><span>Delivery</span><strong>Premium Gallery + Highlights</strong></div>
-              </div>
-              <a class="btn-outline" id="packageWhatsapp3" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="films">
-      <div class="container">
-        <div class="video-card">
-          <div class="video-preview">
-            <a class="play-badge" id="featuredYoutubeLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="Watch featured film">▶</a>
-          </div>
-          <div class="video-copy">
-            <div class="eyebrow">Featured Work</div>
-            <h3>Featured Film & Signature Stories</h3>
-            <p>A premium photo experience deserves beautiful motion too. Explore cinematic highlights, behind-the-scenes moments and destination wedding films crafted to feel elegant, emotional and unforgettable.</p>
-            <div class="hero-actions">
-              <a class="btn" id="featuredYoutubeButton" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
-              <a class="btn-outline" href="#contacts">Book a Session</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="testimonial-card">
-          <div class="testimonial-avatar"><img src="https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=300&q=80" alt="Sofia" /></div>
-          <h3>Sofia</h3>
-          <p><strong>Bride & Portrait Client</strong></p>
-          <p>Working with Mary felt effortless from start to finish. She understood exactly how to make us feel comfortable, and every image looked refined, emotional and beautifully natural. It felt like a luxury experience, not just a photoshoot.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="contacts">
-      <div class="container contact-wrap">
-        <div class="contact-card">
-          <div class="contact-copy">
-            <div class="eyebrow">Stay in Touch</div>
-            <h2>Let’s Create Something Timeless</h2>
-            <p>For weddings, portraits, destination shoots and collaborations, reach out directly through your preferred platform. Every inquiry receives a thoughtful response.</p>
-          </div>
-          <div class="contact-links">
-            <a class="contact-link" id="phoneLink" href="tel:+919876543210"><div><strong>Phone</strong><span id="phoneText">+91 98765 43210</span></div><span>↗</span></a>
-            <a class="contact-link" id="whatsappLink" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><div><strong>WhatsApp</strong><span>Chat on WhatsApp</span></div><span>↗</span></a>
-            <a class="contact-link" id="instagramLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer"><div><strong>Instagram</strong><span id="instagramText">@marykvitkova.studio</span></div><span>↗</span></a>
-            <a class="contact-link" id="youtubeLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer"><div><strong>YouTube</strong><span>Watch latest films</span></div><span>↗</span></a>
-          </div>
-        </div>
-
-        <div class="contact-form">
-          <h3>Send an Inquiry</h3>
-          <div class="form-grid">
-            <input class="field" type="text" placeholder="Your name" />
-            <input class="field" type="email" placeholder="Email address" />
-            <input class="field" type="text" placeholder="Event type / session type" />
-            <textarea class="textarea" placeholder="Tell me about your vision, date and location"></textarea>
-            <a class="btn" id="contactWhatsappButton" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-wrap">
-      <div>
-        <div class="footer-brand" id="footerBrand">MK</div>
-        <div class="footer-copy" id="footerEmail">marykvitkova.photos@gmail.com</div>
-        <div class="footer-copy" style="margin-top:8px;" id="footerPhone">+91 98765 43210</div>
-      </div>
-
-      <div>
-        <div class="footer-links">
+  <div id="templateRoot" class="hidden">
+    <header class="site-header" id="top">
+      <div class="container header-inner" id="headerInner">
+        <nav class="nav" aria-label="Primary navigation">
           <a href="#about">About Me</a>
           <a href="#portfolio">Portfolio</a>
+        </nav>
+        <a class="brand-mark" id="brandShort" href="#top" aria-label="Studio brand initials">MK</a>
+        <nav class="nav-right" aria-label="Secondary navigation">
           <a href="#prices">Prices</a>
-          <a href="#films">Films</a>
           <a href="#contacts">Contacts</a>
-        </div>
-        <div class="footer-social">
-          <a id="footerInstagramLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>
-          <a id="footerYoutubeLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube">▶</a>
-          <a id="footerWhatsappLink" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">✆</a>
-        </div>
+        </nav>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">☰</button>
       </div>
+    </header>
 
-      <div>
-        <div class="eyebrow" style="margin-bottom:8px;">Stay in Touch</div>
-        <div class="footer-subtext">Subscribe for stories, availability updates and recent work.</div>
-        <div class="subscribe-box">
-          <input type="email" placeholder="E-mail" />
-          <button type="button">Subscribe</button>
+    <main>
+      <section class="hero">
+        <div class="container hero-wrap">
+          <div class="hero-copy">
+            <div class="eyebrow" id="locationText">Based in Pune · Available Across India</div>
+            <h1 id="heroName">Mary Kvitkova</h1>
+            <p class="hero-tag" id="heroTagline">Your Photographer</p>
+            <p class="hero-desc" id="heroDescription">Luxury wedding, portrait and editorial photographer creating timeless frames filled with softness, elegance and emotion.</p>
+            <div class="hero-actions">
+              <a class="btn" href="#contacts">Contact</a>
+              <a class="btn-outline" href="#portfolio">View Portfolio</a>
+            </div>
+            <div class="hero-stats">
+              <div class="stat"><strong>7+</strong><span>Years Experience</span></div>
+              <div class="stat"><strong>500+</strong><span>Happy Clients</span></div>
+              <div class="stat"><strong>800+</strong><span>Curated Shoots</span></div>
+            </div>
+          </div>
+
+          <div id="heroImageSlot" class="hero-visual editable-slot" data-image-slot="hero_image_url" aria-label="Hero photographer portrait image">
+            <div class="hero-overlay"></div>
+            <div class="image-loading">Uploading...</div>
+            <div class="edit-overlay"><span>Replace Hero Image</span></div>
+            <div class="social-rail" aria-label="Social links">
+              <div class="social-line"></div>
+              <a id="youtubeTopLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube">▶</a>
+              <a id="instagramTopLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>
+              <a id="whatsappTopLink" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">✆</a>
+              <div class="social-line"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="about">
+        <div class="container about-grid">
+          <div class="about-collage">
+            <div class="about-connector"></div>
+            <div id="aboutFillCard" class="about-card"></div>
+            <div id="aboutImageTopSlot" class="about-card-small editable-slot" data-image-slot="portfolio_image_1_url">
+              <div class="image-loading">Uploading...</div>
+              <div class="edit-overlay"><span>Replace Image</span></div>
+            </div>
+            <div id="aboutImageBottomSlot" class="about-card-photo editable-slot" data-image-slot="portfolio_image_2_url">
+              <div class="image-loading">Uploading...</div>
+              <div class="edit-overlay"><span>Replace Image</span></div>
+            </div>
+          </div>
+          <div class="about-copy">
+            <div class="eyebrow">Photographer Story</div>
+            <h2>About Me</h2>
+            <p id="aboutTextPrimary">I am a photographer who believes the most beautiful images never feel forced. They feel honest, warm and deeply personal.</p>
+            <p id="aboutTextSecondary">From wedding mornings to intimate portraits, I guide each session with calm direction, thoughtful details and a luxury experience from first conversation to final gallery delivery.</p>
+            <div class="about-points">
+              <div class="point"><strong>Signature Style</strong><span>Editorial, candid and cinematic storytelling</span></div>
+              <div class="point"><strong>Best For</strong><span>Weddings, couples, portraits and personal brands</span></div>
+              <div class="point"><strong>Client Experience</strong><span>Relaxed guidance with premium attention to detail</span></div>
+              <div class="point"><strong>Travel</strong><span id="aboutCityText">Destination shoots available on request</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="portfolio">
+        <div class="container">
+          <div class="section-head">
+            <h2>Portfolio</h2>
+            <div class="section-line"></div>
+          </div>
+          <div class="portfolio-grid">
+            <a id="portfolioCard1" class="portfolio-card editable-slot" data-image-slot="portfolio_image_3_url" href="#contacts" aria-label="Wedding">
+              <div class="image-loading">Uploading...</div>
+              <div class="edit-overlay"><span>Replace Image</span></div>
+              <div class="portfolio-label"><strong>Wedding</strong><span>Elegant celebrations & timeless rituals</span></div>
+            </a>
+            <a id="portfolioCard2" class="portfolio-card editable-slot" data-image-slot="portfolio_image_4_url" href="#contacts" aria-label="Family">
+              <div class="image-loading">Uploading...</div>
+              <div class="edit-overlay"><span>Replace Image</span></div>
+              <div class="portfolio-label"><strong>Family</strong><span>Soft and emotional lifestyle stories</span></div>
+            </a>
+            <a id="portfolioCard3" class="portfolio-card editable-slot" data-image-slot="portfolio_image_5_url" href="#contacts" aria-label="Love Story">
+              <div class="image-loading">Uploading...</div>
+              <div class="edit-overlay"><span>Replace Image</span></div>
+              <div class="portfolio-label"><strong>Love Story</strong><span>Romantic couple portraits with depth</span></div>
+            </a>
+            <a id="portfolioCard4" class="portfolio-card editable-slot" data-image-slot="portfolio_image_6_url" href="#contacts" aria-label="Portrait">
+              <div class="image-loading">Uploading...</div>
+              <div class="edit-overlay"><span>Replace Image</span></div>
+              <div class="portfolio-label"><strong>Portrait</strong><span>Personal branding & editorial beauty</span></div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="prices">
+        <div class="container">
+          <div class="section-head">
+            <h2>Prices</h2>
+            <div class="section-line"></div>
+          </div>
+          <div class="services-grid">
+            <article class="service-card">
+              <div class="service-visual" id="packageVisual1">
+                <div class="service-title"><strong>Package Minimal</strong><span>Portrait Session</span></div>
+              </div>
+              <div class="service-body">
+                <p class="service-price">₹18,000</p>
+                <div class="service-list">
+                  <div class="service-item"><span>Duration</span><strong>1 Hour</strong></div>
+                  <div class="service-item"><span>Edited Photos</span><strong>25+</strong></div>
+                  <div class="service-item"><span>Style Guidance</span><strong>Included</strong></div>
+                  <div class="service-item"><span>Delivery</span><strong>Online Gallery</strong></div>
+                </div>
+                <a id="packageWhatsapp1" class="btn-outline" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+              </div>
+            </article>
+            <article class="service-card">
+              <div class="service-visual" id="packageVisual2">
+                <div class="service-title"><strong>Package Standard</strong><span>Couples / Pre-Wedding</span></div>
+              </div>
+              <div class="service-body">
+                <p class="service-price">₹35,000</p>
+                <div class="service-list">
+                  <div class="service-item"><span>Duration</span><strong>2 Hours</strong></div>
+                  <div class="service-item"><span>Edited Photos</span><strong>60+</strong></div>
+                  <div class="service-item"><span>Direction</span><strong>Posing + Storytelling</strong></div>
+                  <div class="service-item"><span>Delivery</span><strong>Preview + Full Gallery</strong></div>
+                </div>
+                <a id="packageWhatsapp2" class="btn-outline" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+              </div>
+            </article>
+            <article class="service-card">
+              <div class="service-visual" id="packageVisual3">
+                <div class="service-title"><strong>Package Maximum</strong><span>Wedding Coverage</span></div>
+              </div>
+              <div class="service-body">
+                <p class="service-price">₹85,000</p>
+                <div class="service-list">
+                  <div class="service-item"><span>Duration</span><strong>Half / Full Day</strong></div>
+                  <div class="service-item"><span>Edited Photos</span><strong>All Best Frames</strong></div>
+                  <div class="service-item"><span>Consultation</span><strong>Planning Call Included</strong></div>
+                  <div class="service-item"><span>Delivery</span><strong>Premium Gallery + Highlights</strong></div>
+                </div>
+                <a id="packageWhatsapp3" class="btn-outline" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="films">
+        <div class="container">
+          <div class="video-card">
+            <div class="video-preview" id="featuredFilmVisual">
+              <a id="featuredYoutubeLink" class="play-badge" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="Watch featured film">▶</a>
+            </div>
+            <div class="video-copy">
+              <div class="eyebrow">Featured Work</div>
+              <h3>Featured Film & Signature Stories</h3>
+              <p>A premium photo experience deserves beautiful motion too. Explore cinematic highlights, behind-the-scenes moments and destination wedding films crafted to feel elegant, emotional and unforgettable.</p>
+              <div class="hero-actions">
+                <a id="featuredYoutubeButton" class="btn" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+                <a class="btn-outline" href="#contacts">Book a Session</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="testimonial-card">
+            <div class="testimonial-avatar">
+              <img src="https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=300&q=80" alt="Sofia" />
+            </div>
+            <h3>Sofia</h3>
+            <p><strong>Bride & Portrait Client</strong></p>
+            <p>Working with Mary felt effortless from start to finish. She understood exactly how to make us feel comfortable, and every image looked refined, emotional and beautifully natural. It felt like a luxury experience, not just a photoshoot.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="contacts">
+        <div class="container contact-wrap">
+          <div class="contact-card">
+            <div class="contact-copy">
+              <div class="eyebrow">Stay in Touch</div>
+              <h2>Let’s Create Something Timeless</h2>
+              <p>For weddings, portraits, destination shoots and collaborations, reach out directly through your preferred platform. Every inquiry receives a thoughtful response.</p>
+            </div>
+            <div class="contact-links">
+              <a id="phoneLink" class="contact-link" href="tel:+919876543210">
+                <div><strong>Phone</strong><span id="phoneText">+91 98765 43210</span></div><span>↗</span>
+              </a>
+              <a id="whatsappLink" class="contact-link" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
+                <div><strong>WhatsApp</strong><span>Chat on WhatsApp</span></div><span>↗</span>
+              </a>
+              <a id="instagramLink" class="contact-link" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
+                <div><strong>Instagram</strong><span id="instagramText">@marykvitkova.studio</span></div><span>↗</span>
+              </a>
+              <a id="youtubeLink" class="contact-link" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">
+                <div><strong>YouTube</strong><span>Watch latest films</span></div><span>↗</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="contact-form">
+            <h3>Send an Inquiry</h3>
+            <div class="form-grid">
+              <input class="field" type="text" placeholder="Your name" />
+              <input class="field" type="email" placeholder="Email address" />
+              <input class="field" type="text" placeholder="Event type / session type" />
+              <textarea class="textarea" placeholder="Tell me about your vision, date and location"></textarea>
+              <a id="contactWhatsappButton" class="btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-wrap">
+        <div>
+          <div class="footer-brand" id="footerBrand">MK</div>
+          <div class="footer-copy" id="footerEmail">marykvitkova.photos@gmail.com</div>
+          <div class="footer-copy" id="footerPhone" style="margin-top:8px;">+91 98765 43210</div>
+        </div>
+
+        <div>
+          <div class="footer-links">
+            <a href="#about">About Me</a>
+            <a href="#portfolio">Portfolio</a>
+            <a href="#prices">Prices</a>
+            <a href="#films">Films</a>
+            <a href="#contacts">Contacts</a>
+          </div>
+          <div class="footer-social">
+            <a id="footerInstagramLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>
+            <a id="footerYoutubeLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube">▶</a>
+            <a id="footerWhatsappLink" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">✆</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="eyebrow" style="margin-bottom:8px;">Stay in Touch</div>
+          <div class="footer-subtext">Subscribe for stories, availability updates and recent work.</div>
+          <div class="subscribe-box">
+            <input type="email" placeholder="E-mail" />
+            <button type="button">Subscribe</button>
+          </div>
         </div>
       </div>
-    </div>
-  </footer>
+    </footer>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
   <script type="module">
-    const defaultData = {
-      brandName: "Mary Kvitkova",
-      shortBrand: "MK",
+    import { replaceImageAsset } from "./js/storage.js";
+
+    const loadingState = document.getElementById("pageLoading");
+    const errorState = document.getElementById("pageError");
+    const errorText = document.getElementById("pageErrorText");
+    const templateRoot = document.getElementById("templateRoot");
+    const editToolbar = document.getElementById("editToolbar");
+    const editModeToggle = document.getElementById("editModeToggle");
+    const editStatus = document.getElementById("editStatus");
+    const imageFileInput = document.getElementById("imageFileInput");
+
+    const DEFAULT_IMAGES = {
+      hero_image_url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80",
+      portfolio_image_1_url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80",
+      portfolio_image_2_url: "https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=900&q=80",
+      portfolio_image_3_url: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=900&q=80",
+      portfolio_image_4_url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=900&q=80",
+      portfolio_image_5_url: "https://images.unsplash.com/photo-1516589091380-5d8e87df6999?auto=format&fit=crop&w=900&q=80",
+      portfolio_image_6_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80"
+    };
+
+    const DEFAULT_DATA = {
+      name: "Mary Kvitkova",
       tagline: "Your Photographer",
-      description: "Luxury wedding, portrait and editorial photographer creating timeless frames filled with softness, elegance and emotion. Available for destination weddings, intimate celebrations and personal storytelling sessions.",
       about: "I am a photographer who believes the most beautiful images never feel forced. They feel honest, warm and deeply personal. My work blends refined composition with natural emotion so every frame looks elegant today and timeless years later.",
       phone: "+91 98765 43210",
       instagram: "@marykvitkova.studio",
-      city: "Pune",
-      siteSlug: "mary-kvitkova",
-      youtubeUrl: "https://www.youtube.com/"
+      city: "Pune"
     };
 
-    const pageMessage = document.getElementById("pageMessage");
-    const params = new URLSearchParams(window.location.search);
-    const slug = (params.get("slug") || "").trim();
+    let currentWebsite = null;
+    let currentUserId = null;
+    let editModeEnabled = false;
+    let pendingImageSlot = "";
 
-    function normalizePhone(phone) {
-      const cleaned = String(phone || "").replace(/[^\d+]/g, "");
-      return cleaned || "+91 98765 43210";
+    function showLoading() {
+      loadingState.classList.remove("hidden");
+      errorState.classList.add("hidden");
+      templateRoot.classList.add("hidden");
     }
 
-    function phoneToWhatsApp(phone) {
-      const digits = String(phone || "").replace(/\D/g, "");
-      return digits ? `https://wa.me/${digits}` : "https://wa.me/919876543210";
+    function showError(message) {
+      loadingState.classList.add("hidden");
+      errorState.classList.remove("hidden");
+      templateRoot.classList.add("hidden");
+      errorText.innerText = message;
+    }
+
+    function showTemplate() {
+      loadingState.classList.add("hidden");
+      errorState.classList.add("hidden");
+      templateRoot.classList.remove("hidden");
+    }
+
+    function getSlugFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return (params.get("slug") || "").trim().toLowerCase();
+    }
+
+    function isEditRequestedFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("edit") === "true";
+    }
+
+    function formatPhoneForDisplay(phone) {
+      const raw = String(phone || "").trim();
+      return raw || DEFAULT_DATA.phone;
+    }
+
+    function formatPhoneForTel(phone) {
+      const raw = String(phone || "").replace(/[^\d+]/g, "");
+      if (!raw) return "+919876543210";
+      return raw.startsWith("+") ? raw : `+${raw}`;
+    }
+
+    function formatPhoneForWhatsApp(phone) {
+      const raw = String(phone || "").replace(/\D/g, "");
+      if (!raw) return "919876543210";
+      if (raw.startsWith("91")) return raw;
+      return `91${raw}`;
     }
 
     function normalizeInstagram(value) {
-      const input = String(value || "").trim();
-      if (!input) return { label: "@marykvitkova.studio", href: "https://www.instagram.com/" };
-      if (/^https?:\/\//i.test(input)) {
-        return { label: input.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, ""), href: input };
+      const raw = String(value || "").trim();
+      if (!raw) return DEFAULT_DATA.instagram;
+      return raw.startsWith("@") ? raw : `@${raw}`;
+    }
+
+    function buildImageBackground(url, overlay = true) {
+      const safeUrl = String(url || "").replace(/"/g, '\\"');
+      return `${overlay ? 'linear-gradient(180deg, rgba(17,17,17,0.04), rgba(17,17,17,0.12)), ' : ''}url("${safeUrl}")`;
+    }
+
+    function setEditStatus(message) {
+      editStatus.innerText = message;
+    }
+
+    function showEditToolbar(show) {
+      editToolbar.classList.toggle("hidden", !show);
+    }
+
+    function setEditMode(enabled) {
+      editModeEnabled = enabled;
+      editModeToggle.classList.toggle("active", enabled);
+      document.querySelectorAll(".editable-slot").forEach(slot => {
+        slot.classList.toggle("edit-active", enabled);
+      });
+      if (enabled) {
+        setEditStatus("Edit mode is ON. Click any image area to replace it.");
+      } else {
+        setEditStatus("You are viewing preview mode.");
       }
-      const cleanHandle = input.replace(/^@+/, "").trim();
-      return { label: `@${cleanHandle}`, href: `https://www.instagram.com/${cleanHandle}/` };
     }
 
-    function deriveShortBrand(name) {
-      const words = String(name || "").trim().split(/\s+/).filter(Boolean).slice(0, 2);
-      return words.map(word => word[0]?.toUpperCase() || "").join("") || "MK";
+    function getSlotElement(slotName) {
+      return Array.from(document.querySelectorAll(".editable-slot")).find(el => el.dataset.imageSlot === slotName) || null;
     }
 
-    function showMessage(message) {
-      pageMessage.textContent = message;
-      pageMessage.classList.add("show");
+    function setSlotUploading(slotName, isUploading) {
+      const slot = getSlotElement(slotName);
+      if (!slot) return;
+      slot.classList.toggle("uploading", isUploading);
     }
 
-    function applyData(data) {
-      const brandName = data.name || data.brandName || defaultData.brandName;
-      const shortBrand = deriveShortBrand(brandName);
-      const tagline = data.tagline || defaultData.tagline;
-      const about = data.about || defaultData.about;
-      const phone = data.phone || defaultData.phone;
-      const city = data.city || defaultData.city;
-      const instagram = normalizeInstagram(data.instagram || defaultData.instagram);
-      const youtubeUrl = data.youtube_url || data.youtubeUrl || defaultData.youtubeUrl;
-      const whatsappUrl = phoneToWhatsApp(phone);
-      const phoneHref = `tel:${normalizePhone(phone)}`;
+    function applyImages(website) {
+      const heroUrl = website.hero_image_url || DEFAULT_IMAGES.hero_image_url;
+      const aboutTop = website.portfolio_image_1_url || DEFAULT_IMAGES.portfolio_image_1_url;
+      const aboutBottom = website.portfolio_image_2_url || DEFAULT_IMAGES.portfolio_image_2_url;
+      const card1 = website.portfolio_image_3_url || DEFAULT_IMAGES.portfolio_image_3_url;
+      const card2 = website.portfolio_image_4_url || DEFAULT_IMAGES.portfolio_image_4_url;
+      const card3 = website.portfolio_image_5_url || DEFAULT_IMAGES.portfolio_image_5_url;
+      const card4 = website.portfolio_image_6_url || DEFAULT_IMAGES.portfolio_image_6_url;
 
-      document.title = `${brandName} - Template 2`;
-      document.getElementById("brandShort").textContent = shortBrand;
-      document.getElementById("footerBrand").textContent = shortBrand;
-      document.getElementById("heroName").textContent = brandName;
-      document.getElementById("heroTagline").textContent = tagline;
-      document.getElementById("heroDescription").textContent = about;
-      document.getElementById("aboutTextPrimary").textContent = about;
-      document.getElementById("aboutTextSecondary").textContent = `Based in ${city}, available for weddings, portraits and destination shoots with a soft luxury aesthetic and a calm, guided experience from inquiry to delivery.`;
-      document.getElementById("locationText").textContent = `Based in ${city} · Available Across India`;
-      document.getElementById("phoneText").textContent = phone;
-      document.getElementById("footerPhone").textContent = phone;
-      document.getElementById("instagramText").textContent = instagram.label;
+      document.getElementById("heroImageSlot").style.backgroundImage = buildImageBackground(heroUrl, true);
+      document.getElementById("aboutImageTopSlot").style.backgroundImage = buildImageBackground(aboutTop, false);
+      document.getElementById("aboutImageBottomSlot").style.backgroundImage = buildImageBackground(aboutBottom, false);
+      document.getElementById("portfolioCard1").style.backgroundImage = buildImageBackground(card1, true);
+      document.getElementById("portfolioCard2").style.backgroundImage = buildImageBackground(card2, true);
+      document.getElementById("portfolioCard3").style.backgroundImage = buildImageBackground(card3, true);
+      document.getElementById("portfolioCard4").style.backgroundImage = buildImageBackground(card4, true);
 
-      const linkIds = [
-        "phoneLink", "instagramLink", "instagramTopLink", "footerInstagramLink",
-        "youtubeLink", "youtubeTopLink", "featuredYoutubeLink", "featuredYoutubeButton", "footerYoutubeLink",
-        "whatsappLink", "whatsappTopLink", "contactWhatsappButton", "footerWhatsappLink",
-        "packageWhatsapp1", "packageWhatsapp2", "packageWhatsapp3"
-      ];
+      document.getElementById("packageVisual1").style.backgroundImage = buildImageBackground(card1, true);
+      document.getElementById("packageVisual2").style.backgroundImage = buildImageBackground(card2, true);
+      document.getElementById("packageVisual3").style.backgroundImage = buildImageBackground(card3, true);
+      document.getElementById("featuredFilmVisual").style.backgroundImage = buildImageBackground(card4, true);
+    }
 
-      document.getElementById("phoneLink").href = phoneHref;
-      document.getElementById("instagramLink").href = instagram.href;
-      document.getElementById("instagramTopLink").href = instagram.href;
-      document.getElementById("footerInstagramLink").href = instagram.href;
-      document.getElementById("youtubeLink").href = youtubeUrl;
-      document.getElementById("youtubeTopLink").href = youtubeUrl;
-      document.getElementById("featuredYoutubeLink").href = youtubeUrl;
-      document.getElementById("featuredYoutubeButton").href = youtubeUrl;
-      document.getElementById("footerYoutubeLink").href = youtubeUrl;
+    function applyWebsiteData(website) {
+      const name = website.name?.trim() || DEFAULT_DATA.name;
+      const tagline = website.tagline?.trim() || DEFAULT_DATA.tagline;
+      const about = website.about?.trim() || DEFAULT_DATA.about;
+      const phoneDisplay = formatPhoneForDisplay(website.phone);
+      const phoneTel = formatPhoneForTel(website.phone);
+      const whatsappPhone = formatPhoneForWhatsApp(website.phone);
+      const instagramDisplay = normalizeInstagram(website.instagram);
+      const city = website.city?.trim() || DEFAULT_DATA.city;
+      const heroLocation = `Based in ${city} · Available Across India`;
+      const whatsappUrl = `https://wa.me/${whatsappPhone}`;
+      const youtubeUrl = "https://www.youtube.com/";
+      const instagramUrl = `https://instagram.com/${instagramDisplay.replace(/^@/, "")}`;
+      const brandInitials = name.split(/\s+/).filter(Boolean).slice(0,2).map(part => part[0]?.toUpperCase() || "").join("") || "ST";
+
+      document.title = `${name} - Template 2`;
+      document.getElementById("brandShort").innerText = brandInitials;
+      document.getElementById("footerBrand").innerText = brandInitials;
+      document.getElementById("heroName").innerText = name;
+      document.getElementById("heroTagline").innerText = tagline;
+      document.getElementById("heroDescription").innerText = about;
+      document.getElementById("locationText").innerText = heroLocation;
+      document.getElementById("aboutTextPrimary").innerText = about;
+      document.getElementById("aboutTextSecondary").innerText = `${name} creates elegant imagery with calm direction, refined composition, and a premium client experience from first inquiry to final gallery delivery.`;
+      document.getElementById("aboutCityText").innerText = `${city} based · Destination shoots available`;
+      document.getElementById("phoneText").innerText = phoneDisplay;
+      document.getElementById("instagramText").innerText = instagramDisplay;
+      document.getElementById("footerPhone").innerText = phoneDisplay;
+      document.getElementById("footerEmail").innerText = `${instagramDisplay.replace(/^@/, "")}@gmail.com`;
+
+      document.getElementById("phoneLink").href = `tel:${phoneTel}`;
       document.getElementById("whatsappLink").href = whatsappUrl;
       document.getElementById("whatsappTopLink").href = whatsappUrl;
       document.getElementById("contactWhatsappButton").href = whatsappUrl;
@@ -1214,42 +1043,140 @@
       document.getElementById("packageWhatsapp1").href = whatsappUrl;
       document.getElementById("packageWhatsapp2").href = whatsappUrl;
       document.getElementById("packageWhatsapp3").href = whatsappUrl;
+      document.getElementById("instagramLink").href = instagramUrl;
+      document.getElementById("instagramTopLink").href = instagramUrl;
+      document.getElementById("footerInstagramLink").href = instagramUrl;
+      document.getElementById("youtubeLink").href = youtubeUrl;
+      document.getElementById("youtubeTopLink").href = youtubeUrl;
+      document.getElementById("featuredYoutubeLink").href = youtubeUrl;
+      document.getElementById("featuredYoutubeButton").href = youtubeUrl;
+      document.getElementById("footerYoutubeLink").href = youtubeUrl;
 
-      linkIds.forEach(id => {
-        const link = document.getElementById(id);
-        if (link && !link.hasAttribute("target") && id !== "phoneLink") {
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
+      applyImages(website);
+    }
+
+    async function fetchWebsiteBySlug(slug) {
+      const supabase = await window.getSupabase();
+      const { data: authData } = await supabase.auth.getUser();
+      currentUserId = authData?.user?.id || null;
+
+      let query = supabase
+        .from("user_websites")
+        .select("*")
+        .eq("site_slug", slug)
+        .eq("template_id", 2)
+        .limit(1);
+
+      if (currentUserId) {
+        query = query.or(`is_published.eq.true,user_id.eq.${currentUserId}`);
+      } else {
+        query = query.eq("is_published", true);
+      }
+
+      const { data, error } = await query.maybeSingle();
+      if (error) throw error;
+      return data || null;
+    }
+
+    function canCurrentUserEdit(website) {
+      return Boolean(currentUserId && website?.user_id && currentUserId === website.user_id);
+    }
+
+    async function updateWebsiteImage(slotName, newUrl) {
+      const supabase = await window.getSupabase();
+      const { data, error } = await supabase
+        .from("user_websites")
+        .update({ [slotName]: newUrl })
+        .eq("id", currentWebsite.id)
+        .eq("user_id", currentUserId)
+        .select("*")
+        .single();
+      if (error) throw error;
+      return data;
+    }
+
+    async function handleImageSelection(file) {
+      if (!pendingImageSlot || !currentWebsite) return;
+      const slotName = pendingImageSlot;
+      const oldUrl = currentWebsite[slotName] || "";
+      const folder = `studioos/websites/${currentWebsite.site_slug}`;
+
+      try {
+        setSlotUploading(slotName, true);
+        setEditStatus("Uploading and replacing image...");
+
+        const replaceResult = await replaceImageAsset({ oldUrl, file, folder });
+        const updatedWebsite = await updateWebsiteImage(slotName, replaceResult.newUrl);
+        currentWebsite = updatedWebsite;
+        applyImages(currentWebsite);
+
+        if (replaceResult.deleteResult?.skipped) {
+          setEditStatus("Image replaced. Old file cleanup skipped until secure delete endpoint is added.");
+        } else {
+          setEditStatus("Image replaced successfully.");
         }
+      } catch (error) {
+        console.error("Image replace failed:", error);
+        setEditStatus(error.message || "Unable to replace image.");
+      } finally {
+        setSlotUploading(slotName, false);
+        pendingImageSlot = "";
+        imageFileInput.value = "";
+      }
+    }
+
+    function registerEditableImageSlots() {
+      document.querySelectorAll(".editable-slot").forEach(slot => {
+        slot.addEventListener("click", event => {
+          if (!editModeEnabled) return;
+          event.preventDefault();
+          pendingImageSlot = slot.dataset.imageSlot || "";
+          imageFileInput.click();
+        });
       });
     }
 
-    async function loadWebsite() {
-      applyData(defaultData);
+    imageFileInput.addEventListener("change", async e => {
+      const file = e.target.files?.[0];
+      if (file) await handleImageSelection(file);
+    });
 
+    editModeToggle.addEventListener("click", () => {
+      setEditMode(!editModeEnabled);
+    });
+
+    async function initTemplate() {
+      showLoading();
+
+      const slug = getSlugFromUrl();
       if (!slug) {
-        showMessage("Preview loaded with default Template 2 data. Open through Website Builder preview to load saved details.");
+        showError("Missing website slug. Open this page like template-2.html?slug=your-site-slug");
         return;
       }
 
       try {
-        const supabase = await window.getSupabase();
-        const { data, error } = await supabase
-          .from("user_websites")
-          .select("name, tagline, about, phone, instagram, city, site_slug")
-          .eq("site_slug", slug)
-          .maybeSingle();
-
-        if (error || !data) {
-          console.error("Template 2 load failed:", error);
-          showMessage("Saved website details could not be loaded for this preview, so default Template 2 data is shown.");
+        const website = await fetchWebsiteBySlug(slug);
+        if (!website) {
+          showError("No website data found for this slug. Save your Website Builder first, then open this template using the correct slug.");
           return;
         }
 
-        applyData(data);
+        currentWebsite = website;
+        applyWebsiteData(website);
+        registerEditableImageSlots();
+        showTemplate();
+
+        const editable = canCurrentUserEdit(website);
+        showEditToolbar(editable);
+
+        if (editable && isEditRequestedFromUrl()) {
+          setEditMode(true);
+        } else {
+          setEditMode(false);
+        }
       } catch (error) {
-        console.error("Template 2 unexpected load failed:", error);
-        showMessage("Preview opened, but saved website details could not be fetched. Default Template 2 data is shown.");
+        console.error("Template 2 load failed:", error);
+        showError("Unable to load website preview right now.");
       }
     }
 
@@ -1261,7 +1188,7 @@
       });
     }
 
-    await loadWebsite();
+    await initTemplate();
   </script>
 </body>
 </html>
