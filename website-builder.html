@@ -1076,37 +1076,37 @@ Write a short introduction about your photography brand. This live preview updat
 
 <div>
 <label class="block text-sm text-gray-300 mb-2">Website / Studio Name</label>
-<input id="siteName" class="input-field" type="text" placeholder="Aditya Masram Photography">
+<input id="siteName" class="input-field" type="text" placeholder="Your Studio Name (e.g. Aurora Frames Studio)">
 </div>
 
 <div>
 <label class="block text-sm text-gray-300 mb-2">Tagline</label>
-<input id="siteTagline" class="input-field" type="text" placeholder="Capturing timeless wedding stories">
+<input id="siteTagline" class="input-field" type="text" placeholder="Short tagline (e.g. Cinematic wedding & portrait stories)">
 </div>
 
 <div>
 <label class="block text-sm text-gray-300 mb-2">About</label>
-<textarea id="siteAbout" class="textarea-field" placeholder="Write a short introduction about your photography brand..."></textarea>
+<textarea id="siteAbout" class="textarea-field" placeholder="Brief about your brand (services, style, experience)"></textarea>
 </div>
 
 <div>
 <label class="block text-sm text-gray-300 mb-2">Phone</label>
-<input id="sitePhone" class="input-field" type="text" placeholder="9876543210">
+<input id="sitePhone" class="input-field" type="text" placeholder="Primary contact number (e.g. +91 9XXXXXXXXX)">
 </div>
 
 <div>
 <label class="block text-sm text-gray-300 mb-2">Instagram</label>
-<input id="siteInstagram" class="input-field" type="text" placeholder="@yourstudio">
+<input id="siteInstagram" class="input-field" type="text" placeholder="Instagram handle (e.g. @yourstudio_name)">
 </div>
 
 <div>
 <label class="block text-sm text-gray-300 mb-2">City</label>
-<input id="siteCity" class="input-field" type="text" placeholder="Pune">
+<input id="siteCity" class="input-field" type="text" placeholder="Your city (e.g. Mumbai / Delhi)">
 </div>
 
 <div>
 <label class="block text-sm text-gray-300 mb-2">Site Slug</label>
-<input id="siteSlug" class="input-field" type="text" placeholder="aditya-masram">
+<input id="siteSlug" class="input-field" type="text" placeholder="unique-site-slug (e.g. aurora-frames)">
 <p class="helper-text mt-2">This will be used for your public website link later.</p>
 </div>
 
@@ -1589,6 +1589,13 @@ return { ok:false }
 }
 
 }
+
+
+
+// FIX: Save button direct handler
+saveWebsiteBtn.addEventListener("click", async ()=>{
+  await saveWebsiteBuilder()
+})
 
 publishToggleBtn.addEventListener("click", async ()=>{
 
