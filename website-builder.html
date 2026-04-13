@@ -272,6 +272,74 @@ color:rgb(209 213 219);
 overflow:hidden;
 }
 
+.publish-toggle-wrap{
+display:inline-flex;
+align-items:center;
+gap:0.65rem;
+}
+
+.publish-toggle-label{
+font-size:0.72rem;
+font-weight:600;
+letter-spacing:0.08em;
+text-transform:uppercase;
+color:rgb(209 213 219);
+}
+
+.publish-switch{
+position:relative;
+display:inline-flex;
+align-items:center;
+width:2.25rem;
+height:1.35rem;
+border-radius:999px;
+background:rgba(255,255,255,0.22);
+border:1px solid rgba(255,255,255,0.12);
+transition:all .2s ease;
+cursor:pointer;
+flex-shrink:0;
+}
+
+.publish-switch::after{
+content:"";
+position:absolute;
+left:2px;
+width:0.95rem;
+height:0.95rem;
+border-radius:999px;
+background:white;
+box-shadow:0 2px 8px rgba(0,0,0,0.18);
+transition:transform .2s ease;
+}
+
+.publish-switch.active{
+background:rgb(99 102 241);
+border-color:rgba(99,102,241,0.7);
+}
+
+.publish-switch.active::after{
+transform:translateX(0.88rem);
+}
+
+.publish-status-text{
+font-size:0.72rem;
+color:rgb(156 163 175);
+white-space:nowrap;
+}
+
+.publish-status-text.live{
+color:rgb(187 247 208);
+}
+
+.publish-control-row{
+display:flex;
+align-items:center;
+gap:0.65rem;
+flex-wrap:wrap;
+justify-content:flex-end;
+}
+
+
 .live-preview-shell{
 border-radius:1.2rem;
 border:1px solid rgba(255,255,255,0.08);
@@ -839,7 +907,14 @@ Create your personal photography website with ready-made premium templates.
 <div class="glass rounded-2xl p-5 mb-5 preview-section">
 <div class="flex items-center justify-between gap-3 mb-4">
 <h2 class="text-lg font-semibold">Live Template Preview</h2>
+<div class="publish-control-row">
+<div class="publish-toggle-wrap">
+<span class="publish-toggle-label">Publish</span>
+<button id="publishToggleBtn" type="button" class="publish-switch" aria-label="Toggle website publish status" aria-pressed="false"></button>
+<span id="publishStatusText" class="publish-status-text">Draft</span>
+</div>
 <span id="previewTemplateLabel" class="text-xs text-gray-400">Template 1</span>
+</div>
 </div>
 
 <div class="live-preview-shell">
@@ -1013,6 +1088,9 @@ const scrollToFormBtn = document.getElementById("scrollToFormBtn")
 const builderFormSection = document.getElementById("builderFormSection")
 const saveFeedback = document.getElementById("saveFeedback")
 
+const publishToggleBtn = document.getElementById("publishToggleBtn")
+const publishStatusText = document.getElementById("publishStatusText")
+
 const siteNameInput = document.getElementById("siteName")
 const siteTaglineInput = document.getElementById("siteTagline")
 const siteAboutInput = document.getElementById("siteAbout")
@@ -1025,6 +1103,7 @@ const saveWebsiteBtn = document.getElementById("saveWebsiteBtn")
 let selectedTemplateId = 1
 let existingWebsiteRowId = null
 let currentWebsiteData = null
+setPublishToggleState(false)
 
 
 // =============================
@@ -1093,6 +1172,15 @@ const pathMap = {
 2: "template-2.html"
 }
 return pathMap[templateId] || ""
+}
+
+
+function setPublishToggleState(isPublished){
+const published = Boolean(isPublished)
+publishToggleBtn.classList.toggle("active", published)
+publishToggleBtn.setAttribute("aria-pressed", String(published))
+publishStatusText.innerText = published ? "Published" : "Draft"
+publishStatusText.classList.toggle("live", published)
 }
 
 
@@ -1233,6 +1321,7 @@ return
 
 if(!data){
 currentWebsiteData = null
+setPublishToggleState(false)
 builderStatus.innerText = "New website setup"
 setSaveFeedback("info", "Fill in your details and save your website builder.")
 syncLivePreview()
@@ -1241,6 +1330,7 @@ return
 
 existingWebsiteRowId = data.id || null
 currentWebsiteData = data || null
+setPublishToggleState(data.is_published)
 
 siteNameInput.value = data.name || ""
 siteTaglineInput.value = data.tagline || ""
@@ -1291,7 +1381,8 @@ youtube: currentWebsiteData?.youtube || null,
 whatsapp: currentWebsiteData?.whatsapp || null,
 template_content: currentWebsiteData?.template_content || {},
 template_images: currentWebsiteData?.template_images || {},
-theme_settings: currentWebsiteData?.theme_settings || {}
+theme_settings: currentWebsiteData?.theme_settings || {},
+is_published: currentWebsiteData?.is_published || false
 }
 
 if(!payload.name){
@@ -1355,6 +1446,7 @@ return { ok:false }
 
 existingWebsiteRowId = data?.id || existingWebsiteRowId
 currentWebsiteData = data || currentWebsiteData
+setPublishToggleState(currentWebsiteData?.is_published)
 builderStatus.innerText = "Saved successfully"
 setSaveFeedback("success", "Website Builder saved successfully.")
 
@@ -1376,6 +1468,64 @@ return { ok:false }
 }
 
 }
+
+publishToggleBtn.addEventListener("click", async ()=>{
+
+const user = await getCurrentUser()
+
+if(!user){
+setSaveFeedback("error", "User session not found. Please login again.")
+return
+}
+
+const nextPublished = !(currentWebsiteData?.is_published || false)
+
+if(!existingWebsiteRowId){
+currentWebsiteData = {
+...(currentWebsiteData || {}),
+is_published: nextPublished
+}
+setPublishToggleState(nextPublished)
+setSaveFeedback("info", `Website status set to ${nextPublished ? "Published" : "Draft"}. Save builder to apply it.`)
+return
+}
+
+try{
+publishToggleBtn.disabled = true
+builderStatus.innerText = "Updating publish status..."
+
+const supabase = await window.getSupabase()
+
+const { data, error } = await supabase
+.from("user_websites")
+.update({ is_published: nextPublished })
+.eq("id", existingWebsiteRowId)
+.eq("user_id", user.id)
+.select("*")
+.single()
+
+publishToggleBtn.disabled = false
+
+if(error){
+console.error("Publish toggle update failed:", error)
+builderStatus.innerText = "Update failed"
+setSaveFeedback("error", "Unable to update publish status right now.")
+return
+}
+
+currentWebsiteData = data || currentWebsiteData
+setPublishToggleState(currentWebsiteData?.is_published)
+builderStatus.innerText = nextPublished ? "Website published" : "Website draft"
+setSaveFeedback("success", `Website ${nextPublished ? "published" : "saved as draft"} successfully.`)
+}
+catch(error){
+console.error("Publish toggle unexpected update failed:", error)
+publishToggleBtn.disabled = false
+builderStatus.innerText = "Update failed"
+setSaveFeedback("error", "Unexpected error while updating publish status.")
+}
+
+})
 
 saveWebsiteBtn.addEventListener("click", saveWebsiteBuilder)
 
