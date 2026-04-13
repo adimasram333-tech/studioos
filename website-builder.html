@@ -1284,11 +1284,26 @@ previewMenuBtn.setAttribute("aria-expanded", String(isHidden))
 }
 
 function getWebsiteUrl({ publicView = false } = {}){
+
 const slug = currentWebsiteData?.site_slug
 if(!slug) return ""
+
 const previewPath = getTemplatePreviewPath(selectedTemplateId)
 if(!previewPath) return ""
-return `${window.location.origin}/${previewPath}?slug=${encodeURIComponent(slug)}${publicView ? "" : "&edit=true"}`
+
+// auto base path (GitHub Pages + future safe)
+const path = window.location.pathname
+const basePath = path.substring(0, path.lastIndexOf("/") + 1)
+
+const url = new URL(`${basePath}${previewPath}`, window.location.origin)
+
+url.searchParams.set("slug", slug)
+
+if(!publicView){
+url.searchParams.set("edit", "true")
+}
+
+return url.toString()
 }
 
 
