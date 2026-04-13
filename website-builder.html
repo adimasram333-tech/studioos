@@ -612,6 +612,57 @@ border:1px solid rgba(255,255,255,0.08);
 background:rgba(255,255,255,0.1);
 }
 
+.preview-main-btn{
+flex:1;
+min-width:0;
+}
+
+.preview-menu-wrap{
+position:relative;
+flex-shrink:0;
+}
+
+.preview-menu-btn{
+min-width:48px;
+padding-left:0.9rem;
+padding-right:0.9rem;
+font-size:1rem;
+line-height:1;
+}
+
+.preview-menu-dropdown{
+position:absolute;
+right:0;
+top:calc(100% + 0.55rem);
+width:220px;
+padding:0.45rem;
+border-radius:1rem;
+background:rgba(15,23,42,0.98);
+border:1px solid rgba(255,255,255,0.08);
+box-shadow:0 18px 50px rgba(0,0,0,0.3);
+backdrop-filter:blur(16px);
+z-index:60;
+}
+
+.preview-menu-item{
+width:100%;
+display:flex;
+align-items:center;
+padding:0.78rem 0.85rem;
+border-radius:0.8rem;
+background:transparent;
+border:none;
+color:white;
+font-size:0.84rem;
+text-align:left;
+cursor:pointer;
+transition:background .2s ease;
+}
+
+.preview-menu-item:hover{
+background:rgba(255,255,255,0.08);
+}
+
 .save-feedback{
 display:none;
 padding:0.85rem 1rem;
@@ -693,11 +744,31 @@ align-items:flex-start;
 }
 
 .preview-actions{
-flex-direction:column;
+flex-direction:row;
+align-items:stretch;
+}
+
+.preview-main-btn{
+flex:1;
+}
+
+.preview-menu-wrap{
+width:auto;
+}
+
+.preview-menu-btn{
+width:48px;
+min-width:48px;
+}
+
+.preview-menu-dropdown{
+right:0;
+left:auto;
+width:220px;
 }
 
 .preview-btn{
-width:100%;
+width:auto;
 }
 
 .status-badge{
@@ -980,8 +1051,18 @@ Write a short introduction about your photography brand. This live preview updat
 </div>
 
 <div class="preview-actions">
-<button id="previewTopBtn" type="button" class="preview-btn primary">Preview Selected Template</button>
-<button id="scrollToFormBtn" type="button" class="preview-btn secondary">Edit Website Details</button>
+<button id="previewTopBtn" type="button" class="preview-btn primary preview-main-btn">Preview Selected Template</button>
+
+<div class="preview-menu-wrap">
+<button id="previewMenuBtn" type="button" class="preview-btn secondary preview-menu-btn" aria-label="Open preview actions menu" aria-expanded="false">⋮</button>
+
+<div id="previewMenuDropdown" class="preview-menu-dropdown hidden" role="menu" aria-label="Preview actions">
+<button id="menuEditBtn" type="button" class="preview-menu-item" role="menuitem">Edit Website Details</button>
+<button id="menuCopyBtn" type="button" class="preview-menu-item" role="menuitem">Copy Website Link</button>
+<button id="menuOpenBtn" type="button" class="preview-menu-item" role="menuitem">Open Website</button>
+<button id="menuPublicBtn" type="button" class="preview-menu-item" role="menuitem">View Public Page</button>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -1084,7 +1165,12 @@ const previewTagline = document.getElementById("previewTagline")
 const previewAbout = document.getElementById("previewAbout")
 const previewFooterText = document.getElementById("previewFooterText")
 const previewTopBtn = document.getElementById("previewTopBtn")
-const scrollToFormBtn = document.getElementById("scrollToFormBtn")
+const previewMenuBtn = document.getElementById("previewMenuBtn")
+const previewMenuDropdown = document.getElementById("previewMenuDropdown")
+const menuEditBtn = document.getElementById("menuEditBtn")
+const menuCopyBtn = document.getElementById("menuCopyBtn")
+const menuOpenBtn = document.getElementById("menuOpenBtn")
+const menuPublicBtn = document.getElementById("menuPublicBtn")
 const builderFormSection = document.getElementById("builderFormSection")
 const saveFeedback = document.getElementById("saveFeedback")
 
@@ -1183,6 +1269,25 @@ publishStatusText.innerText = published ? "Published" : "Draft"
 publishStatusText.classList.toggle("live", published)
 }
 
+function closePreviewMenu(){
+previewMenuDropdown.classList.add("hidden")
+previewMenuBtn.setAttribute("aria-expanded", "false")
+}
+
+function togglePreviewMenu(){
+const isHidden = previewMenuDropdown.classList.contains("hidden")
+previewMenuDropdown.classList.toggle("hidden", !isHidden)
+previewMenuBtn.setAttribute("aria-expanded", String(isHidden))
+}
+
+function getWebsiteUrl({ publicView = false } = {}){
+const slug = currentWebsiteData?.site_slug
+if(!slug) return ""
+const previewPath = getTemplatePreviewPath(selectedTemplateId)
+if(!previewPath) return ""
+return `${window.location.origin}/${previewPath}?slug=${encodeURIComponent(slug)}${publicView ? "" : "&edit=true"}`
+}
+
 
 // =============================
 // GET CURRENT USER
@@ -1265,12 +1370,6 @@ previewFooterText.innerText = `${city} • ${phone}`
 
 }
 
-scrollToFormBtn.addEventListener("click", ()=>{
-builderFormSection.scrollIntoView({
-behavior:"smooth",
-block:"start"
-})
-})
 
 siteNameInput.addEventListener("input", syncLivePreview)
 siteTaglineInput.addEventListener("input", syncLivePreview)
@@ -1527,7 +1626,86 @@ setSaveFeedback("error", "Unexpected error while updating publish status.")
 
 })
 
-saveWebsiteBtn.addEventListener("click", saveWebsiteBuilder)
+
+previewMenuBtn.addEventListener("click", (event)=>{
+event.stopPropagation()
+togglePreviewMenu()
+})
+
+document.addEventListener("click", (event)=>{
+if(!previewMenuDropdown.contains(event.target) && event.target !== previewMenuBtn){
+closePreviewMenu()
+}
+})
+
+menuEditBtn.addEventListener("click", ()=>{
+closePreviewMenu()
+builderFormSection.scrollIntoView({
+behavior:"smooth",
+block:"start"
+})
+})
+
+menuCopyBtn.addEventListener("click", async ()=>{
+closePreviewMenu()
+
+if(!currentWebsiteData?.site_slug){
+setSaveFeedback("error", "Save website first to copy the share link.")
+return
+}
+
+const shareUrl = getWebsiteUrl({ publicView: true })
+
+if(!shareUrl){
+setSaveFeedback("error", "This template share link is not available yet.")
+return
+}
+
+try{
+await navigator.clipboard.writeText(shareUrl)
+setSaveFeedback("success", "Website link copied successfully.")
+}
+catch(error){
+console.error("Copy link failed:", error)
+setSaveFeedback("error", "Unable to copy website link right now.")
+}
+})
+
+menuOpenBtn.addEventListener("click", ()=>{
+closePreviewMenu()
+
+if(!currentWebsiteData?.site_slug){
+setSaveFeedback("error", "Save website first to open preview.")
+return
+}
+
+const editUrl = getWebsiteUrl({ publicView: false })
+
+if(!editUrl){
+setSaveFeedback("error", "This template preview is not available yet.")
+return
+}
+
+window.open(editUrl, "_blank", "noopener,noreferrer")
+})
+
+menuPublicBtn.addEventListener("click", ()=>{
+closePreviewMenu()
+
+if(!currentWebsiteData?.site_slug){
+setSaveFeedback("error", "Save website first to view public page.")
+return
+}
+
+const publicUrl = getWebsiteUrl({ publicView: true })
+
+if(!publicUrl){
+setSaveFeedback("error", "This public website link is not available yet.")
+return
+}
+
+window.open(publicUrl, "_blank", "noopener,noreferrer")
+})
 
 
 // =============================
