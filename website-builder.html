@@ -633,7 +633,8 @@ line-height:1;
 .preview-menu-dropdown{
 position:absolute;
 right:0;
-top:calc(100% + 0.55rem);
+bottom:calc(100% + 0.55rem);
+top:auto;
 width:220px;
 padding:0.45rem;
 border-radius:1rem;
@@ -641,7 +642,7 @@ background:rgba(15,23,42,0.98);
 border:1px solid rgba(255,255,255,0.08);
 box-shadow:0 18px 50px rgba(0,0,0,0.3);
 backdrop-filter:blur(16px);
-z-index:60;
+z-index:999;
 }
 
 .preview-menu-item{
@@ -764,6 +765,8 @@ min-width:48px;
 .preview-menu-dropdown{
 right:0;
 left:auto;
+bottom:calc(100% + 0.5rem);
+top:auto;
 width:220px;
 }
 
