@@ -1258,7 +1258,11 @@ return labels[templateId] || "Template Preview"
 function getTemplatePreviewPath(templateId){
 const pathMap = {
 1: "template-1.html",
-2: "template-2.html"
+2: "template-2.html",
+3: "template-3.html",
+4: "template-4.html",
+5: "template-5.html",
+6: "template-6.html"
 }
 return pathMap[templateId] || ""
 }
@@ -1735,7 +1739,7 @@ previewTopBtn.addEventListener("click", async ()=>{
 const previewPath = getTemplatePreviewPath(selectedTemplateId)
 
 if(!previewPath){
-setSaveFeedback("info", `${getTemplateLabel(selectedTemplateId)} preview file is not built yet. Abhi Template 1 connected hai.`)
+setSaveFeedback("info", `${getTemplateLabel(selectedTemplateId)} preview file is not available yet.`)
 return
 }
 
