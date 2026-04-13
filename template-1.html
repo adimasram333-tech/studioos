@@ -1024,6 +1024,17 @@ function showError(message){
   errorText.innerText = message
 }
 
+function showPrivateWebsite(){
+  loadingState.classList.add("hidden")
+  errorState.classList.remove("hidden")
+  templateRoot.classList.add("hidden")
+  const titleElement = errorState.querySelector(".page-state-title")
+  if(titleElement){
+    titleElement.innerText = "Website Private"
+  }
+  errorText.innerText = "This website is currently in draft mode. Only the website owner can preview it until it is published from the Website Builder."
+}
+
 function showTemplate(){
   loadingState.classList.add("hidden")
   errorState.classList.add("hidden")
@@ -1489,7 +1500,7 @@ async function initTemplate(){
     const website = await fetchWebsiteBySlug(slug)
 
     if(!website){
-      showError("No website data found for this slug. Save your Website Builder first, then open this template using the correct slug.")
+      showPrivateWebsite()
       return
     }
 
