@@ -362,6 +362,28 @@ color:#4b5563;
 position:relative;
 }
 
+.editable-text{
+position:relative;
+transition:box-shadow .2s ease, background .2s ease;
+border-radius:0.5rem;
+}
+
+.editable-text.edit-active{
+cursor:text;
+box-shadow:0 0 0 1px rgba(182,139,60,0.28);
+background:rgba(255,255,255,0.48);
+}
+
+.editable-text.edit-active:hover{
+box-shadow:0 0 0 1px rgba(182,139,60,0.5);
+}
+
+.editable-text.editing{
+box-shadow:0 0 0 2px rgba(182,139,60,0.45);
+background:rgba(255,255,255,0.72);
+}
+
+
 .edit-overlay{
 position:absolute;
 inset:0;
@@ -481,8 +503,8 @@ This website preview is not available right now.
 <div class="flex items-center justify-between py-4 gap-4">
 
 <div class="min-w-0">
-<p id="navStudioName" class="luxury-font text-3xl font-semibold tracking-tight">Aurelia Frames</p>
-<p id="navStudioTagline" class="text-xs uppercase tracking-[0.18em] text-stone-500 mt-1">Wedding & Editorial Photography</p>
+<p id="navStudioName" class="luxury-font text-3xl font-semibold tracking-tight editable-text" data-content-path="hero.title" data-direct-field="name">Aurelia Frames</p>
+<p id="navStudioTagline" class="text-xs uppercase tracking-[0.18em] text-stone-500 mt-1 editable-text" data-content-path="hero.tagline" data-direct-field="tagline">Wedding & Editorial Photography</p>
 </div>
 
 <nav class="hidden md:flex items-center gap-8">
@@ -505,14 +527,14 @@ This website preview is not available right now.
 
 <div class="order-2 lg:order-1">
 <div class="badge-soft mb-5">
-<span>2026 Luxury Template</span>
+<span id="heroBadge" class="editable-text" data-content-path="hero.badge">2026 Luxury Template</span>
 </div>
 
-<h1 id="heroHeading" class="hero-heading luxury-font text-stone-900">
+<h1 id="heroHeading" class="hero-heading luxury-font text-stone-900 editable-text" data-content-path="hero.title" data-direct-field="name">
 Timeless photographs for modern love stories.
 </h1>
 
-<p id="heroTagline" class="hero-sub mt-6 max-w-xl">
+<p id="heroTagline" class="hero-sub mt-6 max-w-xl editable-text" data-content-path="hero.tagline" data-direct-field="tagline">
 Crafting elegant wedding imagery with a refined editorial touch — made for couples who want memories that feel intimate, cinematic, and unforgettable.
 </p>
 
@@ -523,16 +545,16 @@ Crafting elegant wedding imagery with a refined editorial touch — made for cou
 
 <div class="stats-grid mt-10 max-w-xl">
 <div class="stat-box">
-<p class="luxury-font text-4xl font-semibold text-stone-900">120+</p>
-<p class="text-sm text-stone-500 mt-2">Weddings Captured</p>
+<p id="statValue1" class="luxury-font text-4xl font-semibold text-stone-900 editable-text" data-content-path="hero.stats.0.value">120+</p>
+<p id="statLabel1" class="text-sm text-stone-500 mt-2 editable-text" data-content-path="hero.stats.0.label">Weddings Captured</p>
 </div>
 <div class="stat-box">
-<p class="luxury-font text-4xl font-semibold text-stone-900">8+</p>
-<p class="text-sm text-stone-500 mt-2">Years Experience</p>
+<p id="statValue2" class="luxury-font text-4xl font-semibold text-stone-900 editable-text" data-content-path="hero.stats.1.value">8+</p>
+<p id="statLabel2" class="text-sm text-stone-500 mt-2 editable-text" data-content-path="hero.stats.1.label">Years Experience</p>
 </div>
 <div class="stat-box">
-<p class="luxury-font text-4xl font-semibold text-stone-900">4.9</p>
-<p class="text-sm text-stone-500 mt-2">Client Rating</p>
+<p id="statValue3" class="luxury-font text-4xl font-semibold text-stone-900 editable-text" data-content-path="hero.stats.2.value">4.9</p>
+<p id="statLabel3" class="text-sm text-stone-500 mt-2 editable-text" data-content-path="hero.stats.2.label">Client Rating</p>
 </div>
 </div>
 </div>
@@ -544,9 +566,9 @@ class="relative portfolio-card hero-image min-h-[440px] md:min-h-[620px] editabl
 data-image-slot="hero_image_url"
 >
 <div class="floating-badge">
-<p class="text-xs uppercase tracking-[0.18em] text-stone-500">Featured Story</p>
-<p id="featuredStoryTitle" class="luxury-font text-xl font-semibold text-stone-900 mt-1">Aurelia Frames</p>
-<p id="featuredStoryLocation" class="text-sm text-stone-600 mt-1">Luxury Celebration</p>
+<p id="featuredStoryLabel" class="text-xs uppercase tracking-[0.18em] text-stone-500 editable-text" data-content-path="hero.featured_story_label">Featured Story</p>
+<p id="featuredStoryTitle" class="luxury-font text-xl font-semibold text-stone-900 mt-1 editable-text" data-content-path="hero.title" data-direct-field="name">Aurelia Frames</p>
+<p id="featuredStoryLocation" class="text-sm text-stone-600 mt-1 editable-text" data-content-path="hero.featured_story_location">Luxury Celebration</p>
 </div>
 <div class="image-loading">Uploading...</div>
 <div class="edit-overlay"><span>Replace Hero Image</span></div>
@@ -564,29 +586,29 @@ data-image-slot="hero_image_url"
 
 <div>
 <div class="gold-line mb-5"></div>
-<p class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4">About The Studio</p>
-<h2 class="section-heading luxury-font text-stone-900">
+<p id="aboutEyebrow" class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4 editable-text" data-content-path="about.eyebrow">About The Studio</p>
+<h2 id="portfolioHeading" class="section-heading luxury-font text-stone-900 editable-text" data-content-path="portfolio.title">
 For couples who love elegance, emotion, and detail.
 </h2>
 </div>
 
 <div class="glass-card rounded-[2rem] p-6 md:p-8">
-<p id="aboutPrimary" class="small-muted">
+<p id="aboutPrimary" class="small-muted editable-text" data-content-path="about.primary" data-direct-field="about">
 We create visual stories that feel effortless, editorial, and deeply personal. From intimate moments to grand celebrations, every frame is crafted to preserve atmosphere, emotion, and timeless beauty.
 </p>
 
-<p id="aboutSecondary" class="small-muted mt-5">
+<p id="aboutSecondary" class="small-muted mt-5 editable-text" data-content-path="about.secondary">
 Whether it is a wedding, pre-wedding session, or luxury celebration, our approach is calm, intentional, and focused on making you feel confident in front of the camera.
 </p>
 
 <div class="grid sm:grid-cols-2 gap-4 mt-8">
 <div class="outline-soft rounded-2xl p-4 bg-white/70">
 <p class="text-sm text-stone-500 uppercase tracking-[0.12em]">Base City</p>
-<p id="aboutCity" class="luxury-font text-2xl font-semibold text-stone-900 mt-2">Pune, India</p>
+<p id="aboutCity" class="luxury-font text-2xl font-semibold text-stone-900 mt-2 editable-text" data-content-path="about.city" data-direct-field="city">Pune, India</p>
 </div>
 <div class="outline-soft rounded-2xl p-4 bg-white/70">
 <p class="text-sm text-stone-500 uppercase tracking-[0.12em]">Speciality</p>
-<p id="aboutSpeciality" class="luxury-font text-2xl font-semibold text-stone-900 mt-2">Luxury Weddings</p>
+<p id="aboutSpeciality" class="luxury-font text-2xl font-semibold text-stone-900 mt-2 editable-text" data-content-path="about.speciality">Luxury Weddings</p>
 </div>
 </div>
 </div>
@@ -602,13 +624,13 @@ Whether it is a wedding, pre-wedding session, or luxury celebration, our approac
 <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
 <div>
 <div class="gold-line mb-5"></div>
-<p class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4">Portfolio Highlights</p>
+<p id="portfolioEyebrow" class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4 editable-text" data-content-path="portfolio.eyebrow">Portfolio Highlights</p>
 <h2 class="section-heading luxury-font text-stone-900">
 A refined gallery with a soft editorial feel.
 </h2>
 </div>
 
-<p class="small-muted max-w-md">
+<p id="portfolioDescription" class="small-muted max-w-md editable-text" data-content-path="portfolio.description">
 Every frame is curated to balance emotion, movement, intimacy, and timeless aesthetic.
 </p>
 </div>
@@ -625,9 +647,9 @@ data-image-slot="portfolio_image_1_url"
 <div class="edit-overlay"><span>Replace Image</span></div>
 </div>
 <div class="p-5">
-<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Pre-Wedding</p>
-<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Sunlit Romance</h3>
-<p class="small-muted mt-2">Golden hour portraits with effortless movement and warm storytelling.</p>
+<p id="portfolioItem1Eyebrow" class="text-sm uppercase tracking-[0.14em] text-stone-500 editable-text" data-content-path="portfolio.items.0.eyebrow">Pre-Wedding</p>
+<h3 id="portfolioItem1Title" class="luxury-font text-3xl font-semibold mt-2 text-stone-900 editable-text" data-content-path="portfolio.items.0.title">Sunlit Romance</h3>
+<p id="portfolioItem1Desc" class="small-muted mt-2 editable-text" data-content-path="portfolio.items.0.description">Golden hour portraits with effortless movement and warm storytelling.</p>
 </div>
 </div>
 
@@ -641,9 +663,9 @@ data-image-slot="portfolio_image_2_url"
 <div class="edit-overlay"><span>Replace Image</span></div>
 </div>
 <div class="p-5">
-<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Wedding Day</p>
-<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Ceremony Grace</h3>
-<p class="small-muted mt-2">Elegant moments captured with clean composition and emotional presence.</p>
+<p id="portfolioItem2Eyebrow" class="text-sm uppercase tracking-[0.14em] text-stone-500 editable-text" data-content-path="portfolio.items.1.eyebrow">Wedding Day</p>
+<h3 id="portfolioItem2Title" class="luxury-font text-3xl font-semibold mt-2 text-stone-900 editable-text" data-content-path="portfolio.items.1.title">Ceremony Grace</h3>
+<p id="portfolioItem2Desc" class="small-muted mt-2 editable-text" data-content-path="portfolio.items.1.description">Elegant moments captured with clean composition and emotional presence.</p>
 </div>
 </div>
 
@@ -657,9 +679,9 @@ data-image-slot="portfolio_image_3_url"
 <div class="edit-overlay"><span>Replace Image</span></div>
 </div>
 <div class="p-5">
-<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Couple Portraits</p>
-<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">After Vows</h3>
-<p class="small-muted mt-2">Intentional portraiture designed to feel cinematic and timeless.</p>
+<p id="portfolioItem3Eyebrow" class="text-sm uppercase tracking-[0.14em] text-stone-500 editable-text" data-content-path="portfolio.items.2.eyebrow">Couple Portraits</p>
+<h3 id="portfolioItem3Title" class="luxury-font text-3xl font-semibold mt-2 text-stone-900 editable-text" data-content-path="portfolio.items.2.title">After Vows</h3>
+<p id="portfolioItem3Desc" class="small-muted mt-2 editable-text" data-content-path="portfolio.items.2.description">Intentional portraiture designed to feel cinematic and timeless.</p>
 </div>
 </div>
 
@@ -673,9 +695,9 @@ data-image-slot="portfolio_image_4_url"
 <div class="edit-overlay"><span>Replace Image</span></div>
 </div>
 <div class="p-5">
-<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Celebration</p>
-<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Reception Glow</h3>
-<p class="small-muted mt-2">A polished visual mix of style, energy, and real human connection.</p>
+<p id="portfolioItem4Eyebrow" class="text-sm uppercase tracking-[0.14em] text-stone-500 editable-text" data-content-path="portfolio.items.3.eyebrow">Celebration</p>
+<h3 id="portfolioItem4Title" class="luxury-font text-3xl font-semibold mt-2 text-stone-900 editable-text" data-content-path="portfolio.items.3.title">Reception Glow</h3>
+<p id="portfolioItem4Desc" class="small-muted mt-2 editable-text" data-content-path="portfolio.items.3.description">A polished visual mix of style, energy, and real human connection.</p>
 </div>
 </div>
 
@@ -689,9 +711,9 @@ data-image-slot="portfolio_image_5_url"
 <div class="edit-overlay"><span>Replace Image</span></div>
 </div>
 <div class="p-5">
-<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Detail Frames</p>
-<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Styled Beauty</h3>
-<p class="small-muted mt-2">Rings, attire, floral artistry, and all the details that complete the story.</p>
+<p id="portfolioItem5Eyebrow" class="text-sm uppercase tracking-[0.14em] text-stone-500 editable-text" data-content-path="portfolio.items.4.eyebrow">Detail Frames</p>
+<h3 id="portfolioItem5Title" class="luxury-font text-3xl font-semibold mt-2 text-stone-900 editable-text" data-content-path="portfolio.items.4.title">Styled Beauty</h3>
+<p id="portfolioItem5Desc" class="small-muted mt-2 editable-text" data-content-path="portfolio.items.4.description">Rings, attire, floral artistry, and all the details that complete the story.</p>
 </div>
 </div>
 
@@ -705,9 +727,9 @@ data-image-slot="portfolio_image_6_url"
 <div class="edit-overlay"><span>Replace Image</span></div>
 </div>
 <div class="p-5">
-<p class="text-sm uppercase tracking-[0.14em] text-stone-500">Destination</p>
-<h3 class="luxury-font text-3xl font-semibold mt-2 text-stone-900">Travel Stories</h3>
-<p class="small-muted mt-2">Destination coverage with elegant composition and premium atmosphere.</p>
+<p id="portfolioItem6Eyebrow" class="text-sm uppercase tracking-[0.14em] text-stone-500 editable-text" data-content-path="portfolio.items.5.eyebrow">Destination</p>
+<h3 id="portfolioItem6Title" class="luxury-font text-3xl font-semibold mt-2 text-stone-900 editable-text" data-content-path="portfolio.items.5.title">Travel Stories</h3>
+<p id="portfolioItem6Desc" class="small-muted mt-2 editable-text" data-content-path="portfolio.items.5.description">Destination coverage with elegant composition and premium atmosphere.</p>
 </div>
 </div>
 
@@ -722,8 +744,8 @@ data-image-slot="portfolio_image_6_url"
 
 <div class="mb-8">
 <div class="gold-line mb-5"></div>
-<p class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4">Services</p>
-<h2 class="section-heading luxury-font text-stone-900">
+<p id="servicesEyebrow" class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4 editable-text" data-content-path="services.eyebrow">Services</p>
+<h2 id="servicesHeading" class="section-heading luxury-font text-stone-900 editable-text" data-content-path="services.title">
 Tailored experiences designed for premium celebrations.
 </h2>
 </div>
@@ -731,25 +753,25 @@ Tailored experiences designed for premium celebrations.
 <div class="grid md:grid-cols-3 gap-5">
 
 <div class="service-card">
-<p class="text-sm uppercase tracking-[0.14em] text-stone-500">01</p>
-<h3 class="luxury-font text-3xl font-semibold mt-3 text-stone-900">Wedding Coverage</h3>
-<p class="small-muted mt-3">
+<p id="serviceItem1Number" class="text-sm uppercase tracking-[0.14em] text-stone-500 editable-text" data-content-path="services.items.0.number">01</p>
+<h3 id="serviceItem1Title" class="luxury-font text-3xl font-semibold mt-3 text-stone-900 editable-text" data-content-path="services.items.0.title">Wedding Coverage</h3>
+<p id="serviceItem1Desc" class="small-muted mt-3 editable-text" data-content-path="services.items.0.description">
 Complete wedding-day storytelling with portraits, candid moments, rituals, and curated details.
 </p>
 </div>
 
 <div class="service-card">
-<p class="text-sm uppercase tracking-[0.14em] text-stone-500">02</p>
-<h3 class="luxury-font text-3xl font-semibold mt-3 text-stone-900">Pre-Wedding Shoots</h3>
-<p class="small-muted mt-3">
+<p id="serviceItem2Number" class="text-sm uppercase tracking-[0.14em] text-stone-500 editable-text" data-content-path="services.items.1.number">02</p>
+<h3 id="serviceItem2Title" class="luxury-font text-3xl font-semibold mt-3 text-stone-900 editable-text" data-content-path="services.items.1.title">Pre-Wedding Shoots</h3>
+<p id="serviceItem2Desc" class="small-muted mt-3 editable-text" data-content-path="services.items.1.description">
 Creative sessions crafted around your personality, location, mood, and styling preferences.
 </p>
 </div>
 
 <div class="service-card">
-<p class="text-sm uppercase tracking-[0.14em] text-stone-500">03</p>
-<h3 class="luxury-font text-3xl font-semibold mt-3 text-stone-900">Destination Events</h3>
-<p class="small-muted mt-3">
+<p id="serviceItem3Number" class="text-sm uppercase tracking-[0.14em] text-stone-500 editable-text" data-content-path="services.items.2.number">03</p>
+<h3 id="serviceItem3Title" class="luxury-font text-3xl font-semibold mt-3 text-stone-900 editable-text" data-content-path="services.items.2.title">Destination Events</h3>
+<p id="serviceItem3Desc" class="small-muted mt-3 editable-text" data-content-path="services.items.2.description">
 Travel-ready photography for intimate luxury celebrations in scenic and meaningful locations.
 </p>
 </div>
@@ -765,8 +787,8 @@ Travel-ready photography for intimate luxury celebrations in scenic and meaningf
 
 <div class="mb-8">
 <div class="gold-line mb-5"></div>
-<p class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4">Client Words</p>
-<h2 class="section-heading luxury-font text-stone-900">
+<p id="testimonialsEyebrow" class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4 editable-text" data-content-path="testimonials.eyebrow">Client Words</p>
+<h2 id="testimonialsHeading" class="section-heading luxury-font text-stone-900 editable-text" data-content-path="testimonials.title">
 Trusted by couples who wanted something elegant and real.
 </h2>
 </div>
@@ -774,24 +796,24 @@ Trusted by couples who wanted something elegant and real.
 <div class="grid md:grid-cols-3 gap-5">
 
 <div class="testimonial-card">
-<p class="small-muted">
+<p id="testimonialItem1Quote" class="small-muted editable-text" data-content-path="testimonials.items.0.quote">
 “Our photos feel soft, rich, and emotional — exactly what we dreamed of. Every frame looks like a memory and a magazine cover at the same time.”
 </p>
-<p class="luxury-font text-2xl font-semibold mt-5 text-stone-900">Anaya & Vihaan</p>
+<p id="testimonialItem1Name" class="luxury-font text-2xl font-semibold mt-5 text-stone-900 editable-text" data-content-path="testimonials.items.0.name">Anaya & Vihaan</p>
 </div>
 
 <div class="testimonial-card">
-<p class="small-muted">
+<p id="testimonialItem2Quote" class="small-muted editable-text" data-content-path="testimonials.items.1.quote">
 “The whole experience was calm and premium. We never felt awkward, and the final gallery looked absolutely timeless.”
 </p>
-<p class="luxury-font text-2xl font-semibold mt-5 text-stone-900">Rhea & Kabir</p>
+<p id="testimonialItem2Name" class="luxury-font text-2xl font-semibold mt-5 text-stone-900 editable-text" data-content-path="testimonials.items.1.name">Rhea & Kabir</p>
 </div>
 
 <div class="testimonial-card">
-<p class="small-muted">
+<p id="testimonialItem3Quote" class="small-muted editable-text" data-content-path="testimonials.items.2.quote">
 “Beautiful eye for detail, light, and emotion. The team captured our celebration in a way that felt intimate and luxurious.”
 </p>
-<p class="luxury-font text-2xl font-semibold mt-5 text-stone-900">Ira & Arjun</p>
+<p id="testimonialItem3Name" class="luxury-font text-2xl font-semibold mt-5 text-stone-900 editable-text" data-content-path="testimonials.items.2.name">Ira & Arjun</p>
 </div>
 
 </div>
@@ -807,11 +829,11 @@ Trusted by couples who wanted something elegant and real.
 <div class="grid lg:grid-cols-[1fr_0.95fr] gap-8 items-center">
 
 <div>
-<p class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4">Let’s Create Something Beautiful</p>
-<h2 class="section-heading luxury-font text-stone-900">
+<p id="contactEyebrow" class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4 editable-text" data-content-path="contact.eyebrow">Let’s Create Something Beautiful</p>
+<h2 id="contactHeading" class="section-heading luxury-font text-stone-900 editable-text" data-content-path="contact.title">
 Ready to book your date?
 </h2>
-<p class="small-muted mt-5 max-w-xl">
+<p id="contactDescription" class="small-muted mt-5 max-w-xl editable-text" data-content-path="contact.description">
 Share your event details and we will get back with availability, collections, and a personalised photography plan for your celebration.
 </p>
 
@@ -824,15 +846,15 @@ Share your event details and we will get back with availability, collections, an
 <div class="grid sm:grid-cols-2 gap-4">
 <div class="outline-soft rounded-2xl p-5 bg-white/75">
 <p class="text-sm uppercase tracking-[0.12em] text-stone-500">Phone</p>
-<p id="contactPhone" class="luxury-font text-3xl font-semibold text-stone-900 mt-2">+91 98765 43210</p>
+<p id="contactPhone" class="luxury-font text-3xl font-semibold text-stone-900 mt-2 editable-text" data-content-path="contact.phone" data-direct-field="phone">+91 98765 43210</p>
 </div>
 <div class="outline-soft rounded-2xl p-5 bg-white/75">
 <p class="text-sm uppercase tracking-[0.12em] text-stone-500">Instagram</p>
-<p id="contactInstagram" class="luxury-font text-3xl font-semibold text-stone-900 mt-2">@aureliaframes</p>
+<p id="contactInstagram" class="luxury-font text-3xl font-semibold text-stone-900 mt-2 editable-text" data-content-path="contact.instagram" data-direct-field="instagram">@aureliaframes</p>
 </div>
 <div class="outline-soft rounded-2xl p-5 bg-white/75 sm:col-span-2">
 <p class="text-sm uppercase tracking-[0.12em] text-stone-500">Location</p>
-<p id="contactCity" class="luxury-font text-3xl font-semibold text-stone-900 mt-2">Pune, Maharashtra</p>
+<p id="contactCity" class="luxury-font text-3xl font-semibold text-stone-900 mt-2 editable-text" data-content-path="contact.city" data-direct-field="city">Pune, Maharashtra</p>
 </div>
 </div>
 
@@ -847,8 +869,8 @@ Share your event details and we will get back with availability, collections, an
 <div class="section-container">
 <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
 <div>
-<p id="footerStudioName" class="luxury-font text-3xl font-semibold text-stone-900">Aurelia Frames</p>
-<p class="text-sm text-stone-500 mt-1">Minimal White Luxury Template</p>
+<p id="footerStudioName" class="luxury-font text-3xl font-semibold text-stone-900 editable-text" data-content-path="footer.studio_name" data-direct-field="name">Aurelia Frames</p>
+<p id="footerTemplateLabel" class="text-sm text-stone-500 mt-1 editable-text" data-content-path="footer.template_label">Minimal White Luxury Template</p>
 </div>
 
 <div class="flex flex-wrap gap-5">
@@ -879,6 +901,7 @@ const editModeToggle = document.getElementById("editModeToggle")
 const editStatus = document.getElementById("editStatus")
 const imageFileInput = document.getElementById("imageFileInput")
 
+
 const DEFAULT_IMAGES = {
   hero_image_url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
   portfolio_image_1_url: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1000&q=80",
@@ -889,10 +912,104 @@ const DEFAULT_IMAGES = {
   portfolio_image_6_url: "https://images.unsplash.com/photo-1513279922550-250c2129b13a?auto=format&fit=crop&w=1000&q=80"
 }
 
+const DEFAULT_TEMPLATE_CONTENT = {
+  hero: {
+    badge: "2026 Luxury Template",
+    title: "Aurelia Frames",
+    tagline: "Wedding & Editorial Photography",
+    featured_story_label: "Featured Story",
+    featured_story_location: "Luxury Celebration",
+    stats: [
+      { value: "120+", label: "Weddings Captured" },
+      { value: "8+", label: "Years Experience" },
+      { value: "4.9", label: "Client Rating" }
+    ]
+  },
+  about: {
+    eyebrow: "About The Studio",
+    title: "For couples who love elegance, emotion, and detail.",
+    primary: "We create visual stories that feel effortless, editorial, and deeply personal. From intimate moments to grand celebrations, every frame is crafted to preserve atmosphere, emotion, and timeless beauty.",
+    secondary: "Whether it is a wedding, pre-wedding session, or luxury celebration, our approach is calm, intentional, and focused on making you feel confident in front of the camera.",
+    city: "Pune, India",
+    speciality: "Luxury Weddings"
+  },
+  portfolio: {
+    eyebrow: "Portfolio Highlights",
+    title: "A refined gallery with a soft editorial feel.",
+    description: "Every frame is curated to balance emotion, movement, intimacy, and timeless aesthetic.",
+    items: [
+      { eyebrow: "Pre-Wedding", title: "Sunlit Romance", description: "Golden hour portraits with effortless movement and warm storytelling." },
+      { eyebrow: "Wedding Day", title: "Ceremony Grace", description: "Elegant moments captured with clean composition and emotional presence." },
+      { eyebrow: "Couple Portraits", title: "After Vows", description: "Intentional portraiture designed to feel cinematic and timeless." },
+      { eyebrow: "Celebration", title: "Reception Glow", description: "A polished visual mix of style, energy, and real human connection." },
+      { eyebrow: "Detail Frames", title: "Styled Beauty", description: "Rings, attire, floral artistry, and all the details that complete the story." },
+      { eyebrow: "Destination", title: "Travel Stories", description: "Destination coverage with elegant composition and premium atmosphere." }
+    ]
+  },
+  services: {
+    eyebrow: "Services",
+    title: "Tailored experiences designed for premium celebrations.",
+    items: [
+      { number: "01", title: "Wedding Coverage", description: "Complete wedding-day storytelling with portraits, candid moments, rituals, and curated details." },
+      { number: "02", title: "Pre-Wedding Shoots", description: "Creative sessions crafted around your personality, location, mood, and styling preferences." },
+      { number: "03", title: "Destination Events", description: "Travel-ready photography for intimate luxury celebrations in scenic and meaningful locations." }
+    ]
+  },
+  testimonials: {
+    eyebrow: "Client Words",
+    title: "Trusted by couples who wanted something elegant and real.",
+    items: [
+      { quote: "Our photos feel soft, rich, and emotional — exactly what we dreamed of. Every frame looks like a memory and a magazine cover at the same time.", name: "Anaya & Vihaan" },
+      { quote: "The whole experience was calm and premium. We never felt awkward, and the final gallery looked absolutely timeless.", name: "Rhea & Kabir" },
+      { quote: "Beautiful eye for detail, light, and emotion. The team captured our celebration in a way that felt intimate and luxurious.", name: "Ira & Arjun" }
+    ]
+  },
+  contact: {
+    eyebrow: "Let’s Create Something Beautiful",
+    title: "Ready to book your date?",
+    description: "Share your event details and we will get back with availability, collections, and a personalised photography plan for your celebration."
+  },
+  footer: {
+    studio_name: "Aurelia Frames",
+    template_label: "Minimal White Luxury Template"
+  }
+}
+
 let currentWebsite = null
 let currentUserId = null
 let editModeEnabled = false
 let pendingImageSlot = ""
+
+function deepClone(value){
+  return JSON.parse(JSON.stringify(value))
+}
+
+function getMergedTemplateContent(website){
+  const incoming = website?.template_content && typeof website.template_content === "object"
+    ? deepClone(website.template_content)
+    : {}
+
+  const merged = deepClone(DEFAULT_TEMPLATE_CONTENT)
+
+  function merge(target, source){
+    if(!source || typeof source !== "object") return target
+    Object.keys(source).forEach(key=>{
+      if(Array.isArray(source[key])){
+        target[key] = source[key]
+      }else if(source[key] && typeof source[key] === "object"){
+        if(!target[key] || typeof target[key] !== "object" || Array.isArray(target[key])){
+          target[key] = {}
+        }
+        merge(target[key], source[key])
+      }else if(source[key] !== undefined && source[key] !== null && source[key] !== ""){
+        target[key] = source[key]
+      }
+    })
+    return target
+  }
+
+  return merge(merged, incoming)
+}
 
 function showLoading(){
   loadingState.classList.remove("hidden")
@@ -948,10 +1065,6 @@ function normalizeInstagram(value){
   return raw.startsWith("@") ? raw : `@${raw}`
 }
 
-function escapeSelectorId(id){
-  return String(id || "").replace(/([ #;?%&,.+*~':"!^$[\]()=>|\/@])/g, "\\$1")
-}
-
 function setEditStatus(message){
   editStatus.innerText = message
 }
@@ -968,8 +1081,12 @@ function setEditMode(enabled){
     slot.classList.toggle("edit-active", enabled)
   })
 
+  document.querySelectorAll(".editable-text").forEach(item=>{
+    item.classList.toggle("edit-active", enabled)
+  })
+
   if(enabled){
-    setEditStatus("Edit mode is ON. Click any image area to replace it.")
+    setEditStatus("Edit mode is ON. Click any image or text area to update it.")
   }else{
     setEditStatus("You are viewing preview mode.")
   }
@@ -987,11 +1104,128 @@ function setSlotUploading(slotName, isUploading){
 }
 
 function buildImageBackground(url){
-  return `linear-gradient(180deg, rgba(17,17,17,0.04), rgba(17,17,17,0.1)), url("${url}")`
+  return `linear-gradient(180deg, rgba(17,17,17,0.04), rgba(17,17,17,0.1)), url("${String(url || "").replace(/"/g, '\\"')}")`
 }
 
 function buildPortfolioBackground(url){
-  return `linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)), url("${url}")`
+  return `linear-gradient(180deg, rgba(17,17,17,0.02), rgba(17,17,17,0.08)), url("${String(url || "").replace(/"/g, '\\"')}")`
+}
+
+function getByPath(object, path){
+  return String(path || "").split(".").reduce((acc, key)=>{
+    if(acc === undefined || acc === null) return undefined
+    if(Array.isArray(acc)){
+      const index = Number(key)
+      return Number.isNaN(index) ? undefined : acc[index]
+    }
+    return acc[key]
+  }, object)
+}
+
+function setByPath(object, path, value){
+  const keys = String(path || "").split(".")
+  let ref = object
+
+  keys.forEach((key, index)=>{
+    const isLast = index === keys.length - 1
+    const nextKey = keys[index + 1]
+    const nextIsIndex = !Number.isNaN(Number(nextKey))
+
+    if(isLast){
+      if(Array.isArray(ref)){
+        ref[Number(key)] = value
+      }else{
+        ref[key] = value
+      }
+      return
+    }
+
+    if(Array.isArray(ref)){
+      const idx = Number(key)
+      if(ref[idx] === undefined){
+        ref[idx] = nextIsIndex ? [] : {}
+      }
+      ref = ref[idx]
+    }else{
+      if(ref[key] === undefined){
+        ref[key] = nextIsIndex ? [] : {}
+      }
+      ref = ref[key]
+    }
+  })
+}
+
+function applyTextContent(content){
+  const mappings = [
+    ["heroBadge", "hero.badge"],
+    ["navStudioName", "hero.title"],
+    ["navStudioTagline", "hero.tagline"],
+    ["heroHeading", "hero.title"],
+    ["heroTagline", "hero.tagline"],
+    ["featuredStoryLabel", "hero.featured_story_label"],
+    ["featuredStoryTitle", "hero.title"],
+    ["featuredStoryLocation", "hero.featured_story_location"],
+    ["statValue1", "hero.stats.0.value"],
+    ["statLabel1", "hero.stats.0.label"],
+    ["statValue2", "hero.stats.1.value"],
+    ["statLabel2", "hero.stats.1.label"],
+    ["statValue3", "hero.stats.2.value"],
+    ["statLabel3", "hero.stats.2.label"],
+    ["aboutEyebrow", "about.eyebrow"],
+    ["aboutHeading", "about.title"],
+    ["aboutPrimary", "about.primary"],
+    ["aboutSecondary", "about.secondary"],
+    ["aboutCity", "about.city"],
+    ["aboutSpeciality", "about.speciality"],
+    ["portfolioEyebrow", "portfolio.eyebrow"],
+    ["portfolioHeading", "portfolio.title"],
+    ["portfolioDescription", "portfolio.description"],
+    ["servicesEyebrow", "services.eyebrow"],
+    ["servicesHeading", "services.title"],
+    ["testimonialsEyebrow", "testimonials.eyebrow"],
+    ["testimonialsHeading", "testimonials.title"],
+    ["contactEyebrow", "contact.eyebrow"],
+    ["contactHeading", "contact.title"],
+    ["contactDescription", "contact.description"],
+    ["footerTemplateLabel", "footer.template_label"]
+  ]
+
+  mappings.forEach(([id, path])=>{
+    const el = document.getElementById(id)
+    if(!el) return
+    const value = getByPath(content, path)
+    if(value !== undefined && value !== null && value !== ""){
+      el.innerText = value
+    }
+  })
+
+  for(let i=1;i<=6;i++){
+    const item = getByPath(content, `portfolio.items.${i-1}`) || {}
+    const eyebrow = document.getElementById(`portfolioItem${i}Eyebrow`)
+    const title = document.getElementById(`portfolioItem${i}Title`)
+    const desc = document.getElementById(`portfolioItem${i}Desc`)
+    if(eyebrow && item.eyebrow) eyebrow.innerText = item.eyebrow
+    if(title && item.title) title.innerText = item.title
+    if(desc && item.description) desc.innerText = item.description
+  }
+
+  for(let i=1;i<=3;i++){
+    const item = getByPath(content, `services.items.${i-1}`) || {}
+    const number = document.getElementById(`serviceItem${i}Number`)
+    const title = document.getElementById(`serviceItem${i}Title`)
+    const desc = document.getElementById(`serviceItem${i}Desc`)
+    if(number && item.number) number.innerText = item.number
+    if(title && item.title) title.innerText = item.title
+    if(desc && item.description) desc.innerText = item.description
+  }
+
+  for(let i=1;i<=3;i++){
+    const item = getByPath(content, `testimonials.items.${i-1}`) || {}
+    const quote = document.getElementById(`testimonialItem${i}Quote`)
+    const name = document.getElementById(`testimonialItem${i}Name`)
+    if(quote && item.quote) quote.innerText = item.quote
+    if(name && item.name) name.innerText = item.name
+  }
 }
 
 function applyImages(website){
@@ -1013,50 +1247,47 @@ function applyImages(website){
 }
 
 function applyWebsiteData(website){
-
-  const name = website.name?.trim() || "Your Studio Name"
-  const tagline = website.tagline?.trim() || "Capturing timeless wedding stories with emotion, elegance and detail."
-  const about = website.about?.trim() || "Write a short introduction about your photography brand."
+  const content = getMergedTemplateContent(website)
+  const name = website.name?.trim() || content.hero.title || "Your Studio Name"
+  const tagline = website.tagline?.trim() || content.hero.tagline || "Capturing timeless wedding stories with emotion, elegance and detail."
+  const about = website.about?.trim() || content.about.primary || "Write a short introduction about your photography brand."
   const phoneDisplay = formatPhoneForDisplay(website.phone)
   const phoneTel = formatPhoneForTel(website.phone)
   const whatsappPhone = formatPhoneForWhatsApp(website.phone)
   const instagramDisplay = normalizeInstagram(website.instagram)
-  const city = website.city?.trim() || "Your City"
-  const heroLocation = city ? `${city} Celebration` : "Luxury Celebration"
+  const city = website.city?.trim() || content.about.city || "Your City"
+  const heroLocation = content.hero.featured_story_location || (city ? `${city} Celebration` : "Luxury Celebration")
+
+  currentWebsite.template_content = content
 
   document.title = `${name} - Template 1`
 
   document.getElementById("navStudioName").innerText = name
   document.getElementById("navStudioTagline").innerText = tagline
-
   document.getElementById("heroHeading").innerText = name
   document.getElementById("heroTagline").innerText = tagline
-
   document.getElementById("featuredStoryTitle").innerText = name
   document.getElementById("featuredStoryLocation").innerText = heroLocation
-
   document.getElementById("aboutPrimary").innerText = about
-  document.getElementById("aboutSecondary").innerText =
-    `${name} creates elegant imagery with calm direction, refined composition, and a premium client experience from start to finish.`
-
+  if(!getByPath(content, "about.secondary")){
+    setByPath(content, "about.secondary", `${name} creates elegant imagery with calm direction, refined composition, and a premium client experience from start to finish.`)
+  }
+  document.getElementById("aboutSecondary").innerText = getByPath(content, "about.secondary")
   document.getElementById("aboutCity").innerText = city
-  document.getElementById("aboutSpeciality").innerText = "Luxury Weddings"
-
   document.getElementById("contactPhone").innerText = phoneDisplay
   document.getElementById("contactInstagram").innerText = instagramDisplay
   document.getElementById("contactCity").innerText = city
-
   document.getElementById("footerStudioName").innerText = name
 
   document.getElementById("whatsappBtn").href = `https://wa.me/${whatsappPhone}`
   document.getElementById("callBtn").href = `tel:${phoneTel}`
   document.getElementById("navBookBtn").href = "#contact"
 
+  applyTextContent(content)
   applyImages(website)
 }
 
 async function fetchWebsiteBySlug(slug){
-
   const supabase = await window.getSupabase()
 
   const { data: authData } = await supabase.auth.getUser()
@@ -1071,8 +1302,7 @@ async function fetchWebsiteBySlug(slug){
 
   if(currentUserId){
     query = query.or(`is_published.eq.true,user_id.eq.${currentUserId}`)
-  }
-  else{
+  }else{
     query = query.eq("is_published", true)
   }
 
@@ -1111,6 +1341,43 @@ async function updateWebsiteImage(slotName, newUrl){
   return data
 }
 
+async function persistTemplateContent(){
+  const supabase = await window.getSupabase()
+  const payload = { template_content: currentWebsite.template_content || {} }
+
+  const directMap = {
+    "hero.title": "name",
+    "hero.tagline": "tagline",
+    "about.primary": "about",
+    "about.city": "city",
+    "contact.city": "city",
+    "contact.phone": "phone",
+    "contact.instagram": "instagram",
+    "footer.studio_name": "name"
+  }
+
+  Object.entries(directMap).forEach(([path, field])=>{
+    const value = getByPath(currentWebsite.template_content || {}, path)
+    if(value !== undefined && value !== null){
+      payload[field] = value
+    }
+  })
+
+  const { data, error } = await supabase
+    .from("user_websites")
+    .update(payload)
+    .eq("id", currentWebsite.id)
+    .eq("user_id", currentUserId)
+    .select("*")
+    .single()
+
+  if(error){
+    throw error
+  }
+
+  return data
+}
+
 async function handleImageSelection(file){
   if(!pendingImageSlot || !currentWebsite) return
 
@@ -1129,7 +1396,10 @@ async function handleImageSelection(file){
     })
 
     const updatedWebsite = await updateWebsiteImage(slotName, replaceResult.newUrl)
-    currentWebsite = updatedWebsite
+    currentWebsite = {
+      ...updatedWebsite,
+      template_content: currentWebsite.template_content || getMergedTemplateContent(updatedWebsite)
+    }
     applyImages(currentWebsite)
 
     if(replaceResult.deleteResult?.skipped){
@@ -1159,6 +1429,41 @@ function registerEditableImageSlots(){
   })
 }
 
+function registerEditableTextSlots(){
+  document.querySelectorAll(".editable-text").forEach(el=>{
+    el.addEventListener("click", async ()=>{
+      if(!editModeEnabled) return
+
+      const path = el.dataset.contentPath
+      if(!path) return
+
+      const currentValue = String(getByPath(currentWebsite.template_content || {}, path) ?? el.innerText ?? "").trim()
+      el.classList.add("editing")
+
+      try{
+        const newValue = window.prompt("Edit text", currentValue)
+        if(newValue === null) return
+
+        const trimmedValue = newValue.trim()
+        if(!trimmedValue) return
+
+        setByPath(currentWebsite.template_content, path, trimmedValue)
+        currentWebsite = await persistTemplateContent()
+        currentWebsite.template_content = getMergedTemplateContent(currentWebsite)
+        applyWebsiteData(currentWebsite)
+        setEditStatus("Text updated successfully.")
+      }
+      catch(error){
+        console.error("Text update failed:", error)
+        setEditStatus(error.message || "Unable to update text.")
+      }
+      finally{
+        el.classList.remove("editing")
+      }
+    })
+  })
+}
+
 imageFileInput.addEventListener("change", async (e)=>{
   const file = e.target.files?.[0]
   if(file){
@@ -1171,7 +1476,6 @@ editModeToggle.addEventListener("click", ()=>{
 })
 
 async function initTemplate(){
-
   showLoading()
 
   const slug = getSlugFromUrl()
@@ -1182,7 +1486,6 @@ async function initTemplate(){
   }
 
   try{
-
     const website = await fetchWebsiteBySlug(slug)
 
     if(!website){
@@ -1190,10 +1493,14 @@ async function initTemplate(){
       return
     }
 
-    currentWebsite = website
+    currentWebsite = {
+      ...website,
+      template_content: getMergedTemplateContent(website)
+    }
 
-    applyWebsiteData(website)
+    applyWebsiteData(currentWebsite)
     registerEditableImageSlots()
+    registerEditableTextSlots()
     showTemplate()
 
     const editable = canCurrentUserEdit(website)
@@ -1204,16 +1511,14 @@ async function initTemplate(){
     }else{
       setEditMode(false)
     }
-
   }
   catch(error){
     console.error("Template 1 load failed:", error)
     showError("Unable to load website preview right now.")
   }
-
 }
-
 await initTemplate()
+
 
 </script>
 
