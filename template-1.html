@@ -587,7 +587,7 @@ data-image-slot="hero_image_url"
 <div>
 <div class="gold-line mb-5"></div>
 <p id="aboutEyebrow" class="text-sm uppercase tracking-[0.18em] text-stone-500 mb-4 editable-text" data-content-path="about.eyebrow">About The Studio</p>
-<h2 id="portfolioHeading" class="section-heading luxury-font text-stone-900 editable-text" data-content-path="portfolio.title">
+<h2 id="aboutHeading" class="section-heading luxury-font text-stone-900 editable-text" data-content-path="about.title">
 For couples who love elegance, emotion, and detail.
 </h2>
 </div>
@@ -1043,7 +1043,20 @@ function showTemplate(){
 
 function getSlugFromUrl(){
   const params = new URLSearchParams(window.location.search)
-  return (params.get("slug") || "").trim().toLowerCase()
+  const querySlug = (params.get("slug") || "").trim()
+
+  if(querySlug){
+    return decodeURIComponent(querySlug).replace(/^\/+|\/+$/g, "").toLowerCase()
+  }
+
+  const path = window.location.pathname || ""
+  const studioMatch = path.match(/\/studio\/([^/?#]+)/i)
+
+  if(studioMatch && studioMatch[1]){
+    return decodeURIComponent(studioMatch[1]).trim().replace(/^\/+|\/+$/g, "").toLowerCase()
+  }
+
+  return ""
 }
 
 function isEditRequestedFromUrl(){
@@ -1492,7 +1505,7 @@ async function initTemplate(){
   const slug = getSlugFromUrl()
 
   if(!slug){
-    showError("Missing website slug. Open this page like template-1.html?slug=your-site-slug")
+    showError("Missing website slug. Open this page using template-1.html?slug=your-site-slug or a clean URL like /studio/your-site-slug")
     return
   }
 
