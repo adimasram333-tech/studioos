@@ -686,7 +686,7 @@ Create your personal photography website with ready-made premium templates.
 <span id="selectedTemplateText" class="text-xs text-gray-400">Selected: Template 1</span>
 </div>
 
-<div id="templateGrid" class="grid grid-cols-2 gap-3">
+<div id="templateGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
 <div class="template-card active glass rounded-2xl p-3" data-template="1">
 <div class="template-preview t1 mb-3">
@@ -1024,6 +1024,7 @@ const saveWebsiteBtn = document.getElementById("saveWebsiteBtn")
 
 let selectedTemplateId = 1
 let existingWebsiteRowId = null
+let currentWebsiteData = null
 
 
 // =============================
@@ -1219,6 +1220,8 @@ await supabase
 .from("user_websites")
 .select("*")
 .eq("user_id", user.id)
+.order("updated_at", { ascending:false })
+.limit(1)
 .maybeSingle()
 
 if(error){
@@ -1229,6 +1232,7 @@ return
 }
 
 if(!data){
+currentWebsiteData = null
 builderStatus.innerText = "New website setup"
 setSaveFeedback("info", "Fill in your details and save your website builder.")
 syncLivePreview()
@@ -1236,6 +1240,7 @@ return
 }
 
 existingWebsiteRowId = data.id || null
+currentWebsiteData = data || null
 
 siteNameInput.value = data.name || ""
 siteTaglineInput.value = data.tagline || ""
@@ -1280,7 +1285,13 @@ tagline: siteTaglineInput.value.trim(),
 about: siteAboutInput.value.trim(),
 phone: sitePhoneInput.value.trim(),
 instagram: normalizeInstagram(siteInstagramInput.value),
-city: siteCityInput.value.trim()
+city: siteCityInput.value.trim(),
+email: currentWebsiteData?.email || null,
+youtube: currentWebsiteData?.youtube || null,
+whatsapp: currentWebsiteData?.whatsapp || null,
+template_content: currentWebsiteData?.template_content || {},
+template_images: currentWebsiteData?.template_images || {},
+theme_settings: currentWebsiteData?.theme_settings || {}
 }
 
 if(!payload.name){
@@ -1304,12 +1315,25 @@ previewTopBtn.innerText = "Preparing Preview..."
 builderStatus.innerText = "Saving..."
 setSaveFeedback("info", "Saving website builder details...")
 
-const { data, error } =
-await supabase
+let query
+
+if(existingWebsiteRowId){
+query = supabase
 .from("user_websites")
-.upsert(payload, { onConflict: "user_id" })
+.update(payload)
+.eq("id", existingWebsiteRowId)
+.eq("user_id", user.id)
 .select("*")
 .single()
+}else{
+query = supabase
+.from("user_websites")
+.insert(payload)
+.select("*")
+.single()
+}
+
+const { data, error } = await query
 
 saveWebsiteBtn.disabled = false
 previewTopBtn.disabled = false
@@ -1330,6 +1354,7 @@ return { ok:false }
 }
 
 existingWebsiteRowId = data?.id || existingWebsiteRowId
+currentWebsiteData = data || currentWebsiteData
 builderStatus.innerText = "Saved successfully"
 setSaveFeedback("success", "Website Builder saved successfully.")
 
