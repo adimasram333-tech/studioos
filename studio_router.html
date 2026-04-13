@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>StudioOS</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+</head>
+
+<body style="background:#0f172a;color:white;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif">
+
+<div id="status">Loading website...</div>
+
+<script>
+async function loadSite(){
+const path = window.location.pathname
+const slug = path.split("/studio/")[1]
+
+if(!slug){
+document.getElementById("status").innerText = "Invalid URL"
+return
+}
+
+const supabase = await window.getSupabase()
+
+const { data, error } = await supabase
+.from("user_websites")
+.select("template_id, is_published")
+.eq("site_slug", slug)
+.single()
+
+if(error || !data){
+document.getElementById("status").innerText = "Website not found"
+return
+}
+
+if(!data.is_published){
+document.getElementById("status").innerText = "This website is not published yet"
+return
+}
+
+const templatePath = `template-${data.template_id}.html?slug=${slug}`
+window.location.href = templatePath
+}
+
+loadSite()
+</script>
+
+</body>
+</html>
