@@ -1077,7 +1077,20 @@
 
     function getSlugFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      return (params.get("slug") || "").trim().toLowerCase();
+      const querySlug = (params.get("slug") || "").trim();
+
+      if (querySlug) {
+        return decodeURIComponent(querySlug).replace(/^\/+|\/+$/g, "").toLowerCase();
+      }
+
+      const path = window.location.pathname || "";
+      const studioMatch = path.match(/\/studio\/([^/?#]+)/i);
+
+      if (studioMatch && studioMatch[1]) {
+        return decodeURIComponent(studioMatch[1]).trim().replace(/^\/+|\/+$/g, "").toLowerCase();
+      }
+
+      return "";
     }
 
     function isEditRequestedFromUrl() {
@@ -1549,7 +1562,7 @@
 
       const slug = getSlugFromUrl();
       if (!slug) {
-        showError("Missing website slug. Open this page like template-2.html?slug=your-site-slug");
+        showError("Missing website slug. Open this page using template-2.html?slug=your-site-slug or a clean URL like /studio/your-site-slug");
         return;
       }
 
