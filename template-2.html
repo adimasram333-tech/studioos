@@ -30,7 +30,6 @@
     img { max-width: 100%; display: block; }
     a { color: inherit; text-decoration: none; }
     button, input, textarea { font: inherit; }
-
     .hidden { display: none !important; }
 
     .page-state {
@@ -144,16 +143,11 @@
       transition: transform .2s ease;
     }
 
-    .toggle-btn.active {
-      background: var(--accent);
-    }
-
-    .toggle-btn.active::after {
-      transform: translateX(20px);
-    }
+    .toggle-btn.active { background: var(--accent); }
+    .toggle-btn.active::after { transform: translateX(20px); }
 
     .edit-status {
-      max-width: 340px;
+      max-width: 360px;
       padding: 0.85rem 1rem;
       border-radius: 1rem;
       background: rgba(255, 255, 255, 0.94);
@@ -309,6 +303,7 @@
       text-transform: uppercase;
       font-size: 12px;
       transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+      cursor: pointer;
     }
 
     .btn { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 18px 40px rgba(191, 127, 95, 0.22); }
@@ -327,9 +322,29 @@
     .stat strong { display: block; font-size: clamp(24px, 4vw, 34px); color: var(--accent); font-weight: 400; line-height: 1; }
     .stat span { display: block; margin-top: 9px; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-soft); }
 
-    .editable-slot { position: relative; }
-    .editable-slot.edit-active { cursor: pointer; }
-    .editable-slot.edit-active:hover { outline: 1px solid rgba(255,255,255,0.55); }
+    .editable-slot,
+    .editable-text {
+      position: relative;
+    }
+
+    .editable-text.edit-active {
+      cursor: pointer;
+      border-radius: 10px;
+      transition: box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .editable-text.edit-active:hover {
+      box-shadow: 0 0 0 1px rgba(191, 127, 95, 0.35);
+      background: rgba(255,255,255,0.18);
+    }
+
+    .editable-slot.edit-active {
+      cursor: pointer;
+    }
+
+    .editable-slot.edit-active:hover {
+      outline: 1px solid rgba(255,255,255,0.55);
+    }
 
     .edit-overlay {
       position: absolute;
@@ -458,6 +473,7 @@
     .service-price { margin:0 0 16px; font-size:30px; color:var(--accent); font-weight:400; }
     .service-list { display:grid; gap:12px; margin-bottom:20px; }
     .service-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-bottom:12px; border-bottom:1px solid rgba(191,127,95,0.18); color:var(--text-soft); font-size:14px; }
+    .service-item strong { text-align: right; }
 
     .video-card { display:grid; grid-template-columns: 1.1fr 0.9fr; gap:26px; border-radius:30px; overflow:hidden; border:1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); }
     .video-preview { min-height:420px; position:relative; background-size:cover; background-position:center; background-repeat:no-repeat; }
@@ -469,7 +485,7 @@
     .video-copy .hero-actions { margin-top:28px; }
 
     .testimonial-card { position:relative; border:1px solid var(--border); border-radius:28px; background:rgba(255,255,255,0.38); box-shadow:var(--shadow); padding:74px 38px 42px; text-align:center; }
-    .testimonial-avatar { position:absolute; top:-34px; left:50%; transform:translateX(-50%); width:78px; height:78px; border-radius:999px; overflow:hidden; border:6px solid var(--bg); box-shadow:var(--shadow); }
+    .testimonial-avatar { position:absolute; top:-34px; left:50%; transform:translateX(-50%); width:78px; height:78px; border-radius:999px; overflow:hidden; border:6px solid var(--bg); box-shadow:var(--shadow); background: rgba(255,255,255,0.9); }
     .testimonial-avatar img { width:100%; height:100%; object-fit:cover; }
     .testimonial-card h3 { margin:0; font-size:28px; font-weight:300; letter-spacing:0.08em; text-transform:uppercase; }
     .testimonial-card p { max-width:66ch; margin:18px auto 0; color:var(--text-soft); font-size:15px; }
@@ -591,7 +607,7 @@
           <a href="#about">About Me</a>
           <a href="#portfolio">Portfolio</a>
         </nav>
-        <a class="brand-mark" id="brandShort" href="#top" aria-label="Studio brand initials">MK</a>
+        <a class="brand-mark editable-text" id="brandShort" data-field="template_content.footer.brand" href="#top" aria-label="Studio brand initials">MK</a>
         <nav class="nav-right" aria-label="Secondary navigation">
           <a href="#prices">Prices</a>
           <a href="#contacts">Contacts</a>
@@ -604,18 +620,27 @@
       <section class="hero">
         <div class="container hero-wrap">
           <div class="hero-copy">
-            <div class="eyebrow" id="locationText">Based in Pune · Available Across India</div>
-            <h1 id="heroName">Mary Kvitkova</h1>
-            <p class="hero-tag" id="heroTagline">Your Photographer</p>
-            <p class="hero-desc" id="heroDescription">Luxury wedding, portrait and editorial photographer creating timeless frames filled with softness, elegance and emotion.</p>
+            <div class="eyebrow editable-text" id="locationText" data-field="template_content.hero.location">Based in Pune · Available Across India</div>
+            <h1 id="heroName" class="editable-text" data-field="name">Mary Kvitkova</h1>
+            <p class="hero-tag editable-text" id="heroTagline" data-field="tagline">Your Photographer</p>
+            <p class="hero-desc editable-text" id="heroDescription" data-field="template_content.hero.description">Luxury wedding, portrait and editorial photographer creating timeless frames filled with softness, elegance and emotion.</p>
             <div class="hero-actions">
               <a class="btn" href="#contacts">Contact</a>
               <a class="btn-outline" href="#portfolio">View Portfolio</a>
             </div>
             <div class="hero-stats">
-              <div class="stat"><strong>7+</strong><span>Years Experience</span></div>
-              <div class="stat"><strong>500+</strong><span>Happy Clients</span></div>
-              <div class="stat"><strong>800+</strong><span>Curated Shoots</span></div>
+              <div class="stat">
+                <strong class="editable-text" id="heroStat1Value" data-field="template_content.hero.stats.0.value">7+</strong>
+                <span class="editable-text" id="heroStat1Label" data-field="template_content.hero.stats.0.label">Years Experience</span>
+              </div>
+              <div class="stat">
+                <strong class="editable-text" id="heroStat2Value" data-field="template_content.hero.stats.1.value">500+</strong>
+                <span class="editable-text" id="heroStat2Label" data-field="template_content.hero.stats.1.label">Happy Clients</span>
+              </div>
+              <div class="stat">
+                <strong class="editable-text" id="heroStat3Value" data-field="template_content.hero.stats.2.value">800+</strong>
+                <span class="editable-text" id="heroStat3Label" data-field="template_content.hero.stats.2.label">Curated Shoots</span>
+              </div>
             </div>
           </div>
 
@@ -639,25 +664,37 @@
           <div class="about-collage">
             <div class="about-connector"></div>
             <div id="aboutFillCard" class="about-card"></div>
-            <div id="aboutImageTopSlot" class="about-card-small editable-slot" data-image-slot="portfolio_image_1_url">
+            <div id="aboutImageTopSlot" class="about-card-small editable-slot" data-image-slot="template_images.about_image_1_url">
               <div class="image-loading">Uploading...</div>
               <div class="edit-overlay"><span>Replace Image</span></div>
             </div>
-            <div id="aboutImageBottomSlot" class="about-card-photo editable-slot" data-image-slot="portfolio_image_2_url">
+            <div id="aboutImageBottomSlot" class="about-card-photo editable-slot" data-image-slot="template_images.about_image_2_url">
               <div class="image-loading">Uploading...</div>
               <div class="edit-overlay"><span>Replace Image</span></div>
             </div>
           </div>
           <div class="about-copy">
             <div class="eyebrow">Photographer Story</div>
-            <h2>About Me</h2>
-            <p id="aboutTextPrimary">I am a photographer who believes the most beautiful images never feel forced. They feel honest, warm and deeply personal.</p>
-            <p id="aboutTextSecondary">From wedding mornings to intimate portraits, I guide each session with calm direction, thoughtful details and a luxury experience from first conversation to final gallery delivery.</p>
+            <h2 class="editable-text" id="aboutTitle" data-field="template_content.about.title">About Me</h2>
+            <p id="aboutTextPrimary" class="editable-text" data-field="about">I am a photographer who believes the most beautiful images never feel forced. They feel honest, warm and deeply personal.</p>
+            <p id="aboutTextSecondary" class="editable-text" data-field="template_content.about.secondary">From wedding mornings to intimate portraits, I guide each session with calm direction, thoughtful details and a luxury experience from first conversation to final gallery delivery.</p>
             <div class="about-points">
-              <div class="point"><strong>Signature Style</strong><span>Editorial, candid and cinematic storytelling</span></div>
-              <div class="point"><strong>Best For</strong><span>Weddings, couples, portraits and personal brands</span></div>
-              <div class="point"><strong>Client Experience</strong><span>Relaxed guidance with premium attention to detail</span></div>
-              <div class="point"><strong>Travel</strong><span id="aboutCityText">Destination shoots available on request</span></div>
+              <div class="point">
+                <strong class="editable-text" id="aboutPoint1Title" data-field="template_content.about.points.0.title">Signature Style</strong>
+                <span class="editable-text" id="aboutPoint1Text" data-field="template_content.about.points.0.text">Editorial, candid and cinematic storytelling</span>
+              </div>
+              <div class="point">
+                <strong class="editable-text" id="aboutPoint2Title" data-field="template_content.about.points.1.title">Best For</strong>
+                <span class="editable-text" id="aboutPoint2Text" data-field="template_content.about.points.1.text">Weddings, couples, portraits and personal brands</span>
+              </div>
+              <div class="point">
+                <strong class="editable-text" id="aboutPoint3Title" data-field="template_content.about.points.2.title">Client Experience</strong>
+                <span class="editable-text" id="aboutPoint3Text" data-field="template_content.about.points.2.text">Relaxed guidance with premium attention to detail</span>
+              </div>
+              <div class="point">
+                <strong class="editable-text" id="aboutPoint4Title" data-field="template_content.about.points.3.title">Travel</strong>
+                <span class="editable-text" id="aboutPoint4Text" data-field="template_content.about.points.3.text">Destination shoots available on request</span>
+              </div>
             </div>
           </div>
         </div>
@@ -673,22 +710,34 @@
             <a id="portfolioCard1" class="portfolio-card editable-slot" data-image-slot="portfolio_image_3_url" href="#contacts" aria-label="Wedding">
               <div class="image-loading">Uploading...</div>
               <div class="edit-overlay"><span>Replace Image</span></div>
-              <div class="portfolio-label"><strong>Wedding</strong><span>Elegant celebrations & timeless rituals</span></div>
+              <div class="portfolio-label">
+                <strong class="editable-text" id="portfolio1Title" data-field="template_content.portfolio.0.title">Wedding</strong>
+                <span class="editable-text" id="portfolio1Subtitle" data-field="template_content.portfolio.0.subtitle">Elegant celebrations & timeless rituals</span>
+              </div>
             </a>
             <a id="portfolioCard2" class="portfolio-card editable-slot" data-image-slot="portfolio_image_4_url" href="#contacts" aria-label="Family">
               <div class="image-loading">Uploading...</div>
               <div class="edit-overlay"><span>Replace Image</span></div>
-              <div class="portfolio-label"><strong>Family</strong><span>Soft and emotional lifestyle stories</span></div>
+              <div class="portfolio-label">
+                <strong class="editable-text" id="portfolio2Title" data-field="template_content.portfolio.1.title">Family</strong>
+                <span class="editable-text" id="portfolio2Subtitle" data-field="template_content.portfolio.1.subtitle">Soft and emotional lifestyle stories</span>
+              </div>
             </a>
             <a id="portfolioCard3" class="portfolio-card editable-slot" data-image-slot="portfolio_image_5_url" href="#contacts" aria-label="Love Story">
               <div class="image-loading">Uploading...</div>
               <div class="edit-overlay"><span>Replace Image</span></div>
-              <div class="portfolio-label"><strong>Love Story</strong><span>Romantic couple portraits with depth</span></div>
+              <div class="portfolio-label">
+                <strong class="editable-text" id="portfolio3Title" data-field="template_content.portfolio.2.title">Love Story</strong>
+                <span class="editable-text" id="portfolio3Subtitle" data-field="template_content.portfolio.2.subtitle">Romantic couple portraits with depth</span>
+              </div>
             </a>
             <a id="portfolioCard4" class="portfolio-card editable-slot" data-image-slot="portfolio_image_6_url" href="#contacts" aria-label="Portrait">
               <div class="image-loading">Uploading...</div>
               <div class="edit-overlay"><span>Replace Image</span></div>
-              <div class="portfolio-label"><strong>Portrait</strong><span>Personal branding & editorial beauty</span></div>
+              <div class="portfolio-label">
+                <strong class="editable-text" id="portfolio4Title" data-field="template_content.portfolio.3.title">Portrait</strong>
+                <span class="editable-text" id="portfolio4Subtitle" data-field="template_content.portfolio.3.subtitle">Personal branding & editorial beauty</span>
+              </div>
             </a>
           </div>
         </div>
@@ -702,46 +751,63 @@
           </div>
           <div class="services-grid">
             <article class="service-card">
-              <div class="service-visual" id="packageVisual1">
-                <div class="service-title"><strong>Package Minimal</strong><span>Portrait Session</span></div>
+              <div class="service-visual editable-slot" id="packageVisual1" data-image-slot="template_images.package_image_1_url">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+                <div class="service-title">
+                  <strong class="editable-text" id="package1Title" data-field="template_content.packages.0.title">Package Minimal</strong>
+                  <span class="editable-text" id="package1Label" data-field="template_content.packages.0.label">Portrait Session</span>
+                </div>
               </div>
               <div class="service-body">
-                <p class="service-price">₹18,000</p>
+                <p class="service-price editable-text" id="package1Price" data-field="template_content.packages.0.price">₹18,000</p>
                 <div class="service-list">
-                  <div class="service-item"><span>Duration</span><strong>1 Hour</strong></div>
-                  <div class="service-item"><span>Edited Photos</span><strong>25+</strong></div>
-                  <div class="service-item"><span>Style Guidance</span><strong>Included</strong></div>
-                  <div class="service-item"><span>Delivery</span><strong>Online Gallery</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package1Detail1Label" data-field="template_content.packages.0.details.0.label">Duration</span><strong class="editable-text" id="package1Detail1Value" data-field="template_content.packages.0.details.0.value">1 Hour</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package1Detail2Label" data-field="template_content.packages.0.details.1.label">Edited Photos</span><strong class="editable-text" id="package1Detail2Value" data-field="template_content.packages.0.details.1.value">25+</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package1Detail3Label" data-field="template_content.packages.0.details.2.label">Style Guidance</span><strong class="editable-text" id="package1Detail3Value" data-field="template_content.packages.0.details.2.value">Included</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package1Detail4Label" data-field="template_content.packages.0.details.3.label">Delivery</span><strong class="editable-text" id="package1Detail4Value" data-field="template_content.packages.0.details.3.value">Online Gallery</strong></div>
                 </div>
                 <a id="packageWhatsapp1" class="btn-outline" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
               </div>
             </article>
+
             <article class="service-card">
-              <div class="service-visual" id="packageVisual2">
-                <div class="service-title"><strong>Package Standard</strong><span>Couples / Pre-Wedding</span></div>
+              <div class="service-visual editable-slot" id="packageVisual2" data-image-slot="template_images.package_image_2_url">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+                <div class="service-title">
+                  <strong class="editable-text" id="package2Title" data-field="template_content.packages.1.title">Package Standard</strong>
+                  <span class="editable-text" id="package2Label" data-field="template_content.packages.1.label">Couples / Pre-Wedding</span>
+                </div>
               </div>
               <div class="service-body">
-                <p class="service-price">₹35,000</p>
+                <p class="service-price editable-text" id="package2Price" data-field="template_content.packages.1.price">₹35,000</p>
                 <div class="service-list">
-                  <div class="service-item"><span>Duration</span><strong>2 Hours</strong></div>
-                  <div class="service-item"><span>Edited Photos</span><strong>60+</strong></div>
-                  <div class="service-item"><span>Direction</span><strong>Posing + Storytelling</strong></div>
-                  <div class="service-item"><span>Delivery</span><strong>Preview + Full Gallery</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package2Detail1Label" data-field="template_content.packages.1.details.0.label">Duration</span><strong class="editable-text" id="package2Detail1Value" data-field="template_content.packages.1.details.0.value">2 Hours</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package2Detail2Label" data-field="template_content.packages.1.details.1.label">Edited Photos</span><strong class="editable-text" id="package2Detail2Value" data-field="template_content.packages.1.details.1.value">60+</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package2Detail3Label" data-field="template_content.packages.1.details.2.label">Direction</span><strong class="editable-text" id="package2Detail3Value" data-field="template_content.packages.1.details.2.value">Posing + Storytelling</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package2Detail4Label" data-field="template_content.packages.1.details.3.label">Delivery</span><strong class="editable-text" id="package2Detail4Value" data-field="template_content.packages.1.details.3.value">Preview + Full Gallery</strong></div>
                 </div>
                 <a id="packageWhatsapp2" class="btn-outline" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
               </div>
             </article>
+
             <article class="service-card">
-              <div class="service-visual" id="packageVisual3">
-                <div class="service-title"><strong>Package Maximum</strong><span>Wedding Coverage</span></div>
+              <div class="service-visual editable-slot" id="packageVisual3" data-image-slot="template_images.package_image_3_url">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+                <div class="service-title">
+                  <strong class="editable-text" id="package3Title" data-field="template_content.packages.2.title">Package Maximum</strong>
+                  <span class="editable-text" id="package3Label" data-field="template_content.packages.2.label">Wedding Coverage</span>
+                </div>
               </div>
               <div class="service-body">
-                <p class="service-price">₹85,000</p>
+                <p class="service-price editable-text" id="package3Price" data-field="template_content.packages.2.price">₹85,000</p>
                 <div class="service-list">
-                  <div class="service-item"><span>Duration</span><strong>Half / Full Day</strong></div>
-                  <div class="service-item"><span>Edited Photos</span><strong>All Best Frames</strong></div>
-                  <div class="service-item"><span>Consultation</span><strong>Planning Call Included</strong></div>
-                  <div class="service-item"><span>Delivery</span><strong>Premium Gallery + Highlights</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package3Detail1Label" data-field="template_content.packages.2.details.0.label">Duration</span><strong class="editable-text" id="package3Detail1Value" data-field="template_content.packages.2.details.0.value">Half / Full Day</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package3Detail2Label" data-field="template_content.packages.2.details.1.label">Edited Photos</span><strong class="editable-text" id="package3Detail2Value" data-field="template_content.packages.2.details.1.value">All Best Frames</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package3Detail3Label" data-field="template_content.packages.2.details.2.label">Consultation</span><strong class="editable-text" id="package3Detail3Value" data-field="template_content.packages.2.details.2.value">Planning Call Included</strong></div>
+                  <div class="service-item"><span class="editable-text" id="package3Detail4Label" data-field="template_content.packages.2.details.3.label">Delivery</span><strong class="editable-text" id="package3Detail4Value" data-field="template_content.packages.2.details.3.value">Premium Gallery + Highlights</strong></div>
                 </div>
                 <a id="packageWhatsapp3" class="btn-outline" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
               </div>
@@ -753,13 +819,15 @@
       <section class="section" id="films">
         <div class="container">
           <div class="video-card">
-            <div class="video-preview" id="featuredFilmVisual">
+            <div class="video-preview editable-slot" id="featuredFilmVisual" data-image-slot="template_images.featured_film_image_url">
+              <div class="image-loading">Uploading...</div>
+              <div class="edit-overlay"><span>Replace Image</span></div>
               <a id="featuredYoutubeLink" class="play-badge" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="Watch featured film">▶</a>
             </div>
             <div class="video-copy">
               <div class="eyebrow">Featured Work</div>
-              <h3>Featured Film & Signature Stories</h3>
-              <p>A premium photo experience deserves beautiful motion too. Explore cinematic highlights, behind-the-scenes moments and destination wedding films crafted to feel elegant, emotional and unforgettable.</p>
+              <h3 class="editable-text" id="featuredFilmTitle" data-field="template_content.featuredFilm.title">Featured Film & Signature Stories</h3>
+              <p class="editable-text" id="featuredFilmText" data-field="template_content.featuredFilm.text">A premium photo experience deserves beautiful motion too. Explore cinematic highlights, behind-the-scenes moments and destination wedding films crafted to feel elegant, emotional and unforgettable.</p>
               <div class="hero-actions">
                 <a id="featuredYoutubeButton" class="btn" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
                 <a class="btn-outline" href="#contacts">Book a Session</a>
@@ -772,12 +840,14 @@
       <section class="section">
         <div class="container">
           <div class="testimonial-card">
-            <div class="testimonial-avatar">
-              <img src="https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=300&q=80" alt="Sofia" />
+            <div class="testimonial-avatar editable-slot" id="testimonialAvatarSlot" data-image-slot="template_images.testimonial_avatar_url">
+              <img id="testimonialAvatarImage" src="" alt="Client testimonial avatar" />
+              <div class="image-loading">Uploading...</div>
+              <div class="edit-overlay"><span>Replace Image</span></div>
             </div>
-            <h3>Sofia</h3>
-            <p><strong>Bride & Portrait Client</strong></p>
-            <p>Working with Mary felt effortless from start to finish. She understood exactly how to make us feel comfortable, and every image looked refined, emotional and beautifully natural. It felt like a luxury experience, not just a photoshoot.</p>
+            <h3 class="editable-text" id="testimonialName" data-field="template_content.testimonial.name">Sofia</h3>
+            <p><strong class="editable-text" id="testimonialRole" data-field="template_content.testimonial.role">Bride & Portrait Client</strong></p>
+            <p class="editable-text" id="testimonialText" data-field="template_content.testimonial.text">Working with Mary felt effortless from start to finish. She understood exactly how to make us feel comfortable, and every image looked refined, emotional and beautifully natural. It felt like a luxury experience, not just a photoshoot.</p>
           </div>
         </div>
       </section>
@@ -787,21 +857,21 @@
           <div class="contact-card">
             <div class="contact-copy">
               <div class="eyebrow">Stay in Touch</div>
-              <h2>Let’s Create Something Timeless</h2>
-              <p>For weddings, portraits, destination shoots and collaborations, reach out directly through your preferred platform. Every inquiry receives a thoughtful response.</p>
+              <h2 class="editable-text" id="contactHeading" data-field="template_content.contact.heading">Let’s Create Something Timeless</h2>
+              <p class="editable-text" id="contactText" data-field="template_content.contact.text">For weddings, portraits, destination shoots and collaborations, reach out directly through your preferred platform. Every inquiry receives a thoughtful response.</p>
             </div>
             <div class="contact-links">
               <a id="phoneLink" class="contact-link" href="tel:+919876543210">
-                <div><strong>Phone</strong><span id="phoneText">+91 98765 43210</span></div><span>↗</span>
+                <div><strong>Phone</strong><span id="phoneText" class="editable-text" data-field="phone">+91 98765 43210</span></div><span>↗</span>
               </a>
               <a id="whatsappLink" class="contact-link" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
-                <div><strong>WhatsApp</strong><span>Chat on WhatsApp</span></div><span>↗</span>
+                <div><strong>WhatsApp</strong><span id="whatsappText" class="editable-text" data-field="whatsapp">Chat on WhatsApp</span></div><span>↗</span>
               </a>
               <a id="instagramLink" class="contact-link" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
-                <div><strong>Instagram</strong><span id="instagramText">@marykvitkova.studio</span></div><span>↗</span>
+                <div><strong>Instagram</strong><span id="instagramText" class="editable-text" data-field="instagram">@marykvitkova.studio</span></div><span>↗</span>
               </a>
               <a id="youtubeLink" class="contact-link" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">
-                <div><strong>YouTube</strong><span>Watch latest films</span></div><span>↗</span>
+                <div><strong>YouTube</strong><span id="youtubeText" class="editable-text" data-field="youtube">Watch latest films</span></div><span>↗</span>
               </a>
             </div>
           </div>
@@ -823,9 +893,9 @@
     <footer class="site-footer">
       <div class="container footer-wrap">
         <div>
-          <div class="footer-brand" id="footerBrand">MK</div>
-          <div class="footer-copy" id="footerEmail">marykvitkova.photos@gmail.com</div>
-          <div class="footer-copy" id="footerPhone" style="margin-top:8px;">+91 98765 43210</div>
+          <div class="footer-brand editable-text" id="footerBrand" data-field="template_content.footer.brand">MK</div>
+          <div class="footer-copy editable-text" id="footerEmail" data-field="email">marykvitkova.photos@gmail.com</div>
+          <div class="footer-copy editable-text" id="footerPhone" data-field="phone" style="margin-top:8px;">+91 98765 43210</div>
         </div>
 
         <div>
@@ -845,7 +915,7 @@
 
         <div>
           <div class="eyebrow" style="margin-bottom:8px;">Stay in Touch</div>
-          <div class="footer-subtext">Subscribe for stories, availability updates and recent work.</div>
+          <div class="footer-subtext editable-text" id="footerSubscribeText" data-field="template_content.footer.subscribeText">Subscribe for stories, availability updates and recent work.</div>
           <div class="subscribe-box">
             <input type="email" placeholder="E-mail" />
             <button type="button">Subscribe</button>
@@ -879,13 +949,106 @@
       portfolio_image_6_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80"
     };
 
-    const DEFAULT_DATA = {
+    const DEFAULT_TEMPLATE_IMAGES = {
+      about_image_1_url: DEFAULT_IMAGES.portfolio_image_1_url,
+      about_image_2_url: DEFAULT_IMAGES.portfolio_image_2_url,
+      package_image_1_url: DEFAULT_IMAGES.portfolio_image_3_url,
+      package_image_2_url: DEFAULT_IMAGES.portfolio_image_4_url,
+      package_image_3_url: DEFAULT_IMAGES.portfolio_image_5_url,
+      featured_film_image_url: DEFAULT_IMAGES.portfolio_image_6_url,
+      testimonial_avatar_url: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=300&q=80"
+    };
+
+    const DEFAULT_BASE = {
       name: "Mary Kvitkova",
       tagline: "Your Photographer",
       about: "I am a photographer who believes the most beautiful images never feel forced. They feel honest, warm and deeply personal. My work blends refined composition with natural emotion so every frame looks elegant today and timeless years later.",
       phone: "+91 98765 43210",
       instagram: "@marykvitkova.studio",
-      city: "Pune"
+      city: "Pune",
+      email: "marykvitkova.photos@gmail.com",
+      youtube: "https://www.youtube.com/",
+      whatsapp: "https://wa.me/919876543210"
+    };
+
+    const DEFAULT_TEMPLATE_CONTENT = {
+      hero: {
+        location: "Based in Pune · Available Across India",
+        description: "Luxury wedding, portrait and editorial photographer creating timeless frames filled with softness, elegance and emotion.",
+        stats: [
+          { value: "7+", label: "Years Experience" },
+          { value: "500+", label: "Happy Clients" },
+          { value: "800+", label: "Curated Shoots" }
+        ]
+      },
+      about: {
+        title: "About Me",
+        secondary: "From wedding mornings to intimate portraits, I guide each session with calm direction, thoughtful details and a luxury experience from first conversation to final gallery delivery.",
+        points: [
+          { title: "Signature Style", text: "Editorial, candid and cinematic storytelling" },
+          { title: "Best For", text: "Weddings, couples, portraits and personal brands" },
+          { title: "Client Experience", text: "Relaxed guidance with premium attention to detail" },
+          { title: "Travel", text: "Destination shoots available on request" }
+        ]
+      },
+      portfolio: [
+        { title: "Wedding", subtitle: "Elegant celebrations & timeless rituals" },
+        { title: "Family", subtitle: "Soft and emotional lifestyle stories" },
+        { title: "Love Story", subtitle: "Romantic couple portraits with depth" },
+        { title: "Portrait", subtitle: "Personal branding & editorial beauty" }
+      ],
+      packages: [
+        {
+          title: "Package Minimal",
+          label: "Portrait Session",
+          price: "₹18,000",
+          details: [
+            { label: "Duration", value: "1 Hour" },
+            { label: "Edited Photos", value: "25+" },
+            { label: "Style Guidance", value: "Included" },
+            { label: "Delivery", value: "Online Gallery" }
+          ]
+        },
+        {
+          title: "Package Standard",
+          label: "Couples / Pre-Wedding",
+          price: "₹35,000",
+          details: [
+            { label: "Duration", value: "2 Hours" },
+            { label: "Edited Photos", value: "60+" },
+            { label: "Direction", value: "Posing + Storytelling" },
+            { label: "Delivery", value: "Preview + Full Gallery" }
+          ]
+        },
+        {
+          title: "Package Maximum",
+          label: "Wedding Coverage",
+          price: "₹85,000",
+          details: [
+            { label: "Duration", value: "Half / Full Day" },
+            { label: "Edited Photos", value: "All Best Frames" },
+            { label: "Consultation", value: "Planning Call Included" },
+            { label: "Delivery", value: "Premium Gallery + Highlights" }
+          ]
+        }
+      ],
+      featuredFilm: {
+        title: "Featured Film & Signature Stories",
+        text: "A premium photo experience deserves beautiful motion too. Explore cinematic highlights, behind-the-scenes moments and destination wedding films crafted to feel elegant, emotional and unforgettable."
+      },
+      testimonial: {
+        name: "Sofia",
+        role: "Bride & Portrait Client",
+        text: "Working with Mary felt effortless from start to finish. She understood exactly how to make us feel comfortable, and every image looked refined, emotional and beautifully natural. It felt like a luxury experience, not just a photoshoot."
+      },
+      contact: {
+        heading: "Let’s Create Something Timeless",
+        text: "For weddings, portraits, destination shoots and collaborations, reach out directly through your preferred platform. Every inquiry receives a thoughtful response."
+      },
+      footer: {
+        brand: "MK",
+        subscribeText: "Subscribe for stories, availability updates and recent work."
+      }
     };
 
     let currentWebsite = null;
@@ -924,7 +1087,7 @@
 
     function formatPhoneForDisplay(phone) {
       const raw = String(phone || "").trim();
-      return raw || DEFAULT_DATA.phone;
+      return raw || DEFAULT_BASE.phone;
     }
 
     function formatPhoneForTel(phone) {
@@ -933,17 +1096,31 @@
       return raw.startsWith("+") ? raw : `+${raw}`;
     }
 
-    function formatPhoneForWhatsApp(phone) {
+    function formatPhoneForWhatsApp(phone, whatsappLink) {
+      const explicitWhatsapp = String(whatsappLink || "").trim();
+      if (explicitWhatsapp.startsWith("https://wa.me/")) return explicitWhatsapp;
       const raw = String(phone || "").replace(/\D/g, "");
-      if (!raw) return "919876543210";
-      if (raw.startsWith("91")) return raw;
-      return `91${raw}`;
+      if (!raw) return DEFAULT_BASE.whatsapp;
+      if (raw.startsWith("91")) return `https://wa.me/${raw}`;
+      return `https://wa.me/91${raw}`;
     }
 
     function normalizeInstagram(value) {
       const raw = String(value || "").trim();
-      if (!raw) return DEFAULT_DATA.instagram;
+      if (!raw) return DEFAULT_BASE.instagram;
       return raw.startsWith("@") ? raw : `@${raw}`;
+    }
+
+    function normalizeInstagramLink(value) {
+      const raw = String(value || "").trim();
+      if (!raw) return "https://instagram.com/marykvitkova.studio";
+      if (/^https?:\/\//i.test(raw)) return raw;
+      return `https://instagram.com/${raw.replace(/^@/, "")}`;
+    }
+
+    function normalizeYoutubeLink(value) {
+      const raw = String(value || "").trim();
+      return raw || DEFAULT_BASE.youtube;
     }
 
     function buildImageBackground(url, overlay = true) {
@@ -962,11 +1139,17 @@
     function setEditMode(enabled) {
       editModeEnabled = enabled;
       editModeToggle.classList.toggle("active", enabled);
+
       document.querySelectorAll(".editable-slot").forEach(slot => {
         slot.classList.toggle("edit-active", enabled);
       });
+
+      document.querySelectorAll(".editable-text").forEach(el => {
+        el.classList.toggle("edit-active", enabled);
+      });
+
       if (enabled) {
-        setEditStatus("Edit mode is ON. Click any image area to replace it.");
+        setEditStatus("Edit mode is ON. Click any text or image area to update it.");
       } else {
         setEditStatus("You are viewing preview mode.");
       }
@@ -982,58 +1165,189 @@
       slot.classList.toggle("uploading", isUploading);
     }
 
-    function applyImages(website) {
+    function safeObject(value) {
+      return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    }
+
+    function deepClone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function mergeDefaults(defaults, value) {
+      if (Array.isArray(defaults)) {
+        const input = Array.isArray(value) ? value : [];
+        return defaults.map((item, index) => mergeDefaults(item, input[index]));
+      }
+      if (defaults && typeof defaults === "object") {
+        const result = {};
+        const input = safeObject(value);
+        Object.keys(defaults).forEach(key => {
+          result[key] = mergeDefaults(defaults[key], input[key]);
+        });
+        return result;
+      }
+      return value === undefined || value === null || value === "" ? defaults : value;
+    }
+
+    function getByPath(source, path) {
+      return String(path || "").split(".").reduce((acc, key) => {
+        if (acc === null || acc === undefined) return undefined;
+        if (/^\d+$/.test(key)) return acc[Number(key)];
+        return acc[key];
+      }, source);
+    }
+
+    function setByPath(target, path, value) {
+      const keys = String(path || "").split(".");
+      let ref = target;
+      for (let i = 0; i < keys.length - 1; i += 1) {
+        const key = keys[i];
+        const nextKey = keys[i + 1];
+        const isIndex = /^\d+$/.test(nextKey);
+        if (/^\d+$/.test(key)) {
+          const index = Number(key);
+          ref[index] = ref[index] ?? (isIndex ? [] : {});
+          ref = ref[index];
+        } else {
+          ref[key] = ref[key] ?? (isIndex ? [] : {});
+          ref = ref[key];
+        }
+      }
+
+      const lastKey = keys[keys.length - 1];
+      if (/^\d+$/.test(lastKey)) {
+        ref[Number(lastKey)] = value;
+      } else {
+        ref[lastKey] = value;
+      }
+    }
+
+    function composeContent(website) {
+      return {
+        base: {
+          name: website.name?.trim() || DEFAULT_BASE.name,
+          tagline: website.tagline?.trim() || DEFAULT_BASE.tagline,
+          about: website.about?.trim() || DEFAULT_BASE.about,
+          phone: formatPhoneForDisplay(website.phone),
+          instagram: normalizeInstagram(website.instagram),
+          city: website.city?.trim() || DEFAULT_BASE.city,
+          email: String(website.email || "").trim() || DEFAULT_BASE.email,
+          youtube: normalizeYoutubeLink(website.youtube),
+          whatsapp: String(website.whatsapp || "").trim() || formatPhoneForWhatsApp(website.phone, website.whatsapp)
+        },
+        templateContent: mergeDefaults(DEFAULT_TEMPLATE_CONTENT, safeObject(website.template_content)),
+        templateImages: mergeDefaults(DEFAULT_TEMPLATE_IMAGES, safeObject(website.template_images))
+      };
+    }
+
+    function applyImages(website, mergedData = null) {
+      const computed = mergedData || composeContent(website);
+      const templateImages = computed.templateImages;
+
       const heroUrl = website.hero_image_url || DEFAULT_IMAGES.hero_image_url;
-      const aboutTop = website.portfolio_image_1_url || DEFAULT_IMAGES.portfolio_image_1_url;
-      const aboutBottom = website.portfolio_image_2_url || DEFAULT_IMAGES.portfolio_image_2_url;
-      const card1 = website.portfolio_image_3_url || DEFAULT_IMAGES.portfolio_image_3_url;
-      const card2 = website.portfolio_image_4_url || DEFAULT_IMAGES.portfolio_image_4_url;
-      const card3 = website.portfolio_image_5_url || DEFAULT_IMAGES.portfolio_image_5_url;
-      const card4 = website.portfolio_image_6_url || DEFAULT_IMAGES.portfolio_image_6_url;
+      const portfolio1 = website.portfolio_image_1_url || DEFAULT_IMAGES.portfolio_image_1_url;
+      const portfolio2 = website.portfolio_image_2_url || DEFAULT_IMAGES.portfolio_image_2_url;
+      const portfolio3 = website.portfolio_image_3_url || DEFAULT_IMAGES.portfolio_image_3_url;
+      const portfolio4 = website.portfolio_image_4_url || DEFAULT_IMAGES.portfolio_image_4_url;
+      const portfolio5 = website.portfolio_image_5_url || DEFAULT_IMAGES.portfolio_image_5_url;
+      const portfolio6 = website.portfolio_image_6_url || DEFAULT_IMAGES.portfolio_image_6_url;
 
       document.getElementById("heroImageSlot").style.backgroundImage = buildImageBackground(heroUrl, true);
-      document.getElementById("aboutImageTopSlot").style.backgroundImage = buildImageBackground(aboutTop, false);
-      document.getElementById("aboutImageBottomSlot").style.backgroundImage = buildImageBackground(aboutBottom, false);
-      document.getElementById("portfolioCard1").style.backgroundImage = buildImageBackground(card1, true);
-      document.getElementById("portfolioCard2").style.backgroundImage = buildImageBackground(card2, true);
-      document.getElementById("portfolioCard3").style.backgroundImage = buildImageBackground(card3, true);
-      document.getElementById("portfolioCard4").style.backgroundImage = buildImageBackground(card4, true);
+      document.getElementById("aboutImageTopSlot").style.backgroundImage = buildImageBackground(templateImages.about_image_1_url || portfolio1, false);
+      document.getElementById("aboutImageBottomSlot").style.backgroundImage = buildImageBackground(templateImages.about_image_2_url || portfolio2, false);
 
-      document.getElementById("packageVisual1").style.backgroundImage = buildImageBackground(card1, true);
-      document.getElementById("packageVisual2").style.backgroundImage = buildImageBackground(card2, true);
-      document.getElementById("packageVisual3").style.backgroundImage = buildImageBackground(card3, true);
-      document.getElementById("featuredFilmVisual").style.backgroundImage = buildImageBackground(card4, true);
+      document.getElementById("portfolioCard1").style.backgroundImage = buildImageBackground(portfolio3, true);
+      document.getElementById("portfolioCard2").style.backgroundImage = buildImageBackground(portfolio4, true);
+      document.getElementById("portfolioCard3").style.backgroundImage = buildImageBackground(portfolio5, true);
+      document.getElementById("portfolioCard4").style.backgroundImage = buildImageBackground(portfolio6, true);
+
+      document.getElementById("packageVisual1").style.backgroundImage = buildImageBackground(templateImages.package_image_1_url || portfolio3, true);
+      document.getElementById("packageVisual2").style.backgroundImage = buildImageBackground(templateImages.package_image_2_url || portfolio4, true);
+      document.getElementById("packageVisual3").style.backgroundImage = buildImageBackground(templateImages.package_image_3_url || portfolio5, true);
+      document.getElementById("featuredFilmVisual").style.backgroundImage = buildImageBackground(templateImages.featured_film_image_url || portfolio6, true);
+
+      const testimonialAvatar = document.getElementById("testimonialAvatarImage");
+      testimonialAvatar.src = templateImages.testimonial_avatar_url || DEFAULT_TEMPLATE_IMAGES.testimonial_avatar_url;
     }
 
     function applyWebsiteData(website) {
-      const name = website.name?.trim() || DEFAULT_DATA.name;
-      const tagline = website.tagline?.trim() || DEFAULT_DATA.tagline;
-      const about = website.about?.trim() || DEFAULT_DATA.about;
-      const phoneDisplay = formatPhoneForDisplay(website.phone);
-      const phoneTel = formatPhoneForTel(website.phone);
-      const whatsappPhone = formatPhoneForWhatsApp(website.phone);
-      const instagramDisplay = normalizeInstagram(website.instagram);
-      const city = website.city?.trim() || DEFAULT_DATA.city;
-      const heroLocation = `Based in ${city} · Available Across India`;
-      const whatsappUrl = `https://wa.me/${whatsappPhone}`;
-      const youtubeUrl = "https://www.youtube.com/";
-      const instagramUrl = `https://instagram.com/${instagramDisplay.replace(/^@/, "")}`;
-      const brandInitials = name.split(/\s+/).filter(Boolean).slice(0,2).map(part => part[0]?.toUpperCase() || "").join("") || "ST";
+      const { base, templateContent, templateImages } = composeContent(website);
 
-      document.title = `${name} - Template 2`;
-      document.getElementById("brandShort").innerText = brandInitials;
-      document.getElementById("footerBrand").innerText = brandInitials;
-      document.getElementById("heroName").innerText = name;
-      document.getElementById("heroTagline").innerText = tagline;
-      document.getElementById("heroDescription").innerText = about;
-      document.getElementById("locationText").innerText = heroLocation;
-      document.getElementById("aboutTextPrimary").innerText = about;
-      document.getElementById("aboutTextSecondary").innerText = `${name} creates elegant imagery with calm direction, refined composition, and a premium client experience from first inquiry to final gallery delivery.`;
-      document.getElementById("aboutCityText").innerText = `${city} based · Destination shoots available`;
-      document.getElementById("phoneText").innerText = phoneDisplay;
-      document.getElementById("instagramText").innerText = instagramDisplay;
-      document.getElementById("footerPhone").innerText = phoneDisplay;
-      document.getElementById("footerEmail").innerText = `${instagramDisplay.replace(/^@/, "")}@gmail.com`;
+      const whatsappUrl = formatPhoneForWhatsApp(base.phone, base.whatsapp);
+      const phoneTel = formatPhoneForTel(base.phone);
+      const instagramUrl = normalizeInstagramLink(base.instagram);
+      const youtubeUrl = normalizeYoutubeLink(base.youtube);
+
+      const brandFromName = base.name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase() || "").join("");
+      const footerBrand = templateContent.footer.brand || brandFromName || "ST";
+
+      document.title = `${base.name} - Template 2`;
+
+      document.getElementById("brandShort").innerText = footerBrand;
+      document.getElementById("footerBrand").innerText = footerBrand;
+
+      document.getElementById("heroName").innerText = base.name;
+      document.getElementById("heroTagline").innerText = base.tagline;
+      document.getElementById("heroDescription").innerText = templateContent.hero.description;
+      document.getElementById("locationText").innerText = templateContent.hero.location;
+
+      document.getElementById("heroStat1Value").innerText = templateContent.hero.stats[0].value;
+      document.getElementById("heroStat1Label").innerText = templateContent.hero.stats[0].label;
+      document.getElementById("heroStat2Value").innerText = templateContent.hero.stats[1].value;
+      document.getElementById("heroStat2Label").innerText = templateContent.hero.stats[1].label;
+      document.getElementById("heroStat3Value").innerText = templateContent.hero.stats[2].value;
+      document.getElementById("heroStat3Label").innerText = templateContent.hero.stats[2].label;
+
+      document.getElementById("aboutTitle").innerText = templateContent.about.title;
+      document.getElementById("aboutTextPrimary").innerText = base.about;
+      document.getElementById("aboutTextSecondary").innerText = templateContent.about.secondary;
+      document.getElementById("aboutPoint1Title").innerText = templateContent.about.points[0].title;
+      document.getElementById("aboutPoint1Text").innerText = templateContent.about.points[0].text;
+      document.getElementById("aboutPoint2Title").innerText = templateContent.about.points[1].title;
+      document.getElementById("aboutPoint2Text").innerText = templateContent.about.points[1].text;
+      document.getElementById("aboutPoint3Title").innerText = templateContent.about.points[2].title;
+      document.getElementById("aboutPoint3Text").innerText = templateContent.about.points[2].text;
+      document.getElementById("aboutPoint4Title").innerText = templateContent.about.points[3].title;
+      document.getElementById("aboutPoint4Text").innerText = templateContent.about.points[3].text;
+
+      document.getElementById("portfolio1Title").innerText = templateContent.portfolio[0].title;
+      document.getElementById("portfolio1Subtitle").innerText = templateContent.portfolio[0].subtitle;
+      document.getElementById("portfolio2Title").innerText = templateContent.portfolio[1].title;
+      document.getElementById("portfolio2Subtitle").innerText = templateContent.portfolio[1].subtitle;
+      document.getElementById("portfolio3Title").innerText = templateContent.portfolio[2].title;
+      document.getElementById("portfolio3Subtitle").innerText = templateContent.portfolio[2].subtitle;
+      document.getElementById("portfolio4Title").innerText = templateContent.portfolio[3].title;
+      document.getElementById("portfolio4Subtitle").innerText = templateContent.portfolio[3].subtitle;
+
+      templateContent.packages.forEach((pkg, index) => {
+        const num = index + 1;
+        document.getElementById(`package${num}Title`).innerText = pkg.title;
+        document.getElementById(`package${num}Label`).innerText = pkg.label;
+        document.getElementById(`package${num}Price`).innerText = pkg.price;
+        pkg.details.forEach((detail, detailIndex) => {
+          const detailNum = detailIndex + 1;
+          document.getElementById(`package${num}Detail${detailNum}Label`).innerText = detail.label;
+          document.getElementById(`package${num}Detail${detailNum}Value`).innerText = detail.value;
+        });
+      });
+
+      document.getElementById("featuredFilmTitle").innerText = templateContent.featuredFilm.title;
+      document.getElementById("featuredFilmText").innerText = templateContent.featuredFilm.text;
+
+      document.getElementById("testimonialName").innerText = templateContent.testimonial.name;
+      document.getElementById("testimonialRole").innerText = templateContent.testimonial.role;
+      document.getElementById("testimonialText").innerText = templateContent.testimonial.text;
+
+      document.getElementById("contactHeading").innerText = templateContent.contact.heading;
+      document.getElementById("contactText").innerText = templateContent.contact.text;
+      document.getElementById("phoneText").innerText = base.phone;
+      document.getElementById("whatsappText").innerText = base.whatsapp.startsWith("https://wa.me/") ? "Chat on WhatsApp" : base.whatsapp;
+      document.getElementById("instagramText").innerText = base.instagram;
+      document.getElementById("youtubeText").innerText = base.youtube.startsWith("http") ? "Watch latest films" : base.youtube;
+
+      document.getElementById("footerEmail").innerText = base.email;
+      document.getElementById("footerPhone").innerText = base.phone;
+      document.getElementById("footerSubscribeText").innerText = templateContent.footer.subscribeText;
 
       document.getElementById("phoneLink").href = `tel:${phoneTel}`;
       document.getElementById("whatsappLink").href = whatsappUrl;
@@ -1043,16 +1357,18 @@
       document.getElementById("packageWhatsapp1").href = whatsappUrl;
       document.getElementById("packageWhatsapp2").href = whatsappUrl;
       document.getElementById("packageWhatsapp3").href = whatsappUrl;
+
       document.getElementById("instagramLink").href = instagramUrl;
       document.getElementById("instagramTopLink").href = instagramUrl;
       document.getElementById("footerInstagramLink").href = instagramUrl;
+
       document.getElementById("youtubeLink").href = youtubeUrl;
       document.getElementById("youtubeTopLink").href = youtubeUrl;
       document.getElementById("featuredYoutubeLink").href = youtubeUrl;
       document.getElementById("featuredYoutubeButton").href = youtubeUrl;
       document.getElementById("footerYoutubeLink").href = youtubeUrl;
 
-      applyImages(website);
+      applyImages(website, { base, templateContent, templateImages });
     }
 
     async function fetchWebsiteBySlug(slug) {
@@ -1082,23 +1398,63 @@
       return Boolean(currentUserId && website?.user_id && currentUserId === website.user_id);
     }
 
-    async function updateWebsiteImage(slotName, newUrl) {
+    async function updateWebsiteColumn(columnName, value) {
       const supabase = await window.getSupabase();
       const { data, error } = await supabase
         .from("user_websites")
-        .update({ [slotName]: newUrl })
+        .update({ [columnName]: value })
         .eq("id", currentWebsite.id)
         .eq("user_id", currentUserId)
         .select("*")
         .single();
+
       if (error) throw error;
+      currentWebsite = data;
       return data;
+    }
+
+    async function updateWebsiteField(fieldPath, value) {
+      if (!currentWebsite || !currentUserId) return;
+
+      const parts = String(fieldPath || "").split(".");
+      const root = parts[0];
+
+      if (root === "template_content") {
+        const nextValue = deepClone(safeObject(currentWebsite.template_content));
+        setByPath(nextValue, parts.slice(1).join("."), value);
+        return updateWebsiteColumn("template_content", nextValue);
+      }
+
+      if (root === "template_images") {
+        const nextValue = deepClone(safeObject(currentWebsite.template_images));
+        setByPath(nextValue, parts.slice(1).join("."), value);
+        return updateWebsiteColumn("template_images", nextValue);
+      }
+
+      return updateWebsiteColumn(fieldPath, value);
+    }
+
+    async function updateWebsiteImage(slotName, newUrl) {
+      const parts = String(slotName || "").split(".");
+      const root = parts[0];
+
+      if (root === "template_images") {
+        const nextValue = deepClone(safeObject(currentWebsite.template_images));
+        setByPath(nextValue, parts.slice(1).join("."), newUrl);
+        return updateWebsiteColumn("template_images", nextValue);
+      }
+
+      return updateWebsiteColumn(slotName, newUrl);
     }
 
     async function handleImageSelection(file) {
       if (!pendingImageSlot || !currentWebsite) return;
+
       const slotName = pendingImageSlot;
-      const oldUrl = currentWebsite[slotName] || "";
+      const oldUrl = slotName.startsWith("template_images.")
+        ? getByPath(safeObject(currentWebsite.template_images), slotName.replace("template_images.", ""))
+        : currentWebsite[slotName] || "";
+
       const folder = `studioos/websites/${currentWebsite.site_slug}`;
 
       try {
@@ -1106,9 +1462,8 @@
         setEditStatus("Uploading and replacing image...");
 
         const replaceResult = await replaceImageAsset({ oldUrl, file, folder });
-        const updatedWebsite = await updateWebsiteImage(slotName, replaceResult.newUrl);
-        currentWebsite = updatedWebsite;
-        applyImages(currentWebsite);
+        await updateWebsiteImage(slotName, replaceResult.newUrl);
+        applyWebsiteData(currentWebsite);
 
         if (replaceResult.deleteResult?.skipped) {
           setEditStatus("Image replaced. Old file cleanup skipped until secure delete endpoint is added.");
@@ -1125,11 +1480,55 @@
       }
     }
 
+    function getFriendlyFieldLabel(fieldPath) {
+      const map = {
+        name: "Studio Name",
+        tagline: "Tagline",
+        about: "About",
+        phone: "Phone",
+        instagram: "Instagram",
+        youtube: "YouTube",
+        whatsapp: "WhatsApp",
+        email: "Email"
+      };
+      return map[fieldPath] || "Content";
+    }
+
+    function registerEditableText() {
+      document.querySelectorAll(".editable-text").forEach(el => {
+        el.addEventListener("click", async event => {
+          if (!editModeEnabled) return;
+          event.preventDefault();
+          event.stopPropagation();
+
+          const fieldPath = el.dataset.field || "";
+          if (!fieldPath) return;
+
+          const currentValue = el.innerText.trim();
+          const nextValue = window.prompt(`Edit ${getFriendlyFieldLabel(fieldPath)}`, currentValue);
+
+          if (nextValue === null) return;
+
+          const cleanedValue = String(nextValue).trim();
+          try {
+            setEditStatus("Saving text update...");
+            await updateWebsiteField(fieldPath, cleanedValue);
+            applyWebsiteData(currentWebsite);
+            setEditStatus("Text updated successfully.");
+          } catch (error) {
+            console.error("Text update failed:", error);
+            setEditStatus(error.message || "Unable to update text.");
+          }
+        });
+      });
+    }
+
     function registerEditableImageSlots() {
       document.querySelectorAll(".editable-slot").forEach(slot => {
         slot.addEventListener("click", event => {
           if (!editModeEnabled) return;
           event.preventDefault();
+          event.stopPropagation();
           pendingImageSlot = slot.dataset.imageSlot || "";
           imageFileInput.click();
         });
@@ -1164,6 +1563,7 @@
         currentWebsite = website;
         applyWebsiteData(website);
         registerEditableImageSlots();
+        registerEditableText();
         showTemplate();
 
         const editable = canCurrentUserEdit(website);
