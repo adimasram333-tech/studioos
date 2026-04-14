@@ -157,7 +157,7 @@ export async function deleteImageByUrl(url){
   if(!config.deleteEndpoint){
     return {
       skipped: true,
-      reason: "Delete endpoint not configured. DB replace is done, physical file cleanup can be added later."
+      reason: "Delete endpoint not configured."
     }
   }
 
@@ -205,6 +205,54 @@ export async function replaceImageAsset({ oldUrl = "", file, folder = "" }){
   return {
     newUrl: uploaded.url,
     oldUrl,
+    deleteResult
+  }
+}
+
+
+// =============================
+// 🔥 NEW: TEMPLATE IMAGE SLOT SYSTEM
+// =============================
+
+export async function replaceTemplateImage({
+  supabase,
+  userId,
+  websiteId,
+  slot,
+  file,
+  currentData = {}
+}){
+  if(!slot) throw new Error("Image slot is required.")
+
+  const existingImages = currentData.template_images || {}
+  const oldUrl = existingImages[slot] || ""
+
+  const { newUrl, deleteResult } = await replaceImageAsset({
+    oldUrl,
+    file,
+    folder: `websites/${userId}`
+  })
+
+  const updatedImages = {
+    ...existingImages,
+    [slot]: newUrl
+  }
+
+  const { error } = await supabase
+    .from("user_websites")
+    .update({
+      template_images: updatedImages
+    })
+    .eq("id", websiteId)
+    .eq("user_id", userId)
+
+  if(error){
+    throw new Error("Failed to update template images.")
+  }
+
+  return {
+    slot,
+    newUrl,
     deleteResult
   }
 }
