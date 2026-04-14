@@ -877,9 +877,20 @@
         grid-template-columns:auto 1fr auto;
         align-items:start;
       }
-      .edit-toolbar{left:16px;right:16px;align-items:stretch}
+      .edit-toolbar{
+        left:12px;
+        right:12px;
+        top:auto;
+        bottom:12px;
+        align-items:stretch;
+      }
       .edit-chip{justify-content:space-between}
-      .edit-status{max-width:none}
+      .edit-status{
+        max-width:none;
+        padding:12px 14px;
+        font-size:.78rem;
+        line-height:1.45;
+      }
     }
 
     @media (max-width:720px){
@@ -889,6 +900,9 @@
     @media (max-width:640px){
       .container{width:min(100% - 22px,100%)}
       .hero,.hero-content{min-height:480px}
+      .hero-content{padding:118px 18px 36px}
+      .hero-title{font-size:clamp(32px,12vw,54px)}
+      .hero-tagline{font-size:13px;line-height:1.7}
       .portfolio-section{padding-top:40px}
       .section-title{font-size:clamp(34px,12vw,48px)}
       .about-section,.pricing-section,.contact-section{padding-top:48px;padding-bottom:48px}
@@ -1381,6 +1395,98 @@
       return `url("${safeUrl}")`;
     }
 
+    function setText(id,value){
+      const el=document.getElementById(id);
+      if(!el) return;
+      el.textContent=value ?? "";
+      el.innerText=value ?? "";
+    }
+
+    function setHref(id,value){
+      const el=document.getElementById(id);
+      if(!el) return;
+      el.href=value || "#";
+    }
+
+    function forceRenderAllContent(website){
+      const {base,templateContent}=composeContent(website);
+
+      const whatsappUrl=formatPhoneForWhatsApp(base.phone,base.whatsapp);
+      const phoneTel=formatPhoneForTel(base.phone);
+      const instagramUrl=normalizeInstagramLink(base.instagram);
+      const youtubeUrl=normalizeYoutubeLink(base.youtube);
+      const brandFromName=base.name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()||"").join("");
+      const footerBrand=templateContent.footer.brand||brandFromName||"AM";
+
+      document.title=`${base.name} - Template 4`;
+
+      setText("brandShort", footerBrand);
+      setText("footerBrand", footerBrand);
+
+      setText("heroKicker", templateContent.hero.kicker);
+      setText("heroName", base.name);
+      setText("heroTagline", base.tagline);
+
+      setText("portfolioKicker", templateContent.portfolio.kicker);
+      setText("portfolioTitle", templateContent.portfolio.title);
+      setText("portfolioSubtitle", templateContent.portfolio.subtitle);
+      setText("portfolioButtonLabel", templateContent.portfolio.button_label);
+
+      setText("aboutKicker", templateContent.about.kicker);
+      setText("aboutTitle", templateContent.about.title);
+      setText("aboutCopy", base.about);
+
+      for(let i=0;i<3;i+=1){
+        const point=templateContent.about.points[i]||DEFAULT_TEMPLATE_CONTENT.about.points[i];
+        setText(`aboutPoint${i+1}Title`, point?.title || "");
+        setText(`aboutPoint${i+1}Text`, point?.text || "");
+      }
+
+      setText("pricingKicker", templateContent.pricing.kicker);
+      setText("pricingTitle", templateContent.pricing.title);
+      setText("pricingSubtitle", templateContent.pricing.subtitle);
+
+      templateContent.packages.forEach((pkg,index)=>{
+        const num=index+1;
+        setText(`package${num}Label`, pkg.label);
+        setText(`package${num}Title`, pkg.title);
+        setText(`package${num}Price`, pkg.price);
+        pkg.details.forEach((detail,detailIndex)=>{
+          const detailNum=detailIndex+1;
+          setText(`package${num}Detail${detailNum}Label`, detail.label);
+          setText(`package${num}Detail${detailNum}Value`, detail.value);
+        });
+      });
+
+      setText("contactHeading", templateContent.contact.heading);
+      setText("contactText", templateContent.contact.text);
+
+      setText("phoneText", base.phone);
+      setText("whatsappText", base.whatsapp.startsWith("https://wa.me/") ? "Chat on WhatsApp" : base.whatsapp);
+      setText("instagramText", base.instagram);
+      setText("youtubeText", base.youtube.startsWith("http") ? "Watch latest films" : base.youtube);
+
+      setText("footerCopyright", templateContent.footer.copy);
+
+      setHref("phoneLink", `tel:${phoneTel}`);
+      setHref("whatsappLink", whatsappUrl);
+      setHref("contactWhatsappButton", whatsappUrl);
+      setHref("footerWhatsappLink", whatsappUrl);
+      setHref("packageWhatsapp1", whatsappUrl);
+      setHref("packageWhatsapp2", whatsappUrl);
+      setHref("packageWhatsapp3", whatsappUrl);
+
+      setHref("instagramLink", instagramUrl);
+      setHref("headerInstagramLink", instagramUrl);
+      setHref("footerInstagramLink", instagramUrl);
+
+      setHref("youtubeLink", youtubeUrl);
+      setHref("headerYoutubeLink", youtubeUrl);
+      setHref("footerYoutubeLink", youtubeUrl);
+
+      applyImages(website);
+    }
+
     function applyImages(website){
       document.getElementById("heroImageSlot").style.backgroundImage=buildImageBackground(getImageUrl(website,"hero"));
       document.getElementById("portfolioTile1").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_1"));
@@ -1396,84 +1502,7 @@
     }
 
     function applyWebsiteData(website){
-      const {base,templateContent}=composeContent(website);
-
-      const whatsappUrl=formatPhoneForWhatsApp(base.phone,base.whatsapp);
-      const phoneTel=formatPhoneForTel(base.phone);
-      const instagramUrl=normalizeInstagramLink(base.instagram);
-      const youtubeUrl=normalizeYoutubeLink(base.youtube);
-      const brandFromName=base.name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()||"").join("");
-      const footerBrand=templateContent.footer.brand||brandFromName||"AM";
-
-      document.title=`${base.name} - Template 4`;
-
-      document.getElementById("brandShort").innerText=footerBrand;
-      document.getElementById("footerBrand").innerText=footerBrand;
-
-      document.getElementById("heroKicker").innerText=templateContent.hero.kicker;
-      document.getElementById("heroName").innerText=base.name;
-      document.getElementById("heroTagline").innerText=base.tagline;
-
-      document.getElementById("portfolioKicker").innerText=templateContent.portfolio.kicker;
-      document.getElementById("portfolioTitle").innerText=templateContent.portfolio.title;
-      document.getElementById("portfolioSubtitle").innerText=templateContent.portfolio.subtitle;
-      document.getElementById("portfolioButtonLabel").innerText=templateContent.portfolio.button_label;
-
-      document.getElementById("aboutKicker").innerText=templateContent.about.kicker;
-      document.getElementById("aboutTitle").innerText=templateContent.about.title;
-      document.getElementById("aboutCopy").innerText=base.about;
-
-      for(let i=0;i<3;i+=1){
-        const point=templateContent.about.points[i]||DEFAULT_TEMPLATE_CONTENT.about.points[i];
-        const titleEl=document.getElementById(`aboutPoint${i+1}Title`);
-        const textEl=document.getElementById(`aboutPoint${i+1}Text`);
-        if(titleEl) titleEl.innerText=point?.title||"";
-        if(textEl) textEl.innerText=point?.text||"";
-      }
-
-      document.getElementById("pricingKicker").innerText=templateContent.pricing.kicker;
-      document.getElementById("pricingTitle").innerText=templateContent.pricing.title;
-      document.getElementById("pricingSubtitle").innerText=templateContent.pricing.subtitle;
-
-      templateContent.packages.forEach((pkg,index)=>{
-        const num=index+1;
-        document.getElementById(`package${num}Label`).innerText=pkg.label;
-        document.getElementById(`package${num}Title`).innerText=pkg.title;
-        document.getElementById(`package${num}Price`).innerText=pkg.price;
-        pkg.details.forEach((detail,detailIndex)=>{
-          const detailNum=detailIndex+1;
-          document.getElementById(`package${num}Detail${detailNum}Label`).innerText=detail.label;
-          document.getElementById(`package${num}Detail${detailNum}Value`).innerText=detail.value;
-        });
-      });
-
-      document.getElementById("contactHeading").innerText=templateContent.contact.heading;
-      document.getElementById("contactText").innerText=templateContent.contact.text;
-
-      document.getElementById("phoneText").innerText=base.phone;
-      document.getElementById("whatsappText").innerText=base.whatsapp.startsWith("https://wa.me/")?"Chat on WhatsApp":base.whatsapp;
-      document.getElementById("instagramText").innerText=base.instagram;
-      document.getElementById("youtubeText").innerText=base.youtube.startsWith("http")?"Watch latest films":base.youtube;
-
-      document.getElementById("footerCopyright").innerText=templateContent.footer.copy;
-
-      document.getElementById("phoneLink").href=`tel:${phoneTel}`;
-      document.getElementById("whatsappLink").href=whatsappUrl;
-      document.getElementById("contactWhatsappButton").href=whatsappUrl;
-      document.getElementById("footerWhatsappLink").href=whatsappUrl;
-      document.getElementById("packageWhatsapp1").href=whatsappUrl;
-      document.getElementById("packageWhatsapp2").href=whatsappUrl;
-      document.getElementById("packageWhatsapp3").href=whatsappUrl;
-
-      document.getElementById("instagramLink").href=instagramUrl;
-      document.getElementById("headerInstagramLink").href=instagramUrl;
-      document.getElementById("footerInstagramLink").href=instagramUrl;
-
-      document.getElementById("youtubeLink").href=youtubeUrl;
-      document.getElementById("headerYoutubeLink").href=youtubeUrl;
-      document.getElementById("footerYoutubeLink").href=youtubeUrl;
-
-      applyImages(website);
+      forceRenderAllContent(website);
     }
 
     async function fetchWebsiteBySlug(slug){
@@ -1557,6 +1586,7 @@
         }
 
         applyWebsiteData(currentWebsite);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 50);
         setEditStatus("Image replaced successfully.");
       }catch(error){
         console.error("Image replace failed:",error);
@@ -1594,6 +1624,7 @@
             setEditStatus("Saving text update...");
             await updateWebsiteField(fieldPath,cleanedValue);
             applyWebsiteData(currentWebsite);
+            setTimeout(()=>forceRenderAllContent(currentWebsite), 50);
             setEditStatus("Text updated successfully.");
           }catch(error){
             console.error("Text update failed:",error);
@@ -1639,10 +1670,12 @@
         }
 
         currentWebsite=website;
-        applyWebsiteData(website);
         registerEditableImageSlots();
         registerEditableText();
         showTemplate();
+        applyWebsiteData(website);
+        requestAnimationFrame(()=>forceRenderAllContent(currentWebsite));
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 120);
 
         const editable=canCurrentUserEdit(website);
         showEditToolbar(editable);
@@ -1661,7 +1694,17 @@
       mobileMenuBtn.addEventListener("click",()=>headerInner.classList.toggle("mobile-nav-open"));
     }
 
-    await initTemplate();
+    window.addEventListener("resize", ()=>{
+      if(currentWebsite) forceRenderAllContent(currentWebsite);
+    });
+
+    window.addEventListener("orientationchange", ()=>{
+      if(currentWebsite) {
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 120);
+      }
+    });
+
+    window.addEventListener('load', async ()=>{ await initTemplate(); });
   </script>
 </body>
 </html>
