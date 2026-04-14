@@ -976,7 +976,7 @@
     </header>
 
     <main>
-      <section id="heroImageSlot" class="hero editable-slot" data-image-slot="hero_image_url" aria-label="Hero image">
+      <section id="heroImageSlot" class="hero editable-slot" data-image-slot="hero" aria-label="Hero image">
         <div class="image-loading">Uploading...</div>
         <div class="edit-overlay"><span>Replace Hero Image</span></div>
         <div class="hero-inner">
@@ -1002,29 +1002,29 @@
 
       <section class="mosaic-strip" id="portfolio">
         <div class="mosaic-grid">
-          <a id="portfolioCard1" class="mosaic-card tall editable-slot" data-image-slot="portfolio_image_1_url" href="#contacts">
+          <a id="portfolioCard1" class="mosaic-card tall editable-slot" data-image-slot="portfolio_1" href="#contacts">
             <div class="image-loading">Uploading...</div>
             <div class="edit-overlay"><span>Replace Image</span></div>
           </a>
           <div class="mosaic-stack">
-            <a id="portfolioCard2" class="mosaic-card editable-slot" data-image-slot="portfolio_image_2_url" href="#contacts">
+            <a id="portfolioCard2" class="mosaic-card editable-slot" data-image-slot="portfolio_2" href="#contacts">
               <div class="image-loading">Uploading...</div>
               <div class="edit-overlay"><span>Replace Image</span></div>
             </a>
-            <a id="portfolioCard3" class="mosaic-card editable-slot" data-image-slot="portfolio_image_3_url" href="#contacts">
+            <a id="portfolioCard3" class="mosaic-card editable-slot" data-image-slot="portfolio_3" href="#contacts">
               <div class="image-loading">Uploading...</div>
               <div class="edit-overlay"><span>Replace Image</span></div>
             </a>
           </div>
-          <a id="portfolioCard4" class="mosaic-card tall editable-slot" data-image-slot="portfolio_image_4_url" href="#contacts">
+          <a id="portfolioCard4" class="mosaic-card tall editable-slot" data-image-slot="portfolio_4" href="#contacts">
             <div class="image-loading">Uploading...</div>
             <div class="edit-overlay"><span>Replace Image</span></div>
           </a>
-          <a id="portfolioCard5" class="mosaic-card tall editable-slot" data-image-slot="portfolio_image_5_url" href="#contacts">
+          <a id="portfolioCard5" class="mosaic-card tall editable-slot" data-image-slot="portfolio_5" href="#contacts">
             <div class="image-loading">Uploading...</div>
             <div class="edit-overlay"><span>Replace Image</span></div>
           </a>
-          <a id="portfolioCard6" class="mosaic-card tall editable-slot" data-image-slot="portfolio_image_6_url" href="#contacts">
+          <a id="portfolioCard6" class="mosaic-card tall editable-slot" data-image-slot="portfolio_6" href="#contacts">
             <div class="image-loading">Uploading...</div>
             <div class="edit-overlay"><span>Replace Image</span></div>
           </a>
@@ -1044,7 +1044,7 @@
 
       <section class="split-story">
         <div class="split-grid">
-          <div id="aboutImageTopSlot" class="story-main editable-slot" data-image-slot="template_images.about_image_1_url">
+          <div id="aboutImageTopSlot" class="story-main editable-slot" data-image-slot="about_image_1">
             <div class="image-loading">Uploading...</div>
             <div class="edit-overlay"><span>Replace Image</span></div>
             <div class="story-copy">
@@ -1055,16 +1055,16 @@
 
           <div class="story-side">
             <div class="story-side-top">
-              <div id="packageVisual1" class="story-side-card editable-slot" data-image-slot="template_images.package_image_1_url">
+              <div id="packageVisual1" class="story-side-card editable-slot" data-image-slot="package_image_1">
                 <div class="image-loading">Uploading...</div>
                 <div class="edit-overlay"><span>Replace Image</span></div>
               </div>
-              <div id="packageVisual2" class="story-side-card editable-slot" data-image-slot="template_images.package_image_2_url">
+              <div id="packageVisual2" class="story-side-card editable-slot" data-image-slot="package_image_2">
                 <div class="image-loading">Uploading...</div>
                 <div class="edit-overlay"><span>Replace Image</span></div>
               </div>
             </div>
-            <div id="featuredFilmVisual" class="story-side-bottom editable-slot" data-image-slot="template_images.featured_film_image_url">
+            <div id="featuredFilmVisual" class="story-side-bottom editable-slot" data-image-slot="featured_film_image">
               <div class="image-loading">Uploading...</div>
               <div class="edit-overlay"><span>Replace Image</span></div>
             </div>
@@ -1081,7 +1081,7 @@
 
           <div class="services-grid">
             <article class="service-card">
-              <div id="packageVisual3" class="service-visual editable-slot" data-image-slot="template_images.package_image_3_url">
+              <div id="packageVisual3" class="service-visual editable-slot" data-image-slot="package_image_3">
                 <div class="image-loading">Uploading...</div>
                 <div class="edit-overlay"><span>Replace Image</span></div>
                 <div class="service-title">
@@ -1216,7 +1216,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
   <script type="module">
-    import { replaceImageAsset } from "./js/storage.js";
+    import { replaceTemplateImage } from "./js/storage.js";
 
     const loadingState = document.getElementById("pageLoading");
     const errorState = document.getElementById("pageError");
@@ -1228,23 +1228,35 @@
     const imageFileInput = document.getElementById("imageFileInput");
 
     const DEFAULT_IMAGES = {
-      hero_image_url: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80",
-      portfolio_image_1_url: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1000&q=80",
-      portfolio_image_2_url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
-      portfolio_image_3_url: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=800&q=80",
-      portfolio_image_4_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
-      portfolio_image_5_url: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1000&q=80",
-      portfolio_image_6_url: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1000&q=80"
+      hero: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80",
+      portfolio_1: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1000&q=80",
+      portfolio_2: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+      portfolio_3: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=800&q=80",
+      portfolio_4: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
+      portfolio_5: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1000&q=80",
+      portfolio_6: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1000&q=80",
+      about_image_1: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
+      about_image_2: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1000&q=80",
+      package_image_1: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+      package_image_2: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=800&q=80",
+      package_image_3: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1000&q=80",
+      featured_film_image: "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1000&q=80"
     };
 
-    const DEFAULT_TEMPLATE_IMAGES = {
-      about_image_1_url: DEFAULT_IMAGES.portfolio_image_4_url,
-      about_image_2_url: DEFAULT_IMAGES.portfolio_image_5_url,
-      package_image_1_url: DEFAULT_IMAGES.portfolio_image_2_url,
-      package_image_2_url: DEFAULT_IMAGES.portfolio_image_3_url,
-      package_image_3_url: DEFAULT_IMAGES.portfolio_image_6_url,
-      featured_film_image_url: DEFAULT_IMAGES.portfolio_image_5_url,
-      testimonial_avatar_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80"
+    const LEGACY_IMAGE_FIELD_MAP = {
+      hero: "hero_image_url",
+      portfolio_1: "portfolio_image_1_url",
+      portfolio_2: "portfolio_image_2_url",
+      portfolio_3: "portfolio_image_3_url",
+      portfolio_4: "portfolio_image_4_url",
+      portfolio_5: "portfolio_image_5_url",
+      portfolio_6: "portfolio_image_6_url",
+      about_image_1: "about_image_1_url",
+      about_image_2: "about_image_2_url",
+      package_image_1: "package_image_1_url",
+      package_image_2: "package_image_2_url",
+      package_image_3: "package_image_3_url",
+      featured_film_image: "featured_film_image_url"
     };
 
     const DEFAULT_BASE = {
@@ -1491,6 +1503,16 @@
       }
     }
 
+    function getTemplateImages(website) {
+      return safeObject(website?.template_images);
+    }
+
+    function getImageUrl(website, slotName) {
+      const images = getTemplateImages(website);
+      const legacyField = LEGACY_IMAGE_FIELD_MAP[slotName];
+      return images[slotName] || (legacyField ? website?.[legacyField] : "") || DEFAULT_IMAGES[slotName] || "";
+    }
+
     function composeContent(website) {
       return {
         base: {
@@ -1504,22 +1526,18 @@
           youtube: normalizeYoutubeLink(website.youtube),
           whatsapp: String(website.whatsapp || "").trim() || formatPhoneForWhatsApp(website.phone, website.whatsapp)
         },
-        templateContent: mergeDefaults(DEFAULT_TEMPLATE_CONTENT, safeObject(website.template_content)),
-        templateImages: mergeDefaults(DEFAULT_TEMPLATE_IMAGES, safeObject(website.template_images))
+        templateContent: mergeDefaults(DEFAULT_TEMPLATE_CONTENT, safeObject(website.template_content))
       };
     }
 
-    function applyImages(website, mergedData = null) {
-      const computed = mergedData || composeContent(website);
-      const templateImages = computed.templateImages;
-
-      const heroUrl = website.hero_image_url || DEFAULT_IMAGES.hero_image_url;
-      const portfolio1 = website.portfolio_image_1_url || DEFAULT_IMAGES.portfolio_image_1_url;
-      const portfolio2 = website.portfolio_image_2_url || DEFAULT_IMAGES.portfolio_image_2_url;
-      const portfolio3 = website.portfolio_image_3_url || DEFAULT_IMAGES.portfolio_image_3_url;
-      const portfolio4 = website.portfolio_image_4_url || DEFAULT_IMAGES.portfolio_image_4_url;
-      const portfolio5 = website.portfolio_image_5_url || DEFAULT_IMAGES.portfolio_image_5_url;
-      const portfolio6 = website.portfolio_image_6_url || DEFAULT_IMAGES.portfolio_image_6_url;
+    function applyImages(website) {
+      const heroUrl = getImageUrl(website, "hero");
+      const portfolio1 = getImageUrl(website, "portfolio_1");
+      const portfolio2 = getImageUrl(website, "portfolio_2");
+      const portfolio3 = getImageUrl(website, "portfolio_3");
+      const portfolio4 = getImageUrl(website, "portfolio_4");
+      const portfolio5 = getImageUrl(website, "portfolio_5");
+      const portfolio6 = getImageUrl(website, "portfolio_6");
 
       document.getElementById("heroImageSlot").style.backgroundImage = buildImageBackground(heroUrl, true);
       document.getElementById("portfolioCard1").style.backgroundImage = buildImageBackground(portfolio1, true);
@@ -1528,16 +1546,15 @@
       document.getElementById("portfolioCard4").style.backgroundImage = buildImageBackground(portfolio4, true);
       document.getElementById("portfolioCard5").style.backgroundImage = buildImageBackground(portfolio5, true);
       document.getElementById("portfolioCard6").style.backgroundImage = buildImageBackground(portfolio6, true);
-
-      document.getElementById("aboutImageTopSlot").style.backgroundImage = buildImageBackground(templateImages.about_image_1_url || portfolio4, true);
-      document.getElementById("packageVisual1").style.backgroundImage = buildImageBackground(templateImages.package_image_1_url || portfolio2, true);
-      document.getElementById("packageVisual2").style.backgroundImage = buildImageBackground(templateImages.package_image_2_url || portfolio3, true);
-      document.getElementById("featuredFilmVisual").style.backgroundImage = buildImageBackground(templateImages.featured_film_image_url || portfolio5, true);
-      document.getElementById("packageVisual3").style.backgroundImage = buildImageBackground(templateImages.package_image_3_url || portfolio6, true);
+      document.getElementById("aboutImageTopSlot").style.backgroundImage = buildImageBackground(getImageUrl(website, "about_image_1"), true);
+      document.getElementById("packageVisual1").style.backgroundImage = buildImageBackground(getImageUrl(website, "package_image_1"), true);
+      document.getElementById("packageVisual2").style.backgroundImage = buildImageBackground(getImageUrl(website, "package_image_2"), true);
+      document.getElementById("featuredFilmVisual").style.backgroundImage = buildImageBackground(getImageUrl(website, "featured_film_image"), true);
+      document.getElementById("packageVisual3").style.backgroundImage = buildImageBackground(getImageUrl(website, "package_image_3"), true);
     }
 
     function applyWebsiteData(website) {
-      const { base, templateContent, templateImages } = composeContent(website);
+      const { base, templateContent } = composeContent(website);
 
       const whatsappUrl = formatPhoneForWhatsApp(base.phone, base.whatsapp);
       const phoneTel = formatPhoneForTel(base.phone);
@@ -1603,7 +1620,7 @@
       document.getElementById("youtubeTopLink").href = youtubeUrl;
       document.getElementById("footerYoutubeLink").href = youtubeUrl;
 
-      applyImages(website, { base, templateContent, templateImages });
+      applyImages(website);
     }
 
     async function fetchWebsiteBySlug(slug) {
@@ -1669,42 +1686,50 @@
       return updateWebsiteColumn(fieldPath, value);
     }
 
-    async function updateWebsiteImage(slotName, newUrl) {
-      const parts = String(slotName || "").split(".");
-      const root = parts[0];
+    async function refreshWebsiteRecord() {
+      const supabase = await window.getSupabase();
+      const { data, error } = await supabase
+        .from("user_websites")
+        .select("*")
+        .eq("id", currentWebsite.id)
+        .eq("user_id", currentUserId)
+        .single();
 
-      if (root === "template_images") {
-        const nextValue = deepClone(safeObject(currentWebsite.template_images));
-        setByPath(nextValue, parts.slice(1).join("."), newUrl);
-        return updateWebsiteColumn("template_images", nextValue);
-      }
-
-      return updateWebsiteColumn(slotName, newUrl);
+      if (error) throw error;
+      return data;
     }
 
     async function handleImageSelection(file) {
-      if (!pendingImageSlot || !currentWebsite) return;
+      if (!pendingImageSlot || !currentWebsite || !currentUserId) return;
 
       const slotName = pendingImageSlot;
-      const oldUrl = slotName.startsWith("template_images.")
-        ? getByPath(safeObject(currentWebsite.template_images), slotName.replace("template_images.", ""))
-        : currentWebsite[slotName] || "";
-
-      const folder = `studioos/websites/${currentWebsite.site_slug}`;
 
       try {
         setSlotUploading(slotName, true);
         setEditStatus("Uploading and replacing image...");
 
-        const replaceResult = await replaceImageAsset({ oldUrl, file, folder });
-        await updateWebsiteImage(slotName, replaceResult.newUrl);
-        applyWebsiteData(currentWebsite);
+        const supabase = await window.getSupabase();
+        const replaceResult = await replaceTemplateImage({
+          supabase,
+          userId: currentUserId,
+          websiteId: currentWebsite.id,
+          slot: slotName,
+          file,
+          currentData: { ...getTemplateImages(currentWebsite) }
+        });
 
-        if (replaceResult.deleteResult?.skipped) {
-          setEditStatus("Image replaced. Old file cleanup skipped until secure delete endpoint is added.");
-        } else {
-          setEditStatus("Image replaced successfully.");
+        const refreshedWebsite = await refreshWebsiteRecord();
+        currentWebsite = refreshedWebsite;
+
+        if (replaceResult?.updatedUrl) {
+          currentWebsite.template_images = {
+            ...getTemplateImages(currentWebsite),
+            [slotName]: replaceResult.updatedUrl
+          };
         }
+
+        applyWebsiteData(currentWebsite);
+        setEditStatus("Image replaced successfully.");
       } catch (error) {
         console.error("Image replace failed:", error);
         setEditStatus(error.message || "Unable to replace image.");
