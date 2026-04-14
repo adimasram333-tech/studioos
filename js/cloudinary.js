@@ -5,7 +5,8 @@
 const CLOUD_NAME = "dlu9ozif2"
 const UPLOAD_PRESET = "studioos_gallery"
 const CLOUDINARY_FOLDER = "studioos/websites"
-const CLOUDINARY_DELETE_ENDPOINT = ""
+const CLOUDINARY_DELETE_ENDPOINT =
+  "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/cloudinary-delete"
 
 
 // =============================
@@ -19,10 +20,7 @@ export const CLOUDINARY_CONFIG = {
   deleteEndpoint: CLOUDINARY_DELETE_ENDPOINT
 }
 
-// Required for storage.js
 window.CLOUDINARY_CONFIG = CLOUDINARY_CONFIG
-
-// Optional backward compatibility
 window.CLOUDINARY_CLOUD_NAME = CLOUD_NAME
 window.CLOUDINARY_UPLOAD_PRESET = UPLOAD_PRESET
 window.CLOUDINARY_FOLDER = CLOUDINARY_FOLDER
@@ -116,7 +114,9 @@ async function uploadToCloudinary(file, folderOrEventId = ""){
     formData.append("upload_preset", UPLOAD_PRESET)
 
     const folder = folderOrEventId
-      ? `${CLOUDINARY_FOLDER}/${folderOrEventId}`
+      ? (String(folderOrEventId).includes("/")
+          ? String(folderOrEventId)
+          : `${CLOUDINARY_FOLDER}/${folderOrEventId}`)
       : CLOUDINARY_FOLDER
 
     formData.append("folder", folder)
