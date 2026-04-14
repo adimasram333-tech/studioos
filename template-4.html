@@ -900,7 +900,7 @@
     @media (max-width:640px){
       .container{width:min(100% - 22px,100%)}
       .hero,.hero-content{min-height:480px}
-      .hero-content{padding:118px 18px 36px}
+      .hero-content{padding:118px 18px 34px}
       .hero-title{font-size:clamp(32px,12vw,54px)}
       .hero-tagline{font-size:13px;line-height:1.7}
       .portfolio-section{padding-top:40px}
@@ -1398,8 +1398,9 @@
     function setText(id,value){
       const el=document.getElementById(id);
       if(!el) return;
-      el.textContent=value ?? "";
-      el.innerText=value ?? "";
+      const next=value ?? "";
+      el.textContent=next;
+      el.innerText=next;
     }
 
     function setHref(id,value){
@@ -1409,6 +1410,7 @@
     }
 
     function forceRenderAllContent(website){
+      if(!website) return;
       const {base,templateContent}=composeContent(website);
 
       const whatsappUrl=formatPhoneForWhatsApp(base.phone,base.whatsapp);
@@ -1587,6 +1589,7 @@
 
         applyWebsiteData(currentWebsite);
         setTimeout(()=>forceRenderAllContent(currentWebsite), 50);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 180);
         setEditStatus("Image replaced successfully.");
       }catch(error){
         console.error("Image replace failed:",error);
@@ -1625,6 +1628,7 @@
             await updateWebsiteField(fieldPath,cleanedValue);
             applyWebsiteData(currentWebsite);
             setTimeout(()=>forceRenderAllContent(currentWebsite), 50);
+            setTimeout(()=>forceRenderAllContent(currentWebsite), 180);
             setEditStatus("Text updated successfully.");
           }catch(error){
             console.error("Text update failed:",error);
@@ -1676,6 +1680,8 @@
         applyWebsiteData(website);
         requestAnimationFrame(()=>forceRenderAllContent(currentWebsite));
         setTimeout(()=>forceRenderAllContent(currentWebsite), 120);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 500);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 1200);
 
         const editable=canCurrentUserEdit(website);
         showEditToolbar(editable);
@@ -1699,12 +1705,15 @@
     });
 
     window.addEventListener("orientationchange", ()=>{
-      if(currentWebsite) {
+      if(currentWebsite){
         setTimeout(()=>forceRenderAllContent(currentWebsite), 120);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 500);
       }
     });
 
-    window.addEventListener('load', async ()=>{ await initTemplate(); });
+    window.addEventListener("load", async ()=>{
+      await initTemplate();
+    });
   </script>
 </body>
 </html>
