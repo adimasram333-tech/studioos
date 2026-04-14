@@ -383,7 +383,6 @@ box-shadow:0 0 0 2px rgba(182,139,60,0.45);
 background:rgba(255,255,255,0.72);
 }
 
-
 .edit-overlay{
 position:absolute;
 inset:0;
@@ -563,7 +562,7 @@ Crafting elegant wedding imagery with a refined editorial touch — made for cou
 <div
 id="heroImageSlot"
 class="relative portfolio-card hero-image min-h-[440px] md:min-h-[620px] editable-slot"
-data-image-slot="hero_image_url"
+data-image-slot="hero"
 >
 <div class="floating-badge">
 <p id="featuredStoryLabel" class="text-xs uppercase tracking-[0.18em] text-stone-500 editable-text" data-content-path="hero.featured_story_label">Featured Story</p>
@@ -641,7 +640,7 @@ Every frame is curated to balance emotion, movement, intimacy, and timeless aest
 <div
 id="portfolioImage1Slot"
 class="portfolio-thumb image-one editable-slot"
-data-image-slot="portfolio_image_1_url"
+data-image-slot="portfolio_1"
 >
 <div class="image-loading">Uploading...</div>
 <div class="edit-overlay"><span>Replace Image</span></div>
@@ -657,7 +656,7 @@ data-image-slot="portfolio_image_1_url"
 <div
 id="portfolioImage2Slot"
 class="portfolio-thumb image-two editable-slot"
-data-image-slot="portfolio_image_2_url"
+data-image-slot="portfolio_2"
 >
 <div class="image-loading">Uploading...</div>
 <div class="edit-overlay"><span>Replace Image</span></div>
@@ -673,7 +672,7 @@ data-image-slot="portfolio_image_2_url"
 <div
 id="portfolioImage3Slot"
 class="portfolio-thumb image-three editable-slot"
-data-image-slot="portfolio_image_3_url"
+data-image-slot="portfolio_3"
 >
 <div class="image-loading">Uploading...</div>
 <div class="edit-overlay"><span>Replace Image</span></div>
@@ -689,7 +688,7 @@ data-image-slot="portfolio_image_3_url"
 <div
 id="portfolioImage4Slot"
 class="portfolio-thumb image-four editable-slot"
-data-image-slot="portfolio_image_4_url"
+data-image-slot="portfolio_4"
 >
 <div class="image-loading">Uploading...</div>
 <div class="edit-overlay"><span>Replace Image</span></div>
@@ -705,7 +704,7 @@ data-image-slot="portfolio_image_4_url"
 <div
 id="portfolioImage5Slot"
 class="portfolio-thumb image-five editable-slot"
-data-image-slot="portfolio_image_5_url"
+data-image-slot="portfolio_5"
 >
 <div class="image-loading">Uploading...</div>
 <div class="edit-overlay"><span>Replace Image</span></div>
@@ -721,7 +720,7 @@ data-image-slot="portfolio_image_5_url"
 <div
 id="portfolioImage6Slot"
 class="portfolio-thumb image-six editable-slot"
-data-image-slot="portfolio_image_6_url"
+data-image-slot="portfolio_6"
 >
 <div class="image-loading">Uploading...</div>
 <div class="edit-overlay"><span>Replace Image</span></div>
@@ -890,7 +889,7 @@ Share your event details and we will get back with availability, collections, an
 
 <script type="module">
 
-import { replaceImageAsset } from "./js/storage.js"
+import { replaceTemplateImage } from "./js/storage.js"
 
 const loadingState = document.getElementById("pageLoading")
 const errorState = document.getElementById("pageError")
@@ -901,15 +900,24 @@ const editModeToggle = document.getElementById("editModeToggle")
 const editStatus = document.getElementById("editStatus")
 const imageFileInput = document.getElementById("imageFileInput")
 
-
 const DEFAULT_IMAGES = {
-  hero_image_url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
-  portfolio_image_1_url: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1000&q=80",
-  portfolio_image_2_url: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80",
-  portfolio_image_3_url: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1000&q=80",
-  portfolio_image_4_url: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1000&q=80",
-  portfolio_image_5_url: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1000&q=80",
-  portfolio_image_6_url: "https://images.unsplash.com/photo-1513279922550-250c2129b13a?auto=format&fit=crop&w=1000&q=80"
+  hero: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+  portfolio_1: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1000&q=80",
+  portfolio_2: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80",
+  portfolio_3: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1000&q=80",
+  portfolio_4: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1000&q=80",
+  portfolio_5: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1000&q=80",
+  portfolio_6: "https://images.unsplash.com/photo-1513279922550-250c2129b13a?auto=format&fit=crop&w=1000&q=80"
+}
+
+const LEGACY_IMAGE_FIELD_MAP = {
+  hero: "hero_image_url",
+  portfolio_1: "portfolio_image_1_url",
+  portfolio_2: "portfolio_image_2_url",
+  portfolio_3: "portfolio_image_3_url",
+  portfolio_4: "portfolio_image_4_url",
+  portfolio_5: "portfolio_image_5_url",
+  portfolio_6: "portfolio_image_6_url"
 }
 
 const DEFAULT_TEMPLATE_CONTENT = {
@@ -1179,6 +1187,19 @@ function setByPath(object, path, value){
   })
 }
 
+function getTemplateImages(website){
+  if(website?.template_images && typeof website.template_images === "object" && !Array.isArray(website.template_images)){
+    return website.template_images
+  }
+  return {}
+}
+
+function getImageUrl(website, slotName){
+  const images = getTemplateImages(website)
+  const legacyField = LEGACY_IMAGE_FIELD_MAP[slotName]
+  return images[slotName] || (legacyField ? website?.[legacyField] : "") || DEFAULT_IMAGES[slotName] || ""
+}
+
 function applyTextContent(content){
   const mappings = [
     ["heroBadge", "hero.badge"],
@@ -1253,13 +1274,13 @@ function applyTextContent(content){
 }
 
 function applyImages(website){
-  const heroUrl = website.hero_image_url || DEFAULT_IMAGES.hero_image_url
-  const portfolio1 = website.portfolio_image_1_url || DEFAULT_IMAGES.portfolio_image_1_url
-  const portfolio2 = website.portfolio_image_2_url || DEFAULT_IMAGES.portfolio_image_2_url
-  const portfolio3 = website.portfolio_image_3_url || DEFAULT_IMAGES.portfolio_image_3_url
-  const portfolio4 = website.portfolio_image_4_url || DEFAULT_IMAGES.portfolio_image_4_url
-  const portfolio5 = website.portfolio_image_5_url || DEFAULT_IMAGES.portfolio_image_5_url
-  const portfolio6 = website.portfolio_image_6_url || DEFAULT_IMAGES.portfolio_image_6_url
+  const heroUrl = getImageUrl(website, "hero")
+  const portfolio1 = getImageUrl(website, "portfolio_1")
+  const portfolio2 = getImageUrl(website, "portfolio_2")
+  const portfolio3 = getImageUrl(website, "portfolio_3")
+  const portfolio4 = getImageUrl(website, "portfolio_4")
+  const portfolio5 = getImageUrl(website, "portfolio_5")
+  const portfolio6 = getImageUrl(website, "portfolio_6")
 
   document.getElementById("heroImageSlot").style.backgroundImage = buildImageBackground(heroUrl)
   document.getElementById("portfolioImage1Slot").style.backgroundImage = buildPortfolioBackground(portfolio1)
@@ -1343,19 +1364,14 @@ function canCurrentUserEdit(website){
   return Boolean(currentUserId && website?.user_id && currentUserId === website.user_id)
 }
 
-async function updateWebsiteImage(slotName, newUrl){
+async function refreshWebsiteRecord(){
   const supabase = await window.getSupabase()
-
-  const payload = {
-    [slotName]: newUrl
-  }
 
   const { data, error } = await supabase
     .from("user_websites")
-    .update(payload)
+    .select("*")
     .eq("id", currentWebsite.id)
     .eq("user_id", currentUserId)
-    .select("*")
     .single()
 
   if(error){
@@ -1403,38 +1419,48 @@ async function persistTemplateContent(){
 }
 
 async function handleImageSelection(file){
-  if(!pendingImageSlot || !currentWebsite) return
+  if(!pendingImageSlot || !currentWebsite || !currentUserId) return
 
   const slotName = pendingImageSlot
-  const oldUrl = currentWebsite[slotName] || ""
-  const folder = `studioos/websites/${currentWebsite.site_slug}`
 
   try{
     setSlotUploading(slotName, true)
     setEditStatus("Uploading and replacing image...")
 
-    const replaceResult = await replaceImageAsset({
-      oldUrl,
+    const supabase = await window.getSupabase()
+    const currentImages = {
+      ...getTemplateImages(currentWebsite)
+    }
+
+    const replaceResult = await replaceTemplateImage({
+      supabase,
+      userId: currentUserId,
+      websiteId: currentWebsite.id,
+      slot: slotName,
       file,
-      folder
+      currentData: currentImages
     })
 
-    const updatedWebsite = await updateWebsiteImage(slotName, replaceResult.newUrl)
-    currentWebsite = {
-      ...updatedWebsite,
-      template_content: currentWebsite.template_content || getMergedTemplateContent(updatedWebsite)
-    }
-    applyImages(currentWebsite)
+    const refreshedWebsite = await refreshWebsiteRecord()
 
-    if(replaceResult.deleteResult?.skipped){
-      setEditStatus("Image replaced. Old file cleanup skipped until secure delete endpoint is added.")
-    }else{
-      setEditStatus("Image replaced successfully.")
+    currentWebsite = {
+      ...refreshedWebsite,
+      template_content: currentWebsite.template_content || getMergedTemplateContent(refreshedWebsite)
     }
+
+    if(replaceResult?.updatedUrl){
+      currentWebsite.template_images = {
+        ...getTemplateImages(currentWebsite),
+        [slotName]: replaceResult.updatedUrl
+      }
+    }
+
+    applyImages(currentWebsite)
+    setEditStatus("Image replaced successfully.")
   }
   catch(error){
     console.error("Image replace failed:", error)
-    setEditStatus(error.message || "Unable to replace image.")
+    setEditStatus(error?.message || "Unable to replace image.")
   }
   finally{
     setSlotUploading(slotName, false)
@@ -1448,6 +1474,7 @@ function registerEditableImageSlots(){
     slot.addEventListener("click", ()=>{
       if(!editModeEnabled) return
       pendingImageSlot = slot.dataset.imageSlot || ""
+      if(!pendingImageSlot) return
       imageFileInput.click()
     })
   })
@@ -1541,8 +1568,8 @@ async function initTemplate(){
     showError("Unable to load website preview right now.")
   }
 }
-await initTemplate()
 
+await initTemplate()
 
 </script>
 
