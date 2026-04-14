@@ -5,464 +5,145 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Template 4 - StudioOS</title>
   <style>
-    :root{
-      --bg:#f3eee7;
-      --surface:#fbf8f3;
-      --surface-2:#e6ddd0;
-      --text:#171412;
-      --muted:#6d655d;
-      --line:rgba(23,20,18,0.1);
-      --accent:#1e1a16;
-      --accent-soft:rgba(30,26,22,0.08);
-      --container:1440px;
-      --shadow:0 24px 80px rgba(20,17,15,0.08);
-      --radius:30px;
-    }
-
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;background:linear-gradient(180deg,#f7f2eb 0%,var(--bg) 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
-    img{max-width:100%;display:block}
-    a{text-decoration:none;color:inherit}
-    button,input,textarea{font:inherit}
-    .hidden{display:none !important}
-
-    .page-state{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(243,238,231,0.88);backdrop-filter:blur(10px);z-index:100;padding:24px}
-    .page-state-card{width:min(460px,100%);background:rgba(255,255,255,0.96);border:1px solid rgba(23,20,18,0.08);border-radius:28px;box-shadow:var(--shadow);padding:28px;text-align:center}
-    .page-state-title{margin:0;font-size:2rem;line-height:1;font-weight:700;letter-spacing:0.04em;text-transform:uppercase}
-    .page-state-text{margin-top:12px;color:var(--muted);font-size:0.96rem;line-height:1.75}
-    .page-state-btn{margin-top:18px;min-height:48px;padding:0 18px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;text-transform:uppercase;letter-spacing:0.12em;font-size:0.74rem;border:1px solid rgba(23,20,18,0.08)}
-
-    .edit-toolbar{position:fixed;top:16px;right:16px;z-index:101;display:flex;flex-direction:column;gap:10px;align-items:flex-end}
-    .edit-chip{display:inline-flex;align-items:center;gap:12px;padding:12px 14px;border-radius:999px;background:rgba(255,255,255,0.94);border:1px solid rgba(23,20,18,0.08);box-shadow:var(--shadow)}
-    .edit-label{font-size:0.8rem;font-weight:700;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase}
-    .toggle-btn{appearance:none;width:48px;height:28px;border-radius:999px;background:#d4cdc4;position:relative;cursor:pointer;border:none;transition:background .2s ease}
-    .toggle-btn::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:999px;background:#fff;transition:transform .2s ease;box-shadow:0 2px 10px rgba(0,0,0,0.12)}
-    .toggle-btn.active{background:var(--accent)}
-    .toggle-btn.active::after{transform:translateX(20px)}
-    .edit-status{max-width:360px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,0.94);border:1px solid rgba(23,20,18,0.08);box-shadow:var(--shadow);color:var(--muted);font-size:0.82rem;line-height:1.6}
-
-    .container{width:min(var(--container),calc(100% - 32px));margin:0 auto}
-    .site-header{position:sticky;top:0;z-index:40;backdrop-filter:blur(12px);background:rgba(243,238,231,0.78);border-bottom:1px solid var(--line)}
-    .header-inner{min-height:74px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px}
-    .nav,.nav-right{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
-    .nav a,.nav-right a{font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);transition:color .2s ease}
-    .nav a:hover,.nav-right a:hover,.footer-links a:hover{color:var(--text)}
-    .brand-mark{justify-self:center;font-size:28px;font-weight:700;letter-spacing:0.18em;white-space:nowrap}
-    .mobile-menu-btn{display:none;min-width:44px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,0.5);color:var(--text);cursor:pointer}
-
+    :root{--bg:#f3f3f3;--surface:#ffffff;--surface-dark:#1f1f1f;--surface-darker:#090909;--text:#161616;--text-soft:#666666;--text-light:#f7f7f7;--text-light-soft:#cfcfcf;--line:rgba(0,0,0,0.08);--line-light:rgba(255,255,255,0.12);--shadow:0 24px 80px rgba(0,0,0,0.14);--container:1180px}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
+    a{text-decoration:none;color:inherit}img{display:block;max-width:100%}button,input,textarea{font:inherit}.hidden{display:none!important}
+    .page-state{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,10,10,.78);backdrop-filter:blur(10px);z-index:100;padding:24px}
+    .page-state-card{width:min(460px,100%);background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.08);border-radius:28px;box-shadow:var(--shadow);padding:28px;text-align:center}
+    .page-state-title{margin:0;font-size:2rem;line-height:1;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    .page-state-text{margin-top:12px;color:var(--text-soft);font-size:.95rem;line-height:1.75}
+    .page-state-btn{margin-top:18px;min-height:48px;padding:0 18px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:#111;color:#fff;text-transform:uppercase;letter-spacing:.14em;font-size:.74rem;border:1px solid rgba(0,0,0,.08)}
+    .edit-toolbar{position:fixed;top:16px;right:16px;z-index:110;display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+    .edit-chip{display:inline-flex;align-items:center;gap:12px;padding:12px 14px;border-radius:999px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.08);box-shadow:var(--shadow)}
+    .edit-label{font-size:.8rem;font-weight:700;color:#111;letter-spacing:.08em;text-transform:uppercase}
+    .toggle-btn{appearance:none;width:48px;height:28px;border-radius:999px;background:#d1d1d1;position:relative;cursor:pointer;transition:background .2s ease;border:none}
+    .toggle-btn::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:999px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.14);transition:transform .2s ease}
+    .toggle-btn.active{background:#111}.toggle-btn.active::after{transform:translateX(20px)}
+    .edit-status{max-width:360px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.96);border:1px solid rgba(0,0,0,.08);box-shadow:var(--shadow);color:var(--text-soft);font-size:.82rem;line-height:1.6}
+    .container{width:min(var(--container),calc(100% - 40px));margin:0 auto}
+    .site-header{position:absolute;top:0;left:0;right:0;z-index:20}
+    .header-inner{min-height:72px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;color:#fff;padding-top:10px}
+    .nav,.nav-right{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+    .nav a,.nav-right a{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.88);transition:opacity .2s ease}
+    .nav a:hover,.nav-right a:hover,.footer-links a:hover{opacity:.75}
+    .brand-mark{justify-self:center;font-size:18px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;color:#fff}
+    .mobile-menu-btn{display:none;min-width:42px;min-height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;cursor:pointer}
     .editable-slot,.editable-text{position:relative}
     .editable-text.edit-active{cursor:pointer;border-radius:10px;transition:box-shadow .2s ease,background .2s ease}
-    .editable-text.edit-active:hover{box-shadow:0 0 0 1px rgba(23,20,18,0.14);background:rgba(255,255,255,0.42)}
-    .editable-slot.edit-active{cursor:pointer}
-    .editable-slot.edit-active:hover{outline:1px solid rgba(23,20,18,0.2)}
-    .edit-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(17,17,17,0.28);color:#fff;font-size:0.9rem;font-weight:600;z-index:2;text-align:center;padding:16px}
+    .editable-text.edit-active:hover{box-shadow:0 0 0 1px rgba(255,255,255,.18);background:rgba(255,255,255,.05)}
+    .editable-slot.edit-active{cursor:pointer}.editable-slot.edit-active:hover{outline:1px solid rgba(255,255,255,.4)}
+    .edit-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.34);color:#fff;font-size:.9rem;font-weight:600;text-align:center;padding:16px;z-index:2}
     .editable-slot.edit-active .edit-overlay{display:flex}
-    .edit-overlay span{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:999px;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.18)}
-    .image-loading{position:absolute;top:12px;right:12px;display:none;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,0.94);color:#111827;font-size:0.75rem;font-weight:700;z-index:3}
+    .edit-overlay span{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.18)}
+    .image-loading{position:absolute;top:12px;right:12px;display:none;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.95);color:#111827;font-size:.75rem;font-weight:700;z-index:3}
     .editable-slot.uploading .image-loading{display:block}
-
-    .hero-shell{padding:22px 0 0}
-    .hero-layout{display:grid;grid-template-columns:280px 1fr;gap:22px;align-items:stretch;min-height:calc(100vh - 108px)}
-    .hero-rail{display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,0.5);padding:24px;box-shadow:var(--shadow)}
-    .rail-top{display:grid;gap:18px}
-    .eyebrow{font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:var(--muted)}
-    .rail-copy{font-size:14px;line-height:1.8;color:var(--muted)}
-    .rail-stats{display:grid;gap:16px}
-    .rail-stat{padding-top:16px;border-top:1px solid var(--line)}
-    .rail-stat strong{display:block;font-size:clamp(24px,4vw,34px);line-height:1;font-weight:700}
-    .rail-stat span{display:block;margin-top:7px;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted)}
-    .rail-actions{display:grid;gap:12px}
-    .btn,.btn-outline{min-height:52px;padding:0 24px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:10px;letter-spacing:0.12em;text-transform:uppercase;font-size:12px;cursor:pointer;transition:transform .2s ease,background .2s ease,border-color .2s ease}
-    .btn{background:var(--accent);color:#fff;border:1px solid rgba(23,20,18,0.08);box-shadow:0 18px 40px rgba(31,28,25,0.18)}
-    .btn-outline{background:transparent;color:var(--text);border:1px solid rgba(23,20,18,0.14)}
-    .btn:hover,.btn-outline:hover{transform:translateY(-2px)}
-
-    .hero-stage{display:grid;grid-template-columns:1.08fr 0.92fr;gap:22px}
-    .hero-main{position:relative;border-radius:var(--radius);overflow:hidden;min-height:780px;background-size:cover;background-position:center;background-repeat:no-repeat;box-shadow:var(--shadow)}
-    .hero-main::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(17,17,17,0.06), rgba(17,17,17,0.18));pointer-events:none}
-    .hero-block{position:absolute;left:28px;bottom:28px;z-index:1;width:min(560px,calc(100% - 56px));padding:24px;background:rgba(255,255,255,0.74);backdrop-filter:blur(10px);border:1px solid rgba(23,20,18,0.08);border-radius:26px}
-    .hero-badge{display:inline-flex;align-items:center;padding:9px 13px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:11px;letter-spacing:0.18em;text-transform:uppercase}
-    .hero-title{margin:18px 0 0;font-size:clamp(44px,8vw,98px);line-height:0.9;font-weight:700;letter-spacing:-0.05em;text-transform:uppercase;max-width:6ch}
-    .hero-sub{margin:14px 0 0;max-width:40ch;color:var(--muted);font-size:15px;line-height:1.85}
-    .hero-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
-    .social-row{display:flex;gap:12px}
-    .social-row a,.footer-social a{width:42px;height:42px;border-radius:999px;display:grid;place-items:center;border:1px solid rgba(23,20,18,0.1);background:rgba(255,255,255,0.82);color:var(--text);transition:transform .2s ease,background .2s ease}
-    .social-row a:hover,.footer-social a:hover{transform:translateY(-2px);background:#fff}
-
-    .hero-side{display:grid;grid-template-rows:0.88fr 1.12fr;gap:22px}
-    .side-card{position:relative;border-radius:var(--radius);overflow:hidden;background-size:cover;background-position:center;background-repeat:no-repeat;box-shadow:var(--shadow);min-height:240px}
-    .side-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(17,17,17,0.04), rgba(17,17,17,0.16));pointer-events:none}
-    .side-quote{padding:24px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,rgba(255,255,255,0.8),rgba(255,255,255,0.58));box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:space-between}
-    .side-quote h3{margin:0;font-size:clamp(28px,3vw,44px);line-height:0.98;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
-    .side-quote p{margin:16px 0 0;font-size:14px;line-height:1.9;color:var(--muted)}
-    .mini-stack{display:grid;grid-template-columns:1fr 1fr;gap:22px}
-
-    .strip-section{padding:22px 0 0}
-    .strip-grid{display:grid;grid-template-columns:1.15fr 0.85fr 1fr 0.9fr;gap:22px}
-    .strip-card{position:relative;min-height:360px;border-radius:var(--radius);overflow:hidden;background-size:cover;background-position:center;background-repeat:no-repeat;box-shadow:var(--shadow)}
-    .strip-card.tall{min-height:520px}
-    .strip-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(17,17,17,0.04), rgba(17,17,17,0.2));pointer-events:none}
-    .image-caption{position:absolute;left:18px;right:18px;bottom:18px;z-index:1;padding:16px 18px;border-radius:20px;background:rgba(255,255,255,0.74);backdrop-filter:blur(10px);border:1px solid rgba(23,20,18,0.08)}
-    .image-caption strong{display:block;font-size:15px;letter-spacing:0.16em;text-transform:uppercase}
-    .image-caption span{display:block;margin-top:6px;color:var(--muted);font-size:13px;line-height:1.6}
-
-    .section{padding:72px 0}
-    .section-head{display:flex;align-items:center;gap:20px;margin-bottom:28px}
-    .section-head h2{margin:0;font-size:clamp(28px,4vw,42px);font-weight:700;text-transform:uppercase;letter-spacing:0.06em}
-    .section-line{flex:1;height:1px;background:var(--line);min-width:70px}
-
-    .story-layout{display:grid;grid-template-columns:0.92fr 1.08fr;gap:22px;align-items:start}
-    .sticky-story{position:sticky;top:100px;padding:28px;border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,0.56);box-shadow:var(--shadow)}
-    .sticky-story h3,.contact-copy h3{margin:0;font-size:clamp(30px,4vw,46px);line-height:0.98;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
-    .sticky-story p,.contact-copy p{margin:18px 0 0;color:var(--muted);font-size:14px;line-height:1.9}
-    .point-grid{display:grid;gap:14px;margin-top:24px}
-    .point{padding:16px 18px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,0.66)}
-    .point strong{display:block;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px}
-    .point span{display:block;color:var(--muted);font-size:14px;line-height:1.7}
-    .story-images{display:grid;grid-template-columns:1fr 1fr;gap:22px}
-    .story-images .image-card{min-height:300px}
-    .story-images .image-card.large{grid-column:span 2;min-height:420px}
-
-    .services-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
-    .service-card,.contact-card,.contact-form{border:1px solid var(--line);background:rgba(255,255,255,0.56);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-    .service-visual{position:relative;min-height:230px;background-size:cover;background-position:center;background-repeat:no-repeat}
-    .service-visual::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(17,17,17,0.04), rgba(17,17,17,0.24))}
-    .service-title{position:absolute;left:20px;right:20px;bottom:18px;z-index:1;color:#fff}
-    .service-title strong{display:block;font-size:22px;line-height:1.08;font-weight:700;text-transform:uppercase}
-    .service-title span{display:block;margin-top:6px;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#ececec}
-    .service-body{padding:22px}
-    .service-price{margin:0 0 16px;font-size:30px;color:var(--text);font-weight:700}
-    .service-list{display:grid;gap:12px;margin-bottom:20px}
-    .service-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line);color:var(--muted);font-size:14px}
-    .service-item strong{color:var(--text);text-align:right;font-weight:600}
-
+    .hero{position:relative;min-height:560px;background:#000;overflow:hidden}
+    .hero-media{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;filter:grayscale(100%);transform:scale(1.01)}
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.22),rgba(0,0,0,.32));pointer-events:none}
+    .hero-spacer{position:relative;z-index:1;min-height:560px}
+    .portfolio-section{background:var(--bg);padding:56px 0 44px}
+    .section-kicker{text-align:center;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#a1a1a1;margin-bottom:16px}
+    .section-title{margin:0;text-align:center;font-size:clamp(42px,6vw,64px);line-height:.95;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#202020}
+    .section-subtitle{margin:16px auto 0;max-width:520px;text-align:center;color:#7a7a7a;font-size:13px;line-height:1.8}
+    .portfolio-grid{margin:42px auto 0;width:min(820px,100%);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+    .portfolio-stack{display:grid;gap:12px}
+    .portfolio-tile{position:relative;overflow:hidden;background:#d7d7d7;background-size:cover;background-position:center;background-repeat:no-repeat;min-height:180px;filter:grayscale(100%)}
+    .tile-sm{min-height:170px}.tile-md{min-height:215px}.tile-lg{min-height:290px}
+    .portfolio-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.08));pointer-events:none}
+    .load-more-wrap{display:flex;justify-content:center;margin-top:30px}
+    .load-more-btn{min-height:42px;padding:0 22px;border-radius:999px;background:#222;color:#fff;border:1px solid rgba(0,0,0,.08);letter-spacing:.16em;text-transform:uppercase;font-size:11px;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+    .about-section{background:var(--surface-dark);color:var(--text-light);padding:74px 0;position:relative;overflow:hidden}
+    .about-section::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at center,rgba(255,255,255,.03),transparent 46%),linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));pointer-events:none}
+    .about-inner{position:relative;z-index:1;width:min(760px,calc(100% - 32px));margin:0 auto;text-align:center}
+    .about-kicker{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:#bdbdbd;margin-bottom:16px}
+    .about-title{margin:0;font-size:clamp(36px,5vw,56px);line-height:.98;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
+    .about-copy{margin:22px auto 0;max-width:620px;color:var(--text-light-soft);font-size:14px;line-height:1.95}
+    .clients-section{position:relative;background:#171717;color:#fff;padding:66px 0;overflow:hidden}
+    .clients-bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;opacity:.32;filter:grayscale(100%)}
+    .clients-section::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,23,23,.46),rgba(23,23,23,.66));pointer-events:none}
+    .clients-inner{position:relative;z-index:1;width:min(980px,calc(100% - 32px));margin:0 auto;text-align:center}
+    .clients-kicker{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#d3d3d3;margin-bottom:16px}
+    .clients-title{margin:0;font-size:clamp(34px,5vw,58px);line-height:.98;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+    .clients-row{margin-top:34px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:22px;align-items:center}
+    .client-chip{min-height:54px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#f5f5f5;padding:10px 14px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+    .contact-section{background:var(--surface-darker);color:#fff;padding:54px 0;border-top:1px solid var(--line-light)}
     .contact-wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-    .contact-card,.contact-form{padding:30px}
-    .contact-links{display:grid;gap:14px;margin-top:26px}
-    .contact-link{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;padding:0 18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,0.64);transition:transform .2s ease,border-color .2s ease}
-    .contact-link:hover{transform:translateY(-2px);border-color:rgba(23,20,18,0.18)}
-    .contact-link strong{display:block;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text);margin-bottom:4px}
-    .contact-link span{display:block;color:var(--muted);font-size:14px}
-    .contact-form h3{margin:0 0 18px;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em}
+    .contact-card,.contact-form{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+    .contact-heading{margin:0;font-size:clamp(28px,4vw,42px);line-height:1;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+    .contact-copy{margin:16px 0 0;color:#cfcfcf;font-size:14px;line-height:1.9}
+    .contact-links{display:grid;gap:14px;margin-top:24px}
+    .contact-link{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:62px;padding:0 18px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.03);transition:transform .2s ease,border-color .2s ease}
+    .contact-link:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.18)}
+    .contact-link strong{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#fff;margin-bottom:4px}
+    .contact-link span{display:block;color:#c9c9c9;font-size:14px}
+    .contact-form h3{margin:0 0 18px;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
     .form-grid{display:grid;gap:14px}
-    .field,.textarea{width:100%;border:1px solid rgba(23,20,18,0.1);background:rgba(255,255,255,0.82);border-radius:16px;padding:16px 18px;color:var(--text);outline:none;transition:border-color .2s ease,box-shadow .2s ease}
-    .field::placeholder,.textarea::placeholder{color:#8c837b}
-    .field:focus,.textarea:focus{border-color:rgba(23,20,18,0.2);box-shadow:0 0 0 4px rgba(23,20,18,0.04)}
-    .textarea{min-height:150px;resize:vertical}
-
-    .site-footer{padding:34px 0 44px}
-    .footer-wrap{display:grid;grid-template-columns:1.1fr 0.9fr 1fr;gap:26px;align-items:start;padding-top:34px;border-top:1px solid var(--line)}
-    .footer-brand{font-size:28px;color:var(--text);letter-spacing:0.18em;font-weight:700;margin-bottom:14px}
-    .footer-copy,.footer-subtext,.footer-links a{color:var(--muted);font-size:14px}
-    .footer-links{display:grid;gap:10px}
-    .footer-links a{text-transform:uppercase;letter-spacing:0.12em;font-size:12px}
-    .footer-social{display:flex;gap:12px;margin-top:18px}
-    .subscribe-box{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:rgba(255,255,255,0.72);margin-top:12px}
-    .subscribe-box input{flex:1;border:0;outline:none;background:transparent;padding:15px 16px;color:var(--text);min-width:0}
-    .subscribe-box input::placeholder{color:#8c837b}
-    .subscribe-box button{border:0;background:var(--accent);color:#fff;padding:0 18px;text-transform:uppercase;letter-spacing:0.12em;font-size:12px;cursor:pointer}
-
-    @media (max-width:1180px){
-      .hero-layout,.story-layout,.services-grid,.contact-wrap,.footer-wrap{grid-template-columns:1fr}
-      .hero-stage{grid-template-columns:1fr}
-      .hero-main{min-height:620px}
-      .hero-side{grid-template-columns:1fr 1fr;grid-template-rows:none}
-      .strip-grid{grid-template-columns:1fr 1fr}
-      .strip-card.tall{min-height:400px}
-      .sticky-story{position:static}
-    }
-    @media (max-width:860px){
-      .header-inner{grid-template-columns:auto 1fr auto}
-      .nav,.nav-right{display:none}
-      .mobile-menu-btn{display:inline-grid;place-items:center}
-      .mobile-nav-open .nav,.mobile-nav-open .nav-right{display:flex;grid-column:1 / -1;padding:8px 0 14px;gap:16px}
-      .mobile-nav-open .header-inner{grid-template-columns:auto 1fr auto;align-items:start}
-      .hero-layout,.hero-stage,.hero-side,.strip-grid,.story-images{grid-template-columns:1fr}
-      .hero-main{min-height:540px}
-      .hero-title{max-width:none}
-      .hero-rail{order:2}
-      .hero-stage{order:1}
-      .strip-card,.strip-card.tall,.story-images .image-card,.story-images .image-card.large{min-height:300px;grid-column:auto}
-      .edit-toolbar{left:16px;right:16px;align-items:stretch}.edit-chip{justify-content:space-between}.edit-status{max-width:none}
-    }
-    @media (max-width:640px){
-      .container{width:min(100% - 22px,100%)}
-      .hero-shell{padding-top:16px}
-      .hero-rail,.hero-block,.side-quote,.sticky-story,.contact-card,.contact-form,.service-body{padding-left:18px;padding-right:18px}
-      .hero-title{font-size:clamp(34px,13vw,58px)}
-      .hero-links,.social-row{flex-direction:column}
-      .btn,.btn-outline{width:100%}
-      .hero-main{min-height:500px}
-      .hero-block{left:14px;right:14px;bottom:14px;width:auto}
-      .subscribe-box{flex-direction:column}.subscribe-box button{min-height:48px}
-    }
+    .field,.textarea{width:100%;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);border-radius:16px;padding:16px 18px;color:#fff;outline:none;transition:border-color .2s ease,box-shadow .2s ease}
+    .field::placeholder,.textarea::placeholder{color:#9f9f9f}.field:focus,.textarea:focus{border-color:rgba(255,255,255,.22);box-shadow:0 0 0 4px rgba(255,255,255,.04)}.textarea{min-height:150px;resize:vertical}
+    .btn{min-height:50px;padding:0 22px;border-radius:999px;background:#fff;color:#111;border:1px solid rgba(255,255,255,.12);letter-spacing:.14em;text-transform:uppercase;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+    .site-footer{background:#000;color:#fff;padding:26px 0 34px;border-top:1px solid rgba(255,255,255,.08)}
+    .footer-wrap{width:min(960px,calc(100% - 32px));margin:0 auto;text-align:center}
+    .footer-brand{font-size:20px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+    .footer-copy{margin-top:10px;color:#a8a8a8;font-size:12px;line-height:1.8}
+    .footer-social{margin-top:14px;display:flex;justify-content:center;gap:10px}
+    .footer-social a{width:34px;height:34px;border-radius:999px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:#fff}
+    @media (max-width:980px){.clients-row{grid-template-columns:repeat(3,minmax(0,1fr))}.contact-wrap{grid-template-columns:1fr}}
+    @media (max-width:860px){.header-inner{grid-template-columns:auto 1fr auto}.nav,.nav-right{display:none}.mobile-menu-btn{display:inline-grid;place-items:center}.mobile-nav-open .nav,.mobile-nav-open .nav-right{display:flex;grid-column:1/-1;padding:8px 0 14px;gap:14px}.mobile-nav-open .header-inner{grid-template-columns:auto 1fr auto;align-items:start}.edit-toolbar{left:16px;right:16px;align-items:stretch}.edit-chip{justify-content:space-between}.edit-status{max-width:none}}
+    @media (max-width:720px){.portfolio-grid{grid-template-columns:1fr}.clients-row{grid-template-columns:1fr 1fr}}
+    @media (max-width:640px){.container{width:min(100% - 22px,100%)}.hero,.hero-spacer{min-height:420px}.portfolio-section{padding-top:40px}.section-title{font-size:clamp(34px,12vw,48px)}.about-section,.clients-section,.contact-section{padding-top:48px;padding-bottom:48px}.contact-card,.contact-form{padding-left:18px;padding-right:18px}.clients-row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <div id="pageLoading" class="page-state">
-    <div class="page-state-card">
-      <p class="page-state-title">Loading Preview</p>
-      <p class="page-state-text">Fetching your website details and preparing Template 4.</p>
-    </div>
-  </div>
-
-  <div id="pageError" class="page-state hidden">
-    <div class="page-state-card">
-      <p class="page-state-title">Website Not Found</p>
-      <p id="pageErrorText" class="page-state-text">This website preview is not available right now.</p>
-      <a href="website-builder.html" class="page-state-btn">Back to Builder</a>
-    </div>
-  </div>
-
-  <div id="editToolbar" class="edit-toolbar hidden">
-    <div class="edit-chip">
-      <span class="edit-label">Edit Mode</span>
-      <button id="editModeToggle" type="button" class="toggle-btn" aria-label="Toggle edit mode"></button>
-    </div>
-    <div id="editStatus" class="edit-status">You are viewing preview mode.</div>
-  </div>
-
+  <div id="pageLoading" class="page-state"><div class="page-state-card"><p class="page-state-title">Loading Preview</p><p class="page-state-text">Fetching your website details and preparing Template 4.</p></div></div>
+  <div id="pageError" class="page-state hidden"><div class="page-state-card"><p class="page-state-title">Website Not Found</p><p id="pageErrorText" class="page-state-text">This website preview is not available right now.</p><a href="website-builder.html" class="page-state-btn">Back to Builder</a></div></div>
+  <div id="editToolbar" class="edit-toolbar hidden"><div class="edit-chip"><span class="edit-label">Edit Mode</span><button id="editModeToggle" type="button" class="toggle-btn" aria-label="Toggle edit mode"></button></div><div id="editStatus" class="edit-status">You are viewing preview mode.</div></div>
   <input id="imageFileInput" type="file" accept="image/*" class="hidden" />
-
   <div id="templateRoot" class="hidden">
     <header class="site-header" id="top">
       <div class="container header-inner" id="headerInner">
-        <nav class="nav" aria-label="Primary navigation">
-          <a href="#portfolio">Portfolio</a>
-          <a href="#about">About</a>
-        </nav>
+        <nav class="nav" aria-label="Primary navigation"><a href="#portfolio">Work</a><a href="#about">About</a><a href="#journal">Journal</a></nav>
         <a class="brand-mark editable-text" id="brandShort" data-field="template_content.footer.brand" href="#top">AM</a>
-        <nav class="nav-right" aria-label="Secondary navigation">
-          <a href="#prices">Prices</a>
-          <a href="#contacts">Contact</a>
-        </nav>
+        <nav class="nav-right" aria-label="Secondary navigation"><a id="headerInstagramLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">◎</a><a id="headerYoutubeLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">▶</a></nav>
         <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">☰</button>
       </div>
     </header>
-
     <main>
-      <section class="hero-shell">
-        <div class="container hero-layout">
-          <aside class="hero-rail">
-            <div class="rail-top">
-              <div class="eyebrow editable-text" id="locationText" data-field="template_content.hero.location">Creative Studio · Available Worldwide</div>
-              <div class="rail-copy editable-text" id="heroTagline" data-field="tagline">Minimal editorial websites for photographers who want a sharp, premium first impression.</div>
-            </div>
-
-            <div class="rail-stats">
-              <div class="rail-stat">
-                <strong class="editable-text" id="heroStat1Value" data-field="template_content.hero.stats.0.value">120+</strong>
-                <span class="editable-text" id="heroStat1Label" data-field="template_content.hero.stats.0.label">Projects</span>
-              </div>
-              <div class="rail-stat">
-                <strong class="editable-text" id="heroStat2Value" data-field="template_content.hero.stats.1.value">08</strong>
-                <span class="editable-text" id="heroStat2Label" data-field="template_content.hero.stats.1.label">Years</span>
-              </div>
-              <div class="rail-stat">
-                <strong class="editable-text" id="heroStat3Value" data-field="template_content.hero.stats.2.value">4.9</strong>
-                <span class="editable-text" id="heroStat3Label" data-field="template_content.hero.stats.2.label">Rating</span>
-              </div>
-            </div>
-
-            <div class="rail-actions">
-              <a class="btn" href="#contacts">Book Now</a>
-              <a class="btn-outline" href="#portfolio">Explore Work</a>
-            </div>
-          </aside>
-
-          <div class="hero-stage">
-            <div id="heroImageSlot" class="hero-main editable-slot" data-image-slot="hero" aria-label="Hero image">
-              <div class="image-loading">Uploading...</div>
-              <div class="edit-overlay"><span>Replace Hero Image</span></div>
-              <div class="hero-block">
-                <span id="heroBadge" class="hero-badge editable-text" data-field="template_content.hero.badge">Template 4</span>
-                <h1 id="heroName" class="hero-title editable-text" data-field="name">Aditya Masram</h1>
-                <p id="heroSub" class="hero-sub editable-text" data-field="template_content.hero.card_text">A bold layout with a large hero image, side information rail and modular visual sections built to feel clearly different from standard stacked templates.</p>
-                <div class="hero-links">
-                  <div class="social-row">
-                    <a id="youtubeTopLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube">▶</a>
-                    <a id="instagramTopLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>
-                    <a id="whatsappTopLink" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">✆</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="hero-side">
-              <div class="side-quote">
-                <div>
-                  <div class="eyebrow">Layout Direction</div>
-                  <h3 id="heroCardTitle" class="editable-text" data-field="template_content.hero.card_title">Modern grid with strong image focus.</h3>
-                  <p id="heroCardText" class="editable-text" data-field="template_content.hero.card_text">The goal here is a more editorial composition: fixed side rail, oversized hero frame and staggered image modules instead of repeated card stacks.</p>
-                </div>
-              </div>
-              <div class="mini-stack">
-                <div id="galleryCard1" class="side-card editable-slot" data-image-slot="gallery_1">
-                  <div class="image-loading">Uploading...</div>
-                  <div class="edit-overlay"><span>Replace Image</span></div>
-                </div>
-                <div id="galleryCard2" class="side-card editable-slot" data-image-slot="gallery_2">
-                  <div class="image-loading">Uploading...</div>
-                  <div class="edit-overlay"><span>Replace Image</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="strip-section" id="portfolio">
-        <div class="container strip-grid">
-          <div id="galleryCard3" class="strip-card tall editable-slot" data-image-slot="gallery_3">
-            <div class="image-loading">Uploading...</div>
-            <div class="edit-overlay"><span>Replace Image</span></div>
-            <div class="image-caption">
-              <strong id="gallery3Title" class="editable-text" data-field="template_content.gallery.2.title">Signature Frames</strong>
-              <span id="gallery3Text" class="editable-text" data-field="template_content.gallery.2.text">Large visual blocks create a stronger premium feel than standard thumbnail grids.</span>
-            </div>
-          </div>
-          <div id="galleryCard4" class="strip-card editable-slot" data-image-slot="gallery_4">
-            <div class="image-loading">Uploading...</div>
-            <div class="edit-overlay"><span>Replace Image</span></div>
-            <div class="image-caption">
-              <strong id="gallery4Title" class="editable-text" data-field="template_content.gallery.3.title">Clean Details</strong>
-              <span id="gallery4Text" class="editable-text" data-field="template_content.gallery.3.text">Minimal text keeps the design image-led and conversion friendly.</span>
-            </div>
-          </div>
-          <div id="galleryCard5" class="strip-card tall editable-slot" data-image-slot="gallery_5">
-            <div class="image-loading">Uploading...</div>
-            <div class="edit-overlay"><span>Replace Image</span></div>
-            <div class="image-caption">
-              <strong id="gallery5Title" class="editable-text" data-field="template_content.gallery.4.title">Luxury Balance</strong>
-              <span id="gallery5Text" class="editable-text" data-field="template_content.gallery.4.text">Whitespace, asymmetry and large crops give this template a more distinct identity.</span>
-            </div>
-          </div>
-          <div id="galleryCard6" class="strip-card editable-slot" data-image-slot="gallery_6">
-            <div class="image-loading">Uploading...</div>
-            <div class="edit-overlay"><span>Replace Image</span></div>
-            <div class="image-caption">
-              <strong id="gallery6Title" class="editable-text" data-field="template_content.gallery.5.title">Fast Scanning</strong>
-              <span id="gallery6Text" class="editable-text" data-field="template_content.gallery.5.text">Clients can understand the style quickly without scrolling through repetitive sections.</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="about">
-        <div class="container story-layout">
-          <div class="sticky-story">
-            <div class="eyebrow">About The Studio</div>
-            <h3 id="aboutTitle" class="editable-text" data-field="template_content.about.title">A sharper, more editorial website direction.</h3>
-            <p id="aboutTextPrimary" class="editable-text" data-field="about">This template is intentionally built for photographers who want something that feels less generic and more design-led. It uses asymmetry, a side rail, staggered imagery and a stronger visual hierarchy.</p>
-            <p id="aboutTextSecondary" class="editable-text" data-field="template_content.about.secondary">Even with the distinct layout, the structure stays practical: quick contact, editable packages, reusable image slots and the same StudioOS editing flow under the hood.</p>
-            <div class="point-grid">
-              <div class="point"><strong id="aboutPoint1Title" class="editable-text" data-field="template_content.about.points.0.title">Visual Feel</strong><span id="aboutPoint1Text" class="editable-text" data-field="template_content.about.points.0.text">Magazine inspired layout with stronger composition.</span></div>
-              <div class="point"><strong id="aboutPoint2Title" class="editable-text" data-field="template_content.about.points.1.title">Best Use</strong><span id="aboutPoint2Text" class="editable-text" data-field="template_content.about.points.1.text">Luxury weddings, portraits and premium brand positioning.</span></div>
-              <div class="point"><strong id="aboutPoint3Title" class="editable-text" data-field="template_content.about.points.2.title">Client Flow</strong><span id="aboutPoint3Text" class="editable-text" data-field="template_content.about.points.2.text">Fast browsing, strong first impression and clear CTA path.</span></div>
-              <div class="point"><strong id="aboutPoint4Title" class="editable-text" data-field="template_content.about.points.3.title">Engine</strong><span id="aboutPoint4Text" class="editable-text" data-field="template_content.about.points.3.text">Same scalable JSON image system as all other StudioOS templates.</span></div>
-            </div>
-          </div>
-
-          <div class="story-images">
-            <div id="aboutImage1Slot" class="image-card editable-slot" data-image-slot="about_image_1">
-              <div class="image-loading">Uploading...</div>
-              <div class="edit-overlay"><span>Replace Image</span></div>
-            </div>
-            <div id="aboutImage2Slot" class="image-card editable-slot" data-image-slot="about_image_2">
-              <div class="image-loading">Uploading...</div>
-              <div class="edit-overlay"><span>Replace Image</span></div>
-            </div>
-            <div id="galleryCard1b" class="image-card large editable-slot" data-image-slot="gallery_1">
-              <div class="image-loading">Uploading...</div>
-              <div class="edit-overlay"><span>Replace Image</span></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="prices">
+      <section class="hero" aria-label="Hero section"><div id="heroImageSlot" class="hero-media editable-slot" data-image-slot="hero"><div class="image-loading">Uploading...</div><div class="edit-overlay"><span>Replace Hero Image</span></div></div><div class="hero-spacer"></div></section>
+      <section class="portfolio-section" id="portfolio">
         <div class="container">
-          <div class="section-head">
-            <h2>Prices</h2>
-            <div class="section-line"></div>
+          <div class="section-kicker editable-text" id="portfolioKicker" data-field="template_content.portfolio.kicker">The Selected Set</div>
+          <h1 class="section-title editable-text" id="portfolioTitle" data-field="template_content.portfolio.title">Portfolio</h1>
+          <p class="section-subtitle editable-text" id="portfolioSubtitle" data-field="template_content.portfolio.subtitle">A quiet collection of portraits, landscapes and wedding frames shaped by light, texture and feeling.</p>
+          <div class="portfolio-grid">
+            <div class="portfolio-stack">
+              <a id="portfolioTile1" class="portfolio-tile tile-md editable-slot" data-image-slot="portfolio_1" href="#contacts"><div class="image-loading">Uploading...</div><div class="edit-overlay"><span>Replace Image</span></div></a>
+              <a id="portfolioTile2" class="portfolio-tile tile-md editable-slot" data-image-slot="portfolio_2" href="#contacts"><div class="image-loading">Uploading...</div><div class="edit-overlay"><span>Replace Image</span></div></a>
+              <a id="portfolioTile3" class="portfolio-tile tile-sm editable-slot" data-image-slot="portfolio_3" href="#contacts"><div class="image-loading">Uploading...</div><div class="edit-overlay"><span>Replace Image</span></div></a>
+            </div>
+            <div class="portfolio-stack">
+              <a id="portfolioTile4" class="portfolio-tile tile-sm editable-slot" data-image-slot="portfolio_4" href="#contacts"><div class="image-loading">Uploading...</div><div class="edit-overlay"><span>Replace Image</span></div></a>
+              <a id="portfolioTile5" class="portfolio-tile tile-lg editable-slot" data-image-slot="portfolio_5" href="#contacts"><div class="image-loading">Uploading...</div><div class="edit-overlay"><span>Replace Image</span></div></a>
+              <a id="portfolioTile6" class="portfolio-tile tile-sm editable-slot" data-image-slot="portfolio_6" href="#contacts"><div class="image-loading">Uploading...</div><div class="edit-overlay"><span>Replace Image</span></div></a>
+            </div>
+            <div class="portfolio-stack">
+              <a id="portfolioTile7" class="portfolio-tile tile-md editable-slot" data-image-slot="gallery_1" href="#contacts"><div class="image-loading">Uploading...</div><div class="edit-overlay"><span>Replace Image</span></div></a>
+              <a id="portfolioTile8" class="portfolio-tile tile-md editable-slot" data-image-slot="gallery_2" href="#contacts"><div class="image-loading">Uploading...</div><div class="edit-overlay"><span>Replace Image</span></div></a>
+              <a id="portfolioTile9" class="portfolio-tile tile-sm editable-slot" data-image-slot="gallery_3" href="#contacts"><div class="image-loading">Uploading...</div><div class="edit-overlay"><span>Replace Image</span></div></a>
+            </div>
           </div>
-
-          <div class="services-grid">
-            <article class="service-card">
-              <div id="serviceVisual1" class="service-visual editable-slot" data-image-slot="service_1">
-                <div class="image-loading">Uploading...</div>
-                <div class="edit-overlay"><span>Replace Image</span></div>
-                <div class="service-title">
-                  <strong id="package1Title" class="editable-text" data-field="template_content.packages.0.title">Portrait Session</strong>
-                  <span id="package1Label" class="editable-text" data-field="template_content.packages.0.label">Minimal</span>
-                </div>
-              </div>
-              <div class="service-body">
-                <p id="package1Price" class="service-price editable-text" data-field="template_content.packages.0.price">₹18,000</p>
-                <div class="service-list">
-                  <div class="service-item"><span id="package1Detail1Label" class="editable-text" data-field="template_content.packages.0.details.0.label">Duration</span><strong id="package1Detail1Value" class="editable-text" data-field="template_content.packages.0.details.0.value">1 Hour</strong></div>
-                  <div class="service-item"><span id="package1Detail2Label" class="editable-text" data-field="template_content.packages.0.details.1.label">Edited Photos</span><strong id="package1Detail2Value" class="editable-text" data-field="template_content.packages.0.details.1.value">25+</strong></div>
-                  <div class="service-item"><span id="package1Detail3Label" class="editable-text" data-field="template_content.packages.0.details.2.label">Direction</span><strong id="package1Detail3Value" class="editable-text" data-field="template_content.packages.0.details.2.value">Included</strong></div>
-                  <div class="service-item"><span id="package1Detail4Label" class="editable-text" data-field="template_content.packages.0.details.3.label">Delivery</span><strong id="package1Detail4Value" class="editable-text" data-field="template_content.packages.0.details.3.value">Online Gallery</strong></div>
-                </div>
-                <a id="packageWhatsapp1" class="btn-outline" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
-              </div>
-            </article>
-
-            <article class="service-card">
-              <div id="serviceVisual2" class="service-visual editable-slot" data-image-slot="service_2">
-                <div class="image-loading">Uploading...</div>
-                <div class="edit-overlay"><span>Replace Image</span></div>
-                <div class="service-title">
-                  <strong id="package2Title" class="editable-text" data-field="template_content.packages.1.title">Pre Wedding</strong>
-                  <span id="package2Label" class="editable-text" data-field="template_content.packages.1.label">Standard</span>
-                </div>
-              </div>
-              <div class="service-body">
-                <p id="package2Price" class="service-price editable-text" data-field="template_content.packages.1.price">₹35,000</p>
-                <div class="service-list">
-                  <div class="service-item"><span id="package2Detail1Label" class="editable-text" data-field="template_content.packages.1.details.0.label">Duration</span><strong id="package2Detail1Value" class="editable-text" data-field="template_content.packages.1.details.0.value">2 Hours</strong></div>
-                  <div class="service-item"><span id="package2Detail2Label" class="editable-text" data-field="template_content.packages.1.details.1.label">Edited Photos</span><strong id="package2Detail2Value" class="editable-text" data-field="template_content.packages.1.details.1.value">60+</strong></div>
-                  <div class="service-item"><span id="package2Detail3Label" class="editable-text" data-field="template_content.packages.1.details.2.label">Direction</span><strong id="package2Detail3Value" class="editable-text" data-field="template_content.packages.1.details.2.value">Story Posing</strong></div>
-                  <div class="service-item"><span id="package2Detail4Label" class="editable-text" data-field="template_content.packages.1.details.3.label">Delivery</span><strong id="package2Detail4Value" class="editable-text" data-field="template_content.packages.1.details.3.value">Preview + Full Gallery</strong></div>
-                </div>
-                <a id="packageWhatsapp2" class="btn-outline" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
-              </div>
-            </article>
-
-            <article class="service-card">
-              <div id="serviceVisual3" class="service-visual editable-slot" data-image-slot="service_3">
-                <div class="image-loading">Uploading...</div>
-                <div class="edit-overlay"><span>Replace Image</span></div>
-                <div class="service-title">
-                  <strong id="package3Title" class="editable-text" data-field="template_content.packages.2.title">Wedding Day</strong>
-                  <span id="package3Label" class="editable-text" data-field="template_content.packages.2.label">Maximum</span>
-                </div>
-              </div>
-              <div class="service-body">
-                <p id="package3Price" class="service-price editable-text" data-field="template_content.packages.2.price">₹85,000</p>
-                <div class="service-list">
-                  <div class="service-item"><span id="package3Detail1Label" class="editable-text" data-field="template_content.packages.2.details.0.label">Duration</span><strong id="package3Detail1Value" class="editable-text" data-field="template_content.packages.2.details.0.value">Half / Full Day</strong></div>
-                  <div class="service-item"><span id="package3Detail2Label" class="editable-text" data-field="template_content.packages.2.details.1.label">Edited Photos</span><strong id="package3Detail2Value" class="editable-text" data-field="template_content.packages.2.details.1.value">All Best Frames</strong></div>
-                  <div class="service-item"><span id="package3Detail3Label" class="editable-text" data-field="template_content.packages.2.details.2.label">Planning</span><strong id="package3Detail3Value" class="editable-text" data-field="template_content.packages.2.details.2.value">Consultation Included</strong></div>
-                  <div class="service-item"><span id="package3Detail4Label" class="editable-text" data-field="template_content.packages.2.details.3.label">Delivery</span><strong id="package3Detail4Value" class="editable-text" data-field="template_content.packages.2.details.3.value">Premium Gallery + Highlights</strong></div>
-                </div>
-                <a id="packageWhatsapp3" class="btn-outline" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
-              </div>
-            </article>
-          </div>
+          <div class="load-more-wrap"><a class="load-more-btn" href="#contacts">◉ <span class="editable-text" id="portfolioButtonLabel" data-field="template_content.portfolio.button_label">Load More</span></a></div>
         </div>
       </section>
-
-      <section class="section" id="contacts">
+      <section class="about-section" id="about"><div class="about-inner"><div class="about-kicker editable-text" id="aboutKicker" data-field="template_content.about.kicker">Something About Me</div><h2 class="about-title editable-text" id="aboutTitle" data-field="template_content.about.title">About Me</h2><p class="about-copy editable-text" id="aboutCopy" data-field="about">I photograph people and stories with a calm eye and a strong sense of atmosphere. My work is rooted in honest direction, quiet details and portraits that feel both intimate and lasting.</p></div></section>
+      <section class="clients-section" id="journal">
+        <div id="clientsBgSlot" class="clients-bg editable-slot" data-image-slot="clients_bg"><div class="image-loading">Uploading...</div><div class="edit-overlay"><span>Replace Background</span></div></div>
+        <div class="clients-inner"><div class="clients-kicker editable-text" id="clientsKicker" data-field="template_content.clients.kicker">Some of My</div><h2 class="clients-title editable-text" id="clientsTitle" data-field="template_content.clients.title">Clients</h2><div class="clients-row"><div class="client-chip editable-text" id="clientName1" data-field="template_content.clients.names.0">FND</div><div class="client-chip editable-text" id="clientName2" data-field="template_content.clients.names.1">Taylor Studio</div><div class="client-chip editable-text" id="clientName3" data-field="template_content.clients.names.2">Helsinki</div><div class="client-chip editable-text" id="clientName4" data-field="template_content.clients.names.3">David + Jones</div><div class="client-chip editable-text" id="clientName5" data-field="template_content.clients.names.4">North East House</div></div></div>
+      </section>
+      <section class="contact-section" id="contacts">
         <div class="container contact-wrap">
           <div class="contact-card">
-            <div class="contact-copy">
-              <div class="eyebrow">Let’s Work Together</div>
-              <h3 id="contactHeading" class="editable-text" data-field="template_content.contact.heading">Ready to build a premium first impression?</h3>
-              <p id="contactText" class="editable-text" data-field="template_content.contact.text">This template is made for photographers who want something cleaner, sharper and more design-led — while still keeping inquiries, WhatsApp access and package details easy for clients.</p>
-            </div>
+            <h3 class="contact-heading editable-text" id="contactHeading" data-field="template_content.contact.heading">Book a Session</h3>
+            <p class="contact-copy editable-text" id="contactText" data-field="template_content.contact.text">For weddings, portraits and personal commissions, reach out directly on the platform you prefer. Every inquiry gets a thoughtful reply.</p>
             <div class="contact-links">
               <a id="phoneLink" class="contact-link" href="tel:+919876543210"><div><strong>Phone</strong><span id="phoneText" class="editable-text" data-field="phone">+91 98765 43210</span></div><span>↗</span></a>
               <a id="whatsappLink" class="contact-link" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><div><strong>WhatsApp</strong><span id="whatsappText" class="editable-text" data-field="whatsapp">Chat on WhatsApp</span></div><span>↗</span></a>
@@ -470,153 +151,61 @@
               <a id="youtubeLink" class="contact-link" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer"><div><strong>YouTube</strong><span id="youtubeText" class="editable-text" data-field="youtube">Watch latest films</span></div><span>↗</span></a>
             </div>
           </div>
-
-          <div class="contact-form">
-            <h3>Send Inquiry</h3>
-            <div class="form-grid">
-              <input class="field" type="text" placeholder="Name" />
-              <input class="field" type="email" placeholder="Email" />
-              <textarea class="textarea" placeholder="Tell me about your event or shoot"></textarea>
-              <a id="contactWhatsappButton" class="btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
-            </div>
-          </div>
+          <div class="contact-form"><h3>Send an Inquiry</h3><div class="form-grid"><input class="field" type="text" placeholder="Your name" /><input class="field" type="email" placeholder="Email address" /><textarea class="textarea" placeholder="Tell me about your date, location and vision"></textarea><a id="contactWhatsappButton" class="btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a></div></div>
         </div>
       </section>
     </main>
-
-    <footer class="site-footer">
-      <div class="container footer-wrap">
-        <div>
-          <div class="footer-brand editable-text" id="footerBrand" data-field="template_content.footer.brand">AM</div>
-          <div class="footer-copy editable-text" id="footerEmail" data-field="email">aditya@example.com</div>
-          <div class="footer-copy editable-text" id="footerPhone" data-field="phone" style="margin-top:8px;">+91 98765 43210</div>
-        </div>
-        <div>
-          <div class="footer-links">
-            <a href="#portfolio">Portfolio</a>
-            <a href="#about">About</a>
-            <a href="#prices">Prices</a>
-            <a href="#contacts">Contact</a>
-          </div>
-          <div class="footer-social">
-            <a id="footerInstagramLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>
-            <a id="footerYoutubeLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube">▶</a>
-            <a id="footerWhatsappLink" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">✆</a>
-          </div>
-        </div>
-        <div>
-          <div class="eyebrow" style="margin-bottom:8px;">Stay in Touch</div>
-          <div class="footer-subtext editable-text" id="footerSubscribeText" data-field="template_content.footer.subscribeText">Subscribe for recent work, availability and new stories.</div>
-          <div class="subscribe-box">
-            <input type="email" placeholder="Email" />
-            <button type="button">Subscribe</button>
-          </div>
-        </div>
-      </div>
-    </footer>
+    <footer class="site-footer"><div class="footer-wrap"><div class="footer-brand editable-text" id="footerBrand" data-field="template_content.footer.brand">AM</div><div class="footer-copy editable-text" id="footerCopyright" data-field="template_content.footer.copy">Copyright 2026. All Rights Reserved.</div><div class="footer-social"><a id="footerInstagramLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a><a id="footerYoutubeLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube">▶</a><a id="footerWhatsappLink" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">✆</a></div></div></footer>
   </div>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
   <script type="module">
     import { replaceTemplateImage } from "./js/storage.js";
-
-    const loadingState=document.getElementById("pageLoading");
-    const errorState=document.getElementById("pageError");
-    const errorText=document.getElementById("pageErrorText");
-    const templateRoot=document.getElementById("templateRoot");
-    const editToolbar=document.getElementById("editToolbar");
-    const editModeToggle=document.getElementById("editModeToggle");
-    const editStatus=document.getElementById("editStatus");
-    const imageFileInput=document.getElementById("imageFileInput");
-
-    const DEFAULT_IMAGES={
-      hero:"https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80",
-      gallery_1:"https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1000&q=80",
-      gallery_2:"https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1000&q=80",
-      gallery_3:"https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1000&q=80",
-      gallery_4:"https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1000&q=80",
-      gallery_5:"https://images.unsplash.com/photo-1513279922550-250c2129b13a?auto=format&fit=crop&w=1000&q=80",
-      gallery_6:"https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1000&q=80",
-      about_image_1:"https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1000&q=80",
-      about_image_2:"https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=1000&q=80",
-      service_1:"https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1000&q=80",
-      service_2:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1000&q=80",
-      service_3:"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1000&q=80"
-    };
-
-    const LEGACY_IMAGE_FIELD_MAP={
-      hero:"hero_image_url",
-      gallery_1:"portfolio_image_1_url",
-      gallery_2:"portfolio_image_2_url",
-      gallery_3:"portfolio_image_3_url",
-      gallery_4:"portfolio_image_4_url",
-      gallery_5:"portfolio_image_5_url",
-      gallery_6:"portfolio_image_6_url"
-    };
-
-    const DEFAULT_BASE={name:"Aditya Masram",tagline:"Editorial Photography",about:"This template is designed for photographers who want a layout that feels more like a modern editorial website than a standard stacked portfolio page.",phone:"+91 98765 43210",instagram:"@adityamasram.photography",city:"Pune",email:"aditya@example.com",youtube:"https://www.youtube.com/",whatsapp:"https://wa.me/919876543210"};
-
-    const DEFAULT_TEMPLATE_CONTENT={
-      hero:{location:"Creative Studio · Available Worldwide",badge:"Template 4",card_title:"Modern grid with strong image focus.",card_text:"The goal here is a more editorial composition: fixed side rail, oversized hero frame and staggered image modules instead of repeated card stacks.",stats:[{value:"120+",label:"Projects"},{value:"08",label:"Years"},{value:"4.9",label:"Rating"}]},
-      gallery:[
-        {title:"Intro Frames",text:"Compact modules support the large hero without repeating the same section structure."},
-        {title:"Quick Stories",text:"Secondary visuals make the page feel more curated and premium."},
-        {title:"Signature Frames",text:"Large visual blocks create a stronger premium feel than standard thumbnail grids."},
-        {title:"Clean Details",text:"Minimal text keeps the design image-led and conversion friendly."},
-        {title:"Luxury Balance",text:"Whitespace, asymmetry and large crops give this template a more distinct identity."},
-        {title:"Fast Scanning",text:"Clients can understand the style quickly without scrolling through repetitive sections."}
-      ],
-      about:{title:"A sharper, more editorial website direction.",secondary:"Even with the distinct layout, the structure stays practical: quick contact, editable packages, reusable image slots and the same StudioOS editing flow under the hood.",points:[{title:"Visual Feel",text:"Magazine inspired layout with stronger composition."},{title:"Best Use",text:"Luxury weddings, portraits and premium brand positioning."},{title:"Client Flow",text:"Fast browsing, strong first impression and clear CTA path."},{title:"Engine",text:"Same scalable JSON image system as all other StudioOS templates."}]},
-      packages:[
-        {title:"Portrait Session",label:"Minimal",price:"₹18,000",details:[{label:"Duration",value:"1 Hour"},{label:"Edited Photos",value:"25+"},{label:"Direction",value:"Included"},{label:"Delivery",value:"Online Gallery"}]},
-        {title:"Pre Wedding",label:"Standard",price:"₹35,000",details:[{label:"Duration",value:"2 Hours"},{label:"Edited Photos",value:"60+"},{label:"Direction",value:"Story Posing"},{label:"Delivery",value:"Preview + Full Gallery"}]},
-        {title:"Wedding Day",label:"Maximum",price:"₹85,000",details:[{label:"Duration",value:"Half / Full Day"},{label:"Edited Photos",value:"All Best Frames"},{label:"Planning",value:"Consultation Included"},{label:"Delivery",value:"Premium Gallery + Highlights"}]}
-      ],
-      contact:{heading:"Ready to build a premium first impression?",text:"This template is made for photographers who want something cleaner, sharper and more design-led — while still keeping inquiries, WhatsApp access and package details easy for clients."},
-      footer:{brand:"AM",subscribeText:"Subscribe for recent work, availability and new stories."}
-    };
-
+    const loadingState=document.getElementById("pageLoading"),errorState=document.getElementById("pageError"),errorText=document.getElementById("pageErrorText"),templateRoot=document.getElementById("templateRoot"),editToolbar=document.getElementById("editToolbar"),editModeToggle=document.getElementById("editModeToggle"),editStatus=document.getElementById("editStatus"),imageFileInput=document.getElementById("imageFileInput");
+    const DEFAULT_IMAGES={hero:"https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1600&q=80",portfolio_1:"https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",portfolio_2:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=80",portfolio_3:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80",portfolio_4:"https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80",portfolio_5:"https://images.unsplash.com/photo-1516589091380-5d8e87df6999?auto=format&fit=crop&w=900&q=80",portfolio_6:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80",gallery_1:"https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=900&q=80",gallery_2:"https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=900&q=80",gallery_3:"https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80",clients_bg:"https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1600&q=80"};
+    const LEGACY_IMAGE_FIELD_MAP={hero:"hero_image_url",portfolio_1:"portfolio_image_1_url",portfolio_2:"portfolio_image_2_url",portfolio_3:"portfolio_image_3_url",portfolio_4:"portfolio_image_4_url",portfolio_5:"portfolio_image_5_url",portfolio_6:"portfolio_image_6_url"};
+    const DEFAULT_BASE={name:"Aditya Masram",tagline:"Photography",about:"I photograph people and stories with a calm eye and a strong sense of atmosphere. My work is rooted in honest direction, quiet details and portraits that feel both intimate and lasting.",phone:"+91 98765 43210",instagram:"@adityamasram.photography",city:"Pune",email:"aditya@example.com",youtube:"https://www.youtube.com/",whatsapp:"https://wa.me/919876543210"};
+    const DEFAULT_TEMPLATE_CONTENT={portfolio:{kicker:"The Selected Set",title:"Portfolio",subtitle:"A quiet collection of portraits, landscapes and wedding frames shaped by light, texture and feeling.",button_label:"Load More"},about:{kicker:"Something About Me",title:"About Me"},clients:{kicker:"Some of My",title:"Clients",names:["FND","Taylor Studio","Helsinki","David + Jones","North East House"]},contact:{heading:"Book a Session",text:"For weddings, portraits and personal commissions, reach out directly on the platform you prefer. Every inquiry gets a thoughtful reply."},footer:{brand:"AM",copy:"Copyright 2026. All Rights Reserved."}};
     let currentWebsite=null,currentUserId=null,editModeEnabled=false,pendingImageSlot="";
     function showLoading(){loadingState.classList.remove("hidden");errorState.classList.add("hidden");templateRoot.classList.add("hidden")}
     function showError(message){loadingState.classList.add("hidden");errorState.classList.remove("hidden");templateRoot.classList.add("hidden");errorText.innerText=message}
     function showTemplate(){loadingState.classList.add("hidden");errorState.classList.add("hidden");templateRoot.classList.remove("hidden")}
-    function getSlugFromUrl(){const params=new URLSearchParams(window.location.search);const querySlug=(params.get("slug")||"").trim();if(querySlug) return decodeURIComponent(querySlug).replace(/^\/+|\/+$/g,"").toLowerCase();const path=window.location.pathname||"";const studioMatch=path.match(/\/studio\/([^/?#]+)/i);if(studioMatch&&studioMatch[1]) return decodeURIComponent(studioMatch[1]).trim().replace(/^\/+|\/+$/g,"").toLowerCase();return ""}
-    function isEditRequestedFromUrl(){const params=new URLSearchParams(window.location.search);return params.get("edit")==="true"}
+    function getSlugFromUrl(){const params=new URLSearchParams(window.location.search),querySlug=(params.get("slug")||"").trim();if(querySlug)return decodeURIComponent(querySlug).replace(/^\/+|\/+$/g,"").toLowerCase();const path=window.location.pathname||"",studioMatch=path.match(/\/studio\/([^/?#]+)/i);return studioMatch&&studioMatch[1]?decodeURIComponent(studioMatch[1]).trim().replace(/^\/+|\/+$/g,"").toLowerCase():""}
+    function isEditRequestedFromUrl(){return new URLSearchParams(window.location.search).get("edit")==="true"}
     function formatPhoneForDisplay(phone){const raw=String(phone||"").trim();return raw||DEFAULT_BASE.phone}
-    function formatPhoneForTel(phone){const raw=String(phone||"").replace(/[^\d+]/g,"");if(!raw) return "+919876543210";return raw.startsWith("+")?raw:`+${raw}`}
-    function formatPhoneForWhatsApp(phone,whatsappLink){const explicitWhatsapp=String(whatsappLink||"").trim();if(explicitWhatsapp.startsWith("https://wa.me/")) return explicitWhatsapp;const raw=String(phone||"").replace(/\D/g,"");if(!raw) return DEFAULT_BASE.whatsapp;if(raw.startsWith("91")) return `https://wa.me/${raw}`;return `https://wa.me/91${raw}`}
-    function normalizeInstagram(value){const raw=String(value||"").trim();if(!raw) return DEFAULT_BASE.instagram;return raw.startsWith("@")?raw:`@${raw}`}
-    function normalizeInstagramLink(value){const raw=String(value||"").trim();if(!raw) return "https://instagram.com/adityamasram.photography";if(/^https?:\/\//i.test(raw)) return raw;return `https://instagram.com/${raw.replace(/^@/,"")}`}
+    function formatPhoneForTel(phone){const raw=String(phone||"").replace(/[^\d+]/g,"");if(!raw)return"+919876543210";return raw.startsWith("+")?raw:`+${raw}`}
+    function formatPhoneForWhatsApp(phone,whatsappLink){const explicitWhatsapp=String(whatsappLink||"").trim();if(explicitWhatsapp.startsWith("https://wa.me/"))return explicitWhatsapp;const raw=String(phone||"").replace(/\D/g,"");if(!raw)return DEFAULT_BASE.whatsapp;return raw.startsWith("91")?`https://wa.me/${raw}`:`https://wa.me/91${raw}`}
+    function normalizeInstagram(value){const raw=String(value||"").trim();if(!raw)return DEFAULT_BASE.instagram;return raw.startsWith("@")?raw:`@${raw}`}
+    function normalizeInstagramLink(value){const raw=String(value||"").trim();if(!raw)return "https://instagram.com/adityamasram.photography";if(/^https?:\/\//i.test(raw))return raw;return `https://instagram.com/${raw.replace(/^@/,"")}`}
     function normalizeYoutubeLink(value){const raw=String(value||"").trim();return raw||DEFAULT_BASE.youtube}
-    function buildImageBackground(url,overlay=true){const safeUrl=String(url||"").replace(/"/g,'\\"');return `${overlay?'linear-gradient(180deg, rgba(17,17,17,0.04), rgba(17,17,17,0.18)), ':''}url("${safeUrl}")`}
     function setEditStatus(message){editStatus.innerText=message}
     function showEditToolbar(show){editToolbar.classList.toggle("hidden",!show)}
     function setEditMode(enabled){editModeEnabled=enabled;editModeToggle.classList.toggle("active",enabled);document.querySelectorAll(".editable-slot").forEach(slot=>slot.classList.toggle("edit-active",enabled));document.querySelectorAll(".editable-text").forEach(el=>el.classList.toggle("edit-active",enabled));setEditStatus(enabled?"Edit mode is ON. Click any text or image area to update it.":"You are viewing preview mode.")}
     function getSlotElement(slotName){return Array.from(document.querySelectorAll(".editable-slot")).find(el=>el.dataset.imageSlot===slotName)||null}
-    function setSlotUploading(slotName,isUploading){const slot=getSlotElement(slotName);if(!slot) return;slot.classList.toggle("uploading",isUploading)}
-    function safeObject(value){return value&&typeof value==="object"&&!Array.isArray(value)?value:{}}
+    function setSlotUploading(slotName,isUploading){const slot=getSlotElement(slotName);if(!slot)return;slot.classList.toggle("uploading",isUploading)}
     function deepClone(value){return JSON.parse(JSON.stringify(value))}
-    function mergeDefaults(defaults,value){if(Array.isArray(defaults)){const input=Array.isArray(value)?value:[];return defaults.map((item,index)=>mergeDefaults(item,input[index]))} if(defaults&&typeof defaults==="object"){const result={};const input=safeObject(value);Object.keys(defaults).forEach(key=>{result[key]=mergeDefaults(defaults[key],input[key])});return result} return value===undefined||value===null||value===""?defaults:value}
-    function getByPath(source,path){return String(path||"").split(".").reduce((acc,key)=>{if(acc===null||acc===undefined) return undefined;if(/^\d+$/.test(key)) return acc[Number(key)];return acc[key]},source)}
-    function setByPath(target,path,value){const keys=String(path||"").split(".");let ref=target;for(let i=0;i<keys.length-1;i+=1){const key=keys[i];const nextKey=keys[i+1];const isIndex=/^\d+$/.test(nextKey);if(/^\d+$/.test(key)){const index=Number(key);ref[index]=ref[index]??(isIndex?[]:{});ref=ref[index]}else{ref[key]=ref[key]??(isIndex?[]:{});ref=ref[key]}}const lastKey=keys[keys.length-1];if(/^\d+$/.test(lastKey)) ref[Number(lastKey)]=value;else ref[lastKey]=value}
-    function getTemplateImages(website){if(website?.template_images&&typeof website.template_images==="object"&&!Array.isArray(website.template_images)) return website.template_images;return {}}
-    function getImageUrl(website,slotName){const images=getTemplateImages(website);const legacyField=LEGACY_IMAGE_FIELD_MAP[slotName];return images[slotName]||(legacyField?website?.[legacyField]:"")||DEFAULT_IMAGES[slotName]||""}
-    function composeContent(website){return {base:{name:website.name?.trim()||DEFAULT_BASE.name,tagline:website.tagline?.trim()||DEFAULT_BASE.tagline,about:website.about?.trim()||DEFAULT_BASE.about,phone:formatPhoneForDisplay(website.phone),instagram:normalizeInstagram(website.instagram),city:website.city?.trim()||DEFAULT_BASE.city,email:String(website.email||"").trim()||DEFAULT_BASE.email,youtube:normalizeYoutubeLink(website.youtube),whatsapp:String(website.whatsapp||"").trim()||formatPhoneForWhatsApp(website.phone,website.whatsapp)},templateContent:mergeDefaults(DEFAULT_TEMPLATE_CONTENT,safeObject(website.template_content))}}
-    function applyImages(website){document.getElementById("heroImageSlot").style.backgroundImage=buildImageBackground(getImageUrl(website,"hero"),true);document.getElementById("galleryCard1").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_1"),true);document.getElementById("galleryCard1b").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_1"),true);document.getElementById("galleryCard2").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_2"),true);document.getElementById("galleryCard3").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_3"),true);document.getElementById("galleryCard4").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_4"),true);document.getElementById("galleryCard5").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_5"),true);document.getElementById("galleryCard6").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_6"),true);document.getElementById("aboutImage1Slot").style.backgroundImage=buildImageBackground(getImageUrl(website,"about_image_1"),true);document.getElementById("aboutImage2Slot").style.backgroundImage=buildImageBackground(getImageUrl(website,"about_image_2"),true);document.getElementById("serviceVisual1").style.backgroundImage=buildImageBackground(getImageUrl(website,"service_1"),true);document.getElementById("serviceVisual2").style.backgroundImage=buildImageBackground(getImageUrl(website,"service_2"),true);document.getElementById("serviceVisual3").style.backgroundImage=buildImageBackground(getImageUrl(website,"service_3"),true)}
-    function applyWebsiteData(website){const {base,templateContent}=composeContent(website);const whatsappUrl=formatPhoneForWhatsApp(base.phone,base.whatsapp);const phoneTel=formatPhoneForTel(base.phone);const instagramUrl=normalizeInstagramLink(base.instagram);const youtubeUrl=normalizeYoutubeLink(base.youtube);const brandFromName=base.name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()||"").join("");const footerBrand=templateContent.footer.brand||brandFromName||"AM";document.title=`${base.name} - Template 4`;document.getElementById("brandShort").innerText=footerBrand;document.getElementById("footerBrand").innerText=footerBrand;document.getElementById("heroName").innerText=base.name;document.getElementById("heroTagline").innerText=base.tagline;document.getElementById("locationText").innerText=templateContent.hero.location;document.getElementById("heroBadge").innerText=templateContent.hero.badge;document.getElementById("heroCardTitle").innerText=templateContent.hero.card_title;document.getElementById("heroCardText").innerText=templateContent.hero.card_text;document.getElementById("heroSub").innerText=templateContent.hero.card_text;for(let i=1;i<=3;i++){document.getElementById(`heroStat${i}Value`).innerText=templateContent.hero.stats[i-1].value;document.getElementById(`heroStat${i}Label`).innerText=templateContent.hero.stats[i-1].label} for(let i=3;i<=6;i++){document.getElementById(`gallery${i}Title`).innerText=templateContent.gallery[i-1].title;document.getElementById(`gallery${i}Text`).innerText=templateContent.gallery[i-1].text} document.getElementById("aboutTitle").innerText=templateContent.about.title;document.getElementById("aboutTextPrimary").innerText=base.about;document.getElementById("aboutTextSecondary").innerText=templateContent.about.secondary;for(let i=1;i<=4;i++){document.getElementById(`aboutPoint${i}Title`).innerText=templateContent.about.points[i-1].title;document.getElementById(`aboutPoint${i}Text`).innerText=templateContent.about.points[i-1].text} templateContent.packages.forEach((pkg,index)=>{const num=index+1;document.getElementById(`package${num}Title`).innerText=pkg.title;document.getElementById(`package${num}Label`).innerText=pkg.label;document.getElementById(`package${num}Price`).innerText=pkg.price;pkg.details.forEach((detail,detailIndex)=>{const detailNum=detailIndex+1;document.getElementById(`package${num}Detail${detailNum}Label`).innerText=detail.label;document.getElementById(`package${num}Detail${detailNum}Value`).innerText=detail.value})});document.getElementById("contactHeading").innerText=templateContent.contact.heading;document.getElementById("contactText").innerText=templateContent.contact.text;document.getElementById("phoneText").innerText=base.phone;document.getElementById("whatsappText").innerText=base.whatsapp.startsWith("https://wa.me/")?"Chat on WhatsApp":base.whatsapp;document.getElementById("instagramText").innerText=base.instagram;document.getElementById("youtubeText").innerText=base.youtube.startsWith("http")?"Watch latest films":base.youtube;document.getElementById("footerEmail").innerText=base.email;document.getElementById("footerPhone").innerText=base.phone;document.getElementById("footerSubscribeText").innerText=templateContent.footer.subscribeText;document.getElementById("phoneLink").href=`tel:${phoneTel}`;document.getElementById("whatsappLink").href=whatsappUrl;document.getElementById("whatsappTopLink").href=whatsappUrl;document.getElementById("contactWhatsappButton").href=whatsappUrl;document.getElementById("footerWhatsappLink").href=whatsappUrl;document.getElementById("packageWhatsapp1").href=whatsappUrl;document.getElementById("packageWhatsapp2").href=whatsappUrl;document.getElementById("packageWhatsapp3").href=whatsappUrl;document.getElementById("instagramLink").href=instagramUrl;document.getElementById("instagramTopLink").href=instagramUrl;document.getElementById("footerInstagramLink").href=instagramUrl;document.getElementById("youtubeLink").href=youtubeUrl;document.getElementById("youtubeTopLink").href=youtubeUrl;document.getElementById("footerYoutubeLink").href=youtubeUrl;applyImages(website)}
-    async function fetchWebsiteBySlug(slug){const supabase=await window.getSupabase();const {data:authData}=await supabase.auth.getUser();currentUserId=authData?.user?.id||null;let query=supabase.from("user_websites").select("*").eq("site_slug",slug).eq("template_id",4).limit(1);if(currentUserId) query=query.or(`is_published.eq.true,user_id.eq.${currentUserId}`);else query=query.eq("is_published",true);const {data,error}=await query.maybeSingle();if(error) throw error;return data||null}
+    function safeObject(value){return value&&typeof value==="object"&&!Array.isArray(value)?value:{}}
+    function mergeDefaults(defaults,value){if(Array.isArray(defaults)){const input=Array.isArray(value)?value:[];return defaults.map((item,index)=>mergeDefaults(item,input[index]))}if(defaults&&typeof defaults==="object"){const result={},input=safeObject(value);Object.keys(defaults).forEach(key=>{result[key]=mergeDefaults(defaults[key],input[key])});return result}return value===undefined||value===null||value===""?defaults:value}
+    function setByPath(target,path,value){const keys=String(path||"").split(".");let ref=target;for(let i=0;i<keys.length-1;i+=1){const key=keys[i],nextKey=keys[i+1],nextIsIndex=/^\d+$/.test(nextKey);if(/^\d+$/.test(key)){const index=Number(key);ref[index]=ref[index]??(nextIsIndex?[]:{});ref=ref[index]}else{ref[key]=ref[key]??(nextIsIndex?[]:{});ref=ref[key]}}const lastKey=keys[keys.length-1];/^\d+$/.test(lastKey)?ref[Number(lastKey)]=value:ref[lastKey]=value}
+    function getTemplateImages(website){return safeObject(website?.template_images)}
+    function getImageUrl(website,slotName){const images=getTemplateImages(website),legacyField=LEGACY_IMAGE_FIELD_MAP[slotName];return images[slotName]||(legacyField?website?.[legacyField]:"")||DEFAULT_IMAGES[slotName]||""}
+    function composeContent(website){return{base:{name:website?.name?.trim()||DEFAULT_BASE.name,tagline:website?.tagline?.trim()||DEFAULT_BASE.tagline,about:website?.about?.trim()||DEFAULT_BASE.about,phone:formatPhoneForDisplay(website?.phone),instagram:normalizeInstagram(website?.instagram),city:website?.city?.trim()||DEFAULT_BASE.city,email:String(website?.email||"").trim()||DEFAULT_BASE.email,youtube:normalizeYoutubeLink(website?.youtube),whatsapp:String(website?.whatsapp||"").trim()||formatPhoneForWhatsApp(website?.phone,website?.whatsapp)},templateContent:mergeDefaults(DEFAULT_TEMPLATE_CONTENT,safeObject(website?.template_content))}}
+    function buildImageBackground(url){const safeUrl=String(url||"").replace(/"/g,'\"');return `url("${safeUrl}")`}
+    function applyImages(website){document.getElementById("heroImageSlot").style.backgroundImage=buildImageBackground(getImageUrl(website,"hero"));document.getElementById("portfolioTile1").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_1"));document.getElementById("portfolioTile2").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_2"));document.getElementById("portfolioTile3").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_3"));document.getElementById("portfolioTile4").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_4"));document.getElementById("portfolioTile5").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_5"));document.getElementById("portfolioTile6").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_6"));document.getElementById("portfolioTile7").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_1"));document.getElementById("portfolioTile8").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_2"));document.getElementById("portfolioTile9").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_3"));document.getElementById("clientsBgSlot").style.backgroundImage=buildImageBackground(getImageUrl(website,"clients_bg"))}
+    function applyWebsiteData(website){const {base,templateContent}=composeContent(website),whatsappUrl=formatPhoneForWhatsApp(base.phone,base.whatsapp),phoneTel=formatPhoneForTel(base.phone),instagramUrl=normalizeInstagramLink(base.instagram),youtubeUrl=normalizeYoutubeLink(base.youtube),brandFromName=base.name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()||"").join(""),footerBrand=templateContent.footer.brand||brandFromName||"AM";document.title=`${base.name} - Template 4`;document.getElementById("brandShort").innerText=footerBrand;document.getElementById("footerBrand").innerText=footerBrand;document.getElementById("portfolioKicker").innerText=templateContent.portfolio.kicker;document.getElementById("portfolioTitle").innerText=templateContent.portfolio.title;document.getElementById("portfolioSubtitle").innerText=templateContent.portfolio.subtitle;document.getElementById("portfolioButtonLabel").innerText=templateContent.portfolio.button_label;document.getElementById("aboutKicker").innerText=templateContent.about.kicker;document.getElementById("aboutTitle").innerText=templateContent.about.title;document.getElementById("aboutCopy").innerText=base.about;document.getElementById("clientsKicker").innerText=templateContent.clients.kicker;document.getElementById("clientsTitle").innerText=templateContent.clients.title;const clientNames=Array.isArray(templateContent.clients.names)?templateContent.clients.names:[];for(let i=0;i<5;i+=1){const el=document.getElementById(`clientName${i+1}`);if(el)el.innerText=clientNames[i]||DEFAULT_TEMPLATE_CONTENT.clients.names[i]||""}document.getElementById("contactHeading").innerText=templateContent.contact.heading;document.getElementById("contactText").innerText=templateContent.contact.text;document.getElementById("phoneText").innerText=base.phone;document.getElementById("whatsappText").innerText=base.whatsapp.startsWith("https://wa.me/")?"Chat on WhatsApp":base.whatsapp;document.getElementById("instagramText").innerText=base.instagram;document.getElementById("youtubeText").innerText=base.youtube.startsWith("http")?"Watch latest films":base.youtube;document.getElementById("footerCopyright").innerText=templateContent.footer.copy;document.getElementById("phoneLink").href=`tel:${phoneTel}`;document.getElementById("whatsappLink").href=whatsappUrl;document.getElementById("contactWhatsappButton").href=whatsappUrl;document.getElementById("footerWhatsappLink").href=whatsappUrl;document.getElementById("instagramLink").href=instagramUrl;document.getElementById("headerInstagramLink").href=instagramUrl;document.getElementById("footerInstagramLink").href=instagramUrl;document.getElementById("youtubeLink").href=youtubeUrl;document.getElementById("headerYoutubeLink").href=youtubeUrl;document.getElementById("footerYoutubeLink").href=youtubeUrl;applyImages(website)}
+    async function fetchWebsiteBySlug(slug){const supabase=await window.getSupabase(),{data:authData}=await supabase.auth.getUser();currentUserId=authData?.user?.id||null;let query=supabase.from("user_websites").select("*").eq("site_slug",slug).eq("template_id",4).limit(1);query=currentUserId?query.or(`is_published.eq.true,user_id.eq.${currentUserId}`):query.eq("is_published",true);const {data,error}=await query.maybeSingle();if(error)throw error;return data||null}
     function canCurrentUserEdit(website){return Boolean(currentUserId&&website?.user_id&&currentUserId===website.user_id)}
-    async function refreshWebsiteRecord(){const supabase=await window.getSupabase();const {data,error}=await supabase.from("user_websites").select("*").eq("id",currentWebsite.id).eq("user_id",currentUserId).single();if(error) throw error;return data}
-    async function updateWebsiteColumn(columnName,value){const supabase=await window.getSupabase();const {data,error}=await supabase.from("user_websites").update({[columnName]:value}).eq("id",currentWebsite.id).eq("user_id",currentUserId).select("*").single();if(error) throw error;currentWebsite=data;return data}
-    async function updateWebsiteField(fieldPath,value){if(!currentWebsite||!currentUserId) return;const parts=String(fieldPath||"").split(".");const root=parts[0];if(root==="template_content"){const nextValue=deepClone(safeObject(currentWebsite.template_content));setByPath(nextValue,parts.slice(1).join("."),value);return updateWebsiteColumn("template_content",nextValue)} return updateWebsiteColumn(fieldPath,value)}
-    async function handleImageSelection(file){if(!pendingImageSlot||!currentWebsite||!currentUserId) return;const slotName=pendingImageSlot;try{setSlotUploading(slotName,true);setEditStatus("Uploading and replacing image...");const supabase=await window.getSupabase();const currentImages={...getTemplateImages(currentWebsite)};const replaceResult=await replaceTemplateImage({supabase,userId:currentUserId,websiteId:currentWebsite.id,slot:slotName,file,currentData:currentImages});const refreshedWebsite=await refreshWebsiteRecord();currentWebsite={...refreshedWebsite};if(replaceResult?.updatedUrl){currentWebsite.template_images={...getTemplateImages(currentWebsite),[slotName]:replaceResult.updatedUrl}} applyImages(currentWebsite);setEditStatus("Image replaced successfully.")}catch(error){console.error("Image replace failed:",error);setEditStatus(error?.message||"Unable to replace image.")}finally{setSlotUploading(slotName,false);pendingImageSlot="";imageFileInput.value=""}}
-    function getFriendlyFieldLabel(fieldPath){const map={name:"Studio Name",tagline:"Tagline",about:"About",phone:"Phone",instagram:"Instagram",youtube:"YouTube",whatsapp:"WhatsApp",email:"Email"};return map[fieldPath]||"Content"}
-    function registerEditableText(){document.querySelectorAll(".editable-text").forEach(el=>{el.addEventListener("click",async event=>{if(!editModeEnabled) return;event.preventDefault();event.stopPropagation();const fieldPath=el.dataset.field||"";if(!fieldPath) return;const currentValue=el.innerText.trim();const nextValue=window.prompt(`Edit ${getFriendlyFieldLabel(fieldPath)}`,currentValue);if(nextValue===null) return;const cleanedValue=String(nextValue).trim();try{setEditStatus("Saving text update...");await updateWebsiteField(fieldPath,cleanedValue);applyWebsiteData(currentWebsite);setEditStatus("Text updated successfully.")}catch(error){console.error("Text update failed:",error);setEditStatus(error.message||"Unable to update text.")}})})}
-    function registerEditableImageSlots(){document.querySelectorAll(".editable-slot").forEach(slot=>{slot.addEventListener("click",event=>{if(!editModeEnabled) return;event.preventDefault();event.stopPropagation();pendingImageSlot=slot.dataset.imageSlot||"";if(!pendingImageSlot) return;imageFileInput.click()})})}
-    imageFileInput.addEventListener("change",async e=>{const file=e.target.files?.[0];if(file) await handleImageSelection(file)});editModeToggle.addEventListener("click",()=>{setEditMode(!editModeEnabled)});
-    async function initTemplate(){showLoading();const slug=getSlugFromUrl();if(!slug){showError("Missing website slug. Open this page using template-4.html?slug=your-site-slug or a clean URL like /studio/your-site-slug");return} try{const website=await fetchWebsiteBySlug(slug);if(!website){showError("No website data found for this slug. Save your Website Builder first, then open this template using the correct slug.");return} currentWebsite=website;applyWebsiteData(website);registerEditableImageSlots();registerEditableText();showTemplate();const editable=canCurrentUserEdit(website);showEditToolbar(editable);if(editable&&isEditRequestedFromUrl()) setEditMode(true);else setEditMode(false)}catch(error){console.error("Template 4 load failed:",error);showError("Unable to load website preview right now.")}}
-    const mobileMenuBtn=document.getElementById("mobileMenuBtn");const headerInner=document.getElementById("headerInner");if(mobileMenuBtn&&headerInner){mobileMenuBtn.addEventListener("click",()=>{headerInner.classList.toggle("mobile-nav-open")})}
+    async function refreshWebsiteRecord(){const supabase=await window.getSupabase(),{data,error}=await supabase.from("user_websites").select("*").eq("id",currentWebsite.id).eq("user_id",currentUserId).single();if(error)throw error;return data}
+    async function updateWebsiteColumn(columnName,value){const supabase=await window.getSupabase(),{data,error}=await supabase.from("user_websites").update({[columnName]:value}).eq("id",currentWebsite.id).eq("user_id",currentUserId).select("*").single();if(error)throw error;currentWebsite=data;return data}
+    async function updateWebsiteField(fieldPath,value){if(!currentWebsite||!currentUserId)return;const parts=String(fieldPath||"").split("."),root=parts[0];if(root==="template_content"){const nextValue=deepClone(safeObject(currentWebsite.template_content));setByPath(nextValue,parts.slice(1).join("."),value);return updateWebsiteColumn("template_content",nextValue)}return updateWebsiteColumn(fieldPath,value)}
+    async function handleImageSelection(file){if(!pendingImageSlot||!currentWebsite||!currentUserId)return;const slotName=pendingImageSlot;try{setSlotUploading(slotName,true);setEditStatus("Uploading and replacing image...");const supabase=await window.getSupabase(),currentImages={...getTemplateImages(currentWebsite)},replaceResult=await replaceTemplateImage({supabase,userId:currentUserId,websiteId:currentWebsite.id,slot:slotName,file,currentData:currentImages}),refreshedWebsite=await refreshWebsiteRecord();currentWebsite={...refreshedWebsite,template_content:safeObject(refreshedWebsite.template_content)};if(replaceResult?.updatedUrl){currentWebsite.template_images={...getTemplateImages(currentWebsite),[slotName]:replaceResult.updatedUrl}}applyWebsiteData(currentWebsite);setEditStatus("Image replaced successfully.")}catch(error){console.error("Image replace failed:",error);setEditStatus(error?.message||"Unable to replace image.")}finally{setSlotUploading(slotName,false);pendingImageSlot="";imageFileInput.value=""}}
+    function getFriendlyFieldLabel(fieldPath){const map={about:"About",phone:"Phone",instagram:"Instagram",youtube:"YouTube",whatsapp:"WhatsApp",email:"Email"};return map[fieldPath]||"Content"}
+    function registerEditableText(){document.querySelectorAll(".editable-text").forEach(el=>{el.addEventListener("click",async event=>{if(!editModeEnabled)return;event.preventDefault();event.stopPropagation();const fieldPath=el.dataset.field||"";if(!fieldPath)return;const currentValue=el.innerText.trim(),nextValue=window.prompt(`Edit ${getFriendlyFieldLabel(fieldPath)}`,currentValue);if(nextValue===null)return;const cleanedValue=String(nextValue).trim();if(!cleanedValue)return;try{setEditStatus("Saving text update...");await updateWebsiteField(fieldPath,cleanedValue);applyWebsiteData(currentWebsite);setEditStatus("Text updated successfully.")}catch(error){console.error("Text update failed:",error);setEditStatus(error.message||"Unable to update text.")}})})}
+    function registerEditableImageSlots(){document.querySelectorAll(".editable-slot").forEach(slot=>{slot.addEventListener("click",event=>{if(!editModeEnabled)return;event.preventDefault();event.stopPropagation();pendingImageSlot=slot.dataset.imageSlot||"";if(!pendingImageSlot)return;imageFileInput.click()})})}
+    imageFileInput.addEventListener("change",async e=>{const file=e.target.files?.[0];if(file)await handleImageSelection(file)});
+    editModeToggle.addEventListener("click",()=>{setEditMode(!editModeEnabled)});
+    async function initTemplate(){showLoading();const slug=getSlugFromUrl();if(!slug){showError("Missing website slug. Open this page using template-4.html?slug=your-site-slug or a clean URL like /studio/your-site-slug");return}try{const website=await fetchWebsiteBySlug(slug);if(!website){showError("No website data found for this slug. Save your Website Builder first, then open this template using the correct slug.");return}currentWebsite=website;applyWebsiteData(website);registerEditableImageSlots();registerEditableText();showTemplate();const editable=canCurrentUserEdit(website);showEditToolbar(editable);editable&&isEditRequestedFromUrl()?setEditMode(true):setEditMode(false)}catch(error){console.error("Template 4 load failed:",error);showError("Unable to load website preview right now.")}}
+    const mobileMenuBtn=document.getElementById("mobileMenuBtn"),headerInner=document.getElementById("headerInner");if(mobileMenuBtn&&headerInner){mobileMenuBtn.addEventListener("click",()=>{headerInner.classList.toggle("mobile-nav-open")})}
     await initTemplate();
   </script>
 </body>
