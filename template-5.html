@@ -1368,28 +1368,8 @@
     }
 
     function buildImageBackground(url){
-      const safeUrl=String(url||"").replace(/"/g,'\\"');
+      const safeUrl=String(url||"").replace(/"/g,'\\\"');
       return `url("${safeUrl}")`;
-    }
-
-    
-
-      if(heroImg){
-        heroImg.onload=()=>{
-          heroImg.style.opacity="0";
-          heroImg.style.visibility="hidden";
-        };
-        heroImg.onerror=()=>{
-          heroImg.style.opacity="0";
-          heroImg.style.visibility="hidden";
-          if(heroSection){
-            heroSection.style.backgroundImage=buildImageBackground(DEFAULT_IMAGES.hero || "");
-            heroSection.dataset.previewUrl=DEFAULT_IMAGES.hero || "";
-          }
-        };
-        heroImg.src=safeUrl;
-        heroImg.alt=(currentWebsite?.name || "Studio") + " hero image";
-      }
     }
 
     function applyImageToTile(id,slot){
@@ -1397,18 +1377,7 @@
       if(!el) return;
 
       const url=getImageUrl(currentWebsite,slot) || DEFAULT_IMAGES[slot] || "";
-
-      if(id === "heroSection"){
-        applyHeroImage(url);
-      }else{
-        const img = el.querySelector("img");
-        if(img){
-          img.src = url;
-        }else{
-          el.style.backgroundImage=buildImageBackground(url);
-        }
-      }
-
+      el.style.backgroundImage=buildImageBackground(url);
       el.dataset.previewUrl=url;
     }
 
