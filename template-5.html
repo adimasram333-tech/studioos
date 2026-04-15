@@ -1490,7 +1490,7 @@
           tagline:website?.tagline?.trim()||DEFAULT_BASE.tagline,
           about:website?.about?.trim()||DEFAULT_BASE.about,
           phone:formatPhoneForDisplay(website?.phone),
-          instagram:normalizePortfolioLabel(website?.instagram),
+          instagram:normalizeInstagram(website?.instagram),
           email:String(website?.email||"").trim()||DEFAULT_BASE.email,
           youtube:normalizeYoutubeLink(website?.youtube),
           whatsapp:String(website?.whatsapp||"").trim()||formatPhoneForWhatsApp(website?.phone,website?.whatsapp)
