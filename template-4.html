@@ -293,7 +293,7 @@
       background-size:cover;
       background-position:center;
       background-repeat:no-repeat;
-      filter:grayscale(100%);
+      
       transform:scale(1.01);
       z-index:1;
     }
@@ -439,7 +439,7 @@
       background-position:center;
       background-repeat:no-repeat;
       min-height:180px;
-      filter:grayscale(100%);
+      
     }
 
     .tile-sm{min-height:170px}
@@ -589,7 +589,7 @@
       background-position:center;
       background-repeat:no-repeat;
       overflow:hidden;
-      filter:grayscale(100%);
+      
     }
 
     .featured-card.tall{
@@ -625,7 +625,7 @@
       background-position:center;
       background-repeat:no-repeat;
       opacity:.22;
-      filter:grayscale(100%);
+      
     }
 
     .pricing-section::after{
@@ -971,7 +971,10 @@
       .hero-btn,.hero-btn-outline{width:100%}
       .brand-mark{max-width:58vw;font-size:13px;letter-spacing:.1em}
     }
-  </style>
+  
+.filter-bw{filter:grayscale(100%);}
+</style>
+
 </head>
 <body>
   <div id="pageLoading" class="page-state">
@@ -1594,20 +1597,56 @@
       applyImages(website);
     }
 
-    function applyImages(website){
-      document.getElementById("heroImageSlot").style.backgroundImage=buildImageBackground(getImageUrl(website,"hero"));
-      document.getElementById("portfolioTile1").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_1"));
-      document.getElementById("portfolioTile2").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_2"));
-      document.getElementById("portfolioTile3").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_3"));
-      document.getElementById("portfolioTile4").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_4"));
-      document.getElementById("portfolioTile5").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_5"));
-      document.getElementById("portfolioTile6").style.backgroundImage=buildImageBackground(getImageUrl(website,"portfolio_6"));
-      document.getElementById("featuredTile1").style.backgroundImage=buildImageBackground(getImageUrl(website,"featured_1"));
-      document.getElementById("featuredTile2").style.backgroundImage=buildImageBackground(getImageUrl(website,"featured_2"));
-      document.getElementById("portfolioTile7").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_1"));
-      document.getElementById("portfolioTile8").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_2"));
-      document.getElementById("portfolioTile9").style.backgroundImage=buildImageBackground(getImageUrl(website,"gallery_3"));
-      document.getElementById("pricingBgSlot").style.backgroundImage=buildImageBackground(getImageUrl(website,"pricing_bg"));
+    
+function applyBWCondition(el, slot, website){
+  if(!el) return;
+  if(website?.template_images && website.template_images[slot]){
+    el.classList.remove("filter-bw");
+  }else{
+    el.classList.add("filter-bw");
+  }
+}
+
+function applyImages(website){
+      const heroImageSlotEl = document.getElementById("heroImageSlot");
+heroImageSlotEl.style.backgroundImage = buildImageBackground(getImageUrl(website,"hero"));
+applyBWCondition(heroImageSlotEl, "hero", website);
+      const portfolioTile1El = document.getElementById("portfolioTile1");
+portfolioTile1El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_1"));
+applyBWCondition(portfolioTile1El, "portfolio_1", website);
+      const portfolioTile2El = document.getElementById("portfolioTile2");
+portfolioTile2El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_2"));
+applyBWCondition(portfolioTile2El, "portfolio_2", website);
+      const portfolioTile3El = document.getElementById("portfolioTile3");
+portfolioTile3El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_3"));
+applyBWCondition(portfolioTile3El, "portfolio_3", website);
+      const portfolioTile4El = document.getElementById("portfolioTile4");
+portfolioTile4El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_4"));
+applyBWCondition(portfolioTile4El, "portfolio_4", website);
+      const portfolioTile5El = document.getElementById("portfolioTile5");
+portfolioTile5El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_5"));
+applyBWCondition(portfolioTile5El, "portfolio_5", website);
+      const portfolioTile6El = document.getElementById("portfolioTile6");
+portfolioTile6El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_6"));
+applyBWCondition(portfolioTile6El, "portfolio_6", website);
+      const featuredTile1El = document.getElementById("featuredTile1");
+featuredTile1El.style.backgroundImage = buildImageBackground(getImageUrl(website,"featured_1"));
+applyBWCondition(featuredTile1El, "featured_1", website);
+      const featuredTile2El = document.getElementById("featuredTile2");
+featuredTile2El.style.backgroundImage = buildImageBackground(getImageUrl(website,"featured_2"));
+applyBWCondition(featuredTile2El, "featured_2", website);
+      const portfolioTile7El = document.getElementById("portfolioTile7");
+portfolioTile7El.style.backgroundImage = buildImageBackground(getImageUrl(website,"gallery_1"));
+applyBWCondition(portfolioTile7El, "gallery_1", website);
+      const portfolioTile8El = document.getElementById("portfolioTile8");
+portfolioTile8El.style.backgroundImage = buildImageBackground(getImageUrl(website,"gallery_2"));
+applyBWCondition(portfolioTile8El, "gallery_2", website);
+      const portfolioTile9El = document.getElementById("portfolioTile9");
+portfolioTile9El.style.backgroundImage = buildImageBackground(getImageUrl(website,"gallery_3"));
+applyBWCondition(portfolioTile9El, "gallery_3", website);
+      const pricingBgSlotEl = document.getElementById("pricingBgSlot");
+pricingBgSlotEl.style.backgroundImage = buildImageBackground(getImageUrl(website,"pricing_bg"));
+applyBWCondition(pricingBgSlotEl, "pricing_bg", website);
     }
 
     function applyWebsiteData(website){
