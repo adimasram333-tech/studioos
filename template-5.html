@@ -1536,6 +1536,7 @@
     }
 
     function applyImages(){
+      applyImageToTile("heroImageSlot","hero");
       applyImageToTile("heroSection","hero");
       for(let i=1;i<=12;i+=1) applyImageToTile(`gridTile${i}`,`grid_${i}`);
       for(let i=1;i<=4;i+=1) applyImageToTile(`reelCard${i}`,`reel_${i}`);
@@ -1657,13 +1658,43 @@
       const {data:authData}=await supabase.auth.getUser();
       currentUserId=authData?.user?.id||null;
 
-      let query=supabase.from("user_websites").select("*").eq("site_slug",slug).eq("template_id",5).limit(1);
-      if(currentUserId) query=query.or(`is_published.eq.true,user_id.eq.${currentUserId}`);
-      else query=query.eq("is_published",true);
+      function applyAccessScope(query){
+        if(currentUserId){
+          return query.or(`is_published.eq.true,user_id.eq.${currentUserId}`);
+        }
+        return query.eq("is_published",true);
+      }
 
-      const {data,error}=await query.maybeSingle();
-      if(error) throw error;
-      return data||null;
+      // 1) Preferred exact match: current template row
+      let exactQuery=applyAccessScope(
+        supabase
+          .from("user_websites")
+          .select("*")
+          .eq("site_slug",slug)
+          .eq("template_id",5)
+          .order("updated_at",{ascending:false})
+          .limit(1)
+      );
+
+      let {data:exactData,error:exactError}=await exactQuery.maybeSingle();
+      if(exactError) throw exactError;
+      if(exactData) return exactData;
+
+      // 2) Fallback: same slug, owner/public accessible, latest row regardless of template_id
+      let fallbackQuery=applyAccessScope(
+        supabase
+          .from("user_websites")
+          .select("*")
+          .eq("site_slug",slug)
+          .order("updated_at",{ascending:false})
+          .limit(1)
+      );
+
+      let {data:fallbackData,error:fallbackError}=await fallbackQuery.maybeSingle();
+      if(fallbackError) throw fallbackError;
+      if(fallbackData) return {...fallbackData, template_id: 5};
+
+      return null;
     }
 
     function canCurrentUserEdit(website){
@@ -1825,7 +1856,7 @@
       try{
         const website=await fetchWebsiteBySlug(slug);
         if(!website){
-          showError("No website data found for this slug. Save your Website Builder first, then open this template using the correct slug.");
+          showError("No accessible website data was found for this slug. Save or publish the website once, then reopen this preview.");
           return;
         }
 
