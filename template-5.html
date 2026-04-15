@@ -204,12 +204,13 @@
       text-transform:uppercase;
     }
 
-        .hero-banner{
+        
+    .hero-banner{
       position:relative;
-      min-height:70vh;
+      height:520px;
       overflow:hidden;
       border-bottom:1px solid var(--line);
-      background:#f5f5f5;
+      background:#efefef;
     }
 
     .hero-media{
@@ -234,7 +235,7 @@
       content:"";
       position:absolute;
       inset:0;
-      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.08) 45%, rgba(255,255,255,.14));
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.08) 45%, rgba(255,255,255,.14));
       pointer-events:none;
       z-index:2;
     }
@@ -242,14 +243,14 @@
     .hero-content-wrap{
       position:relative;
       z-index:5;
-      min-height:70vh;
+      height:100%;
       display:flex;
       align-items:flex-end;
       padding:0 0 22px;
     }
 
     .hero-copy{
-      width:min(100%, 520px);
+      width:min(100%, 420px);
       padding:0 18px;
       color:#111;
     }
@@ -259,13 +260,13 @@
       flex-direction:column;
       align-items:flex-start;
       gap:0;
-      background:rgba(255,255,255,.78);
+      background:rgba(255,255,255,.76);
       backdrop-filter:blur(8px);
       border:1px solid rgba(0,0,0,.06);
-      border-radius:20px;
+      border-radius:18px;
       padding:12px 14px;
       box-shadow:var(--shadow);
-      max-width:min(100%, 420px);
+      max-width:min(100%, 380px);
     }
 
     .hero-kicker{
@@ -280,7 +281,7 @@
 
     .hero-title{
       margin:0;
-      font-size:clamp(24px,3.2vw,38px);
+      font-size:clamp(24px,3vw,36px);
       line-height:1.02;
       font-weight:900;
       letter-spacing:.01em;
@@ -292,10 +293,10 @@
 
     .hero-tagline{
       margin:8px 0 0;
-      max-width:28ch;
+      max-width:26ch;
       color:#333;
       font-size:13px;
-      line-height:1.5;
+      line-height:1.45;
       display:inline-block;
     }
 
@@ -305,6 +306,7 @@
       gap:10px;
       flex-wrap:wrap;
     }
+
 
     .action-btn,.action-btn-outline{
       min-height:48px;
@@ -332,7 +334,7 @@
 
     .stats-strip{
       width:min(var(--container), calc(100% - 32px));
-      margin:-24px auto 0;
+      margin:-18px auto 0;
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
       gap:12px;
@@ -827,23 +829,23 @@
       .section-sub{margin-top:6px}
       .collection-grid,.pricing-grid{grid-template-columns:1fr}
       .grid-feed{gap:1px}
-      .header-inner{min-height:56px; align-items:flex-start; padding:10px 0}
-      .brand{max-width:66vw;font-size:.8rem;letter-spacing:.04em;line-height:1.2}
-      .header-links{gap:8px; justify-content:flex-end; max-width:34vw}
-      .header-links a{font-size:.68rem; letter-spacing:.06em}
-      .hero-banner{min-height:48vh}
-      .hero-content-wrap{min-height:48vh;padding:0 0 14px; align-items:flex-end}
+      .header-inner{min-height:56px; align-items:center; padding:8px 0}
+      .brand{max-width:58vw;font-size:.78rem;letter-spacing:.04em;line-height:1.15}
+      .header-links{gap:8px; justify-content:flex-end; max-width:38vw}
+      .header-links a{font-size:.66rem; letter-spacing:.04em}
+      .hero-banner{height:360px}
+      .hero-content-wrap{padding:0 0 14px; align-items:flex-end}
       .hero-copy{padding:0 12px; width:100%}
-      .hero-panel{padding:10px 12px; border-radius:18px; max-width:100%; width:min(100%, 280px)}
-      .hero-kicker{font-size:9px; letter-spacing:.14em; margin-bottom:6px}
-      .hero-title{font-size:clamp(18px,6.6vw,24px);max-width:12ch;line-height:1.04}
-      .hero-tagline{font-size:11px;line-height:1.4;max-width:100%; margin-top:6px}
+      .hero-panel{padding:10px 12px; border-radius:16px; max-width:100%; width:min(100%, 250px)}
+      .hero-kicker{font-size:8.5px; letter-spacing:.12em; margin-bottom:6px}
+      .hero-title{font-size:clamp(18px,6.6vw,24px);max-width:11ch;line-height:1.04}
+      .hero-tagline{font-size:11px;line-height:1.35;max-width:100%; margin-top:6px}
       .hero-actions{display:flex;flex-wrap:wrap;width:100%; margin-top:10px; gap:8px}
-      .action-btn,.action-btn-outline{width:auto; min-height:38px; padding:0 14px; font-size:.66rem}
-      .stats-strip{grid-template-columns:1fr 1fr 1fr; margin-top:-16px; gap:8px}
+      .action-btn,.action-btn-outline{width:auto; min-height:36px; padding:0 12px; font-size:.64rem}
+      .stats-strip{grid-template-columns:1fr 1fr 1fr; margin-top:-14px; gap:8px}
       .stat-card{padding:12px 8px;border-radius:18px}
       .stat-card strong{font-size:.92rem}
-      .stat-card span{font-size:.68rem;letter-spacing:.06em}
+      .stat-card span{font-size:.66rem;letter-spacing:.05em}
       .edit-toolbar{left:10px; right:10px; bottom:6px}
       .edit-status{font-size:.72rem; padding:10px 12px}
     }
@@ -891,7 +893,7 @@
     <main id="top">
       <section class="hero-banner">
         <div id="heroSection" class="hero-media editable-slot" data-image-slot="hero">
-          <img id="heroImageEl" class="hero-image-el" src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1600&q=80" alt="Hero image" />
+          <img id="heroImageEl" class="hero-image-el" src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1600&q=80" alt="Hero image" loading="eager" decoding="async" />
           <div class="image-loading">Uploading...</div>
           <div class="edit-overlay"><span>Replace Hero Image</span></div>
         </div>
