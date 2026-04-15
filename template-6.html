@@ -214,14 +214,16 @@
       min-height:760px;
       overflow:hidden;
       border-bottom:1px solid rgba(255,255,255,.06);
+      background:#1a1a22 center/cover no-repeat;
     }
 
     .hero-bg{
       position:absolute;
       inset:0;
-      background:#1a1a22 center/cover no-repeat;
+      background:transparent center/cover no-repeat;
       z-index:0;
       transform:scale(1.01);
+      pointer-events:none;
     }
 
     .hero::after{
@@ -893,12 +895,11 @@
     </header>
 
     <main id="top">
-      <section class="hero">
+      <section id="heroSection" class="hero">
         <div id="heroImageSlot" class="hero-bg editable-slot" data-image-slot="hero">
           <div class="image-loading">Uploading...</div>
           <div class="edit-overlay"><span>Replace Hero Image</span></div>
         </div>
-        
 
         <div class="container hero-inner">
           <div class="hero-copy">
@@ -1358,11 +1359,20 @@
     }
 
     function applyImages(website){
+      const heroSectionEl=document.getElementById("heroSection");
       const heroImageSlotEl=document.getElementById("heroImageSlot");
-      if(heroImageSlotEl){
-        heroImageSlotEl.style.backgroundImage=buildImageBackground(getImageUrl(website,"hero"));
-        heroImageSlotEl.dataset.previewUrl=getImageUrl(website,"hero");
+      const heroUrl=getImageUrl(website,"hero") || DEFAULT_IMAGES.hero || "";
+
+      if(heroSectionEl){
+        heroSectionEl.style.backgroundImage=buildImageBackground(heroUrl);
+        heroSectionEl.dataset.previewUrl=heroUrl;
       }
+
+      if(heroImageSlotEl){
+        heroImageSlotEl.style.backgroundImage=buildImageBackground(heroUrl);
+        heroImageSlotEl.dataset.previewUrl=heroUrl;
+      }
+
       applyImageToTile("galleryTile1","gallery_1",website);
       applyImageToTile("galleryTile2","gallery_2",website);
       applyImageToTile("galleryTile3","gallery_3",website);
@@ -1465,7 +1475,7 @@
       editModeToggle.classList.toggle("active",enabled);
       document.querySelectorAll(".editable-slot").forEach(slot=>slot.classList.toggle("edit-active",enabled));
       document.querySelectorAll(".editable-text").forEach(el=>el.classList.toggle("edit-active",enabled));
-      
+
       setEditStatus(enabled?"Edit mode is ON. Click any text or image area to update it.":"You are viewing preview mode.");
     }
 
@@ -1634,6 +1644,7 @@
       document.querySelectorAll(".editable-slot").forEach(slot=>{
         slot.addEventListener("click",event=>{
           if(!editModeEnabled) return;
+          if(slot.dataset.imageSlot==="hero") return;
           event.preventDefault();
           event.stopPropagation();
           pendingImageSlot=slot.dataset.imageSlot||"";
@@ -1650,7 +1661,7 @@
     }
 
     function registerPreviewTiles(){
-      document.querySelectorAll(".gallery-tile,.collection-media,.hero-bg").forEach(el=>{
+      document.querySelectorAll(".gallery-tile,.collection-media").forEach(el=>{
         el.addEventListener("click",event=>{
           if(editModeEnabled) return;
           event.preventDefault();
@@ -1660,21 +1671,43 @@
       });
     }
 
+    function registerHeroImageInteraction(){
+      const heroSection=document.getElementById("heroSection");
+      const heroImageSlot=document.getElementById("heroImageSlot");
+      if(!heroSection || !heroImageSlot) return;
+
+      heroSection.addEventListener("click",event=>{
+        const clickedEditableText=event.target.closest(".editable-text");
+        const clickedAction=event.target.closest("a,button,input,textarea");
+        const clickedPreviewBlockingCard=event.target.closest(".hero-card");
+
+        if(editModeEnabled){
+          if(clickedEditableText || clickedAction || clickedPreviewBlockingCard){
+            return;
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          pendingImageSlot="hero";
+          imageFileInput.click();
+          return;
+        }
+
+        if(clickedAction){
+          return;
+        }
+
+        const heroUrl=heroSection.dataset.previewUrl || heroImageSlot.dataset.previewUrl || "";
+        if(heroUrl){
+          event.preventDefault();
+          openPreview(heroUrl);
+        }
+      });
+    }
+
     imageFileInput.addEventListener("change",async e=>{
       const file=e.target.files?.[0];
       if(file) await handleImageSelection(file);
     });
-
-    const heroReplaceButton=document.getElementById("heroReplaceButton");
-    if(heroReplaceButton){
-      heroReplaceButton.addEventListener("click",(event)=>{
-        event.preventDefault();
-        event.stopPropagation();
-        if(!editModeEnabled) return;
-        pendingImageSlot="hero";
-        imageFileInput.click();
-      });
-    }
 
     editModeToggle.addEventListener("click",()=>setEditMode(!editModeEnabled));
     previewClose.addEventListener("click",()=>previewModal.classList.remove("open"));
@@ -1699,6 +1732,7 @@
         registerEditableImageSlots();
         registerEditableText();
         registerPreviewTiles();
+        registerHeroImageInteraction();
         showTemplate();
         applyWebsiteData(currentWebsite);
 
