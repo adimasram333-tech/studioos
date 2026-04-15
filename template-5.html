@@ -1722,7 +1722,12 @@
 
     window.addEventListener("resize",()=>{ if(currentWebsite) forceRenderAllContent(); });
     window.addEventListener("orientationchange",()=>{ if(currentWebsite) setTimeout(()=>forceRenderAllContent(),120); });
-    window.addEventListener("load", async ()=>{ await initTemplate(); });
+    window.addEventListener("load", async ()=>{
+  await initTemplate();
+  setTimeout(() => {
+    if(currentWebsite) forceRenderAllContent();
+  }, 120);
+});
   </script>
 </body>
 </html>
