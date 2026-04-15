@@ -230,8 +230,8 @@
       object-fit:cover;
       object-position:center;
       display:block;
-      opacity:1;
-      visibility:visible;
+      opacity:0;
+      visibility:hidden;
       pointer-events:none;
     }
 
@@ -1390,6 +1390,34 @@
       return `url("${safeUrl}")`;
     }
 
+    function applyHeroImage(url){
+      const heroSection=document.getElementById("heroSection");
+      const heroImg=document.getElementById("heroImageEl");
+      const safeUrl=url || DEFAULT_IMAGES.hero || "";
+
+      if(heroSection){
+        heroSection.style.backgroundImage=buildImageBackground(safeUrl);
+        heroSection.dataset.previewUrl=safeUrl;
+      }
+
+      if(heroImg){
+        heroImg.onload=()=>{
+          heroImg.style.opacity="0";
+          heroImg.style.visibility="hidden";
+        };
+        heroImg.onerror=()=>{
+          heroImg.style.opacity="0";
+          heroImg.style.visibility="hidden";
+          if(heroSection){
+            heroSection.style.backgroundImage=buildImageBackground(DEFAULT_IMAGES.hero || "");
+            heroSection.dataset.previewUrl=DEFAULT_IMAGES.hero || "";
+          }
+        };
+        heroImg.src=safeUrl;
+        heroImg.alt=(currentWebsite?.name || "Studio") + " hero image";
+      }
+    }
+
     function applyImageToTile(id,slot){
       const el=document.getElementById(id);
       if(!el) return;
@@ -1397,12 +1425,7 @@
       const url=getImageUrl(currentWebsite,slot) || DEFAULT_IMAGES[slot] || "";
 
       if(id === "heroSection"){
-        el.style.backgroundImage=buildImageBackground(url);
-        const heroImg=document.getElementById("heroImageEl");
-        if(heroImg){
-          heroImg.src=url;
-          heroImg.alt=(currentWebsite?.name || "Studio") + " hero image";
-        }
+        applyHeroImage(url);
       }else{
         const img = el.querySelector("img");
         if(img){
@@ -1510,7 +1533,9 @@
       }
       if(heroReplaceButton){
         heroReplaceButton.classList.remove("hidden");
-        heroReplaceButton.style.display=enabled?"inline-flex":"none";
+        heroReplaceButton.style.display=enabled ? "inline-flex" : "none";
+        heroReplaceButton.style.visibility=enabled ? "visible" : "hidden";
+        heroReplaceButton.style.opacity=enabled ? "1" : "0";
         heroReplaceButton.disabled=!enabled;
         heroReplaceButton.setAttribute("aria-hidden", enabled ? "false" : "true");
       }
