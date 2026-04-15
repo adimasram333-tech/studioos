@@ -225,14 +225,31 @@
     }
 
     .hero::after{
-      content:"";
+      display:none;
+    }
+
+    .hero-replace-btn{
       position:absolute;
-      inset:0;
-      z-index:2;
-      background:
-        linear-gradient(180deg, rgba(8,8,12,.24), rgba(8,8,12,.5) 54%, rgba(8,8,12,.82)),
-        linear-gradient(90deg, rgba(8,8,12,.74), rgba(8,8,12,.20) 55%, rgba(8,8,12,.60));
-      pointer-events:none;
+      top:92px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:9;
+      min-height:44px;
+      padding:0 16px;
+      border:none;
+      border-radius:999px;
+      background:rgba(18,18,26,.88);
+      color:#fff;
+      box-shadow:var(--shadow);
+      font-size:.74rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      cursor:pointer;
+      display:none;
+      appearance:none;
+      -webkit-appearance:none;
+      border:1px solid rgba(255,255,255,.10);
     }
 
     .hero-inner{
@@ -820,6 +837,12 @@
       .hero-tagline{font-size:.92rem;line-height:1.7}
       .hero-actions{flex-direction:column}
       .primary-btn,.secondary-btn{width:100%}
+      .hero-replace-btn{
+        top:88px;
+        min-height:40px;
+        padding:0 14px;
+        font-size:.68rem;
+      }
       .stat-grid{grid-template-columns:1fr}
       .stats-strip{grid-template-columns:1fr; margin-top:-10px}
       .gallery-tile,.gallery-tile.medium,.gallery-tile.tall{min-height:220px}
@@ -871,6 +894,7 @@
           <div class="image-loading">Uploading...</div>
           <div class="edit-overlay"><span>Replace Hero Image</span></div>
         </div>
+        <button id="heroReplaceButton" type="button" class="hero-replace-btn hidden">Replace Hero Image</button>
 
         <div class="container hero-inner">
           <div class="hero-copy">
@@ -1437,6 +1461,12 @@
       editModeToggle.classList.toggle("active",enabled);
       document.querySelectorAll(".editable-slot").forEach(slot=>slot.classList.toggle("edit-active",enabled));
       document.querySelectorAll(".editable-text").forEach(el=>el.classList.toggle("edit-active",enabled));
+      const heroReplaceButton=document.getElementById("heroReplaceButton");
+      if(heroReplaceButton){
+        heroReplaceButton.classList.toggle("hidden", !enabled);
+        heroReplaceButton.style.display=enabled ? "inline-flex" : "none";
+        heroReplaceButton.disabled=!enabled;
+      }
       setEditStatus(enabled?"Edit mode is ON. Click any text or image area to update it.":"You are viewing preview mode.");
     }
 
@@ -1635,6 +1665,17 @@
       const file=e.target.files?.[0];
       if(file) await handleImageSelection(file);
     });
+
+    const heroReplaceButton=document.getElementById("heroReplaceButton");
+    if(heroReplaceButton){
+      heroReplaceButton.addEventListener("click",(event)=>{
+        event.preventDefault();
+        event.stopPropagation();
+        if(!editModeEnabled) return;
+        pendingImageSlot="hero";
+        imageFileInput.click();
+      });
+    }
 
     editModeToggle.addEventListener("click",()=>setEditMode(!editModeEnabled));
     previewClose.addEventListener("click",()=>previewModal.classList.remove("open"));
