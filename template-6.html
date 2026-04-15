@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template 6 - StudioOS</title>
+  <style>
+    :root{
+      --bg:#0a0a0d;
+      --surface:#111117;
+      --surface-2:#171720;
+      --surface-3:#1d1d28;
+      --line:rgba(255,255,255,.08);
+      --text:#f8f8fb;
+      --muted:#c7c8d3;
+      --soft:#9d9fb1;
+      --accent:#d6b36f;
+      --shadow:0 28px 90px rgba(0,0,0,.35);
+      --container:1220px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at top right, rgba(214,179,111,.12), transparent 28%),
+        radial-gradient(circle at top left, rgba(108,124,255,.10), transparent 22%),
+        var(--bg);
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height:1.5;
+    }
+
+    a{text-decoration:none;color:inherit}
+    img{display:block;max-width:100%}
+    button,input,textarea{font:inherit}
+    .hidden{display:none!important}
+
+    .page-state{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(4,4,8,.86);
+      backdrop-filter:blur(12px);
+      z-index:140;
+      padding:24px;
+    }
+
+    .page-state-card{
+      width:min(460px,100%);
+      background:rgba(20,20,28,.94);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:28px;
+      text-align:center;
+    }
+
+    .page-state-title{
+      margin:0;
+      font-size:2rem;
+      line-height:1;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .page-state-text{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:.95rem;
+      line-height:1.75;
+    }
+
+    .page-state-btn{
+      margin-top:18px;
+      min-height:48px;
+      padding:0 18px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg, var(--accent), #f0d19b);
+      color:#16120b;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-size:.74rem;
+      font-weight:800;
+      border:1px solid rgba(255,255,255,.06);
+    }
+
+    .edit-toolbar{
+      position:fixed;
+      top:16px;
+      right:16px;
+      z-index:160;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-end;
+    }
+
+    .edit-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border-radius:999px;
+      background:rgba(18,18,26,.95);
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+    }
+
+    .edit-label{
+      font-size:.8rem;
+      font-weight:700;
+      color:#fff;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .toggle-btn{
+      appearance:none;
+      width:48px;
+      height:28px;
+      border-radius:999px;
+      background:#3b3c48;
+      position:relative;
+      cursor:pointer;
+      border:none;
+      transition:background .2s ease;
+    }
+
+    .toggle-btn::after{
+      content:"";
+      position:absolute;
+      top:3px;
+      left:3px;
+      width:22px;
+      height:22px;
+      border-radius:999px;
+      background:#fff;
+      box-shadow:0 2px 8px rgba(0,0,0,.18);
+      transition:transform .2s ease;
+    }
+
+    .toggle-btn.active{background:var(--accent)}
+    .toggle-btn.active::after{transform:translateX(20px)}
+
+    .edit-status{
+      max-width:360px;
+      padding:13px 14px;
+      border-radius:16px;
+      background:rgba(18,18,26,.95);
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      color:var(--muted);
+      font-size:.8rem;
+      line-height:1.5;
+    }
+
+    .container{
+      width:min(var(--container), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .site-header{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:rgba(10,10,13,.78);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .header-inner{
+      min-height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+
+    .brand{
+      font-size:1rem;
+      font-weight:900;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      white-space:nowrap;
+      max-width:52vw;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .header-links{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      flex-wrap:wrap;
+      color:#d4d5df;
+    }
+
+    .header-links a{
+      font-size:.76rem;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
+    .hero{
+      position:relative;
+      min-height:760px;
+      overflow:hidden;
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+
+    .hero-bg{
+      position:absolute;
+      inset:0;
+      background:#1a1a22 center/cover no-repeat;
+      z-index:1;
+      transform:scale(1.01);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:2;
+      background:
+        linear-gradient(180deg, rgba(8,8,12,.24), rgba(8,8,12,.5) 54%, rgba(8,8,12,.82)),
+        linear-gradient(90deg, rgba(8,8,12,.74), rgba(8,8,12,.20) 55%, rgba(8,8,12,.60));
+      pointer-events:none;
+    }
+
+    .hero-inner{
+      position:relative;
+      z-index:5;
+      min-height:760px;
+      display:grid;
+      grid-template-columns:minmax(0, 1.08fr) minmax(320px, .92fr);
+      gap:28px;
+      align-items:end;
+      padding:110px 0 44px;
+    }
+
+    .hero-copy{
+      max-width:690px;
+      padding:0 6px 18px 0;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      color:#ececf3;
+      font-size:.74rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-weight:700;
+    }
+
+    .hero-title{
+      margin:18px 0 0;
+      font-size:clamp(40px, 7vw, 90px);
+      line-height:.92;
+      font-weight:900;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+      max-width:11ch;
+      word-break:break-word;
+    }
+
+    .hero-tagline{
+      margin:18px 0 0;
+      max-width:560px;
+      color:#d7d8e2;
+      font-size:1rem;
+      line-height:1.9;
+    }
+
+    .hero-actions{
+      margin-top:26px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .primary-btn,.secondary-btn{
+      min-height:50px;
+      padding:0 20px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.78rem;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .primary-btn{
+      background:linear-gradient(135deg, var(--accent), #f0d19b);
+      color:#18130b;
+    }
+
+    .secondary-btn{
+      background:rgba(255,255,255,.05);
+      color:#fff;
+    }
+
+    .hero-card{
+      align-self:end;
+      background:rgba(16,16,24,.82);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:30px;
+      box-shadow:var(--shadow);
+      padding:22px;
+      backdrop-filter:blur(14px);
+    }
+
+    .hero-card-title{
+      margin:0;
+      font-size:.82rem;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:#d8d9e3;
+    }
+
+    .hero-card-copy{
+      margin-top:12px;
+      color:#bfc1cf;
+      font-size:.96rem;
+      line-height:1.8;
+    }
+
+    .stat-grid{
+      margin-top:20px;
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:12px;
+    }
+
+    .stat{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:20px;
+      padding:16px 12px;
+      text-align:center;
+    }
+
+    .stat strong{
+      display:block;
+      font-size:1.2rem;
+      font-weight:900;
+      color:#fff;
+    }
+
+    .stat span{
+      display:block;
+      margin-top:6px;
+      color:#aeb0bf;
+      font-size:.72rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .section{
+      padding:34px 0;
+    }
+
+    .section-head{
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .section-label{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      color:#d4b16d;
+      font-size:.74rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-weight:800;
+      margin-bottom:10px;
+    }
+
+    .section-title{
+      margin:0;
+      font-size:clamp(26px,4vw,40px);
+      font-weight:900;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+
+    .section-sub{
+      color:#b7b9c8;
+      font-size:.95rem;
+      line-height:1.8;
+      max-width:720px;
+    }
+
+    .glass-card{
+      background:rgba(17,17,24,.94);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+    }
+
+    .about-wrap{
+      padding:24px;
+    }
+
+    .about-copy{
+      color:#d3d4de;
+      font-size:1rem;
+      line-height:1.95;
+      max-width:900px;
+    }
+
+    .gallery-grid{
+      display:grid;
+      grid-template-columns:1.05fr .95fr .95fr;
+      gap:14px;
+      align-items:stretch;
+    }
+
+    .gallery-stack{
+      display:grid;
+      gap:14px;
+    }
+
+    .gallery-tile{
+      position:relative;
+      min-height:220px;
+      background:#1d1d28 center/cover no-repeat;
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:26px;
+      overflow:hidden;
+    }
+
+    .gallery-tile.tall{min-height:470px}
+    .gallery-tile.medium{min-height:310px}
+
+    .gallery-tile::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.16));
+      pointer-events:none;
+    }
+
+    .collection-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:16px;
+    }
+
+    .collection-card{
+      background:rgba(17,17,24,.94);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:26px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+
+    .collection-media{
+      position:relative;
+      aspect-ratio:4/5;
+      background:#1d1d28 center/cover no-repeat;
+    }
+
+    .collection-body{
+      padding:18px;
+    }
+
+    .collection-title{
+      margin:0;
+      font-size:1.02rem;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .collection-text{
+      margin-top:10px;
+      color:#bcbfcc;
+      font-size:.95rem;
+      line-height:1.8;
+    }
+
+    .pricing-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:16px;
+    }
+
+    .price-card{
+      background:linear-gradient(180deg, rgba(20,20,29,.98), rgba(14,14,20,.98));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:28px;
+      padding:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .price-label{
+      color:#d4b16d;
+      font-size:.72rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-weight:800;
+    }
+
+    .price-title{
+      margin:12px 0 0;
+      font-size:1.55rem;
+      font-weight:900;
+      text-transform:uppercase;
+      line-height:1.08;
+    }
+
+    .price-value{
+      margin:14px 0 0;
+      font-size:2.15rem;
+      font-weight:900;
+      color:#fff;
+    }
+
+    .price-list{
+      margin-top:16px;
+      display:grid;
+      gap:10px;
+    }
+
+    .price-item{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding-bottom:10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      color:#c4c6d2;
+      font-size:.9rem;
+    }
+
+    .price-item strong{
+      color:#fff;
+      text-align:right;
+      font-weight:700;
+    }
+
+    .price-btn{
+      margin-top:16px;
+      min-height:46px;
+      padding:0 16px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg, var(--accent), #f0d19b);
+      color:#18130b;
+      font-size:.74rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-weight:900;
+    }
+
+    .contact-grid{
+      display:grid;
+      grid-template-columns:1.02fr .98fr;
+      gap:16px;
+    }
+
+    .contact-card,.contact-form{
+      background:rgba(17,17,24,.94);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:28px;
+      padding:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .contact-title{
+      margin:0;
+      font-size:1.32rem;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .contact-text{
+      margin-top:12px;
+      color:#bcbfcc;
+      font-size:.96rem;
+      line-height:1.85;
+    }
+
+    .contact-links{
+      margin-top:18px;
+      display:grid;
+      gap:12px;
+    }
+
+    .contact-link{
+      min-height:62px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:0 18px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+    }
+
+    .contact-link strong{
+      display:block;
+      font-size:.72rem;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:#f3f4f8;
+      margin-bottom:4px;
+    }
+
+    .contact-link span{
+      display:block;
+      color:#bfc1cf;
+      font-size:.92rem;
+    }
+
+    .form-grid{
+      display:grid;
+      gap:12px;
+      margin-top:16px;
+    }
+
+    .field,.textarea{
+      width:100%;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      border-radius:18px;
+      padding:15px 16px;
+      color:#fff;
+      outline:none;
+    }
+
+    .field::placeholder,.textarea::placeholder{color:#8f92a3}
+    .textarea{min-height:150px;resize:vertical}
+
+    .site-footer{
+      padding:26px 0 42px;
+      border-top:1px solid rgba(255,255,255,.06);
+      margin-top:10px;
+    }
+
+    .footer-wrap{text-align:center}
+    .footer-brand{
+      font-size:1rem;
+      font-weight:900;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
+    .footer-copy{
+      margin-top:10px;
+      color:#9497aa;
+      font-size:.84rem;
+      line-height:1.8;
+    }
+
+    .editable-slot,.editable-text{position:relative}
+    .editable-text.edit-active{
+      cursor:pointer;
+      border-radius:8px;
+      transition:box-shadow .2s ease, background .2s ease;
+    }
+
+    .editable-text.edit-active:hover{
+      box-shadow:0 0 0 1px rgba(255,255,255,.14);
+      background:rgba(255,255,255,.03);
+    }
+
+    .editable-slot.edit-active{cursor:pointer}
+    .editable-slot.edit-active:hover{outline:1px solid rgba(255,255,255,.18)}
+
+    .edit-overlay{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:14px;
+      background:rgba(0,0,0,.24);
+      color:#fff;
+      z-index:3;
+      pointer-events:none;
+    }
+
+    .editable-slot.edit-active .edit-overlay{display:flex}
+
+    .edit-overlay span{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.12);
+      font-size:.8rem;
+      font-weight:700;
+    }
+
+    .image-loading{
+      position:absolute;
+      top:10px;
+      right:10px;
+      display:none;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#ffffff;
+      color:#111827;
+      font-size:.72rem;
+      font-weight:700;
+      z-index:4;
+      border:1px solid rgba(0,0,0,.08);
+    }
+
+    .editable-slot.uploading .image-loading{display:block}
+
+    .preview-modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(6,6,10,.9);
+      z-index:170;
+      padding:20px;
+    }
+
+    .preview-modal.open{display:flex}
+
+    .preview-inner{
+      position:relative;
+      width:min(92vw,840px);
+      max-height:92vh;
+      border-radius:24px;
+      overflow:hidden;
+      background:#0e0e15;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+    }
+
+    .preview-image{
+      width:100%;
+      max-height:92vh;
+      object-fit:contain;
+      background:#0e0e15;
+    }
+
+    .preview-close{
+      position:absolute;
+      top:12px;
+      right:12px;
+      min-width:42px;
+      min-height:42px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(17,17,24,.88);
+      color:#fff;
+      cursor:pointer;
+      z-index:2;
+    }
+
+    @media (max-width:1080px){
+      .hero-inner{grid-template-columns:1fr}
+      .collection-grid,.pricing-grid{grid-template-columns:1fr 1fr}
+      .contact-grid{grid-template-columns:1fr}
+      .gallery-grid{grid-template-columns:1fr 1fr}
+      .gallery-tile.tall{min-height:360px}
+    }
+
+    @media (max-width:860px){
+      .header-links a:nth-child(2),
+      .header-links a:nth-child(3){display:none}
+      .header-links a:nth-child(4){display:block}
+      .edit-toolbar{
+        left:12px;
+        right:12px;
+        top:auto;
+        bottom:8px;
+        align-items:stretch;
+      }
+      .edit-chip{justify-content:space-between}
+      .edit-status{
+        max-width:none;
+        padding:10px 12px;
+        font-size:.74rem;
+        line-height:1.35;
+      }
+      .gallery-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width:640px){
+      .container{width:min(100% - 20px,100%)}
+      .collection-grid,.pricing-grid{grid-template-columns:1fr}
+      .hero,.hero-bg,.hero-inner{min-height:520px}
+      .hero-inner{padding:88px 0 18px}
+      .hero-title{font-size:clamp(28px,9vw,48px)}
+      .hero-tagline{font-size:.92rem;line-height:1.7}
+      .hero-actions{flex-direction:column}
+      .primary-btn,.secondary-btn{width:100%}
+      .stat-grid{grid-template-columns:1fr}
+      .stats-strip{grid-template-columns:1fr; margin-top:-10px}
+      .gallery-tile,.gallery-tile.medium,.gallery-tile.tall{min-height:220px}
+    }
+  </style>
+</head>
+<body>
+  <div id="pageLoading" class="page-state">
+    <div class="page-state-card">
+      <p class="page-state-title">Loading Preview</p>
+      <p class="page-state-text">Fetching your website details and preparing Template 6.</p>
+    </div>
+  </div>
+
+  <div id="pageError" class="page-state hidden">
+    <div class="page-state-card">
+      <p class="page-state-title">Website Not Found</p>
+      <p id="pageErrorText" class="page-state-text">This website preview is not available right now.</p>
+      <a href="website-builder.html" class="page-state-btn">Back to Builder</a>
+    </div>
+  </div>
+
+  <div id="editToolbar" class="edit-toolbar hidden">
+    <div class="edit-chip">
+      <span class="edit-label">Edit Mode</span>
+      <button id="editModeToggle" type="button" class="toggle-btn" aria-label="Toggle edit mode"></button>
+    </div>
+    <div id="editStatus" class="edit-status">You are viewing preview mode.</div>
+  </div>
+
+  <input id="imageFileInput" type="file" accept="image/*" class="hidden" />
+
+  <div id="templateRoot" class="hidden">
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="#top" class="brand editable-text" id="headerStudioName" data-field="name">Studio Name</a>
+        <div class="header-links">
+          <a href="#gallery">Gallery</a>
+          <a href="#collections">Collections</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div id="heroImageSlot" class="hero-bg editable-slot" data-image-slot="hero">
+          <div class="image-loading">Uploading...</div>
+          <div class="edit-overlay"><span>Replace Hero Image</span></div>
+        </div>
+
+        <div class="container hero-inner">
+          <div class="hero-copy">
+            <div class="eyebrow editable-text" id="heroKicker" data-field="template_content.hero.kicker">Luxury Wedding & Editorial Studio</div>
+            <h1 class="hero-title editable-text" id="heroName" data-field="name">Studio Name</h1>
+            <div class="hero-tagline editable-text" id="heroTagline" data-field="tagline">A cinematic and premium portfolio experience designed for photographers who want a bold, modern and high-converting website presence.</div>
+            <div class="hero-actions">
+              <a id="heroWhatsappBtn" class="primary-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+              <a class="secondary-btn" href="#gallery">View Work</a>
+            </div>
+          </div>
+
+          <div class="hero-card glass-card">
+            <p class="hero-card-title editable-text" id="heroCardTitle" data-field="template_content.hero.card_title">Premium Experience</p>
+            <div class="hero-card-copy editable-text" id="heroCardText" data-field="template_content.hero.card_text">Built for premium photographers who want strong first impressions, sharp galleries, clean pricing, and a modern dark luxury aesthetic that converts visitors into inquiries.</div>
+            <div class="stat-grid">
+              <div class="stat">
+                <strong class="editable-text" id="stat1Value" data-field="template_content.stats.0.value">150+</strong>
+                <span class="editable-text" id="stat1Label" data-field="template_content.stats.0.label">Shoots</span>
+              </div>
+              <div class="stat">
+                <strong class="editable-text" id="stat2Value" data-field="template_content.stats.1.value">80+</strong>
+                <span class="editable-text" id="stat2Label" data-field="template_content.stats.1.label">Weddings</span>
+              </div>
+              <div class="stat">
+                <strong class="editable-text" id="stat3Value" data-field="template_content.stats.2.value">4.9</strong>
+                <span class="editable-text" id="stat3Label" data-field="template_content.stats.2.label">Rating</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="about">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-label editable-text" id="aboutLabel" data-field="template_content.about.label">Studio Story</div>
+              <h2 class="section-title editable-text" id="aboutTitle" data-field="template_content.about.title">About</h2>
+              <div class="section-sub editable-text" id="aboutSubtitle" data-field="template_content.about.subtitle">A premium positioning section to establish trust before visitors scroll deeper into the visual work.</div>
+            </div>
+          </div>
+          <div class="glass-card about-wrap">
+            <div class="about-copy editable-text" id="aboutText" data-field="about">Portraits, weddings and visual stories crafted with a cinematic editorial eye. Template 6 is designed to feel premium, immersive and polished while keeping the editing and image replacement logic consistent with the proven StudioOS website system.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="gallery">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-label editable-text" id="galleryLabel" data-field="template_content.gallery.label">Visual Highlights</div>
+              <h2 class="section-title editable-text" id="galleryTitle" data-field="template_content.gallery.title">Signature Gallery</h2>
+              <div class="section-sub editable-text" id="gallerySubtitle" data-field="template_content.gallery.subtitle">A more advanced editorial grid with a premium rhythm for hero shots, portraits, landscapes and storytelling frames.</div>
+            </div>
+          </div>
+
+          <div class="gallery-grid">
+            <a id="galleryTile1" class="gallery-tile tall editable-slot" data-image-slot="gallery_1" href="#">
+              <div class="image-loading">Uploading...</div>
+              <div class="edit-overlay"><span>Replace Image</span></div>
+            </a>
+
+            <div class="gallery-stack">
+              <a id="galleryTile2" class="gallery-tile medium editable-slot" data-image-slot="gallery_2" href="#">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+              <a id="galleryTile3" class="gallery-tile editable-slot" data-image-slot="gallery_3" href="#">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+            </div>
+
+            <div class="gallery-stack">
+              <a id="galleryTile4" class="gallery-tile editable-slot" data-image-slot="gallery_4" href="#">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+              <a id="galleryTile5" class="gallery-tile medium editable-slot" data-image-slot="gallery_5" href="#">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="collections">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-label editable-text" id="collectionsLabel" data-field="template_content.collections.label">Categories</div>
+              <h2 class="section-title editable-text" id="collectionsTitle" data-field="template_content.collections.title">Featured Collections</h2>
+              <div class="section-sub editable-text" id="collectionsSubtitle" data-field="template_content.collections.subtitle">Useful category blocks for fast discovery, strong presentation and clearer booking intent.</div>
+            </div>
+          </div>
+
+          <div class="collection-grid">
+            <article class="collection-card">
+              <div id="collectionMedia1" class="collection-media editable-slot" data-image-slot="collection_1">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </div>
+              <div class="collection-body">
+                <h3 class="collection-title editable-text" id="collectionTitle1" data-field="template_content.collections.items.0.title">Weddings</h3>
+                <div class="collection-text editable-text" id="collectionText1" data-field="template_content.collections.items.0.text">Premium full-day storytelling with portraits, details, design and emotional moments.</div>
+              </div>
+            </article>
+
+            <article class="collection-card">
+              <div id="collectionMedia2" class="collection-media editable-slot" data-image-slot="collection_2">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </div>
+              <div class="collection-body">
+                <h3 class="collection-title editable-text" id="collectionTitle2" data-field="template_content.collections.items.1.title">Pre-Wedding</h3>
+                <div class="collection-text editable-text" id="collectionText2" data-field="template_content.collections.items.1.text">Relationship-focused sessions with movement, fashion direction and cinematic chemistry.</div>
+              </div>
+            </article>
+
+            <article class="collection-card">
+              <div id="collectionMedia3" class="collection-media editable-slot" data-image-slot="collection_3">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </div>
+              <div class="collection-body">
+                <h3 class="collection-title editable-text" id="collectionTitle3" data-field="template_content.collections.items.2.title">Portraits</h3>
+                <div class="collection-text editable-text" id="collectionText3" data-field="template_content.collections.items.2.text">Personal brand and portrait sessions with a high-end editorial finish and strong identity.</div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="pricing">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-label editable-text" id="pricingLabel" data-field="template_content.pricing.label">Collections</div>
+              <h2 class="section-title editable-text" id="pricingTitle" data-field="template_content.pricing.title">Premium Pricing</h2>
+              <div class="section-sub editable-text" id="pricingSubtitle" data-field="template_content.pricing.subtitle">Simple premium cards that help clients understand the value before they contact you.</div>
+            </div>
+          </div>
+
+          <div class="pricing-grid">
+            <article class="price-card">
+              <div class="price-label editable-text" id="priceLabel1" data-field="template_content.pricing.items.0.label">Portrait Session</div>
+              <h3 class="price-title editable-text" id="priceTitle1" data-field="template_content.pricing.items.0.title">Minimal</h3>
+              <div class="price-value editable-text" id="priceValue1" data-field="template_content.pricing.items.0.price">₹18,000</div>
+              <div class="price-list">
+                <div class="price-item"><span class="editable-text" id="price1Detail1Label" data-field="template_content.pricing.items.0.details.0.label">Duration</span><strong class="editable-text" id="price1Detail1Value" data-field="template_content.pricing.items.0.details.0.value">1 Hour</strong></div>
+                <div class="price-item"><span class="editable-text" id="price1Detail2Label" data-field="template_content.pricing.items.0.details.1.label">Photos</span><strong class="editable-text" id="price1Detail2Value" data-field="template_content.pricing.items.0.details.1.value">25+</strong></div>
+                <div class="price-item"><span class="editable-text" id="price1Detail3Label" data-field="template_content.pricing.items.0.details.2.label">Delivery</span><strong class="editable-text" id="price1Detail3Value" data-field="template_content.pricing.items.0.details.2.value">Online Gallery</strong></div>
+              </div>
+              <a id="priceWhatsapp1" class="price-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+            </article>
+
+            <article class="price-card">
+              <div class="price-label editable-text" id="priceLabel2" data-field="template_content.pricing.items.1.label">Couples / Pre-Wedding</div>
+              <h3 class="price-title editable-text" id="priceTitle2" data-field="template_content.pricing.items.1.title">Standard</h3>
+              <div class="price-value editable-text" id="priceValue2" data-field="template_content.pricing.items.1.price">₹35,000</div>
+              <div class="price-list">
+                <div class="price-item"><span class="editable-text" id="price2Detail1Label" data-field="template_content.pricing.items.1.details.0.label">Duration</span><strong class="editable-text" id="price2Detail1Value" data-field="template_content.pricing.items.1.details.0.value">2 Hours</strong></div>
+                <div class="price-item"><span class="editable-text" id="price2Detail2Label" data-field="template_content.pricing.items.1.details.1.label">Photos</span><strong class="editable-text" id="price2Detail2Value" data-field="template_content.pricing.items.1.details.1.value">60+</strong></div>
+                <div class="price-item"><span class="editable-text" id="price2Detail3Label" data-field="template_content.pricing.items.1.details.2.label">Delivery</span><strong class="editable-text" id="price2Detail3Value" data-field="template_content.pricing.items.1.details.2.value">Preview + Full Gallery</strong></div>
+              </div>
+              <a id="priceWhatsapp2" class="price-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+            </article>
+
+            <article class="price-card">
+              <div class="price-label editable-text" id="priceLabel3" data-field="template_content.pricing.items.2.label">Wedding Coverage</div>
+              <h3 class="price-title editable-text" id="priceTitle3" data-field="template_content.pricing.items.2.title">Maximum</h3>
+              <div class="price-value editable-text" id="priceValue3" data-field="template_content.pricing.items.2.price">₹85,000</div>
+              <div class="price-list">
+                <div class="price-item"><span class="editable-text" id="price3Detail1Label" data-field="template_content.pricing.items.2.details.0.label">Duration</span><strong class="editable-text" id="price3Detail1Value" data-field="template_content.pricing.items.2.details.0.value">Half / Full Day</strong></div>
+                <div class="price-item"><span class="editable-text" id="price3Detail2Label" data-field="template_content.pricing.items.2.details.1.label">Photos</span><strong class="editable-text" id="price3Detail2Value" data-field="template_content.pricing.items.2.details.1.value">All Best Frames</strong></div>
+                <div class="price-item"><span class="editable-text" id="price3Detail3Label" data-field="template_content.pricing.items.2.details.2.label">Delivery</span><strong class="editable-text" id="price3Detail3Value" data-field="template_content.pricing.items.2.details.2.value">Premium Gallery</strong></div>
+              </div>
+              <a id="priceWhatsapp3" class="price-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="contact">
+        <div class="container">
+          <div class="contact-grid">
+            <div class="contact-card">
+              <h3 class="contact-title editable-text" id="contactTitle" data-field="template_content.contact.title">Let’s Work Together</h3>
+              <div class="contact-text editable-text" id="contactText" data-field="template_content.contact.text">For weddings, portraits and premium content projects, message directly on the platform you prefer. Template 6 is designed to feel elevated, modern and conversion-friendly.</div>
+
+              <div class="contact-links">
+                <a id="phoneLink" class="contact-link" href="tel:+919876543210">
+                  <div><strong>Phone</strong><span id="phoneText" class="editable-text" data-field="phone">+91 98765 43210</span></div><span>↗</span>
+                </a>
+                <a id="whatsappLink" class="contact-link" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
+                  <div><strong>WhatsApp</strong><span id="whatsappText" class="editable-text" data-field="whatsapp">Chat on WhatsApp</span></div><span>↗</span>
+                </a>
+                <a id="portfolioLink" class="contact-link" href="#gallery">
+                  <div><strong>Portfolio</strong><span id="portfolioText" class="editable-text" data-field="instagram">Latest work</span></div><span>↗</span>
+                </a>
+                <a id="youtubeLink" class="contact-link" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">
+                  <div><strong>YouTube</strong><span id="youtubeText" class="editable-text" data-field="youtube">Watch latest films</span></div><span>↗</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="contact-form">
+              <h3 class="contact-title">Send an Inquiry</h3>
+              <div class="form-grid">
+                <input class="field" type="text" placeholder="Your name" />
+                <input class="field" type="email" placeholder="Email address" />
+                <textarea class="textarea" placeholder="Tell me about your date, plan or project"></textarea>
+                <a id="contactWhatsappButton" class="primary-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-wrap">
+        <div class="footer-brand editable-text" id="footerBrand" data-field="template_content.footer.brand">AM</div>
+        <div class="footer-copy editable-text" id="footerCopy" data-field="template_content.footer.copy">Built for photographers who want a premium cinematic website presence with strong booking flow.</div>
+      </div>
+    </footer>
+  </div>
+
+  <div id="previewModal" class="preview-modal">
+    <div class="preview-inner">
+      <button id="previewClose" class="preview-close" type="button" aria-label="Close preview">✕</button>
+      <img id="previewImage" class="preview-image" alt="Preview" />
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script type="module">
+    import { replaceTemplateImage } from "./js/storage.js";
+
+    const loadingState=document.getElementById("pageLoading");
+    const errorState=document.getElementById("pageError");
+    const errorText=document.getElementById("pageErrorText");
+    const templateRoot=document.getElementById("templateRoot");
+    const editToolbar=document.getElementById("editToolbar");
+    const editModeToggle=document.getElementById("editModeToggle");
+    const editStatus=document.getElementById("editStatus");
+    const imageFileInput=document.getElementById("imageFileInput");
+    const previewModal=document.getElementById("previewModal");
+    const previewImage=document.getElementById("previewImage");
+    const previewClose=document.getElementById("previewClose");
+
+    const DEFAULT_IMAGES={
+      hero:"https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1600&q=80",
+      gallery_1:"https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+      gallery_2:"https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80",
+      gallery_3:"https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=80",
+      gallery_4:"https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80",
+      gallery_5:"https://images.unsplash.com/photo-1516589091380-5d8e87df6999?auto=format&fit=crop&w=1200&q=80",
+      collection_1:"https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1000&q=80",
+      collection_2:"https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1000&q=80",
+      collection_3:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1000&q=80"
+    };
+
+    const LEGACY_IMAGE_FIELD_MAP={
+      hero:"hero_image_url"
+    };
+
+    const DEFAULT_BASE={
+      name:"Studio Name",
+      tagline:"Wedding & Editorial Photography",
+      about:"Portraits, weddings and visual stories crafted with a cinematic editorial eye. The layout keeps a premium dark luxury experience while the backend logic stays consistent with the proven StudioOS website system.",
+      phone:"+91 98765 43210",
+      instagram:"@portfolio",
+      email:"hello@example.com",
+      youtube:"https://www.youtube.com/",
+      whatsapp:"https://wa.me/919876543210"
+    };
+
+    const DEFAULT_TEMPLATE_CONTENT={
+      hero:{
+        kicker:"Luxury Wedding & Editorial Studio",
+        card_title:"Premium Experience",
+        card_text:"Built for premium photographers who want strong first impressions, sharp galleries, clean pricing, and a modern dark luxury aesthetic that converts visitors into inquiries."
+      },
+      stats:[
+        {value:"150+",label:"Shoots"},
+        {value:"80+",label:"Weddings"},
+        {value:"4.9",label:"Rating"}
+      ],
+      about:{
+        label:"Studio Story",
+        title:"About",
+        subtitle:"A premium positioning section to establish trust before visitors scroll deeper into the visual work."
+      },
+      gallery:{
+        label:"Visual Highlights",
+        title:"Signature Gallery",
+        subtitle:"A more advanced editorial grid with a premium rhythm for hero shots, portraits, landscapes and storytelling frames."
+      },
+      collections:{
+        label:"Categories",
+        title:"Featured Collections",
+        subtitle:"Useful category blocks for fast discovery, strong presentation and clearer booking intent.",
+        items:[
+          {title:"Weddings",text:"Premium full-day storytelling with portraits, details, design and emotional moments."},
+          {title:"Pre-Wedding",text:"Relationship-focused sessions with movement, fashion direction and cinematic chemistry."},
+          {title:"Portraits",text:"Personal brand and portrait sessions with a high-end editorial finish and strong identity."}
+        ]
+      },
+      pricing:{
+        label:"Collections",
+        title:"Premium Pricing",
+        subtitle:"Simple premium cards that help clients understand the value before they contact you.",
+        items:[
+          {label:"Portrait Session",title:"Minimal",price:"₹18,000",details:[{label:"Duration",value:"1 Hour"},{label:"Photos",value:"25+"},{label:"Delivery",value:"Online Gallery"}]},
+          {label:"Couples / Pre-Wedding",title:"Standard",price:"₹35,000",details:[{label:"Duration",value:"2 Hours"},{label:"Photos",value:"60+"},{label:"Delivery",value:"Preview + Full Gallery"}]},
+          {label:"Wedding Coverage",title:"Maximum",price:"₹85,000",details:[{label:"Duration",value:"Half / Full Day"},{label:"Photos",value:"All Best Frames"},{label:"Delivery",value:"Premium Gallery"}]}
+        ]
+      },
+      contact:{
+        title:"Let’s Work Together",
+        text:"For weddings, portraits and premium content projects, message directly on the platform you prefer. Template 6 is designed to feel elevated, modern and conversion-friendly."
+      },
+      footer:{
+        brand:"AM",
+        copy:"Built for photographers who want a premium cinematic website presence with strong booking flow."
+      }
+    };
+
+    let currentWebsite=null;
+    let currentUserId=null;
+    let editModeEnabled=false;
+    let pendingImageSlot="";
+
+    function showLoading(){loadingState.classList.remove("hidden");errorState.classList.add("hidden");templateRoot.classList.add("hidden")}
+    function showError(message){loadingState.classList.add("hidden");errorState.classList.remove("hidden");templateRoot.classList.add("hidden");errorText.innerText=message}
+    function showTemplate(){loadingState.classList.add("hidden");errorState.classList.add("hidden");templateRoot.classList.remove("hidden")}
+
+    function getSlugFromUrl(){
+      const params=new URLSearchParams(window.location.search);
+      const querySlug=(params.get("slug")||"").trim();
+      if(querySlug) return decodeURIComponent(querySlug).replace(/^\/+|\/+$/g,"").toLowerCase();
+      const path=window.location.pathname||"";
+      const studioMatch=path.match(/\/studio\/([^/?#]+)/i);
+      return studioMatch&&studioMatch[1]?decodeURIComponent(studioMatch[1]).trim().replace(/^\/+|\/+$/g,"").toLowerCase():"";
+    }
+
+    function isEditRequestedFromUrl(){return new URLSearchParams(window.location.search).get("edit")==="true"}
+    function formatPhoneForDisplay(phone){const raw=String(phone||"").trim();return raw||DEFAULT_BASE.phone}
+    function formatPhoneForTel(phone){const raw=String(phone||"").replace(/[^\d+]/g,"");if(!raw)return "+919876543210";return raw.startsWith("+")?raw:`+${raw}`}
+    function formatPhoneForWhatsApp(phone,whatsappLink){
+      const explicit=String(whatsappLink||"").trim();
+      if(explicit.startsWith("https://wa.me/")) return explicit;
+      const raw=String(phone||"").replace(/\D/g,"");
+      if(!raw) return DEFAULT_BASE.whatsapp;
+      return raw.startsWith("91")?`https://wa.me/${raw}`:`https://wa.me/91${raw}`;
+    }
+    function normalizeHandle(value){
+      const raw=String(value||"").trim();
+      if(!raw) return DEFAULT_BASE.instagram;
+      return raw.startsWith("@")?raw:`@${raw}`;
+    }
+    function normalizeYoutubeLink(value){
+      const raw=String(value||"").trim();
+      return raw || DEFAULT_BASE.youtube;
+    }
+    function setEditStatus(message){editStatus.innerText=message}
+    function showEditToolbar(show){editToolbar.classList.toggle("hidden",!show)}
+    function deepClone(value){return JSON.parse(JSON.stringify(value))}
+    function safeObject(value){return value&&typeof value==="object"&&!Array.isArray(value)?value:{}}
+
+    function setText(id,value){
+      const el=document.getElementById(id);
+      if(!el) return;
+      const next=value ?? "";
+      el.textContent=next;
+      el.innerText=next;
+    }
+
+    function setHref(id,value){
+      const el=document.getElementById(id);
+      if(!el) return;
+      el.href=value || "#";
+    }
+
+    function mergeDefaults(defaults,value){
+      if(Array.isArray(defaults)){
+        const input=Array.isArray(value)?value:[];
+        return defaults.map((item,index)=>mergeDefaults(item,input[index]));
+      }
+      if(defaults&&typeof defaults==="object"){
+        const result={},input=safeObject(value);
+        Object.keys(defaults).forEach(key=>{result[key]=mergeDefaults(defaults[key],input[key])});
+        return result;
+      }
+      return value===undefined||value===null||value===""?defaults:value;
+    }
+
+    function setByPath(target,path,value){
+      const keys=String(path||"").split(".");
+      let ref=target;
+      for(let i=0;i<keys.length-1;i+=1){
+        const key=keys[i],nextKey=keys[i+1],nextIsIndex=/^\d+$/.test(nextKey);
+        if(/^\d+$/.test(key)){
+          const index=Number(key);
+          ref[index]=ref[index]??(nextIsIndex?[]:{});
+          ref=ref[index];
+        }else{
+          ref[key]=ref[key]??(nextIsIndex?[]:{});
+          ref=ref[key];
+        }
+      }
+      const lastKey=keys[keys.length-1];
+      if(/^\d+$/.test(lastKey)) ref[Number(lastKey)]=value;
+      else ref[lastKey]=value;
+    }
+
+    function getTemplateImages(website){return safeObject(website?.template_images)}
+
+    function getImageUrl(website,slotName){
+      const images=getTemplateImages(website);
+      const legacyField=LEGACY_IMAGE_FIELD_MAP[slotName];
+      return images[slotName] || (legacyField ? website?.[legacyField] : "") || DEFAULT_IMAGES[slotName] || "";
+    }
+
+    function composeContent(website){
+      return {
+        base:{
+          name:website?.name?.trim()||DEFAULT_BASE.name,
+          tagline:website?.tagline?.trim()||DEFAULT_BASE.tagline,
+          about:website?.about?.trim()||DEFAULT_BASE.about,
+          phone:formatPhoneForDisplay(website?.phone),
+          instagram:normalizeHandle(website?.instagram),
+          email:String(website?.email||"").trim()||DEFAULT_BASE.email,
+          youtube:normalizeYoutubeLink(website?.youtube),
+          whatsapp:String(website?.whatsapp||"").trim()||formatPhoneForWhatsApp(website?.phone,website?.whatsapp)
+        },
+        templateContent:mergeDefaults(DEFAULT_TEMPLATE_CONTENT,safeObject(website?.template_content))
+      };
+    }
+
+    function buildImageBackground(url){
+      const safeUrl=String(url||"").replace(/"/g,'\\\"');
+      return `url("${safeUrl}")`;
+    }
+
+    function applyImageToTile(id,slot,website){
+      const el=document.getElementById(id);
+      if(!el) return;
+      const url=getImageUrl(website,slot) || DEFAULT_IMAGES[slot] || "";
+      el.style.backgroundImage=buildImageBackground(url);
+      el.dataset.previewUrl=url;
+    }
+
+    function applyImages(website){
+      const heroImageSlotEl=document.getElementById("heroImageSlot");
+      if(heroImageSlotEl){
+        heroImageSlotEl.style.backgroundImage=buildImageBackground(getImageUrl(website,"hero"));
+        heroImageSlotEl.dataset.previewUrl=getImageUrl(website,"hero");
+      }
+      applyImageToTile("galleryTile1","gallery_1",website);
+      applyImageToTile("galleryTile2","gallery_2",website);
+      applyImageToTile("galleryTile3","gallery_3",website);
+      applyImageToTile("galleryTile4","gallery_4",website);
+      applyImageToTile("galleryTile5","gallery_5",website);
+      applyImageToTile("collectionMedia1","collection_1",website);
+      applyImageToTile("collectionMedia2","collection_2",website);
+      applyImageToTile("collectionMedia3","collection_3",website);
+    }
+
+    function applyWebsiteData(website){
+      forceRenderAllContent(website);
+    }
+
+    function forceRenderAllContent(website=currentWebsite){
+      if(!website) return;
+      const {base,templateContent}=composeContent(website);
+
+      const whatsappUrl=formatPhoneForWhatsApp(base.phone,base.whatsapp);
+      const phoneTel=formatPhoneForTel(base.phone);
+      const youtubeUrl=normalizeYoutubeLink(base.youtube);
+      const footerBrand=templateContent.footer.brand || base.name.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]?.toUpperCase()||"").join("") || "AM";
+
+      document.title=`${base.name} - Template 6`;
+
+      setText("headerStudioName", base.name);
+      setText("heroName", base.name);
+      setText("heroKicker", templateContent.hero.kicker);
+      setText("heroTagline", base.tagline);
+      setText("heroCardTitle", templateContent.hero.card_title);
+      setText("heroCardText", templateContent.hero.card_text);
+
+      setText("stat1Value", templateContent.stats[0].value);
+      setText("stat1Label", templateContent.stats[0].label);
+      setText("stat2Value", templateContent.stats[1].value);
+      setText("stat2Label", templateContent.stats[1].label);
+      setText("stat3Value", templateContent.stats[2].value);
+      setText("stat3Label", templateContent.stats[2].label);
+
+      setText("aboutLabel", templateContent.about.label);
+      setText("aboutTitle", templateContent.about.title);
+      setText("aboutSubtitle", templateContent.about.subtitle);
+      setText("aboutText", base.about);
+
+      setText("galleryLabel", templateContent.gallery.label);
+      setText("galleryTitle", templateContent.gallery.title);
+      setText("gallerySubtitle", templateContent.gallery.subtitle);
+
+      setText("collectionsLabel", templateContent.collections.label);
+      setText("collectionsTitle", templateContent.collections.title);
+      setText("collectionsSubtitle", templateContent.collections.subtitle);
+      for(let i=0;i<3;i+=1){
+        const item=templateContent.collections.items[i];
+        setText(`collectionTitle${i+1}`, item.title);
+        setText(`collectionText${i+1}`, item.text);
+      }
+
+      setText("pricingLabel", templateContent.pricing.label);
+      setText("pricingTitle", templateContent.pricing.title);
+      setText("pricingSubtitle", templateContent.pricing.subtitle);
+      for(let i=0;i<3;i+=1){
+        const item=templateContent.pricing.items[i];
+        setText(`priceLabel${i+1}`, item.label);
+        setText(`priceTitle${i+1}`, item.title);
+        setText(`priceValue${i+1}`, item.price);
+        for(let j=0;j<3;j+=1){
+          const detail=item.details[j];
+          setText(`price${i+1}Detail${j+1}Label`, detail.label);
+          setText(`price${i+1}Detail${j+1}Value`, detail.value);
+        }
+      }
+
+      setText("contactTitle", templateContent.contact.title);
+      setText("contactText", templateContent.contact.text);
+
+      setText("phoneText", base.phone);
+      setText("whatsappText", base.whatsapp.startsWith("https://wa.me/") ? "Chat on WhatsApp" : base.whatsapp);
+      setText("portfolioText", "Latest work");
+      setText("youtubeText", base.youtube.startsWith("http") ? "Watch latest films" : base.youtube);
+
+      setText("footerBrand", footerBrand);
+      setText("footerCopy", templateContent.footer.copy);
+
+      setHref("heroWhatsappBtn", whatsappUrl);
+      setHref("phoneLink", `tel:${phoneTel}`);
+      setHref("whatsappLink", whatsappUrl);
+      setHref("contactWhatsappButton", whatsappUrl);
+      setHref("priceWhatsapp1", whatsappUrl);
+      setHref("priceWhatsapp2", whatsappUrl);
+      setHref("priceWhatsapp3", whatsappUrl);
+      setHref("portfolioLink", "#gallery");
+      setHref("youtubeLink", youtubeUrl);
+
+      currentWebsite=website;
+      applyImages(website);
+    }
+
+    function setEditMode(enabled){
+      editModeEnabled=enabled;
+      editModeToggle.classList.toggle("active",enabled);
+      document.querySelectorAll(".editable-slot").forEach(slot=>slot.classList.toggle("edit-active",enabled));
+      document.querySelectorAll(".editable-text").forEach(el=>el.classList.toggle("edit-active",enabled));
+      setEditStatus(enabled?"Edit mode is ON. Click any text or image area to update it.":"You are viewing preview mode.");
+    }
+
+    function getSlotElement(slotName){
+      return Array.from(document.querySelectorAll(".editable-slot")).find(el=>el.dataset.imageSlot===slotName)||null;
+    }
+
+    function setSlotUploading(slotName,isUploading){
+      const slot=getSlotElement(slotName);
+      if(!slot) return;
+      slot.classList.toggle("uploading",isUploading);
+    }
+
+    async function fetchWebsiteBySlug(slug){
+      const supabase=await window.getSupabase();
+      const {data:authData}=await supabase.auth.getUser();
+      currentUserId=authData?.user?.id||null;
+
+      function applyAccessScope(query){
+        if(currentUserId) return query.or(`is_published.eq.true,user_id.eq.${currentUserId}`);
+        return query.eq("is_published",true);
+      }
+
+      let exactQuery=applyAccessScope(
+        supabase
+          .from("user_websites")
+          .select("*")
+          .eq("site_slug",slug)
+          .eq("template_id",6)
+          .order("updated_at",{ascending:false})
+          .limit(1)
+      );
+
+      let {data:exactData,error:exactError}=await exactQuery.maybeSingle();
+      if(exactError) throw exactError;
+      if(exactData) return exactData;
+
+      let fallbackQuery=applyAccessScope(
+        supabase
+          .from("user_websites")
+          .select("*")
+          .eq("site_slug",slug)
+          .order("updated_at",{ascending:false})
+          .limit(1)
+      );
+
+      let {data:fallbackData,error:fallbackError}=await fallbackQuery.maybeSingle();
+      if(fallbackError) throw fallbackError;
+      if(fallbackData) return {...fallbackData, template_id:6};
+
+      return null;
+    }
+
+    function canCurrentUserEdit(website){
+      return Boolean(currentUserId && website?.user_id && currentUserId===website.user_id);
+    }
+
+    async function refreshWebsiteRecord(){
+      const supabase=await window.getSupabase();
+      const {data,error}=await supabase.from("user_websites").select("*").eq("id",currentWebsite.id).eq("user_id",currentUserId).single();
+      if(error) throw error;
+      return data;
+    }
+
+    async function updateWebsiteColumn(columnName,value){
+      const supabase=await window.getSupabase();
+      const {data,error}=await supabase.from("user_websites").update({[columnName]:value}).eq("id",currentWebsite.id).eq("user_id",currentUserId).select("*").single();
+      if(error) throw error;
+      currentWebsite=data;
+      return data;
+    }
+
+    async function updateWebsiteField(fieldPath,value){
+      if(!currentWebsite||!currentUserId) return;
+      const parts=String(fieldPath||"").split(".");
+      const root=parts[0];
+      if(root==="template_content"){
+        const nextValue=deepClone(safeObject(currentWebsite.template_content));
+        setByPath(nextValue,parts.slice(1).join("."),value);
+        return updateWebsiteColumn("template_content",nextValue);
+      }
+      return updateWebsiteColumn(fieldPath,value);
+    }
+
+    async function handleImageSelection(file){
+      if(!pendingImageSlot||!currentWebsite||!currentUserId) return;
+      const slotName=pendingImageSlot;
+      try{
+        setSlotUploading(slotName,true);
+        setEditStatus("Uploading and replacing image...");
+        const supabase=await window.getSupabase();
+        const currentImages={...getTemplateImages(currentWebsite)};
+
+        const replaceResult=await replaceTemplateImage({
+          supabase,
+          userId:currentUserId,
+          websiteId:currentWebsite.id,
+          slot:slotName,
+          file,
+          currentData:currentImages
+        });
+
+        const refreshedWebsite=await refreshWebsiteRecord();
+        currentWebsite={
+          ...refreshedWebsite,
+          template_content:safeObject(refreshedWebsite.template_content)
+        };
+
+        if(replaceResult?.updatedUrl){
+          currentWebsite.template_images={
+            ...getTemplateImages(currentWebsite),
+            [slotName]:replaceResult.updatedUrl
+          };
+        }
+
+        applyWebsiteData(currentWebsite);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 50);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 180);
+        setEditStatus("Image replaced successfully.");
+      }catch(error){
+        console.error("Image replace failed:",error);
+        setEditStatus(error?.message || "Unable to replace image.");
+      }finally{
+        setSlotUploading(slotName,false);
+        pendingImageSlot="";
+        imageFileInput.value="";
+      }
+    }
+
+    function getFriendlyFieldLabel(fieldPath){
+      const map={name:"Studio Name",tagline:"Tagline",about:"About",phone:"Phone",instagram:"Portfolio Label",youtube:"YouTube",whatsapp:"WhatsApp",email:"Email"};
+      return map[fieldPath] || "Content";
+    }
+
+    function registerEditableText(){
+      document.querySelectorAll(".editable-text").forEach(el=>{
+        el.addEventListener("click",async event=>{
+          if(!editModeEnabled) return;
+          event.preventDefault();
+          event.stopPropagation();
+
+          const fieldPath=el.dataset.field||"";
+          if(!fieldPath) return;
+
+          const currentValue=el.innerText.trim();
+          const nextValue=window.prompt(`Edit ${getFriendlyFieldLabel(fieldPath)}`,currentValue);
+          if(nextValue===null) return;
+
+          const cleanedValue=String(nextValue).trim();
+          if(!cleanedValue) return;
+
+          try{
+            setEditStatus("Saving text update...");
+            await updateWebsiteField(fieldPath,cleanedValue);
+            forceRenderAllContent(currentWebsite);
+            setEditStatus("Text updated successfully.");
+          }catch(error){
+            console.error("Text update failed:",error);
+            setEditStatus(error?.message || "Unable to update text.");
+          }
+        });
+      });
+    }
+
+    function registerEditableImageSlots(){
+      document.querySelectorAll(".editable-slot").forEach(slot=>{
+        slot.addEventListener("click",event=>{
+          if(!editModeEnabled) return;
+          event.preventDefault();
+          event.stopPropagation();
+          pendingImageSlot=slot.dataset.imageSlot||"";
+          if(!pendingImageSlot) return;
+          imageFileInput.click();
+        });
+      });
+    }
+
+    function openPreview(url){
+      if(!url) return;
+      previewImage.src=url;
+      previewModal.classList.add("open");
+    }
+
+    function registerPreviewTiles(){
+      document.querySelectorAll(".gallery-tile,.collection-media,.hero-bg").forEach(el=>{
+        el.addEventListener("click",event=>{
+          if(editModeEnabled) return;
+          event.preventDefault();
+          const url=el.dataset.previewUrl || "";
+          openPreview(url);
+        });
+      });
+    }
+
+    imageFileInput.addEventListener("change",async e=>{
+      const file=e.target.files?.[0];
+      if(file) await handleImageSelection(file);
+    });
+
+    editModeToggle.addEventListener("click",()=>setEditMode(!editModeEnabled));
+    previewClose.addEventListener("click",()=>previewModal.classList.remove("open"));
+    previewModal.addEventListener("click",e=>{ if(e.target===previewModal) previewModal.classList.remove("open"); });
+
+    async function initTemplate(){
+      showLoading();
+      const slug=getSlugFromUrl();
+      if(!slug){
+        showError("Missing website slug. Open this page using template-6.html?slug=your-site-slug or a clean URL like /studio/your-site-slug");
+        return;
+      }
+
+      try{
+        const website=await fetchWebsiteBySlug(slug);
+        if(!website){
+          showError("No accessible website data was found for this slug. Save or publish the website once, then reopen this preview.");
+          return;
+        }
+
+        currentWebsite=website;
+        registerEditableImageSlots();
+        registerEditableText();
+        registerPreviewTiles();
+        showTemplate();
+        applyWebsiteData(currentWebsite);
+
+        const editable=canCurrentUserEdit(website);
+        showEditToolbar(editable);
+        if(editable && isEditRequestedFromUrl()) setEditMode(true);
+        else setEditMode(false);
+      }catch(error){
+        console.error("Template 6 load failed:",error);
+        showError(error?.message || "Unable to load website preview right now.");
+      }
+    }
+
+    window.addEventListener("resize",()=>{ if(currentWebsite) forceRenderAllContent(currentWebsite); });
+    window.addEventListener("orientationchange",()=>{ if(currentWebsite) setTimeout(()=>forceRenderAllContent(currentWebsite),120); });
+    window.addEventListener("load", async ()=>{ await initTemplate(); });
+  </script>
+</body>
+</html>
