@@ -6,7 +6,7 @@
   <title>Template 5 - Instagram Style</title>
   <style>
     :root{
-      --bg:#0b0b0b;
+      --bg:#ffffff;
       --surface:#121212;
       --surface-2:#171717;
       --surface-3:#1f1f1f;
@@ -24,7 +24,7 @@
     body{
       margin:0;
       background:var(--bg);
-      color:var(--text);
+      color:#111;
       font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height:1.5;
     }
@@ -261,14 +261,14 @@
 
     .profile-stats{
       display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-columns:repeat(3,minmax(0,1fr));
       gap:10px;
       margin-top:16px;
     }
 
     .stat{
       border:1px solid var(--line);
-      background:var(--surface);
+      background:#ffffff;
       padding:12px 10px;
       text-align:center;
       border-radius:18px;
@@ -494,7 +494,7 @@
       border:1px solid var(--line);
       border-radius:22px;
       overflow:hidden;
-      background:var(--surface);
+      background:#ffffff;
       box-shadow:var(--shadow);
     }
 
@@ -532,7 +532,7 @@
     .review-card{
       border:1px solid var(--line);
       border-radius:22px;
-      background:var(--surface);
+      background:#ffffff;
       padding:18px;
     }
 
@@ -560,7 +560,7 @@
     .price-card{
       border:1px solid var(--line);
       border-radius:22px;
-      background:var(--surface);
+      background:#ffffff;
       padding:18px;
     }
 
@@ -634,7 +634,7 @@
     .contact-card,.contact-form{
       border:1px solid var(--line);
       border-radius:24px;
-      background:var(--surface);
+      background:#ffffff;
       padding:20px;
     }
 
@@ -668,7 +668,7 @@
       padding:0 16px;
       border:1px solid var(--line);
       border-radius:18px;
-      background:var(--surface-2);
+      background:#f5f5f5;
     }
 
     .contact-link strong{
@@ -695,7 +695,7 @@
     .field,.textarea{
       width:100%;
       border:1px solid var(--line);
-      background:var(--surface-2);
+      background:#f5f5f5;
       border-radius:16px;
       padding:15px 16px;
       color:#fff;
@@ -800,6 +800,10 @@
     }
 
     @media (max-width:640px){
+      .grid-feed{grid-template-columns:repeat(3,1fr);}
+      .reel-card{min-width:140px}
+      .profile-actions{grid-template-columns:1fr}
+
       .container{width:min(100% - 20px,100%)}
       .profile-grid{grid-template-columns:76px 1fr; gap:12px}
       .profile-image-wrap{width:76px;height:76px}
@@ -855,56 +859,28 @@
     </header>
 
     <main id="top">
-      <section class="profile-section">
-        <div class="container">
-          <div class="profile-grid">
-            <div id="profileImageSlot" class="profile-image-wrap editable-slot" data-image-slot="profile">
-              <img id="profileImage" class="profile-image" alt="Profile image" />
-              <div class="image-loading">Uploading...</div>
-              <div class="edit-overlay"><span>Replace Profile</span></div>
-            </div>
+<section class="hero" style="width:100%;height:70vh;background:#ddd center/cover no-repeat;" data-image-slot="hero">
+  <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.2);"></div>
+  <div style="position:relative;z-index:2;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;">
+    <div>
+      <h1 id="heroName" class="editable-text" data-field="name" style="font-size:40px;margin-bottom:10px;">Studio Name</h1>
+      <p id="heroTagline" class="editable-text" data-field="tagline">Wedding & Portrait Photographer</p>
+    </div>
+  </div>
+</section>
 
-            <div class="profile-main">
-              <div class="profile-top">
-                <div>
-                  <h1 class="profile-name editable-text" id="profileStudioName" data-field="name">Studio Name</h1>
-                  <div class="profile-handle editable-text" id="profileTagline" data-field="tagline">Wedding & Portrait Photographer</div>
-                </div>
-              </div>
+      
 
-              <div class="profile-stats">
-                <div class="stat">
-                  <strong class="editable-text" id="stat1Value" data-field="template_content.stats.0.value">120+</strong>
-                  <span class="editable-text" id="stat1Label" data-field="template_content.stats.0.label">Shoots</span>
-                </div>
-                <div class="stat">
-                  <strong class="editable-text" id="stat2Value" data-field="template_content.stats.1.value">50+</strong>
-                  <span class="editable-text" id="stat2Label" data-field="template_content.stats.1.label">Weddings</span>
-                </div>
-                <div class="stat">
-                  <strong class="editable-text" id="stat3Value" data-field="template_content.stats.2.value">10k+</strong>
-                  <span class="editable-text" id="stat3Label" data-field="template_content.stats.2.label">Followers</span>
-                </div>
-                <div class="stat">
-                  <strong class="editable-text" id="stat4Value" data-field="template_content.stats.3.value">4.9</strong>
-                  <span class="editable-text" id="stat4Label" data-field="template_content.stats.3.label">Rating</span>
-                </div>
-              </div>
-
-              <div class="profile-bio editable-text" id="profileBio" data-field="about">
-                Portraits, weddings and visual stories crafted with a clean editorial eye. This space is designed for photographers who want the speed and engagement of social browsing with the trust and booking flow of a personal website.
-              </div>
-
-              <div class="profile-actions">
-                <a id="instagramBtn" class="action-btn" href="https://instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a>
-                <a id="whatsappBtn" class="action-btn-outline" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="grid">
+      
+<section class="section" id="about">
+  <div class="container">
+    <h2 class="section-title editable-text" data-field="template_content.about.title">About</h2>
+    <p class="editable-text" data-field="about" style="margin-top:10px;color:#555;">
+      Professional photographer capturing timeless moments with clean and cinematic style.
+    </p>
+  </div>
+</section>
+<section class="section" id="grid">
         <div class="container">
           <div class="section-head">
             <div>
