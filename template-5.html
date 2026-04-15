@@ -48,10 +48,10 @@
 
     .page-state-card{
       width:min(460px,100%);
-      background:rgba(255,255,255,0.98);
+      background:#ffffff;
       border:1px solid var(--line);
       border-radius:28px;
-      box-shadow:var(--shadow);
+      box-shadow:0 18px 60px rgba(0,0,0,0.08);
       padding:28px;
       text-align:center;
     }
@@ -107,7 +107,7 @@
       border-radius:999px;
       background:rgba(255,255,255,.98);
       border:1px solid var(--line);
-      box-shadow:var(--shadow);
+      box-shadow:0 18px 60px rgba(0,0,0,0.08);
     }
 
     .edit-label{
@@ -152,7 +152,7 @@
       border-radius:16px;
       background:rgba(255,255,255,.98);
       border:1px solid var(--line);
-      box-shadow:var(--shadow);
+      box-shadow:0 18px 60px rgba(0,0,0,0.08);
       color:var(--muted);
       font-size:.82rem;
       line-height:1.6;
@@ -476,7 +476,7 @@
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
       gap:2px;
-      background:#f2f2f2;
+      background:#f7f7f7;
       border:1px solid var(--line);
     }
 
@@ -611,7 +611,7 @@
       border-radius:22px;
       overflow:hidden;
       background:var(--surface);
-      box-shadow:var(--shadow);
+      box-shadow:0 18px 60px rgba(0,0,0,0.08);
     }
 
     .collection-media{
@@ -865,7 +865,7 @@
       max-height:92vh;
       border-radius:24px;
       overflow:hidden;
-      background:#f2f2f2;
+      background:#f7f7f7;
       border:1px solid rgba(255,255,255,.12);
     }
 
@@ -873,7 +873,7 @@
       width:100%;
       max-height:92vh;
       object-fit:contain;
-      background:#f2f2f2;
+      background:#f7f7f7;
     }
 
     .preview-close{
@@ -975,25 +975,6 @@
     </header>
 
     <main id="top">
-
-      <section class="hero">
-        <div id="heroImageSlot" class="hero-media editable-slot" data-image-slot="hero">
-          <div class="image-loading">Uploading...</div>
-          <div class="edit-overlay"><span>Replace Hero Image</span></div>
-        </div>
-        <div class="container hero-content">
-          <div class="hero-copy">
-            <div class="hero-kicker editable-text" id="heroKicker" data-field="template_content.hero.kicker">Wedding & Portrait Photographer</div>
-            <h1 class="hero-title editable-text" id="heroTitle" data-field="name">Studio Name</h1>
-            <div class="hero-tagline editable-text" id="heroSubtitle" data-field="tagline">Wedding & Editorial Photography</div>
-            <div class="hero-actions">
-              <a id="heroBookBtn" class="hero-btn-outline" href="#contact">Book Now</a>
-              <a id="heroViewBtn" class="hero-btn" href="#grid">View Work</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
 
       <section class="hero-section">
         <div id="heroSection" class="hero-banner editable-slot" data-image-slot="hero">
@@ -1536,7 +1517,6 @@
     }
 
     function applyImages(){
-      applyImageToTile("heroImageSlot","hero");
       applyImageToTile("heroSection","hero");
       for(let i=1;i<=12;i+=1) applyImageToTile(`gridTile${i}`,`grid_${i}`);
       for(let i=1;i<=4;i+=1) applyImageToTile(`reelCard${i}`,`reel_${i}`);
@@ -1549,7 +1529,7 @@
 
       const whatsappUrl=formatPhoneForWhatsApp(base.phone,base.whatsapp);
       const phoneTel=formatPhoneForTel(base.phone);
-      const instagramUrl=normalizePortfolioLabelLink(base.instagram);
+      const instagramUrl=normalizeInstagramLink(base.instagram);
       const youtubeUrl=normalizeYoutubeLink(base.youtube);
       const footerBrand=templateContent.footer.brand || base.name.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]?.toUpperCase()||"").join("") || "AM";
 
@@ -1612,14 +1592,14 @@
 
       setText("phoneText", base.phone);
       setText("whatsappText", base.whatsapp.startsWith("https://wa.me/") ? "Chat on WhatsApp" : base.whatsapp);
-      setText("instagramText", base.instagram);
+      setText("instagramText", "Latest work");
       setText("youtubeText", base.youtube.startsWith("http") ? "Watch latest films" : base.youtube);
 
       setText("footerBrand", footerBrand);
       setText("footerCopy", templateContent.footer.copy);
 
-      setHref("headerInstagramLink", instagramUrl);
-      setHref("heroInstagramBtn", instagramUrl);
+      setHref("headerInstagramLink", "#grid");
+      setHref("heroInstagramBtn", "#grid");
       setHref("instagramLink", instagramUrl);
 
       setHref("heroWhatsappBtn", whatsappUrl);
@@ -1873,7 +1853,7 @@
         else setEditMode(false);
       }catch(error){
         console.error("Template 5 load failed:",error);
-        showError("Unable to load website preview right now.");
+        showError(error?.message || "Unable to load website preview right now.");
       }
     }
 
