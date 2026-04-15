@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Template 5 - Instagram Style</title>
+  <title>Template 5 - Clean Social Style</title>
   <style>
     :root{
       --bg:#ffffff;
-      --surface:#121212;
-      --surface-2:#171717;
-      --surface-3:#1f1f1f;
-      --line:rgba(255,255,255,0.08);
-      --text:#f7f7f7;
-      --muted:#b5b5b5;
-      --soft:#8a8a8a;
-      --accent:#ffffff;
+      --surface:#ffffff;
+      --surface-2:#f7f7f7;
+      --surface-3:#efefef;
+      --line:rgba(0,0,0,0.08);
+      --text:#111111;
+      --muted:#5f5f5f;
+      --soft:#777777;
+      --accent:#111111;
       --shadow:0 20px 60px rgba(0,0,0,0.28);
       --container:1240px;
     }
@@ -24,7 +24,7 @@
     body{
       margin:0;
       background:var(--bg);
-      color:#111;
+      color:var(--text);
       font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height:1.5;
     }
@@ -48,7 +48,7 @@
 
     .page-state-card{
       width:min(460px,100%);
-      background:rgba(18,18,18,0.96);
+      background:rgba(255,255,255,0.98);
       border:1px solid var(--line);
       border-radius:28px;
       box-shadow:var(--shadow);
@@ -80,12 +80,12 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      background:#fff;
-      color:#111;
+      background:#111;
+      color:#fff;
       text-transform:uppercase;
       letter-spacing:.12em;
       font-size:.74rem;
-      border:1px solid rgba(255,255,255,0.1);
+      border:1px solid rgba(0,0,0,0.08);
     }
 
     .edit-toolbar{
@@ -105,7 +105,7 @@
       gap:12px;
       padding:12px 14px;
       border-radius:999px;
-      background:rgba(18,18,18,.96);
+      background:rgba(255,255,255,.98);
       border:1px solid var(--line);
       box-shadow:var(--shadow);
     }
@@ -113,7 +113,7 @@
     .edit-label{
       font-size:.8rem;
       font-weight:700;
-      color:#fff;
+      color:#111;
       letter-spacing:.08em;
       text-transform:uppercase;
     }
@@ -150,7 +150,7 @@
       max-width:360px;
       padding:14px 16px;
       border-radius:16px;
-      background:rgba(18,18,18,.96);
+      background:rgba(255,255,255,.98);
       border:1px solid var(--line);
       box-shadow:var(--shadow);
       color:var(--muted);
@@ -167,7 +167,7 @@
       position:sticky;
       top:0;
       z-index:40;
-      background:rgba(11,11,11,.88);
+      background:rgba(255,255,255,.92);
       backdrop-filter:blur(12px);
       border-bottom:1px solid var(--line);
     }
@@ -195,7 +195,7 @@
       display:flex;
       align-items:center;
       gap:16px;
-      color:#d9d9d9;
+      color:#555;
     }
 
     .header-links a{
@@ -204,71 +204,16 @@
       text-transform:uppercase;
     }
 
-    .profile-section{
-      padding:18px 0 18px;
-      border-bottom:1px solid var(--line);
-    }
-
-    .profile-grid{
-      display:grid;
-      grid-template-columns:88px 1fr;
-      gap:16px;
-      align-items:start;
-    }
-
-    .profile-image-wrap{
-      position:relative;
-      width:88px;
-      height:88px;
-      border-radius:999px;
-      overflow:hidden;
-      background:#222;
-      border:1px solid var(--line);
-      flex-shrink:0;
-    }
-
-    .profile-image{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .profile-main{
-      min-width:0;
-    }
-
-    .profile-top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    .profile-name{
-      font-size:1.2rem;
-      font-weight:800;
-      line-height:1.1;
-      margin:0;
-    }
-
-    .profile-handle{
-      margin-top:6px;
-      color:var(--muted);
-      font-size:.92rem;
-      line-height:1.7;
-    }
-
     .profile-stats{
       display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
+      grid-template-columns:repeat(4,minmax(0,1fr));
       gap:10px;
       margin-top:16px;
     }
 
     .stat{
       border:1px solid var(--line);
-      background:#ffffff;
+      background:var(--surface);
       padding:12px 10px;
       text-align:center;
       border-radius:18px;
@@ -278,7 +223,7 @@
       display:block;
       font-size:1rem;
       font-weight:800;
-      color:#fff;
+      color:#111;
     }
 
     .stat span{
@@ -288,21 +233,6 @@
       font-size:.72rem;
       letter-spacing:.08em;
       text-transform:uppercase;
-    }
-
-    .profile-bio{
-      margin-top:14px;
-      color:#d7d7d7;
-      font-size:.94rem;
-      line-height:1.8;
-      max-width:860px;
-    }
-
-    .profile-actions{
-      margin-top:16px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
     }
 
     .action-btn,.action-btn-outline{
@@ -320,13 +250,100 @@
     }
 
     .action-btn{
+      background:#111;
+      color:#fff;
+    }
+
+    .action-btn-outline{
       background:#fff;
       color:#111;
     }
 
-    .action-btn-outline{
-      background:transparent;
+
+    .hero-section{
+      padding:0 0 16px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .hero-banner{
+      position:relative;
+      min-height:62vh;
+      background:#e8e8e8 center/cover no-repeat;
+      overflow:hidden;
+    }
+
+    .hero-overlay{
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.34));
+      pointer-events:none;
+      z-index:1;
+    }
+
+    .hero-content-wrap{
+      position:relative;
+      z-index:2;
+      min-height:62vh;
+      display:flex;
+      align-items:flex-end;
+      justify-content:flex-start;
+      padding:120px 0 46px;
+    }
+
+    .hero-copy{
+      max-width:720px;
       color:#fff;
+    }
+
+    .hero-kicker{
+      font-size:.74rem;
+      font-weight:800;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      opacity:.95;
+    }
+
+    .hero-title{
+      margin:10px 0 0;
+      font-size:clamp(2rem, 6vw, 4.6rem);
+      line-height:.95;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      word-break:break-word;
+    }
+
+    .hero-tagline{
+      margin:14px 0 0;
+      max-width:620px;
+      font-size:1rem;
+      line-height:1.8;
+      color:rgba(255,255,255,.92);
+    }
+
+    .stats-strip{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin-top:-26px;
+      position:relative;
+      z-index:4;
+    }
+
+    .about-card{
+      border:1px solid var(--line);
+      border-radius:24px;
+      background:#fff;
+      padding:22px;
+      box-shadow:0 10px 30px rgba(0,0,0,.04);
+    }
+
+    .about-text{
+      margin:0;
+      color:#4f4f4f;
+      font-size:.98rem;
+      line-height:1.95;
+      max-width:900px;
     }
 
     .section{
@@ -360,14 +377,14 @@
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
       gap:2px;
-      background:#000;
+      background:#f2f2f2;
       border:1px solid var(--line);
     }
 
     .grid-tile{
       position:relative;
       aspect-ratio:1/1;
-      background:#1b1b1b center/cover no-repeat;
+      background:#ececec center/cover no-repeat;
       overflow:hidden;
     }
 
@@ -401,7 +418,7 @@
       text-align:center;
       padding:14px;
       background:rgba(0,0,0,.38);
-      color:#fff;
+      color:#111;
       z-index:3;
       pointer-events:none;
     }
@@ -449,7 +466,7 @@
       aspect-ratio:9/16;
       border-radius:24px;
       overflow:hidden;
-      background:#1b1b1b center/cover no-repeat;
+      background:#ececec center/cover no-repeat;
       border:1px solid var(--line);
       flex-shrink:0;
     }
@@ -494,14 +511,14 @@
       border:1px solid var(--line);
       border-radius:22px;
       overflow:hidden;
-      background:#ffffff;
+      background:var(--surface);
       box-shadow:var(--shadow);
     }
 
     .collection-media{
       position:relative;
       aspect-ratio:4/5;
-      background:#1b1b1b center/cover no-repeat;
+      background:#ececec center/cover no-repeat;
     }
 
     .collection-body{
@@ -532,12 +549,12 @@
     .review-card{
       border:1px solid var(--line);
       border-radius:22px;
-      background:#ffffff;
+      background:var(--surface);
       padding:18px;
     }
 
     .review-text{
-      color:#fff;
+      color:#111;
       font-size:.94rem;
       line-height:1.8;
     }
@@ -560,7 +577,7 @@
     .price-card{
       border:1px solid var(--line);
       border-radius:22px;
-      background:#ffffff;
+      background:var(--surface);
       padding:18px;
     }
 
@@ -584,7 +601,7 @@
       margin:12px 0 0;
       font-size:2rem;
       font-weight:900;
-      color:#fff;
+      color:#111;
     }
 
     .price-list{
@@ -604,7 +621,7 @@
     }
 
     .price-item strong{
-      color:#fff;
+      color:#111;
       text-align:right;
       font-weight:700;
     }
@@ -617,8 +634,8 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      background:#fff;
-      color:#111;
+      background:#111;
+      color:#fff;
       font-size:.72rem;
       text-transform:uppercase;
       letter-spacing:.12em;
@@ -634,7 +651,7 @@
     .contact-card,.contact-form{
       border:1px solid var(--line);
       border-radius:24px;
-      background:#ffffff;
+      background:var(--surface);
       padding:20px;
     }
 
@@ -668,7 +685,7 @@
       padding:0 16px;
       border:1px solid var(--line);
       border-radius:18px;
-      background:#f5f5f5;
+      background:var(--surface-2);
     }
 
     .contact-link strong{
@@ -676,7 +693,7 @@
       font-size:.72rem;
       letter-spacing:.14em;
       text-transform:uppercase;
-      color:#fff;
+      color:#111;
       margin-bottom:4px;
     }
 
@@ -695,10 +712,10 @@
     .field,.textarea{
       width:100%;
       border:1px solid var(--line);
-      background:#f5f5f5;
+      background:var(--surface-2);
       border-radius:16px;
       padding:15px 16px;
-      color:#fff;
+      color:#111;
       outline:none;
     }
 
@@ -708,7 +725,7 @@
     .site-footer{
       padding:24px 0 40px;
       border-top:1px solid var(--line);
-      background:#090909;
+      background:#ffffff;
       margin-top:10px;
     }
 
@@ -749,7 +766,7 @@
       max-height:92vh;
       border-radius:24px;
       overflow:hidden;
-      background:#000;
+      background:#f2f2f2;
       border:1px solid rgba(255,255,255,.12);
     }
 
@@ -757,7 +774,7 @@
       width:100%;
       max-height:92vh;
       object-fit:contain;
-      background:#000;
+      background:#f2f2f2;
     }
 
     .preview-close{
@@ -769,7 +786,7 @@
       border-radius:999px;
       border:1px solid rgba(255,255,255,.16);
       background:rgba(0,0,0,.42);
-      color:#fff;
+      color:#111;
       cursor:pointer;
       z-index:2;
     }
@@ -800,22 +817,23 @@
     }
 
     @media (max-width:640px){
-      .grid-feed{grid-template-columns:repeat(3,1fr);}
-      .reel-card{min-width:140px}
-      .profile-actions{grid-template-columns:1fr}
-
       .container{width:min(100% - 20px,100%)}
-      .profile-grid{grid-template-columns:76px 1fr; gap:12px}
-      .profile-image-wrap{width:76px;height:76px}
-      .profile-name{font-size:1rem}
-      .profile-handle{font-size:.84rem}
-      .profile-actions{display:grid;grid-template-columns:1fr 1fr}
       .section-head{display:block}
       .section-sub{margin-top:6px}
       .collection-grid,.reviews-grid,.pricing-grid{grid-template-columns:1fr}
       .grid-feed{gap:1px}
       .header-inner{min-height:56px}
       .brand{max-width:58vw;font-size:.82rem;letter-spacing:.1em}
+      .header-links a:not(:last-child){display:none}
+      .hero-banner{min-height:54vh}
+      .hero-content-wrap{min-height:54vh;padding:98px 0 24px}
+      .hero-title{font-size:clamp(1.8rem, 10vw, 2.8rem); line-height:1}
+      .hero-tagline{font-size:.92rem; line-height:1.7}
+      .hero-actions{display:grid;grid-template-columns:1fr; gap:10px}
+      .stats-strip{grid-template-columns:1fr 1fr 1fr; margin-top:-18px; gap:8px}
+      .stat{padding:10px 8px; border-radius:14px}
+      .stat strong{font-size:.92rem}
+      .stat span{font-size:.64rem}
     }
   </style>
 </head>
@@ -859,28 +877,58 @@
     </header>
 
     <main id="top">
-<section class="hero" style="width:100%;height:70vh;background:#ddd center/cover no-repeat;" data-image-slot="hero">
-  <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.2);"></div>
-  <div style="position:relative;z-index:2;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;">
-    <div>
-      <h1 id="heroName" class="editable-text" data-field="name" style="font-size:40px;margin-bottom:10px;">Studio Name</h1>
-      <p id="heroTagline" class="editable-text" data-field="tagline">Wedding & Portrait Photographer</p>
-    </div>
-  </div>
-</section>
 
-      
+      <section class="hero-section">
+        <div id="heroSection" class="hero-banner editable-slot" data-image-slot="hero">
+          <div class="image-loading">Uploading...</div>
+          <div class="edit-overlay"><span>Replace Hero Image</span></div>
+          <div class="hero-overlay"></div>
+          <div class="container hero-content-wrap">
+            <div class="hero-copy">
+              <div class="hero-kicker editable-text" id="heroKicker" data-field="template_content.hero.kicker">Wedding & Portrait Photographer</div>
+              <h1 class="hero-title editable-text" id="heroStudioName" data-field="name">Studio Name</h1>
+              <p class="hero-tagline editable-text" id="heroTagline" data-field="tagline">Clean, modern storytelling for weddings, portraits and personal moments.</p>
+              <div class="hero-actions">
+                <a id="heroWhatsappBtn" class="action-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+                <a id="heroInstagramBtn" class="action-btn-outline" href="https://instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      
-<section class="section" id="about">
-  <div class="container">
-    <h2 class="section-title editable-text" data-field="template_content.about.title">About</h2>
-    <p class="editable-text" data-field="about" style="margin-top:10px;color:#555;">
-      Professional photographer capturing timeless moments with clean and cinematic style.
-    </p>
-  </div>
-</section>
-<section class="section" id="grid">
+        <div class="container">
+          <div class="stats-strip">
+            <div class="stat">
+              <strong class="editable-text" id="stat1Value" data-field="template_content.stats.0.value">120+</strong>
+              <span class="editable-text" id="stat1Label" data-field="template_content.stats.0.label">Shoots</span>
+            </div>
+            <div class="stat">
+              <strong class="editable-text" id="stat2Value" data-field="template_content.stats.1.value">50+</strong>
+              <span class="editable-text" id="stat2Label" data-field="template_content.stats.1.label">Weddings</span>
+            </div>
+            <div class="stat">
+              <strong class="editable-text" id="stat3Value" data-field="template_content.stats.2.value">4.9</strong>
+              <span class="editable-text" id="stat3Label" data-field="template_content.stats.2.label">Rating</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="about">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title editable-text" id="aboutTitle" data-field="template_content.about.title">About</h2>
+              <div class="section-sub editable-text" id="aboutSubtitle" data-field="template_content.about.subtitle">A calm introduction section that helps clients understand your style before they scroll deeper.</div>
+            </div>
+          </div>
+          <div class="about-card">
+            <p class="about-text editable-text" id="aboutText" data-field="about">I photograph weddings, portraits and personal stories with a clean, modern approach. The goal is to keep the website mobile-friendly, fast to browse and useful for clients who want to explore your work and book quickly.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="grid">
         <div class="container">
           <div class="section-head">
             <div>
@@ -1165,7 +1213,7 @@
     const previewClose=document.getElementById("previewClose");
 
     const DEFAULT_IMAGES={
-      profile:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80",
+      hero:"https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1600&q=80",
       grid_1:"https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=900&q=80",
       grid_2:"https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=900&q=80",
       grid_3:"https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
@@ -1199,10 +1247,16 @@
     };
 
     const DEFAULT_TEMPLATE_CONTENT={
+      hero:{
+        kicker:"Wedding & Portrait Photographer"
+      },
+      about:{
+        title:"About",
+        subtitle:"A calm introduction section that helps clients understand your style before they scroll deeper."
+      },
       stats:[
         {value:"120+",label:"Shoots"},
         {value:"50+",label:"Weddings"},
-        {value:"10k+",label:"Followers"},
         {value:"4.9",label:"Rating"}
       ],
       feed:{
@@ -1358,7 +1412,7 @@
     }
 
     function applyImages(){
-      applyImageToTile("profileImage","profile");
+      applyImageToTile("heroSection","hero");
       for(let i=1;i<=12;i+=1) applyImageToTile(`gridTile${i}`,`grid_${i}`);
       for(let i=1;i<=4;i+=1) applyImageToTile(`reelCard${i}`,`reel_${i}`);
       for(let i=1;i<=3;i+=1) applyImageToTile(`collectionMedia${i}`,`collection_${i}`);
@@ -1377,9 +1431,12 @@
       document.title=`${base.name} - Template 5`;
 
       setText("headerStudioName", base.name);
-      setText("profileStudioName", base.name);
-      setText("profileTagline", base.tagline);
-      setText("profileBio", base.about);
+      setText("heroStudioName", base.name);
+      setText("heroTagline", base.tagline);
+      setText("aboutText", base.about);
+      setText("heroKicker", templateContent.hero.kicker);
+      setText("aboutTitle", templateContent.about.title);
+      setText("aboutSubtitle", templateContent.about.subtitle);
 
       setText("stat1Value", templateContent.stats[0].value);
       setText("stat1Label", templateContent.stats[0].label);
@@ -1387,8 +1444,6 @@
       setText("stat2Label", templateContent.stats[1].label);
       setText("stat3Value", templateContent.stats[2].value);
       setText("stat3Label", templateContent.stats[2].label);
-      setText("stat4Value", templateContent.stats[3].value);
-      setText("stat4Label", templateContent.stats[3].label);
 
       setText("feedTitle", templateContent.feed.title);
       setText("feedSubtitle", templateContent.feed.subtitle);
@@ -1439,10 +1494,10 @@
       setText("footerCopy", templateContent.footer.copy);
 
       setHref("headerInstagramLink", instagramUrl);
-      setHref("instagramBtn", instagramUrl);
+      setHref("heroInstagramBtn", instagramUrl);
       setHref("instagramLink", instagramUrl);
 
-      setHref("whatsappBtn", whatsappUrl);
+      setHref("heroWhatsappBtn", whatsappUrl);
       setHref("whatsappLink", whatsappUrl);
       setHref("contactWhatsappButton", whatsappUrl);
       setHref("priceWhatsapp1", whatsappUrl);
