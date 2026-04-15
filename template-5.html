@@ -146,15 +146,15 @@
     .toggle-btn.active::after{transform:translateX(20px)}
 
     .edit-status{
-      max-width:360px;
-      padding:14px 16px;
+      max-width:320px;
+      padding:12px 14px;
       border-radius:16px;
       background:#ffffff;
       border:1px solid var(--line);
       box-shadow:var(--shadow);
       color:var(--muted);
-      font-size:.82rem;
-      line-height:1.6;
+      font-size:.78rem;
+      line-height:1.5;
     }
 
     .container{
@@ -245,6 +245,20 @@
       color:#111;
     }
 
+    .hero-panel{
+      display:inline-flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:0;
+      background:rgba(255,255,255,.42);
+      backdrop-filter:blur(8px);
+      border:1px solid rgba(0,0,0,.06);
+      border-radius:28px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      max-width:min(100%, 620px);
+    }
+
     .hero-kicker{
       display:inline-block;
       font-size:11px;
@@ -261,13 +275,14 @@
 
     .hero-title{
       margin:0;
-      font-size:clamp(32px,5vw,62px);
+      font-size:clamp(30px,4.6vw,58px);
       line-height:0.98;
       font-weight:900;
       letter-spacing:.01em;
       text-transform:uppercase;
-      max-width:10ch;
+      max-width:11ch;
       word-break:break-word;
+      text-wrap:balance;
     }
 
     .hero-tagline{
@@ -810,19 +825,25 @@
       .section-sub{margin-top:6px}
       .collection-grid,.pricing-grid{grid-template-columns:1fr}
       .grid-feed{gap:1px}
-      .header-inner{min-height:56px}
-      .brand{max-width:62vw;font-size:.82rem;letter-spacing:.06em}
-      .hero-banner{min-height:56vh}
-      .hero-content-wrap{min-height:56vh;padding:84px 0 22px}
-      .hero-copy{padding:0 14px}
-      .hero-title{font-size:clamp(24px,9.2vw,38px);max-width:10ch;line-height:1.02}
-      .hero-tagline{font-size:13px;line-height:1.55;max-width:24ch}
-      .hero-actions{display:grid;grid-template-columns:1fr;width:100%}
-      .action-btn,.action-btn-outline{width:100%}
-      .stats-strip{grid-template-columns:1fr 1fr 1fr; margin-top:-18px; gap:8px}
-      .stat-card{padding:14px 10px;border-radius:20px}
-      .stat-card strong{font-size:.95rem}
-      .stat-card span{font-size:.72rem;letter-spacing:.08em}
+      .header-inner{min-height:56px; align-items:flex-start; padding:10px 0}
+      .brand{max-width:66vw;font-size:.8rem;letter-spacing:.04em;line-height:1.2}
+      .header-links{gap:10px; justify-content:flex-end; max-width:32vw}
+      .header-links a{font-size:.72rem; letter-spacing:.1em}
+      .hero-banner{min-height:62vh}
+      .hero-content-wrap{min-height:62vh;padding:86px 0 20px; align-items:flex-end}
+      .hero-copy{padding:0 12px}
+      .hero-panel{padding:14px; border-radius:22px; max-width:100%}
+      .hero-kicker{font-size:10px; letter-spacing:.16em; margin-bottom:10px}
+      .hero-title{font-size:clamp(22px,8.8vw,34px);max-width:9ch;line-height:1.02}
+      .hero-tagline{font-size:12px;line-height:1.45;max-width:100%; margin-top:10px}
+      .hero-actions{display:grid;grid-template-columns:1fr;width:100%; margin-top:14px}
+      .action-btn,.action-btn-outline{width:100%; min-height:46px}
+      .stats-strip{grid-template-columns:1fr 1fr 1fr; margin-top:-16px; gap:8px}
+      .stat-card{padding:12px 8px;border-radius:18px}
+      .stat-card strong{font-size:.92rem}
+      .stat-card span{font-size:.68rem;letter-spacing:.06em}
+      .edit-toolbar{left:10px; right:10px; bottom:6px}
+      .edit-status{font-size:.72rem; padding:10px 12px}
     }
   </style>
 </head>
@@ -867,18 +888,20 @@
 
     <main id="top">
       <section class="hero-banner">
-        <div id="heroSection" class="hero-media editable-slot" data-image-slot="hero">
+        <div id="heroSection" class="hero-media editable-slot" data-image-slot="hero" style="background-image:url('https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1600&q=80');">
           <div class="image-loading">Uploading...</div>
           <div class="edit-overlay"><span>Replace Hero Image</span></div>
         </div>
         <div class="container hero-content-wrap">
           <div class="hero-copy">
-            <div class="hero-kicker editable-text" id="heroKicker" data-field="template_content.hero.kicker">Wedding & Portrait Photographer</div>
-            <h1 class="hero-title editable-text" id="heroStudioName" data-field="name">Studio Name</h1>
-            <div class="hero-tagline editable-text" id="heroTagline" data-field="tagline">Wedding & Editorial Photography</div>
-            <div class="hero-actions">
-              <a id="heroWhatsappBtn" class="action-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
-              <a id="heroPortfolioBtn" class="action-btn-outline" href="#grid">View Work</a>
+            <div class="hero-panel">
+              <div class="hero-kicker editable-text" id="heroKicker" data-field="template_content.hero.kicker">Wedding & Portrait Photographer</div>
+              <h1 class="hero-title editable-text" id="heroStudioName" data-field="name">Studio Name</h1>
+              <div class="hero-tagline editable-text" id="heroTagline" data-field="tagline">Wedding & Editorial Photography</div>
+              <div class="hero-actions">
+                <a id="heroWhatsappBtn" class="action-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+                <a id="heroPortfolioBtn" class="action-btn-outline" href="#grid">View Work</a>
+              </div>
             </div>
           </div>
         </div>
