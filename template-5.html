@@ -80,8 +80,8 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      background:#111;
-      color:#fff;
+      background:#ffffff;
+      color:#111;
       text-transform:uppercase;
       letter-spacing:.12em;
       font-size:.74rem;
@@ -144,7 +144,7 @@
     }
 
     .toggle-btn.active{background:#fff}
-    .toggle-btn.active::after{transform:translateX(20px); background:#111}
+    .toggle-btn.active::after{transform:translateX(20px); background:#ffffff}
 
     .edit-status{
       max-width:360px;
@@ -251,11 +251,11 @@
 
     .action-btn{
       background:#111;
-      color:#fff;
+      color:#111;
     }
 
     .action-btn-outline{
-      background:#fff;
+      background:#111;
       color:#111;
     }
 
@@ -292,7 +292,7 @@
 
     .hero-copy{
       max-width:720px;
-      color:#fff;
+      color:#111;
     }
 
     .hero-kicker{
@@ -344,6 +344,105 @@
       font-size:.98rem;
       line-height:1.95;
       max-width:900px;
+    }
+
+
+    .hero{
+      position:relative;
+      min-height:74vh;
+      background:#f7f7f7;
+      overflow:hidden;
+      border-bottom:1px solid var(--line);
+    }
+
+    .hero-media{
+      position:absolute;
+      inset:0;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      z-index:1;
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.18));
+      pointer-events:none;
+      z-index:2;
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:5;
+      min-height:74vh;
+      display:flex;
+      align-items:flex-end;
+      justify-content:flex-start;
+      padding:110px 0 34px;
+    }
+
+    .hero-copy{
+      width:min(680px, 100%);
+      color:#111;
+      padding:0 18px;
+    }
+
+    .hero-kicker{
+      display:inline-block;
+      font-size:11px;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:#444;
+      margin-bottom:12px;
+      font-weight:700;
+      background:rgba(255,255,255,.72);
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.08);
+    }
+
+    .hero-tagline{
+      margin:14px 0 0;
+      max-width:34ch;
+      color:#333;
+      font-size:15px;
+      line-height:1.7;
+      background:rgba(255,255,255,.72);
+      padding:10px 12px;
+      border-radius:16px;
+      border:1px solid rgba(0,0,0,.06);
+      display:inline-block;
+    }
+
+    .hero-actions{
+      margin-top:18px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .hero-btn,.hero-btn-outline{
+      min-height:48px;
+      padding:0 20px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-size:.78rem;
+      font-weight:800;
+      border:1px solid rgba(0,0,0,.08);
+      background:#fff;
+      color:#111;
+    }
+
+    .hero-btn-outline{
+      background:#111;
+      color:#fff;
+      border-color:#111;
     }
 
     .section{
@@ -635,7 +734,7 @@
       align-items:center;
       justify-content:center;
       background:#111;
-      color:#fff;
+      color:#111;
       font-size:.72rem;
       text-transform:uppercase;
       letter-spacing:.12em;
@@ -799,20 +898,19 @@
     @media (max-width:860px){
       .header-links a:nth-child(2),
       .header-links a:nth-child(3){display:none}
-      .profile-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
       .edit-toolbar{
         left:12px;
         right:12px;
         top:auto;
-        bottom:12px;
+        bottom:8px;
         align-items:stretch;
       }
       .edit-chip{justify-content:space-between}
       .edit-status{
         max-width:none;
-        padding:12px 14px;
-        font-size:.78rem;
-        line-height:1.45;
+        padding:10px 12px;
+        font-size:.74rem;
+        line-height:1.35;
       }
     }
 
@@ -871,12 +969,31 @@
           <a href="#grid">Feed</a>
           <a href="#reels">Highlights</a>
           <a href="#pricing">Pricing</a>
-          <a id="headerInstagramLink" href="https://instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a id="headerInstagramLink" href="#grid">View Grid</a>
         </div>
       </div>
     </header>
 
     <main id="top">
+
+      <section class="hero">
+        <div id="heroImageSlot" class="hero-media editable-slot" data-image-slot="hero">
+          <div class="image-loading">Uploading...</div>
+          <div class="edit-overlay"><span>Replace Hero Image</span></div>
+        </div>
+        <div class="container hero-content">
+          <div class="hero-copy">
+            <div class="hero-kicker editable-text" id="heroKicker" data-field="template_content.hero.kicker">Wedding & Portrait Photographer</div>
+            <h1 class="hero-title editable-text" id="heroTitle" data-field="name">Studio Name</h1>
+            <div class="hero-tagline editable-text" id="heroSubtitle" data-field="tagline">Wedding & Editorial Photography</div>
+            <div class="hero-actions">
+              <a id="heroBookBtn" class="hero-btn-outline" href="#contact">Book Now</a>
+              <a id="heroViewBtn" class="hero-btn" href="#grid">View Work</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       <section class="hero-section">
         <div id="heroSection" class="hero-banner editable-slot" data-image-slot="hero">
@@ -890,7 +1007,7 @@
               <p class="hero-tagline editable-text" id="heroTagline" data-field="tagline">Clean, modern storytelling for weddings, portraits and personal moments.</p>
               <div class="hero-actions">
                 <a id="heroWhatsappBtn" class="action-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
-                <a id="heroInstagramBtn" class="action-btn-outline" href="https://instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a>
+                <a id="heroInstagramBtn" class="action-btn-outline" href="https://instagram.com/" target="_blank" rel="noopener noreferrer">View Grid</a>
               </div>
             </div>
           </div>
@@ -1158,7 +1275,7 @@
                   <div><strong>WhatsApp</strong><span id="whatsappText" class="editable-text" data-field="whatsapp">Chat on WhatsApp</span></div><span>↗</span>
                 </a>
                 <a id="instagramLink" class="contact-link" href="https://instagram.com/" target="_blank" rel="noopener noreferrer">
-                  <div><strong>Instagram</strong><span id="instagramText" class="editable-text" data-field="instagram">@studiohandle</span></div><span>↗</span>
+                  <div><strong>View Grid</strong><span id="instagramText" class="editable-text" data-field="instagram">Latest work</span></div><span>↗</span>
                 </a>
                 <a id="youtubeLink" class="contact-link" href="https://youtube.com/" target="_blank" rel="noopener noreferrer">
                   <div><strong>YouTube</strong><span id="youtubeText" class="editable-text" data-field="youtube">Watch latest films</span></div><span>↗</span>
@@ -1183,7 +1300,7 @@
     <footer class="site-footer">
       <div class="container footer-wrap">
         <div class="footer-brand editable-text" id="footerBrand" data-field="template_content.footer.brand">AM</div>
-        <div class="footer-copy editable-text" id="footerCopy" data-field="template_content.footer.copy">Built for photographers who want an Instagram-style presence with strong booking flow.</div>
+        <div class="footer-copy editable-text" id="footerCopy" data-field="template_content.footer.copy">Built for photographers who want an social-style presence with strong booking flow.</div>
       </div>
     </footer>
   </div>
@@ -1240,7 +1357,7 @@
       tagline:"Wedding & Portrait Photographer",
       about:"Portraits, weddings and visual stories crafted with a clean editorial eye. This space is designed for photographers who want the speed and engagement of social browsing with the trust and booking flow of a personal website.",
       phone:"+91 98765 43210",
-      instagram:"@studiohandle",
+      instagram:"Latest work",
       email:"hello@example.com",
       youtube:"https://www.youtube.com/",
       whatsapp:"https://wa.me/919876543210"
@@ -1259,6 +1376,13 @@
         {value:"50+",label:"Weddings"},
         {value:"4.9",label:"Rating"}
       ],
+      hero:{
+        kicker:"Wedding & Portrait Photographer"
+      },
+      about:{
+        title:"About",
+        subtitle:"A calm introduction that helps clients understand your work before they explore the full feed."
+      },
       feed:{
         title:"Latest Feed",
         subtitle:"A fast scrollable image grid built for mobile-first browsing and strong portfolio discovery."
@@ -1301,7 +1425,7 @@
       },
       footer:{
         brand:"AM",
-        copy:"Built for photographers who want an Instagram-style presence with strong booking flow."
+        copy:"Built for photographers who want an social-style presence with strong booking flow."
       }
     };
 
@@ -1385,7 +1509,7 @@
           tagline:website?.tagline?.trim()||DEFAULT_BASE.tagline,
           about:website?.about?.trim()||DEFAULT_BASE.about,
           phone:formatPhoneForDisplay(website?.phone),
-          instagram:normalizeInstagram(website?.instagram),
+          instagram:normalizePortfolioLabel(website?.instagram),
           email:String(website?.email||"").trim()||DEFAULT_BASE.email,
           youtube:normalizeYoutubeLink(website?.youtube),
           whatsapp:String(website?.whatsapp||"").trim()||formatPhoneForWhatsApp(website?.phone,website?.whatsapp)
@@ -1424,7 +1548,7 @@
 
       const whatsappUrl=formatPhoneForWhatsApp(base.phone,base.whatsapp);
       const phoneTel=formatPhoneForTel(base.phone);
-      const instagramUrl=normalizeInstagramLink(base.instagram);
+      const instagramUrl=normalizePortfolioLabelLink(base.instagram);
       const youtubeUrl=normalizeYoutubeLink(base.youtube);
       const footerBrand=templateContent.footer.brand || base.name.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]?.toUpperCase()||"").join("") || "AM";
 
