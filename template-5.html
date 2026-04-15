@@ -895,7 +895,7 @@
 
     <main id="top">
       <section class="hero-banner">
-        <div id="heroSection" class="hero-media editable-slot" data-image-slot="hero">
+        <div id="heroImageSlot" class="hero-media editable-slot" data-image-slot="hero">
           <div class="image-loading">Uploading...</div>
           <div class="edit-overlay"><span>Replace Hero Image</span></div>
         </div>
@@ -1347,24 +1347,31 @@
       return `url("${safeUrl}")`;
     }
 
-    function applyImageToTile(id,slot){
+    function applyImageToTile(id,slot,website){
       const el=document.getElementById(id);
       if(!el) return;
-
-      const url=getImageUrl(currentWebsite,slot) || DEFAULT_IMAGES[slot] || "";
+      const url=getImageUrl(website,slot) || DEFAULT_IMAGES[slot] || "";
       el.style.backgroundImage=buildImageBackground(url);
       el.dataset.previewUrl=url;
     }
 
-    function applyImages(){
-      applyImageToTile("heroSection","hero");
-      for(let i=1;i<=12;i+=1) applyImageToTile(`gridTile${i}`,`grid_${i}`);
-      for(let i=1;i<=3;i+=1) applyImageToTile(`collectionMedia${i}`,`collection_${i}`);
+    function applyImages(website){
+      const heroImageSlotEl = document.getElementById("heroImageSlot");
+      if(heroImageSlotEl){
+        heroImageSlotEl.style.backgroundImage = buildImageBackground(getImageUrl(website,"hero"));
+        heroImageSlotEl.dataset.previewUrl = getImageUrl(website,"hero");
+      }
+      for(let i=1;i<=12;i+=1) applyImageToTile(`gridTile${i}`,`grid_${i}`,website);
+      for(let i=1;i<=3;i+=1) applyImageToTile(`collectionMedia${i}`,`collection_${i}`,website);
     }
 
-    function forceRenderAllContent(){
-      if(!currentWebsite) return;
-      const {base,templateContent}=composeContent(currentWebsite);
+    function applyWebsiteData(website){
+      forceRenderAllContent(website);
+    }
+
+    function forceRenderAllContent(website=currentWebsite){
+      if(!website) return;
+      const {base,templateContent}=composeContent(website);
 
       const whatsappUrl=formatPhoneForWhatsApp(base.phone,base.whatsapp);
       const phoneTel=formatPhoneForTel(base.phone);
@@ -1436,7 +1443,8 @@
       setHref("portfolioLink", "#grid");
       setHref("youtubeLink", youtubeUrl);
 
-      applyImages();
+      currentWebsite=website;
+      applyImages(website);
     }
 
     function setEditMode(enabled){
@@ -1559,7 +1567,9 @@
           };
         }
 
-        forceRenderAllContent();
+        applyWebsiteData(currentWebsite);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 50);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 180);
         setEditStatus("Image replaced successfully.");
       }catch(error){
         console.error("Image replace failed:",error);
@@ -1665,7 +1675,7 @@
         registerEditableText();
         registerPreviewTiles();
         showTemplate();
-        forceRenderAllContent();
+        applyWebsiteData(currentWebsite);
 
         const editable=canCurrentUserEdit(website);
         showEditToolbar(editable);
