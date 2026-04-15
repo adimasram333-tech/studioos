@@ -220,7 +220,7 @@
       position:absolute;
       inset:0;
       background:#1a1a22 center/cover no-repeat;
-      z-index:1;
+      z-index:0;
       transform:scale(1.01);
     }
 
@@ -261,6 +261,10 @@
       gap:28px;
       align-items:end;
       padding:110px 0 44px;
+      pointer-events:none;
+    }
+    .hero-inner *{
+      pointer-events:auto;
     }
 
     .hero-copy{
@@ -894,7 +898,7 @@
           <div class="image-loading">Uploading...</div>
           <div class="edit-overlay"><span>Replace Hero Image</span></div>
         </div>
-        <button id="heroReplaceButton" type="button" class="hero-replace-btn hidden">Replace Hero Image</button>
+        
 
         <div class="container hero-inner">
           <div class="hero-copy">
@@ -1461,12 +1465,7 @@
       editModeToggle.classList.toggle("active",enabled);
       document.querySelectorAll(".editable-slot").forEach(slot=>slot.classList.toggle("edit-active",enabled));
       document.querySelectorAll(".editable-text").forEach(el=>el.classList.toggle("edit-active",enabled));
-      const heroReplaceButton=document.getElementById("heroReplaceButton");
-      if(heroReplaceButton){
-        heroReplaceButton.classList.toggle("hidden", !enabled);
-        heroReplaceButton.style.display=enabled ? "inline-flex" : "none";
-        heroReplaceButton.disabled=!enabled;
-      }
+      
       setEditStatus(enabled?"Edit mode is ON. Click any text or image area to update it.":"You are viewing preview mode.");
     }
 
