@@ -219,6 +219,7 @@
       z-index:1;
       overflow:hidden;
       background:#e9e9e9;
+      cursor:default;
     }
 
     .hero-image-el{
@@ -237,7 +238,7 @@
       position:absolute;
       top:16px;
       right:16px;
-      z-index:8;
+      z-index:12;
       min-height:42px;
       padding:0 14px;
       border:none;
@@ -250,6 +251,7 @@
       letter-spacing:.08em;
       text-transform:uppercase;
       cursor:pointer;
+      pointer-events:auto;
     }
 
     .hero-banner::after{
@@ -326,6 +328,22 @@
       display:flex;
       gap:10px;
       flex-wrap:wrap;
+    }
+
+    .editable-slot.edit-active .hero-replace-btn{
+      display:inline-flex !important;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .hero-media.edit-active .edit-overlay{
+      justify-content:flex-start;
+      align-items:flex-start;
+      padding:68px 16px 16px;
+    }
+
+    .hero-media.edit-active .edit-overlay span{
+      background:rgba(255,255,255,.86);
     }
 
 
@@ -863,7 +881,7 @@
       .hero-tagline{font-size:10.5px;line-height:1.3;max-width:100%; margin-top:6px}
       .hero-actions{display:flex;flex-wrap:wrap;width:100%; margin-top:10px; gap:8px}
       .action-btn,.action-btn-outline{width:auto; min-height:34px; padding:0 11px; font-size:.62rem}
-      .hero-replace-btn{top:10px; right:10px; min-height:34px; padding:0 10px; font-size:.60rem}
+      .hero-replace-btn{top:10px; right:10px; min-height:34px; padding:0 10px; font-size:.60rem; z-index:14}
       .stats-strip{grid-template-columns:1fr 1fr 1fr; margin-top:-14px; gap:8px}
       .stat-card{padding:12px 8px;border-radius:18px}
       .stat-card strong{font-size:.92rem}
@@ -1479,9 +1497,15 @@
       editModeToggle.classList.toggle("active",enabled);
       document.querySelectorAll(".editable-slot").forEach(slot=>slot.classList.toggle("edit-active",enabled));
       document.querySelectorAll(".editable-text").forEach(el=>el.classList.toggle("edit-active",enabled));
+      const heroSection=document.getElementById("heroSection");
       const heroReplaceButton=document.getElementById("heroReplaceButton");
+      if(heroSection){
+        heroSection.classList.toggle("edit-active",enabled);
+      }
       if(heroReplaceButton){
         heroReplaceButton.classList.toggle("hidden", !enabled);
+        heroReplaceButton.disabled=!enabled;
+        heroReplaceButton.setAttribute("aria-hidden", enabled ? "false" : "true");
       }
       setEditStatus(enabled?"Edit mode is ON. Click any text or image area to update it.":"You are viewing preview mode.");
     }
@@ -1649,6 +1673,7 @@
       document.querySelectorAll(".editable-slot").forEach(slot=>{
         slot.addEventListener("click",event=>{
           if(!editModeEnabled) return;
+          if(event.target && event.target.closest(".hero-replace-btn")) return;
           event.preventDefault();
           event.stopPropagation();
           pendingImageSlot=slot.dataset.imageSlot||"";
