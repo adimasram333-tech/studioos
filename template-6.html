@@ -843,19 +843,19 @@
     @media (max-width:640px){
       .container{width:min(100% - 20px,100%)}
       .collection-grid,.pricing-grid{grid-template-columns:1fr}
-      .hero,.hero-bg,.hero-inner{min-height:1180px}
+      .hero,.hero-bg{min-height:1180px}
       .hero-inner{
-        min-height:1180px;
-        display:flex !important;
-        flex-direction:column;
-        justify-content:flex-end;
-        align-items:stretch;
+        min-height:980px;
+        display:grid;
+        grid-template-columns:1fr;
+        align-content:end;
         gap:14px;
-        padding:0 0 28px;
+        padding:300px 0 28px;
+        position:relative;
+        transform:translateY(180px);
       }
       .hero-copy{
-        margin-top:auto;
-        padding:420px 0 0;
+        padding:0;
         max-width:none;
       }
       .hero-title{font-size:clamp(28px,9vw,48px)}
