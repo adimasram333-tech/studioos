@@ -843,12 +843,28 @@
     @media (max-width:640px){
       .container{width:min(100% - 20px,100%)}
       .collection-grid,.pricing-grid{grid-template-columns:1fr}
-      .hero,.hero-bg,.hero-inner{min-height:520px}
-      .hero-inner{padding:88px 0 18px}
+      .hero,.hero-bg,.hero-inner{min-height:700px}
+      .hero-inner{
+        min-height:700px;
+        padding:170px 0 28px;
+        align-content:end;
+        gap:18px;
+      }
+      .hero-copy{
+        padding:0;
+        max-width:none;
+      }
       .hero-title{font-size:clamp(28px,9vw,48px)}
       .hero-tagline{font-size:.92rem;line-height:1.7}
-      .hero-actions{flex-direction:column}
+      .hero-actions{
+        flex-direction:column;
+        margin-top:18px;
+      }
       .primary-btn,.secondary-btn{width:100%}
+      .hero-card{
+        margin-top:6px;
+        padding:18px;
+      }
       .hero-replace-btn{
         top:88px;
         min-height:40px;
