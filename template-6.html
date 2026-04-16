@@ -843,14 +843,18 @@
     @media (max-width:640px){
       .container{width:min(100% - 20px,100%)}
       .collection-grid,.pricing-grid{grid-template-columns:1fr}
-      .hero,.hero-bg,.hero-inner{min-height:700px}
+      .hero,.hero-bg,.hero-inner{min-height:780px}
       .hero-inner{
-        min-height:700px;
-        padding:170px 0 28px;
-        align-content:end;
-        gap:18px;
+        min-height:780px;
+        display:flex;
+        flex-direction:column;
+        justify-content:flex-end;
+        align-items:stretch;
+        padding:108px 0 26px;
+        gap:14px;
       }
       .hero-copy{
+        margin-top:auto;
         padding:0;
         max-width:none;
       }
@@ -862,7 +866,7 @@
       }
       .primary-btn,.secondary-btn{width:100%}
       .hero-card{
-        margin-top:6px;
+        margin-top:0;
         padding:18px;
       }
       .hero-replace-btn{
