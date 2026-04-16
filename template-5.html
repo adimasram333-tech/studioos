@@ -267,12 +267,6 @@
       display:flex;
       align-items:flex-end;
       padding:0 0 22px;
-      pointer-events:none;
-    }
-
-    .hero-panel,
-    .hero-panel *{
-      pointer-events:auto;
     }
 
     .hero-copy{
@@ -735,6 +729,12 @@
     }
 
     .editable-slot,.editable-text{position:relative}
+
+    #heroImageSlot{
+      position:absolute;
+      inset:0;
+      z-index:1;
+    }
     .editable-text.edit-active{
       cursor:pointer;
       border-radius:8px;
