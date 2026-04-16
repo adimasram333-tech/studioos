@@ -218,23 +218,8 @@
       inset:0;
       z-index:1;
       overflow:hidden;
-      background:#e9e9e9 center/cover no-repeat;
+      background:#e9e9e9;
       cursor:default;
-    }
-
-    .hero-media::before{
-      content:"";
-      position:absolute;
-      inset:-24px;
-      background:inherit;
-      background-position:center center;
-      background-size:cover;
-      background-repeat:no-repeat;
-      filter:blur(18px);
-      transform:scale(1.08);
-      opacity:.92;
-      z-index:1;
-      pointer-events:none;
     }
 
     .hero-image-el{
@@ -242,10 +227,10 @@
       inset:0;
       width:100%;
       height:100%;
-      object-fit:contain;
+      object-fit:cover;
       object-position:center center;
       display:block;
-      z-index:2;
+      z-index:1;
       pointer-events:none;
       user-select:none;
       -webkit-user-drag:none;
@@ -255,7 +240,7 @@
       content:"";
       position:absolute;
       inset:0;
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.08) 45%, rgba(255,255,255,.14));
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.04) 45%, rgba(255,255,255,.10));
       pointer-events:none;
       z-index:2;
     }
@@ -267,6 +252,12 @@
       display:flex;
       align-items:flex-end;
       padding:0 0 22px;
+      pointer-events:none;
+    }
+
+    .hero-panel,
+    .hero-panel *{
+      pointer-events:auto;
     }
 
     .hero-copy{
@@ -1417,7 +1408,7 @@
       const heroUrl = getImageUrl(website,"hero");
 
       if(heroImageSlotEl){
-        heroImageSlotEl.style.backgroundImage = buildImageBackground(heroUrl);
+        heroImageSlotEl.style.backgroundImage = "";
         heroImageSlotEl.dataset.previewUrl = heroUrl;
       }
 
