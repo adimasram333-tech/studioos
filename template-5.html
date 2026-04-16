@@ -222,6 +222,12 @@
       cursor:default;
     }
 
+    #heroImageSlot{
+      position:absolute;
+      inset:0;
+      z-index:1;
+    }
+
     .hero-image-el{display:none}
 
     .hero-banner::after{
@@ -240,6 +246,12 @@
       display:flex;
       align-items:flex-end;
       padding:0 0 22px;
+      pointer-events:none;
+    }
+
+    .hero-panel,
+    .hero-panel *{
+      pointer-events:auto;
     }
 
     .hero-copy{
@@ -1643,6 +1655,7 @@
       document.querySelectorAll(".editable-slot").forEach(slot=>{
         slot.addEventListener("click",event=>{
           if(!editModeEnabled) return;
+          if(slot.dataset.imageSlot==="hero") return;
           event.preventDefault();
           event.stopPropagation();
           pendingImageSlot=slot.dataset.imageSlot||"";
@@ -1659,13 +1672,46 @@
     }
 
     function registerPreviewTiles(){
-      document.querySelectorAll(".grid-tile,.collection-media,.hero-media").forEach(el=>{
+      document.querySelectorAll(".grid-tile,.collection-media").forEach(el=>{
         el.addEventListener("click",event=>{
           if(editModeEnabled) return;
           event.preventDefault();
           const url=el.dataset.previewUrl || "";
           openPreview(url);
         });
+      });
+    }
+
+    function registerHeroImageInteraction(){
+      const heroBanner=document.querySelector(".hero-banner");
+      const heroMedia=document.getElementById("heroImageSlot");
+      if(!heroBanner || !heroMedia) return;
+
+      heroBanner.addEventListener("click",event=>{
+        const clickedEditableText=event.target.closest(".editable-text");
+        const clickedAction=event.target.closest("a,button,input,textarea");
+        const clickedHeroPanel=event.target.closest(".hero-panel");
+
+        if(editModeEnabled){
+          if(clickedEditableText || clickedAction || clickedHeroPanel){
+            return;
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          pendingImageSlot="hero";
+          imageFileInput.click();
+          return;
+        }
+
+        if(clickedAction){
+          return;
+        }
+
+        const heroUrl=heroMedia.dataset.previewUrl || "";
+        if(heroUrl){
+          event.preventDefault();
+          openPreview(heroUrl);
+        }
       });
     }
 
@@ -1697,6 +1743,7 @@
         registerEditableImageSlots();
         registerEditableText();
         registerPreviewTiles();
+        registerHeroImageInteraction();
         showTemplate();
         applyWebsiteData(currentWebsite);
 
