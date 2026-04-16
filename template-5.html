@@ -207,63 +207,52 @@
         
     .hero-banner{
       position:relative;
-      height:520px;
       overflow:hidden;
       border-bottom:1px solid var(--line);
       background:#efefef;
     }
 
     .hero-media{
-      position:absolute;
-      inset:0;
+      position:relative;
       z-index:1;
       overflow:hidden;
-      background:#e9e9e9 center/cover no-repeat;
+      background:#e9e9e9;
       cursor:default;
-    }
-
-    .hero-media::before{
-      content:"";
-      position:absolute;
-      inset:-24px;
-      background:inherit;
-      background-position:center center;
-      background-size:cover;
-      filter:blur(18px);
-      transform:scale(1.08);
-      opacity:.9;
-      z-index:1;
-      pointer-events:none;
+      line-height:0;
     }
 
     .hero-image-el{
-      position:absolute;
-      inset:0;
+      display:block;
       width:100%;
-      height:100%;
+      height:auto;
+      max-width:100%;
       object-fit:contain;
       object-position:center center;
-      z-index:2;
-      display:block;
+      position:relative;
+      z-index:1;
       pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
     }
 
     .hero-banner::after{
       content:"";
       position:absolute;
       inset:0;
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.08) 45%, rgba(255,255,255,.14));
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0) 35%, rgba(255,255,255,.12) 100%);
       pointer-events:none;
       z-index:2;
     }
 
     .hero-content-wrap{
-      position:relative;
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:22px;
       z-index:5;
-      height:100%;
       display:flex;
       align-items:flex-end;
-      padding:0 0 22px;
+      padding:0;
       pointer-events:none;
     }
 
@@ -866,8 +855,7 @@
       .brand{max-width:58vw;font-size:.78rem;letter-spacing:.04em;line-height:1.15}
       .header-links{gap:8px; justify-content:flex-end; max-width:38vw}
       .header-links a{font-size:.66rem; letter-spacing:.04em}
-      .hero-banner{height:380px}
-      .hero-content-wrap{padding:0 0 12px; align-items:flex-end}
+      .hero-content-wrap{bottom:12px; align-items:flex-end}
       .hero-copy{padding:0 12px; width:100%}
       .hero-panel{padding:10px 12px; border-radius:16px; max-width:100%; width:min(100%, 238px)}
       .hero-kicker{font-size:8px; letter-spacing:.11em; margin-bottom:6px}
@@ -1681,7 +1669,14 @@
       document.querySelectorAll(".editable-slot").forEach(slot=>{
         slot.addEventListener("click",event=>{
           if(!editModeEnabled) return;
-          if(slot.dataset.imageSlot==="hero") return;
+          if(slot.dataset.imageSlot==="hero"){
+            const clickedEditableText=event.target.closest(".editable-text");
+            const clickedAction=event.target.closest("a,button,input,textarea");
+            const clickedHeroPanel=event.target.closest(".hero-panel");
+            if(clickedEditableText || clickedAction || clickedHeroPanel){
+              return;
+            }
+          }
           event.preventDefault();
           event.stopPropagation();
           pendingImageSlot=slot.dataset.imageSlot||"";
@@ -1698,46 +1693,13 @@
     }
 
     function registerPreviewTiles(){
-      document.querySelectorAll(".grid-tile,.collection-media").forEach(el=>{
+      document.querySelectorAll(".grid-tile,.collection-media,.hero-media").forEach(el=>{
         el.addEventListener("click",event=>{
           if(editModeEnabled) return;
           event.preventDefault();
           const url=el.dataset.previewUrl || "";
           openPreview(url);
         });
-      });
-    }
-
-    function registerHeroImageInteraction(){
-      const heroBanner=document.querySelector(".hero-banner");
-      const heroMedia=document.getElementById("heroImageSlot");
-      if(!heroBanner || !heroMedia) return;
-
-      heroBanner.addEventListener("click",event=>{
-        const clickedEditableText=event.target.closest(".editable-text");
-        const clickedAction=event.target.closest("a,button,input,textarea");
-        const clickedHeroPanel=event.target.closest(".hero-panel");
-
-        if(editModeEnabled){
-          if(clickedEditableText || clickedAction || clickedHeroPanel){
-            return;
-          }
-          event.preventDefault();
-          event.stopPropagation();
-          pendingImageSlot="hero";
-          imageFileInput.click();
-          return;
-        }
-
-        if(clickedAction){
-          return;
-        }
-
-        const heroUrl=heroMedia.dataset.previewUrl || "";
-        if(heroUrl){
-          event.preventDefault();
-          openPreview(heroUrl);
-        }
       });
     }
 
@@ -1769,7 +1731,6 @@
         registerEditableImageSlots();
         registerEditableText();
         registerPreviewTiles();
-        registerHeroImageInteraction();
         showTemplate();
         applyWebsiteData(currentWebsite);
 
