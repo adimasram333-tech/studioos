@@ -240,12 +240,6 @@
       display:flex;
       align-items:flex-end;
       padding:0 0 22px;
-      pointer-events:none;
-    }
-
-    .hero-panel,
-    .hero-panel *{
-      pointer-events:auto;
     }
 
     .hero-copy{
@@ -1197,6 +1191,10 @@
       collection_3:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1000&q=80"
     };
 
+    const LEGACY_IMAGE_FIELD_MAP={
+      hero:"hero_image_url"
+    };
+
     const DEFAULT_BASE={
       name:"Studio Name",
       tagline:"Wedding & Editorial Photography",
@@ -1330,7 +1328,25 @@
     }
 
     function getTemplateImages(website){return safeObject(website?.template_images)}
-    function getImageUrl(website,slotName){return getTemplateImages(website)[slotName] || DEFAULT_IMAGES[slotName] || ""}
+
+    function sanitizeImageUrl(value){
+      const raw=String(value ?? "").trim();
+      if(!raw) return "";
+      const lower=raw.toLowerCase();
+      if(lower==="null" || lower==="undefined" || lower==="false" || lower==="nan") return "";
+      return raw;
+    }
+
+    function getImageUrl(website,slotName){
+      const images=getTemplateImages(website);
+      const legacyField=LEGACY_IMAGE_FIELD_MAP[slotName];
+      return (
+        sanitizeImageUrl(images[slotName]) ||
+        (legacyField ? sanitizeImageUrl(website?.[legacyField]) : "") ||
+        sanitizeImageUrl(DEFAULT_IMAGES[slotName]) ||
+        ""
+      );
+    }
 
     function composeContent(website){
       return {
@@ -1363,9 +1379,10 @@
 
     function applyImages(website){
       const heroImageSlotEl = document.getElementById("heroImageSlot");
+      const heroUrl = getImageUrl(website,"hero");
       if(heroImageSlotEl){
-        heroImageSlotEl.style.backgroundImage = buildImageBackground(getImageUrl(website,"hero"));
-        heroImageSlotEl.dataset.previewUrl = getImageUrl(website,"hero");
+        heroImageSlotEl.style.backgroundImage = buildImageBackground(heroUrl);
+        heroImageSlotEl.dataset.previewUrl = heroUrl;
       }
       for(let i=1;i<=12;i+=1) applyImageToTile(`gridTile${i}`,`grid_${i}`,website);
       for(let i=1;i<=3;i+=1) applyImageToTile(`collectionMedia${i}`,`collection_${i}`,website);
@@ -1626,7 +1643,6 @@
       document.querySelectorAll(".editable-slot").forEach(slot=>{
         slot.addEventListener("click",event=>{
           if(!editModeEnabled) return;
-          if(slot.dataset.imageSlot==="hero") return;
           event.preventDefault();
           event.stopPropagation();
           pendingImageSlot=slot.dataset.imageSlot||"";
@@ -1643,46 +1659,13 @@
     }
 
     function registerPreviewTiles(){
-      document.querySelectorAll(".grid-tile,.collection-media").forEach(el=>{
+      document.querySelectorAll(".grid-tile,.collection-media,.hero-media").forEach(el=>{
         el.addEventListener("click",event=>{
           if(editModeEnabled) return;
           event.preventDefault();
           const url=el.dataset.previewUrl || "";
           openPreview(url);
         });
-      });
-    }
-
-    function registerHeroImageInteraction(){
-      const heroBanner=document.querySelector(".hero-banner");
-      const heroMedia=document.getElementById("heroImageSlot");
-      if(!heroBanner || !heroMedia) return;
-
-      heroBanner.addEventListener("click",event=>{
-        const clickedEditableText=event.target.closest(".editable-text");
-        const clickedAction=event.target.closest("a,button,input,textarea");
-        const clickedHeroPanel=event.target.closest(".hero-panel");
-
-        if(editModeEnabled){
-          if(clickedEditableText || clickedAction || clickedHeroPanel){
-            return;
-          }
-          event.preventDefault();
-          event.stopPropagation();
-          pendingImageSlot="hero";
-          imageFileInput.click();
-          return;
-        }
-
-        if(clickedAction){
-          return;
-        }
-
-        const heroUrl=heroMedia.dataset.previewUrl || "";
-        if(heroUrl){
-          event.preventDefault();
-          openPreview(heroUrl);
-        }
       });
     }
 
@@ -1714,7 +1697,6 @@
         registerEditableImageSlots();
         registerEditableText();
         registerPreviewTiles();
-        registerHeroImageInteraction();
         showTemplate();
         applyWebsiteData(currentWebsite);
 
