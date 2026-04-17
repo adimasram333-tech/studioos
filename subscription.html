@@ -515,7 +515,7 @@
 
           <div class="plan-actions">
             <div class="current-flag">✓ Current Plan</div>
-            <button class="plan-btn secondary upgrade-btn disabled" type="button">Current Plan</button>
+            <button id="freePlanBtn" class="plan-btn secondary upgrade-btn disabled" type="button">Current Plan</button>
           </div>
         </div>
       </article>
@@ -619,8 +619,10 @@
     const planStatusBadge = document.getElementById("planStatusBadge");
     const basicBillingNote = document.getElementById("basicBillingNote");
     const proBillingNote = document.getElementById("proBillingNote");
+    const freePlanBtn = document.getElementById("freePlanBtn");
     const basicPlanBtn = document.getElementById("basicPlanBtn");
     const proPlanBtn = document.getElementById("proPlanBtn");
+
     const planCards = {
       free: document.getElementById("freePlanCard"),
       basic: document.getElementById("basicPlanCard"),
@@ -628,6 +630,12 @@
     };
 
     let billingMode = "annual";
+    let activePlan = "free";
+
+    function normalizePlan(value){
+      const plan = String(value || "").trim().toLowerCase();
+      return ["free", "basic", "pro"].includes(plan) ? plan : "free";
+    }
 
     function updateBillingMode(mode){
       billingMode = mode === "monthly" ? "monthly" : "annual";
@@ -648,24 +656,37 @@
       if(billingMode === "annual"){
         basicBillingNote.textContent = "Billed yearly • ₹5988 charged once for 12 months";
         proBillingNote.textContent = "Billed yearly • ₹11988 charged once for 12 months";
-        basicPlanBtn.textContent = "Choose Basic Yearly";
-        proPlanBtn.textContent = "Choose Pro Yearly";
+        basicPlanBtn.textContent = activePlan === "basic" ? "Choose Basic Yearly" : "Choose Basic Yearly";
+        proPlanBtn.textContent = activePlan === "pro" ? "Choose Pro Yearly" : "Choose Pro Yearly";
       }else{
         basicBillingNote.textContent = "1 month plan • ₹1499 charged for one month only";
         proBillingNote.textContent = "1 month plan • ₹1999 charged for one month only";
-        basicPlanBtn.textContent = "Choose Basic 1 Month";
-        proPlanBtn.textContent = "Choose Pro 1 Month";
+        basicPlanBtn.textContent = activePlan === "basic" ? "Choose Basic 1 Month" : "Choose Basic 1 Month";
+        proPlanBtn.textContent = activePlan === "pro" ? "Choose Pro 1 Month" : "Choose Pro 1 Month";
       }
     }
 
+    function syncPlanButtons(plan){
+      freePlanBtn.textContent = plan === "free" ? "Current Plan" : "Free Plan";
+      basicPlanBtn.textContent = plan === "basic"
+        ? (billingMode === "annual" ? "Choose Basic Yearly" : "Choose Basic 1 Month")
+        : (billingMode === "annual" ? "Choose Basic Yearly" : "Choose Basic 1 Month");
+      proPlanBtn.textContent = plan === "pro"
+        ? (billingMode === "annual" ? "Choose Pro Yearly" : "Choose Pro 1 Month")
+        : (billingMode === "annual" ? "Choose Pro Yearly" : "Choose Pro 1 Month");
+    }
+
     function setCurrentPlan(plan){
+      activePlan = normalizePlan(plan);
+
       Object.values(planCards).forEach(card => card.classList.remove("current-plan"));
+      planCards[activePlan].classList.add("current-plan");
 
-      const normalized = ["free", "basic", "pro"].includes(plan) ? plan : "free";
-      planCards[normalized].classList.add("current-plan");
+      currentPlanText.textContent = activePlan.charAt(0).toUpperCase() + activePlan.slice(1);
+      planStatusBadge.textContent = `${currentPlanText.textContent} Plan`;
 
-      currentPlanText.textContent = normalized.charAt(0).toUpperCase() + normalized.slice(1);
-      planStatusBadge.textContent = `${normalized.charAt(0).toUpperCase() + normalized.slice(1)} Plan`;
+      syncPlanButtons(activePlan);
+      updateBillingMode(billingMode);
     }
 
     async function loadPlanState(){
@@ -675,37 +696,35 @@
 
       const { data, error } = await supabase
         .from("photographer_settings")
-        .select("plan, is_paid")
+        .select("plan, billing_cycle, subscription_status, storage_limit_gb")
         .eq("user_id", user.id)
         .maybeSingle();
 
       if(error){
         console.error("Unable to load plan state:", error);
+        setCurrentPlan("free");
+        storageUsageText.textContent = "0GB / 5GB";
         return;
       }
 
-      const plan = String(data?.plan || "").trim().toLowerCase();
-      if(plan === "basic" || plan === "pro"){
-        setCurrentPlan(plan);
-        storageUsageText.textContent = plan === "basic" ? "0GB / 50GB" : "0GB / 100GB";
-        return;
-      }
+      const dbPlan = normalizePlan(data?.plan);
+      const subscriptionStatus = String(data?.subscription_status || "").trim().toLowerCase();
+      const effectivePlan = subscriptionStatus === "active" ? dbPlan : "free";
+      const storageLimit = Number(data?.storage_limit_gb || (effectivePlan === "pro" ? 100 : effectivePlan === "basic" ? 50 : 5));
+      const dbBillingCycle = String(data?.billing_cycle || "").trim().toLowerCase();
 
-      if(data?.is_paid){
-        setCurrentPlan("basic");
-        storageUsageText.textContent = "0GB / 50GB";
-        return;
-      }
+      setCurrentPlan(effectivePlan);
+      storageUsageText.textContent = `0GB / ${storageLimit}GB`;
 
-      setCurrentPlan("free");
-      storageUsageText.textContent = "0GB / 5GB";
+      if(effectivePlan !== "free" && (dbBillingCycle === "monthly" || dbBillingCycle === "yearly")){
+        updateBillingMode(dbBillingCycle === "yearly" ? "annual" : "monthly");
+      }else{
+        updateBillingMode("annual");
+      }
     }
 
     monthlyBtn.addEventListener("click", () => updateBillingMode("monthly"));
     annualBtn.addEventListener("click", () => updateBillingMode("annual"));
-
-    updateBillingMode("annual");
-    await loadPlanState();
 
     basicPlanBtn.addEventListener("click", () => {
       alert(billingMode === "annual"
@@ -718,6 +737,9 @@
         ? "Pro Yearly selected • ₹11988 billed once for 12 months"
         : "Pro 1 Month selected • ₹1999 billed for one month");
     });
+
+    updateBillingMode("annual");
+    await loadPlanState();
   </script>
 </body>
 </html>
