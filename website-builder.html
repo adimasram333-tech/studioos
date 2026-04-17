@@ -701,47 +701,151 @@ height:108px;
 }
 
 .live-preview-shell{
-padding:0.75rem;
+padding:0.7rem;
+}
+
+.live-preview-frame{
+width:min(100%, 360px);
+margin:0 auto;
+aspect-ratio:9 / 18.5;
 }
 
 .live-template{
-padding:0.8rem;
-min-height:auto;
+padding:0.78rem;
+min-height:100%;
+height:100%;
+display:flex;
+flex-direction:column;
+overflow:hidden;
 }
 
 .live-nav{
 flex-direction:column;
 align-items:flex-start;
+gap:0.45rem;
+margin-bottom:0.7rem;
 }
 
 .live-nav-links{
 justify-content:flex-start;
+gap:0.35rem;
+}
+
+.live-nav-links span{
+font-size:0.58rem;
+padding:0.18rem 0.42rem;
 }
 
 .live-brand{
 max-width:100%;
 white-space:normal;
+font-size:0.86rem;
+line-height:1.2;
+}
+
+.live-hero{
+padding:0.35rem 0 0.75rem;
+}
+
+.live-eyebrow{
+font-size:0.58rem;
+letter-spacing:0.12em;
+margin-bottom:0.4rem;
 }
 
 .live-heading{
-font-size:1.45rem;
+font-size:1.3rem;
+line-height:1.05;
+}
+
+.live-tagline{
+font-size:0.76rem;
+line-height:1.45;
+margin-top:0.55rem;
+display:-webkit-box;
+-webkit-line-clamp:3;
+-webkit-box-orient:vertical;
+overflow:hidden;
+}
+
+.live-cta-row{
+gap:0.45rem;
+margin-top:0.75rem;
+}
+
+.live-btn{
+padding:0.56rem 0.78rem;
+font-size:0.72rem;
+}
+
+.live-section-title{
+font-size:0.76rem;
+margin-bottom:0.5rem;
 }
 
 .live-grid{
 grid-template-columns:repeat(2,1fr);
+gap:0.4rem;
+margin-top:0.65rem;
 }
 
 .live-grid div{
-height:64px;
+height:52px;
+border-radius:0.75rem;
+}
+
+.live-about{
+font-size:0.72rem;
+line-height:1.5;
+display:-webkit-box;
+-webkit-line-clamp:4;
+-webkit-box-orient:vertical;
+overflow:hidden;
 }
 
 .live-services{
 grid-template-columns:1fr;
+gap:0.42rem;
+margin-top:0.85rem;
+}
+
+.live-service-card{
+padding:0.62rem;
+}
+
+.live-service-card:last-child{
+display:none;
+}
+
+.live-service-title{
+font-size:0.72rem;
+}
+
+.live-service-text{
+font-size:0.66rem;
+line-height:1.35;
+display:-webkit-box;
+-webkit-line-clamp:2;
+-webkit-box-orient:vertical;
+overflow:hidden;
 }
 
 .live-footer{
 flex-direction:column;
 align-items:flex-start;
+gap:0.5rem;
+margin-top:auto;
+padding-top:0.7rem;
+}
+
+.live-footer-text{
+font-size:0.66rem;
+}
+
+.live-social span{
+width:1.55rem;
+height:1.55rem;
+font-size:0.64rem;
 }
 
 .preview-actions{
@@ -781,11 +885,15 @@ padding:0.4rem 0.7rem;
 }
 
 @media (max-width: 360px){
+.live-preview-frame{
+aspect-ratio:9 / 19;
+}
+
 .live-heading{
-font-size:1.32rem;
+font-size:1.18rem;
 }
 .live-tagline{
-font-size:0.85rem;
+font-size:0.72rem;
 }
 .live-btn{
 width:100%;
@@ -795,10 +903,13 @@ flex-direction:column;
 }
 .live-grid{
 grid-template-columns:1fr 1fr;
-gap:0.45rem;
+gap:0.38rem;
+}
+.live-grid div{
+height:46px;
 }
 .live-service-card{
-padding:0.7rem;
+padding:0.56rem;
 }
 }
 
@@ -851,7 +962,10 @@ Create your personal photography website with ready-made premium templates.
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 1</h3>
-<p class="text-xs text-gray-400 mt-1">Minimal Portfolio</p>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Minimal Portfolio</p>
+<span class="text-xs font-semibold text-white/90">Free</span>
+</div>
 </div>
 
 <div class="template-card glass rounded-2xl p-3" data-template="2">
@@ -878,7 +992,10 @@ Create your personal photography website with ready-made premium templates.
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 2</h3>
-<p class="text-xs text-gray-400 mt-1">Luxury Wedding</p>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Luxury Wedding</p>
+<span class="text-xs font-semibold text-white/90">1099/- year</span>
+</div>
 </div>
 
 <div class="template-card glass rounded-2xl p-3" data-template="3">
@@ -904,7 +1021,10 @@ Create your personal photography website with ready-made premium templates.
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 3</h3>
-<p class="text-xs text-gray-400 mt-1">Dark Cinematic</p>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Dark Cinematic</p>
+<span class="text-xs font-semibold text-white/90">1599/- year</span>
+</div>
 </div>
 
 <div class="template-card glass rounded-2xl p-3" data-template="4">
@@ -926,7 +1046,10 @@ Create your personal photography website with ready-made premium templates.
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 4</h3>
-<p class="text-xs text-gray-400 mt-1">Modern Studio</p>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Modern Studio</p>
+<span class="text-xs font-semibold text-white/90">1499/- year</span>
+</div>
 </div>
 
 <div class="template-card glass rounded-2xl p-3" data-template="5">
@@ -948,7 +1071,10 @@ Create your personal photography website with ready-made premium templates.
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 5</h3>
-<p class="text-xs text-gray-400 mt-1">Instagram Style</p>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Instagram Style</p>
+<span class="text-xs font-semibold text-white/90">1499/- year</span>
+</div>
 </div>
 
 <div class="template-card glass rounded-2xl p-3" data-template="6">
@@ -972,7 +1098,10 @@ Create your personal photography website with ready-made premium templates.
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 6</h3>
-<p class="text-xs text-gray-400 mt-1">Premium Agency</p>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Premium Agency</p>
+<span class="text-xs font-semibold text-white/90">1099/- year</span>
+</div>
 </div>
 
 </div>
