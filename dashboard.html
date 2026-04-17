@@ -396,6 +396,14 @@ class="menu-item"
 Website Builder
 </a>
 
+<a
+href="#"
+id="subscriptionBtn"
+class="menu-item"
+>
+Subscription & Billing
+</a>
+
 <button
 id="logoutBtn"
 type="button"
@@ -574,6 +582,9 @@ document.getElementById("dashboardMenu")
 const websiteBuilderBtn =
 document.getElementById("websiteBuilderBtn")
 
+const subscriptionBtn =
+document.getElementById("subscriptionBtn")
+
 menuBtn.addEventListener("click",(e)=>{
 
 e.stopPropagation()
@@ -609,6 +620,15 @@ e.preventDefault()
 dashboardMenu.classList.add("hidden")
 menuBtn.setAttribute("aria-expanded","false")
 window.location.href = "website-builder.html"
+
+})
+
+subscriptionBtn.addEventListener("click",(e)=>{
+
+e.preventDefault()
+dashboardMenu.classList.add("hidden")
+menuBtn.setAttribute("aria-expanded","false")
+window.location.href = "subscription.html"
 
 })
 
