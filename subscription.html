@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subscription Plans - StudioOS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --bg-start:#1e293b;
+      --bg-end:#0f172a;
+      --card-white:#ffffff;
+      --text-dark:#0f172a;
+      --text-muted:#475569;
+      --primary:#4f46e5;
+      --primary-dark:#3730a3;
+      --primary-soft:#e0e7ff;
+      --success:#16a34a;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      background: radial-gradient(circle at top, var(--bg-start), var(--bg-end));
+      min-height:100vh;
+    }
+
+    .glass-shell{
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(14px);
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 20px 70px rgba(0,0,0,0.22);
+    }
+
+    .pricing-stack{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      align-items:end;
+      gap:1.15rem;
+    }
+
+    .plan-card{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      border-radius:1.7rem;
+      background:var(--card-white);
+      border:1px solid rgba(79,70,229,0.12);
+      box-shadow:0 24px 60px rgba(15,23,42,0.18);
+      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      min-height:640px;
+    }
+
+    .plan-card:hover{
+      transform:translateY(-4px);
+      box-shadow:0 30px 70px rgba(15,23,42,0.22);
+    }
+
+    .plan-card.popular{
+      transform:translateY(-18px);
+      border-color:rgba(79,70,229,0.38);
+      box-shadow:0 36px 84px rgba(79,70,229,0.22);
+    }
+
+    .plan-card.popular:hover{
+      transform:translateY(-22px);
+    }
+
+    .plan-top{
+      padding:1.2rem 1.2rem 1rem;
+      background:linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+      color:white;
+    }
+
+    .plan-card.free .plan-top{
+      background:linear-gradient(180deg, #64748b 0%, #475569 100%);
+    }
+
+    .plan-card.pro .plan-top{
+      background:linear-gradient(180deg, #312e81 0%, #4338ca 100%);
+    }
+
+    .plan-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:30px;
+      padding:0 0.8rem;
+      border-radius:999px;
+      background:rgba(255,255,255,0.16);
+      border:1px solid rgba(255,255,255,0.2);
+      font-size:0.72rem;
+      font-weight:700;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    }
+
+    .plan-price{
+      margin-top:1rem;
+      display:flex;
+      align-items:flex-end;
+      gap:0.25rem;
+      line-height:1;
+    }
+
+    .plan-price strong{
+      font-size:3rem;
+      font-weight:800;
+      letter-spacing:-0.04em;
+    }
+
+    .plan-price span{
+      font-size:0.9rem;
+      font-weight:600;
+      opacity:0.92;
+      padding-bottom:0.35rem;
+    }
+
+    .plan-subtitle{
+      margin-top:0.65rem;
+      font-size:0.92rem;
+      line-height:1.55;
+      color:rgba(255,255,255,0.88);
+    }
+
+    .plan-billing-note{
+      margin-top:0.55rem;
+      font-size:0.78rem;
+      line-height:1.45;
+      color:rgba(255,255,255,0.82);
+      font-weight:600;
+    }
+
+    .plan-body{
+      display:flex;
+      flex-direction:column;
+      flex:1;
+      padding:1.25rem 1.25rem 1.3rem;
+      color:var(--text-dark);
+    }
+
+    .storage-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:0.4rem;
+      align-self:flex-start;
+      min-height:34px;
+      padding:0 0.85rem;
+      border-radius:999px;
+      background:var(--primary-soft);
+      color:var(--primary-dark);
+      font-size:0.8rem;
+      font-weight:700;
+      margin-bottom:1rem;
+    }
+
+    .feature-list{
+      display:grid;
+      gap:0.9rem;
+      margin:0;
+      padding:0;
+      list-style:none;
+    }
+
+    .feature-list li{
+      display:flex;
+      align-items:flex-start;
+      gap:0.72rem;
+      color:var(--text-muted);
+      font-size:0.94rem;
+      line-height:1.55;
+    }
+
+    .feature-list li::before{
+      content:"✓";
+      width:1.35rem;
+      height:1.35rem;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+      background:var(--primary-soft);
+      color:var(--primary-dark);
+      font-size:0.78rem;
+      font-weight:800;
+      margin-top:0.08rem;
+    }
+
+    .plan-note{
+      margin-top:1rem;
+      padding-top:1rem;
+      border-top:1px solid rgba(15,23,42,0.08);
+      color:#64748b;
+      font-size:0.82rem;
+      line-height:1.55;
+    }
+
+    .plan-actions{
+      margin-top:auto;
+      padding-top:1.2rem;
+      display:grid;
+      gap:0.7rem;
+    }
+
+    .plan-btn{
+      width:100%;
+      min-height:50px;
+      border-radius:1rem;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.92rem;
+      font-weight:700;
+      transition:all .2s ease;
+      cursor:pointer;
+      border:1px solid transparent;
+    }
+
+    .plan-btn.primary{
+      background:var(--primary);
+      color:white;
+      box-shadow:0 12px 24px rgba(79,70,229,0.22);
+    }
+
+    .plan-btn.primary:hover{
+      background:#4338ca;
+    }
+
+    .plan-btn.secondary{
+      background:white;
+      color:var(--primary);
+      border-color:rgba(79,70,229,0.22);
+    }
+
+    .plan-btn.secondary:hover{
+      background:#eef2ff;
+    }
+
+    .plan-btn.disabled{
+      background:#e2e8f0;
+      color:#475569;
+      cursor:default;
+      border-color:#e2e8f0;
+      box-shadow:none;
+    }
+
+    .current-flag{
+      display:none;
+      align-items:center;
+      justify-content:center;
+      gap:0.45rem;
+      font-size:0.82rem;
+      font-weight:700;
+      color:var(--success);
+      background:#ecfdf5;
+      border:1px solid rgba(22,163,74,0.16);
+      border-radius:0.95rem;
+      min-height:46px;
+    }
+
+    .current-plan .current-flag{
+      display:flex;
+    }
+
+    .current-plan .upgrade-btn{
+      display:none;
+    }
+
+    .billing-toggle{
+      display:inline-flex;
+      align-items:center;
+      gap:0.35rem;
+      padding:0.35rem;
+      border-radius:1rem;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.1);
+    }
+
+    .billing-btn{
+      min-width:116px;
+      min-height:44px;
+      border-radius:0.8rem;
+      border:none;
+      background:transparent;
+      color:rgba(255,255,255,0.72);
+      font-size:0.86rem;
+      font-weight:700;
+      letter-spacing:0.02em;
+      cursor:pointer;
+      transition:all .2s ease;
+    }
+
+    .billing-btn.active{
+      background:linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+      color:white;
+      box-shadow:0 12px 24px rgba(79,70,229,0.24);
+    }
+
+    .mini-status-card{
+      display:grid;
+      grid-template-columns:1.1fr .9fr .8fr;
+      gap:1rem;
+      align-items:center;
+      color:white;
+    }
+
+    .mini-stat{
+      padding:1rem 1.1rem;
+      border-radius:1.1rem;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .mini-stat-label{
+      font-size:0.76rem;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,0.68);
+    }
+
+    .mini-stat-value{
+      margin-top:0.5rem;
+      font-size:1.4rem;
+      font-weight:800;
+      line-height:1;
+    }
+
+    .note-strip{
+      border-radius:1.25rem;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.08);
+      padding:1rem 1.1rem;
+      color:rgba(255,255,255,0.82);
+      font-size:0.9rem;
+      line-height:1.65;
+    }
+
+    @media (max-width: 960px){
+      .pricing-stack{
+        grid-template-columns:1fr;
+      }
+
+      .plan-card,
+      .plan-card.popular{
+        transform:none;
+        min-height:auto;
+      }
+
+      .plan-card.popular:hover{
+        transform:translateY(-4px);
+      }
+
+      .mini-status-card{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 640px){
+      body{
+        padding:0.85rem;
+      }
+
+      .glass-shell{
+        border-radius:1.35rem;
+      }
+
+      .pricing-stack{
+        gap:0.95rem;
+      }
+
+      .plan-card{
+        border-radius:1.35rem;
+      }
+
+      .mini-stat{
+        padding:0.9rem 0.95rem;
+      }
+
+      .mini-stat-value{
+        font-size:1.15rem;
+      }
+
+      .note-strip{
+        font-size:0.82rem;
+        line-height:1.55;
+      }
+    }
+
+    @media (max-width: 480px){
+      .billing-toggle{
+        width:100%;
+        justify-content:center;
+      }
+
+      .billing-btn{
+        min-width:0;
+        flex:1 1 0;
+      }
+
+      .plan-top{
+        padding:1rem 1rem 0.9rem;
+      }
+
+      .plan-body{
+        padding:1rem;
+      }
+
+      .plan-price strong{
+        font-size:2.35rem;
+      }
+
+      .plan-price span{
+        font-size:0.78rem;
+        padding-bottom:0.28rem;
+      }
+
+      .plan-subtitle{
+        font-size:0.84rem;
+        line-height:1.45;
+      }
+
+      .plan-billing-note{
+        font-size:0.72rem;
+      }
+
+      .feature-list{
+        gap:0.72rem;
+      }
+
+      .feature-list li{
+        font-size:0.86rem;
+        line-height:1.45;
+      }
+
+      .storage-pill{
+        font-size:0.74rem;
+      }
+    }
+  </style>
+</head>
+<body class="text-white min-h-screen p-4">
+  <div class="max-w-6xl mx-auto pb-10">
+    <div class="flex items-center justify-between gap-3 mb-5">
+      <a href="dashboard.html" class="text-sm text-gray-300 hover:text-white transition">← Back</a>
+      <span id="planStatusBadge" class="inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-white/10 bg-white/5 text-white/80">
+        Plan Center
+      </span>
+    </div>
+
+    <section class="glass-shell rounded-[28px] p-5 md:p-8 mb-5">
+      <div class="text-center max-w-3xl mx-auto">
+        <p class="text-xs md:text-sm uppercase tracking-[0.3em] text-white/60">StudioOS Subscription</p>
+        <h1 class="mt-3 text-3xl md:text-5xl font-extrabold leading-tight">
+          Flexible pricing for photographers
+        </h1>
+        <p class="mt-4 text-sm md:text-base text-white/70 leading-7">
+          Choose a plan based on your storage, gallery workflow, and premium feature access. Premium website templates are purchased separately.
+        </p>
+
+        <div class="mt-6 inline-flex billing-toggle">
+          <button id="monthlyBtn" type="button" class="billing-btn">1 Month</button>
+          <button id="annualBtn" type="button" class="billing-btn active">Yearly</button>
+        </div>
+        <p class="mt-3 text-xs text-white/60">Yearly plans are billed once for 12 months. One-month plans are available at higher pricing.</p>
+      </div>
+    </section>
+
+    <section class="glass-shell rounded-[28px] p-5 md:p-6 mb-5">
+      <div class="mini-status-card">
+        <div class="mini-stat">
+          <div class="mini-stat-label">Current Plan</div>
+          <div id="currentPlanText" class="mini-stat-value">Free</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Storage Usage</div>
+          <div id="storageUsageText" class="mini-stat-value">0GB / 5GB</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Templates</div>
+          <div class="mini-stat-value">Separate</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pricing-stack mb-5">
+      <article id="freePlanCard" class="plan-card free current-plan">
+        <div class="plan-top">
+          <span class="plan-badge">Free</span>
+          <div class="plan-price">
+            <strong data-monthly="₹0" data-annual="₹0">₹0</strong>
+            <span>/ mo</span>
+          </div>
+          <p class="plan-subtitle">Best to start with StudioOS and set up your first workflow.</p>
+        </div>
+
+        <div class="plan-body">
+          <div class="storage-pill">Storage • Up to 1000 images</div>
+
+          <ul class="feature-list">
+            <li>Template 1 access</li>
+            <li>Basic quotation workflow</li>
+            <li>AI search access</li>
+            <li>Core dashboard usage</li>
+            <li>Gallery viewing only</li>
+            <li>No public gallery sharing</li>
+            <li>No photo selling</li>
+            <li>No team sheet</li>
+          </ul>
+
+          <div class="plan-note">
+            Premium templates are not included in subscription. Free plan is ideal for testing StudioOS before upgrading.
+          </div>
+
+          <div class="plan-actions">
+            <div class="current-flag">✓ Current Plan</div>
+            <button class="plan-btn secondary upgrade-btn disabled" type="button">Current Plan</button>
+          </div>
+        </div>
+      </article>
+
+      <article id="basicPlanCard" class="plan-card popular">
+        <div class="plan-top">
+          <span class="plan-badge">Most Popular</span>
+          <div class="plan-price">
+            <strong data-monthly="₹1499" data-annual="₹499">₹499</strong>
+            <span>/ mo</span>
+          </div>
+          <p id="basicBillingNote" class="plan-billing-note">Billed yearly • ₹5988 charged once for 12 months</p>
+          <p class="plan-subtitle">For working photographers who need client delivery, sharing, and premium workflow tools.</p>
+        </div>
+
+        <div class="plan-body">
+          <div class="storage-pill">Storage • 50GB</div>
+
+          <ul class="feature-list">
+            <li>Everything in Free plan</li>
+            <li>Premium quotation access</li>
+            <li>Team sheet access</li>
+            <li>Gallery sharing enabled</li>
+            <li>AI Face Search</li>
+            <li>Photo Selling</li>
+            <li>Client workflow upgrade</li>
+            <li>Higher upload capacity</li>
+            <li>Premium templates sold separately</li>
+            <li>Priority feature access</li>
+          </ul>
+
+          <div class="plan-note">
+            Best for photographers who actively manage bookings, quotations, and delivery inside StudioOS.
+          </div>
+
+          <div class="plan-actions">
+            <div class="current-flag">✓ Current Plan</div>
+            <button id="basicPlanBtn" class="plan-btn primary upgrade-btn" type="button">Choose Basic Yearly</button>
+          </div>
+        </div>
+      </article>
+
+      <article id="proPlanCard" class="plan-card pro">
+        <div class="plan-top">
+          <span class="plan-badge">Pro</span>
+          <div class="plan-price">
+            <strong data-monthly="₹1999" data-annual="₹999">₹999</strong>
+            <span>/ mo</span>
+          </div>
+          <p id="proBillingNote" class="plan-billing-note">Billed yearly • ₹11988 charged once for 12 months</p>
+          <p class="plan-subtitle">For studios that need selling, scale, and stronger delivery capacity.</p>
+        </div>
+
+        <div class="plan-body">
+          <div class="storage-pill">Storage • 100GB</div>
+
+          <ul class="feature-list">
+            <li>Everything in Basic plan</li>
+            <li>Premium quotation access</li>
+            <li>Team sheet access</li>
+            <li>Gallery sharing enabled</li>
+            <li>AI Face Search</li>
+            <li>Photo Selling</li>
+            <li>Client workflow upgrade</li>
+            <li>Higher upload capacity</li>
+            <li>Premium templates sold separately</li>
+            <li>Priority feature access</li>
+          </ul>
+
+          <div class="plan-note">
+            Built for photographers and studios who want to monetize galleries and scale image-heavy workflows.
+          </div>
+
+          <div class="plan-actions">
+            <div class="current-flag">✓ Current Plan</div>
+            <button id="proPlanBtn" class="plan-btn secondary upgrade-btn" type="button">Choose Pro Yearly</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="note-strip">
+      <strong class="text-white">Important:</strong>
+      Subscription unlocks platform features, storage, sharing, and workflow tools.
+      Basic and Pro support both yearly and one-month billing. Yearly plans are billed once for 12 months.
+      Premium website templates are separate products and are not included automatically in subscription plans.
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script type="module">
+    import { protectPage } from "./js/auth.js";
+
+    await protectPage();
+
+    const monthlyBtn = document.getElementById("monthlyBtn");
+    const annualBtn = document.getElementById("annualBtn");
+    const currentPlanText = document.getElementById("currentPlanText");
+    const storageUsageText = document.getElementById("storageUsageText");
+    const planStatusBadge = document.getElementById("planStatusBadge");
+    const basicBillingNote = document.getElementById("basicBillingNote");
+    const proBillingNote = document.getElementById("proBillingNote");
+    const basicPlanBtn = document.getElementById("basicPlanBtn");
+    const proPlanBtn = document.getElementById("proPlanBtn");
+    const planCards = {
+      free: document.getElementById("freePlanCard"),
+      basic: document.getElementById("basicPlanCard"),
+      pro: document.getElementById("proPlanCard")
+    };
+
+    let billingMode = "annual";
+
+    function updateBillingMode(mode){
+      billingMode = mode === "monthly" ? "monthly" : "annual";
+
+      monthlyBtn.classList.toggle("active", billingMode === "monthly");
+      annualBtn.classList.toggle("active", billingMode === "annual");
+      monthlyBtn.setAttribute("aria-pressed", String(billingMode === "monthly"));
+      annualBtn.setAttribute("aria-pressed", String(billingMode === "annual"));
+
+      document.querySelectorAll(".plan-price strong").forEach(node => {
+        node.textContent = billingMode === "annual" ? node.dataset.annual : node.dataset.monthly;
+      });
+
+      document.querySelectorAll(".plan-price span").forEach(node => {
+        node.textContent = "/ mo";
+      });
+
+      if(billingMode === "annual"){
+        basicBillingNote.textContent = "Billed yearly • ₹5988 charged once for 12 months";
+        proBillingNote.textContent = "Billed yearly • ₹11988 charged once for 12 months";
+        basicPlanBtn.textContent = "Choose Basic Yearly";
+        proPlanBtn.textContent = "Choose Pro Yearly";
+      }else{
+        basicBillingNote.textContent = "1 month plan • ₹1499 charged for one month only";
+        proBillingNote.textContent = "1 month plan • ₹1999 charged for one month only";
+        basicPlanBtn.textContent = "Choose Basic 1 Month";
+        proPlanBtn.textContent = "Choose Pro 1 Month";
+      }
+    }
+
+    function setCurrentPlan(plan){
+      Object.values(planCards).forEach(card => card.classList.remove("current-plan"));
+
+      const normalized = ["free", "basic", "pro"].includes(plan) ? plan : "free";
+      planCards[normalized].classList.add("current-plan");
+
+      currentPlanText.textContent = normalized.charAt(0).toUpperCase() + normalized.slice(1);
+      planStatusBadge.textContent = `${normalized.charAt(0).toUpperCase() + normalized.slice(1)} Plan`;
+    }
+
+    async function loadPlanState(){
+      const supabase = await window.getSupabase();
+      const { data:{ user } } = await supabase.auth.getUser();
+      if(!user) return;
+
+      const { data, error } = await supabase
+        .from("photographer_settings")
+        .select("plan, is_paid")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if(error){
+        console.error("Unable to load plan state:", error);
+        return;
+      }
+
+      const plan = String(data?.plan || "").trim().toLowerCase();
+      if(plan === "basic" || plan === "pro"){
+        setCurrentPlan(plan);
+        storageUsageText.textContent = plan === "basic" ? "0GB / 50GB" : "0GB / 100GB";
+        return;
+      }
+
+      if(data?.is_paid){
+        setCurrentPlan("basic");
+        storageUsageText.textContent = "0GB / 50GB";
+        return;
+      }
+
+      setCurrentPlan("free");
+      storageUsageText.textContent = "0GB / 5GB";
+    }
+
+    monthlyBtn.addEventListener("click", () => updateBillingMode("monthly"));
+    annualBtn.addEventListener("click", () => updateBillingMode("annual"));
+
+    updateBillingMode("annual");
+    await loadPlanState();
+
+    basicPlanBtn.addEventListener("click", () => {
+      alert(billingMode === "annual"
+        ? "Basic Yearly selected • ₹5988 billed once for 12 months"
+        : "Basic 1 Month selected • ₹1499 billed for one month");
+    });
+
+    proPlanBtn.addEventListener("click", () => {
+      alert(billingMode === "annual"
+        ? "Pro Yearly selected • ₹11988 billed once for 12 months"
+        : "Pro 1 Month selected • ₹1999 billed for one month");
+    });
+  </script>
+</body>
+</html>
