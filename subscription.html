@@ -605,6 +605,7 @@
     </section>
   </div>
 
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
   <script type="module">
@@ -629,12 +630,76 @@
       pro: document.getElementById("proPlanCard")
     };
 
+    const SUBSCRIPTION_ORDER_URL =
+      "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/create-subscription-order";
+
+    const SUBSCRIPTION_VERIFY_URL =
+      "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/verify-subscription-payment";
+
+    const RAZORPAY_KEY = "rzp_test_SYs7AftkGNrQNe";
+
     let billingMode = "annual";
     let activePlan = "free";
+    let currentUser = null;
+    let currentSettings = null;
 
     function normalizePlan(value){
       const plan = String(value || "").trim().toLowerCase();
       return ["free", "basic", "pro"].includes(plan) ? plan : "free";
+    }
+
+    function getPlanConfig(plan, mode){
+      const plans = {
+        basic: {
+          annual: {
+            displayPrice: "₹499",
+            amountInRupees: 5988,
+            billing_cycle: "yearly",
+            storage_limit_gb: 50,
+            buttonLabel: "Choose Basic Yearly",
+            note: "Billed yearly • ₹5988 charged once for 12 months"
+          },
+          monthly: {
+            displayPrice: "₹1499",
+            amountInRupees: 1499,
+            billing_cycle: "monthly",
+            storage_limit_gb: 50,
+            buttonLabel: "Choose Basic 1 Month",
+            note: "1 month plan • ₹1499 charged for one month only"
+          }
+        },
+        pro: {
+          annual: {
+            displayPrice: "₹999",
+            amountInRupees: 11988,
+            billing_cycle: "yearly",
+            storage_limit_gb: 100,
+            buttonLabel: "Choose Pro Yearly",
+            note: "Billed yearly • ₹11988 charged once for 12 months"
+          },
+          monthly: {
+            displayPrice: "₹1999",
+            amountInRupees: 1999,
+            billing_cycle: "monthly",
+            storage_limit_gb: 100,
+            buttonLabel: "Choose Pro 1 Month",
+            note: "1 month plan • ₹1999 charged for one month only"
+          }
+        }
+      };
+
+      return plans?.[plan]?.[mode] || null;
+    }
+
+    function setButtonBusy(isBusy){
+      basicPlanBtn.disabled = isBusy;
+      proPlanBtn.disabled = isBusy;
+      monthlyBtn.disabled = isBusy;
+      annualBtn.disabled = isBusy;
+    }
+
+    function showMessage(message){
+      alert(message);
     }
 
     function updateBillingMode(mode){
@@ -645,35 +710,22 @@
       monthlyBtn.setAttribute("aria-pressed", String(billingMode === "monthly"));
       annualBtn.setAttribute("aria-pressed", String(billingMode === "annual"));
 
-      document.querySelectorAll(".plan-price strong").forEach(node => {
-        node.textContent = billingMode === "annual" ? node.dataset.annual : node.dataset.monthly;
-      });
+      const basicConfig = getPlanConfig("basic", billingMode);
+      const proConfig = getPlanConfig("pro", billingMode);
+
+      const priceNodes = document.querySelectorAll(".plan-price strong");
+      if(priceNodes[1]) priceNodes[1].textContent = basicConfig.displayPrice;
+      if(priceNodes[2]) priceNodes[2].textContent = proConfig.displayPrice;
 
       document.querySelectorAll(".plan-price span").forEach(node => {
         node.textContent = "/ mo";
       });
 
-      if(billingMode === "annual"){
-        basicBillingNote.textContent = "Billed yearly • ₹5988 charged once for 12 months";
-        proBillingNote.textContent = "Billed yearly • ₹11988 charged once for 12 months";
-        basicPlanBtn.textContent = activePlan === "basic" ? "Choose Basic Yearly" : "Choose Basic Yearly";
-        proPlanBtn.textContent = activePlan === "pro" ? "Choose Pro Yearly" : "Choose Pro Yearly";
-      }else{
-        basicBillingNote.textContent = "1 month plan • ₹1499 charged for one month only";
-        proBillingNote.textContent = "1 month plan • ₹1999 charged for one month only";
-        basicPlanBtn.textContent = activePlan === "basic" ? "Choose Basic 1 Month" : "Choose Basic 1 Month";
-        proPlanBtn.textContent = activePlan === "pro" ? "Choose Pro 1 Month" : "Choose Pro 1 Month";
-      }
-    }
+      basicBillingNote.textContent = basicConfig.note;
+      proBillingNote.textContent = proConfig.note;
 
-    function syncPlanButtons(plan){
-      freePlanBtn.textContent = plan === "free" ? "Current Plan" : "Free Plan";
-      basicPlanBtn.textContent = plan === "basic"
-        ? (billingMode === "annual" ? "Choose Basic Yearly" : "Choose Basic 1 Month")
-        : (billingMode === "annual" ? "Choose Basic Yearly" : "Choose Basic 1 Month");
-      proPlanBtn.textContent = plan === "pro"
-        ? (billingMode === "annual" ? "Choose Pro Yearly" : "Choose Pro 1 Month")
-        : (billingMode === "annual" ? "Choose Pro Yearly" : "Choose Pro 1 Month");
+      basicPlanBtn.textContent = activePlan === "basic" ? "Current Plan" : basicConfig.buttonLabel;
+      proPlanBtn.textContent = activePlan === "pro" ? "Current Plan" : proConfig.buttonLabel;
     }
 
     function setCurrentPlan(plan){
@@ -685,58 +737,171 @@
       currentPlanText.textContent = activePlan.charAt(0).toUpperCase() + activePlan.slice(1);
       planStatusBadge.textContent = `${currentPlanText.textContent} Plan`;
 
-      syncPlanButtons(activePlan);
+      if(freePlanBtn){
+        freePlanBtn.textContent = activePlan === "free" ? "Current Plan" : "Free Plan";
+      }
+
       updateBillingMode(billingMode);
     }
 
     async function loadPlanState(){
       const supabase = await window.getSupabase();
-      const { data:{ user } } = await supabase.auth.getUser();
-      if(!user) return;
+
+      const authResult = await supabase.auth.getUser();
+      currentUser = authResult?.data?.user || null;
+      if(!currentUser) return;
 
       const { data, error } = await supabase
         .from("photographer_settings")
-        .select("plan, billing_cycle, subscription_status, storage_limit_gb")
-        .eq("user_id", user.id)
+        .select("plan, billing_cycle, subscription_status, storage_limit_gb, studio_name")
+        .eq("user_id", currentUser.id)
         .maybeSingle();
 
       if(error){
-        console.error("Unable to load plan state:", error);
+        console.error("Unable to load photographer_settings:", error);
         setCurrentPlan("free");
         storageUsageText.textContent = "0GB / 5GB";
         return;
       }
 
+      currentSettings = data || null;
+
       const dbPlan = normalizePlan(data?.plan);
+      const dbBilling = String(data?.billing_cycle || "").trim().toLowerCase();
       const subscriptionStatus = String(data?.subscription_status || "").trim().toLowerCase();
+
       const effectivePlan = subscriptionStatus === "active" ? dbPlan : "free";
-      const storageLimit = Number(data?.storage_limit_gb || (effectivePlan === "pro" ? 100 : effectivePlan === "basic" ? 50 : 5));
-      const dbBillingCycle = String(data?.billing_cycle || "").trim().toLowerCase();
+      const storageLimit = Number(
+        data?.storage_limit_gb ||
+        (effectivePlan === "pro" ? 100 : effectivePlan === "basic" ? 50 : 5)
+      );
 
       setCurrentPlan(effectivePlan);
       storageUsageText.textContent = `0GB / ${storageLimit}GB`;
 
-      if(effectivePlan !== "free" && (dbBillingCycle === "monthly" || dbBillingCycle === "yearly")){
-        updateBillingMode(dbBillingCycle === "yearly" ? "annual" : "monthly");
+      if(effectivePlan !== "free" && (dbBilling === "monthly" || dbBilling === "yearly")){
+        updateBillingMode(dbBilling === "monthly" ? "monthly" : "annual");
       }else{
         updateBillingMode("annual");
       }
     }
 
+    async function startSubscriptionCheckout(targetPlan){
+      const selectedPlan = normalizePlan(targetPlan);
+
+      if(!currentUser){
+        showMessage("User session not found. Please login again.");
+        return;
+      }
+
+      if(activePlan === selectedPlan){
+        showMessage(`You are already on the ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan.`);
+        return;
+      }
+
+      const config = getPlanConfig(selectedPlan, billingMode);
+      if(!config){
+        showMessage("Invalid plan selection.");
+        return;
+      }
+
+      setButtonBusy(true);
+
+      try{
+        const orderRes = await fetch(SUBSCRIPTION_ORDER_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": window.SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            plan: selectedPlan,
+            billing_cycle: config.billing_cycle,
+            amount: config.amountInRupees,
+            storage_limit_gb: config.storage_limit_gb
+          })
+        });
+
+        const orderData = await orderRes.json();
+
+        if(!orderRes.ok || !orderData?.success || !orderData?.order){
+          throw new Error(orderData?.error || "Unable to create subscription order.");
+        }
+
+        const options = {
+          key: RAZORPAY_KEY,
+          amount: orderData.order.amount,
+          currency: orderData.order.currency || "INR",
+          name: "StudioOS",
+          description: orderData.order.description || `${selectedPlan} subscription`,
+          order_id: orderData.order.id,
+          handler: async function(response){
+            try{
+              const verifyRes = await fetch(SUBSCRIPTION_VERIFY_URL, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "apikey": window.SUPABASE_ANON_KEY,
+                  "Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  plan: selectedPlan,
+                  billing_cycle: config.billing_cycle,
+                  storage_limit_gb: config.storage_limit_gb
+                })
+              });
+
+              const verifyData = await verifyRes.json();
+
+              if(!verifyRes.ok || !verifyData?.success){
+                throw new Error(verifyData?.error || "Payment verification failed.");
+              }
+
+              await loadPlanState();
+              showMessage("Subscription activated successfully.");
+            }catch(verifyError){
+              console.error("Subscription verify failed:", verifyError);
+              showMessage("Payment completed but subscription verification failed.");
+            }finally{
+              setButtonBusy(false);
+            }
+          },
+          prefill: {
+            name: currentSettings?.studio_name || "",
+            email: currentUser.email || ""
+          },
+          theme: {
+            color: "#4f46e5"
+          },
+          modal: {
+            ondismiss: function(){
+              setButtonBusy(false);
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on("payment.failed", function(errorResponse){
+          console.error("Razorpay payment failed:", errorResponse);
+          setButtonBusy(false);
+          showMessage("Payment failed. Please try again.");
+        });
+        rzp.open();
+      }catch(error){
+        console.error("Unable to start subscription checkout:", error);
+        setButtonBusy(false);
+        showMessage("Unable to start payment right now.");
+      }
+    }
+
     monthlyBtn.addEventListener("click", () => updateBillingMode("monthly"));
     annualBtn.addEventListener("click", () => updateBillingMode("annual"));
-
-    basicPlanBtn.addEventListener("click", () => {
-      alert(billingMode === "annual"
-        ? "Basic Yearly selected • ₹5988 billed once for 12 months"
-        : "Basic 1 Month selected • ₹1499 billed for one month");
-    });
-
-    proPlanBtn.addEventListener("click", () => {
-      alert(billingMode === "annual"
-        ? "Pro Yearly selected • ₹11988 billed once for 12 months"
-        : "Pro 1 Month selected • ₹1999 billed for one month");
-    });
+    basicPlanBtn.addEventListener("click", () => startSubscriptionCheckout("basic"));
+    proPlanBtn.addEventListener("click", () => startSubscriptionCheckout("pro"));
 
     updateBillingMode("annual");
     await loadPlanState();
