@@ -55,6 +55,35 @@ pointer-events:none;
 box-shadow:inset 0 0 0 1px rgba(255,255,255,0.03);
 }
 
+.template-preview-shell{
+position:absolute;
+inset:0;
+overflow:hidden;
+border-radius:inherit;
+background:#0b1220;
+}
+
+.template-preview-frame{
+position:absolute;
+top:0;
+left:0;
+width:390px;
+height:844px;
+border:0;
+background:#0b1220;
+transform:scale(0.308);
+transform-origin:top left;
+pointer-events:none;
+}
+
+@media (max-width: 480px){
+.template-preview-frame{
+width:360px;
+height:780px;
+transform:scale(0.3);
+}
+}
+
 .template-preview.t1{
 background:
 linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
@@ -943,22 +972,8 @@ Create your personal photography website with ready-made premium templates.
 
 <div class="template-card active glass rounded-2xl p-3" data-template="1">
 <div class="template-preview t1 mb-3">
-<div class="preview-ui">
-<div class="preview-topbar">
-<div class="preview-brand">
-<span class="preview-brand-dot"></span>
-<span class="preview-brand-text">Minimal Portfolio</span>
-</div>
-<div class="preview-nav"><span></span><span></span><span></span></div>
-</div>
-<div class="preview-hero">
-<div class="preview-line-lg"></div>
-<div class="preview-line-md"></div>
-<div class="preview-line-sm"></div>
-</div>
-<div class="preview-grid">
-<div></div><div></div><div></div>
-</div>
+<div class="template-preview-shell">
+<iframe title="Template 1 preview" src="template-1.html?preview=true&card_preview=1" class="template-preview-frame" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 1</h3>
@@ -970,25 +985,8 @@ Create your personal photography website with ready-made premium templates.
 
 <div class="template-card glass rounded-2xl p-3" data-template="2">
 <div class="template-preview t2 mb-3">
-<div class="preview-ui">
-<div class="preview-topbar">
-<div class="preview-brand">
-<span class="preview-brand-dot"></span>
-<span class="preview-brand-text">Luxury Wedding</span>
-</div>
-<div class="preview-nav"><span></span><span></span></div>
-</div>
-<div class="preview-hero">
-<div class="preview-line-lg" style="width:70%"></div>
-<div class="preview-line-md" style="width:60%"></div>
-</div>
-<div class="preview-grid alt-2">
-<div></div><div></div>
-</div>
-<div class="preview-footer">
-<div class="preview-pill"></div>
-<div class="preview-pill short"></div>
-</div>
+<div class="template-preview-shell">
+<iframe title="Template 2 preview" src="template-2.html?preview=true&card_preview=1" class="template-preview-frame" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 2</h3>
@@ -1000,24 +998,8 @@ Create your personal photography website with ready-made premium templates.
 
 <div class="template-card glass rounded-2xl p-3" data-template="3">
 <div class="template-preview t3 mb-3">
-<div class="preview-ui">
-<div class="preview-topbar">
-<div class="preview-brand">
-<span class="preview-brand-dot"></span>
-<span class="preview-brand-text">Dark Cinematic</span>
-</div>
-</div>
-<div class="preview-grid">
-<div></div><div></div><div></div>
-</div>
-<div class="preview-hero">
-<div class="preview-line-lg" style="width:58%"></div>
-<div class="preview-line-sm" style="width:36%"></div>
-</div>
-<div class="preview-footer">
-<div class="preview-pill"></div>
-<div class="preview-pill short"></div>
-</div>
+<div class="template-preview-shell">
+<iframe title="Template 3 preview" src="template-3.html?preview=true&card_preview=1" class="template-preview-frame" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 3</h3>
@@ -1029,20 +1011,8 @@ Create your personal photography website with ready-made premium templates.
 
 <div class="template-card glass rounded-2xl p-3" data-template="4">
 <div class="template-preview t4 mb-3">
-<div class="preview-ui">
-<div class="preview-topbar">
-<div class="preview-brand">
-<span class="preview-brand-dot"></span>
-<span class="preview-brand-text">Modern Studio</span>
-</div>
-<div class="preview-nav"><span></span><span></span></div>
-</div>
-<div class="preview-grid">
-<div></div><div></div><div></div>
-</div>
-<div class="preview-grid" style="margin-top:0.35rem;">
-<div></div><div></div><div></div>
-</div>
+<div class="template-preview-shell">
+<iframe title="Template 4 preview" src="template-4.html?preview=true&card_preview=1" class="template-preview-frame" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 4</h3>
@@ -1054,20 +1024,8 @@ Create your personal photography website with ready-made premium templates.
 
 <div class="template-card glass rounded-2xl p-3" data-template="5">
 <div class="template-preview t5 mb-3">
-<div class="preview-ui">
-<div class="preview-topbar">
-<div class="preview-brand">
-<span class="preview-brand-dot"></span>
-<span class="preview-brand-text">Instagram Style</span>
-</div>
-</div>
-<div class="preview-grid">
-<div></div><div></div><div></div>
-</div>
-<div class="preview-grid" style="margin-top:0.35rem;">
-<div></div><div></div><div></div>
-</div>
-<div class="preview-line-sm" style="width:52%;"></div>
+<div class="template-preview-shell">
+<iframe title="Template 5 preview" src="template-5.html?preview=true&card_preview=1" class="template-preview-frame" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 5</h3>
@@ -1079,22 +1037,8 @@ Create your personal photography website with ready-made premium templates.
 
 <div class="template-card glass rounded-2xl p-3" data-template="6">
 <div class="template-preview t6 mb-3">
-<div class="preview-ui">
-<div class="preview-topbar">
-<div class="preview-brand">
-<span class="preview-brand-dot"></span>
-<span class="preview-brand-text">Premium Agency</span>
-</div>
-<div class="preview-nav"><span></span><span></span><span></span></div>
-</div>
-<div class="preview-hero">
-<div class="preview-line-lg" style="width:66%"></div>
-<div class="preview-line-md" style="width:52%"></div>
-</div>
-<div class="preview-footer">
-<div class="preview-pill" style="width:4rem;"></div>
-<div class="preview-pill short"></div>
-</div>
+<div class="template-preview-shell">
+<iframe title="Template 6 preview" src="template-6.html?preview=true&card_preview=1" class="template-preview-frame" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
 </div>
 </div>
 <h3 class="text-sm font-semibold">Template 6</h3>
@@ -1396,6 +1340,21 @@ const pathMap = {
 return pathMap[templateId] || ""
 }
 
+function isAlwaysFreeTemplate(templateId){
+return Number(templateId) === 1
+}
+
+function canPublishSelectedTemplate(templateId = selectedTemplateId){
+return isAlwaysFreeTemplate(templateId)
+}
+
+function getTemplatePublishMessage(templateId = selectedTemplateId){
+if(isAlwaysFreeTemplate(templateId)){
+return ""
+}
+return `${getTemplateLabel(templateId)} publish karne ke liye separate purchase required hai.`
+}
+
 
 function setPublishToggleState(isPublished){
 const published = Boolean(isPublished)
@@ -1478,6 +1437,14 @@ liveTemplatePreview.querySelector(".live-eyebrow")
 
 if(eyebrowElement){
 eyebrowElement.innerText = getTemplateEyebrow(selectedTemplateId)
+}
+
+if(!canPublishSelectedTemplate(selectedTemplateId)){
+setPublishToggleState(false)
+publishStatusText.innerText = "Locked"
+publishStatusText.classList.remove("live")
+}else{
+setPublishToggleState(Boolean(currentWebsiteData?.is_published))
 }
 
 }
@@ -1580,7 +1547,7 @@ return
 
 existingWebsiteRowId = data.id || null
 currentWebsiteData = data || null
-setPublishToggleState(data.is_published)
+setPublishToggleState((data.template_id || 1) === 1 ? data.is_published : false)
 
 siteNameInput.value = data.name || ""
 siteTaglineInput.value = data.tagline || ""
@@ -1632,7 +1599,7 @@ whatsapp: currentWebsiteData?.whatsapp || null,
 template_content: currentWebsiteData?.template_content || {},
 template_images: currentWebsiteData?.template_images || {},
 theme_settings: currentWebsiteData?.theme_settings || {},
-is_published: currentWebsiteData?.is_published || false
+is_published: canPublishSelectedTemplate(selectedTemplateId) ? Boolean(currentWebsiteData?.is_published) : false
 }
 
 if(!payload.name){
@@ -1696,7 +1663,15 @@ return { ok:false }
 
 existingWebsiteRowId = data?.id || existingWebsiteRowId
 currentWebsiteData = data || currentWebsiteData
+
+if(!canPublishSelectedTemplate(selectedTemplateId)){
+setPublishToggleState(false)
+publishStatusText.innerText = "Locked"
+publishStatusText.classList.remove("live")
+}else{
 setPublishToggleState(currentWebsiteData?.is_published)
+}
+
 builderStatus.innerText = "Saved successfully"
 setSaveFeedback("success", "Website Builder saved successfully.")
 
@@ -1732,6 +1707,15 @@ const user = await getCurrentUser()
 
 if(!user){
 setSaveFeedback("error", "User session not found. Please login again.")
+return
+}
+
+if(!canPublishSelectedTemplate()){
+setPublishToggleState(false)
+publishStatusText.innerText = "Locked"
+publishStatusText.classList.remove("live")
+builderStatus.innerText = "Publish locked"
+setSaveFeedback("error", getTemplatePublishMessage())
 return
 }
 
@@ -1807,6 +1791,11 @@ block:"start"
 menuCopyBtn.addEventListener("click", async ()=>{
 closePreviewMenu()
 
+if(!canPublishSelectedTemplate()){
+setSaveFeedback("error", getTemplatePublishMessage())
+return
+}
+
 if(!currentWebsiteData?.site_slug){
 setSaveFeedback("error", "Save website first to copy the share link.")
 return
@@ -1832,6 +1821,11 @@ setSaveFeedback("error", "Unable to copy website link right now.")
 menuOpenBtn.addEventListener("click", ()=>{
 closePreviewMenu()
 
+if(!canPublishSelectedTemplate()){
+setSaveFeedback("error", getTemplatePublishMessage())
+return
+}
+
 if(!currentWebsiteData?.site_slug){
 setSaveFeedback("error", "Save website first to open preview.")
 return
@@ -1849,6 +1843,11 @@ window.open(editUrl, "_blank", "noopener,noreferrer")
 
 menuPublicBtn.addEventListener("click", ()=>{
 closePreviewMenu()
+
+if(!canPublishSelectedTemplate()){
+setSaveFeedback("error", getTemplatePublishMessage())
+return
+}
 
 if(!currentWebsiteData?.site_slug){
 setSaveFeedback("error", "Save website first to view public page.")
