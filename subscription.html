@@ -843,8 +843,6 @@
 
         const orderData = await orderRes.json();
 
-        console.log("ORDER DATA:", orderData);
-
         if(!orderRes.ok || !orderData?.success || !orderData?.order || !orderData?.order?.id){
           throw new Error(orderData?.error || "Unable to create subscription order.");
         }
