@@ -1321,6 +1321,7 @@ const saveWebsiteBtn = document.getElementById("saveWebsiteBtn")
 let selectedTemplateId = 1
 let existingWebsiteRowId = null
 let currentWebsiteData = null
+let currentPurchasedTemplates = []
 setPublishToggleState(false)
 
 
@@ -1394,6 +1395,36 @@ const pathMap = {
 6: "template-6.html"
 }
 return pathMap[templateId] || ""
+}
+
+function normalizePurchasedTemplates(value){
+if(Array.isArray(value)){
+return value
+.map(item => Number(item))
+.filter(item => Number.isInteger(item) && item >= 2 && item <= 6)
+}
+return []
+}
+
+function isTemplatePurchased(templateId){
+const numericTemplateId = Number(templateId)
+
+if(numericTemplateId === 1){
+return true
+}
+
+return currentPurchasedTemplates.includes(numericTemplateId)
+}
+
+function canPublishSelectedTemplate(templateId = selectedTemplateId){
+return isTemplatePurchased(templateId)
+}
+
+function getTemplatePublishMessage(templateId = selectedTemplateId){
+if(Number(templateId) === 1){
+return ""
+}
+return `${getTemplateLabel(templateId)} publish karne ke liye separate purchase required hai.`
 }
 
 
@@ -1478,6 +1509,14 @@ liveTemplatePreview.querySelector(".live-eyebrow")
 
 if(eyebrowElement){
 eyebrowElement.innerText = getTemplateEyebrow(selectedTemplateId)
+}
+
+if(!canPublishSelectedTemplate(selectedTemplateId)){
+setPublishToggleState(false)
+publishStatusText.innerText = "Locked"
+publishStatusText.classList.remove("live")
+}else{
+setPublishToggleState(Boolean(currentWebsiteData?.is_published))
 }
 
 }
@@ -1571,6 +1610,7 @@ return
 
 if(!data){
 currentWebsiteData = null
+currentPurchasedTemplates = []
 setPublishToggleState(false)
 builderStatus.innerText = "New website setup"
 setSaveFeedback("info", "Fill in your details and save your website builder.")
@@ -1580,7 +1620,15 @@ return
 
 existingWebsiteRowId = data.id || null
 currentWebsiteData = data || null
+currentPurchasedTemplates = normalizePurchasedTemplates(data.purchased_templates)
+
+if(canPublishSelectedTemplate(data.template_id || 1)){
 setPublishToggleState(data.is_published)
+}else{
+setPublishToggleState(false)
+publishStatusText.innerText = "Locked"
+publishStatusText.classList.remove("live")
+}
 
 siteNameInput.value = data.name || ""
 siteTaglineInput.value = data.tagline || ""
@@ -1632,7 +1680,8 @@ whatsapp: currentWebsiteData?.whatsapp || null,
 template_content: currentWebsiteData?.template_content || {},
 template_images: currentWebsiteData?.template_images || {},
 theme_settings: currentWebsiteData?.theme_settings || {},
-is_published: currentWebsiteData?.is_published || false
+purchased_templates: currentWebsiteData?.purchased_templates || [],
+is_published: canPublishSelectedTemplate(selectedTemplateId) ? Boolean(currentWebsiteData?.is_published) : false
 }
 
 if(!payload.name){
@@ -1696,7 +1745,16 @@ return { ok:false }
 
 existingWebsiteRowId = data?.id || existingWebsiteRowId
 currentWebsiteData = data || currentWebsiteData
+currentPurchasedTemplates = normalizePurchasedTemplates(currentWebsiteData?.purchased_templates)
+
+if(canPublishSelectedTemplate(selectedTemplateId)){
 setPublishToggleState(currentWebsiteData?.is_published)
+}else{
+setPublishToggleState(false)
+publishStatusText.innerText = "Locked"
+publishStatusText.classList.remove("live")
+}
+
 builderStatus.innerText = "Saved successfully"
 setSaveFeedback("success", "Website Builder saved successfully.")
 
@@ -1732,6 +1790,15 @@ const user = await getCurrentUser()
 
 if(!user){
 setSaveFeedback("error", "User session not found. Please login again.")
+return
+}
+
+if(!canPublishSelectedTemplate()){
+setPublishToggleState(false)
+publishStatusText.innerText = "Locked"
+publishStatusText.classList.remove("live")
+builderStatus.innerText = "Publish locked"
+setSaveFeedback("error", getTemplatePublishMessage())
 return
 }
 
@@ -1807,6 +1874,11 @@ block:"start"
 menuCopyBtn.addEventListener("click", async ()=>{
 closePreviewMenu()
 
+if(!canPublishSelectedTemplate()){
+setSaveFeedback("error", getTemplatePublishMessage())
+return
+}
+
 if(!currentWebsiteData?.site_slug){
 setSaveFeedback("error", "Save website first to copy the share link.")
 return
@@ -1832,6 +1904,11 @@ setSaveFeedback("error", "Unable to copy website link right now.")
 menuOpenBtn.addEventListener("click", ()=>{
 closePreviewMenu()
 
+if(!canPublishSelectedTemplate()){
+setSaveFeedback("error", getTemplatePublishMessage())
+return
+}
+
 if(!currentWebsiteData?.site_slug){
 setSaveFeedback("error", "Save website first to open preview.")
 return
@@ -1849,6 +1926,11 @@ window.open(editUrl, "_blank", "noopener,noreferrer")
 
 menuPublicBtn.addEventListener("click", ()=>{
 closePreviewMenu()
+
+if(!canPublishSelectedTemplate()){
+setSaveFeedback("error", getTemplatePublishMessage())
+return
+}
 
 if(!currentWebsiteData?.site_slug){
 setSaveFeedback("error", "Save website first to view public page.")
