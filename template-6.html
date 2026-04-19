@@ -1379,10 +1379,23 @@
 
     function getTemplateImages(website){return safeObject(website?.template_images)}
 
+    function sanitizeImageUrl(value){
+      const raw=String(value ?? "").trim();
+      if(!raw) return "";
+      const lower=raw.toLowerCase();
+      if(lower==="null" || lower==="undefined" || lower==="false" || lower==="nan") return "";
+      return raw;
+    }
+
     function getImageUrl(website,slotName){
       const images=getTemplateImages(website);
       const legacyField=LEGACY_IMAGE_FIELD_MAP[slotName];
-      return images[slotName] || (legacyField ? website?.[legacyField] : "") || DEFAULT_IMAGES[slotName] || "";
+      return (
+        sanitizeImageUrl(images[slotName]) ||
+        (legacyField ? sanitizeImageUrl(website?.[legacyField]) : "") ||
+        sanitizeImageUrl(DEFAULT_IMAGES[slotName]) ||
+        ""
+      );
     }
 
     function composeContent(website){
@@ -1437,6 +1450,18 @@
       applyImageToTile("collectionMedia1","collection_1",website);
       applyImageToTile("collectionMedia2","collection_2",website);
       applyImageToTile("collectionMedia3","collection_3",website);
+    }
+
+    let imageRenderFrame = null;
+    let resizeApplyTimer = null;
+
+    function scheduleImageApply(website=currentWebsite){
+      if(!website) return;
+      if(imageRenderFrame) cancelAnimationFrame(imageRenderFrame);
+      imageRenderFrame = requestAnimationFrame(()=>{
+        applyImages(website);
+        imageRenderFrame = null;
+      });
     }
 
     function applyWebsiteData(website){
@@ -1523,7 +1548,7 @@
       setHref("youtubeLink", youtubeUrl);
 
       currentWebsite=website;
-      applyImages(website);
+      scheduleImageApply(website);
     }
 
     function setEditMode(enabled){
@@ -1648,8 +1673,6 @@
         }
 
         applyWebsiteData(currentWebsite);
-        setTimeout(()=>forceRenderAllContent(currentWebsite), 50);
-        setTimeout(()=>forceRenderAllContent(currentWebsite), 180);
         setEditStatus("Image replaced successfully.");
       }catch(error){
         console.error("Image replace failed:",error);
@@ -1752,7 +1775,7 @@
           return;
         }
 
-        const heroUrl=heroSection.dataset.previewUrl || heroImageSlot.dataset.previewUrl || "";
+        const heroUrl=heroImageSlot.dataset.previewUrl || heroSection.dataset.previewUrl || "";
         if(heroUrl){
           event.preventDefault();
           openPreview(heroUrl);
@@ -1802,8 +1825,18 @@
       }
     }
 
-    window.addEventListener("resize",()=>{ if(currentWebsite) forceRenderAllContent(currentWebsite); });
-    window.addEventListener("orientationchange",()=>{ if(currentWebsite) setTimeout(()=>forceRenderAllContent(currentWebsite),120); });
+    window.addEventListener("resize",()=>{
+      clearTimeout(resizeApplyTimer);
+      resizeApplyTimer=setTimeout(()=>{
+        if(currentWebsite) scheduleImageApply(currentWebsite);
+      },120);
+    });
+    window.addEventListener("orientationchange",()=>{
+      clearTimeout(resizeApplyTimer);
+      resizeApplyTimer=setTimeout(()=>{
+        if(currentWebsite) scheduleImageApply(currentWebsite);
+      },160);
+    });
     window.addEventListener("load", async ()=>{ await initTemplate(); });
   </script>
 </body>
