@@ -2094,11 +2094,18 @@ return data
 }
 
 async function refreshWebsiteAfterPurchase(){
+
 const latestData = await loadWebsiteBuilder({ preserveSelectedTemplate: true })
+
 if(latestData?.purchased_templates){
 currentPurchasedTemplates = normalizePurchasedTemplates(latestData.purchased_templates)
 }
+
+// force full UI rebind so purchased state reflects immediately
+setSelectedTemplate(selectedTemplateId)
+syncLivePreview()
 updatePublishUiFromCurrentState()
+
 }
 
 async function startTemplatePurchaseFlow(){
@@ -2177,6 +2184,10 @@ throw new Error(verifyResponse?.error || "Payment verification failed.")
 
 currentPurchasedTemplates = normalizePurchasedTemplates(verifyResponse?.purchased_templates || [...currentPurchasedTemplates, templateId])
 await refreshWebsiteAfterPurchase()
+
+// allow UI repaint before resolving purchase flow
+await new Promise(resolveDelay => setTimeout(resolveDelay, 150))
+
 setSaveFeedback("success", `${templateMeta.name} unlocked successfully.`)
 resolve(true)
 }catch(error){
@@ -2215,6 +2226,10 @@ razorpayInstance.open()
 
 purchaseFlowInProgress = false
 setPurchaseButtonsDisabled(false)
+
+// ensure unlocked UI is painted before modal close and pending action resume
+await new Promise(resolveDelay => setTimeout(resolveDelay, 100))
+
 closePurchaseModal()
 await runPendingLockedAction()
 }
