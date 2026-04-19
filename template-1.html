@@ -69,10 +69,9 @@ background:linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
 .hero-image{
-background-size:cover;
-background-position:center center;
-background-repeat:no-repeat;
+position:relative;
 overflow:hidden;
+background:none !important;
 }
 
 .hero-image-media{
@@ -87,11 +86,6 @@ z-index:0;
 pointer-events:none;
 user-select:none;
 -webkit-user-drag:none;
-}
-
-.hero-image > *:not(.hero-image-media){
-position:relative;
-z-index:1;
 }
 
 .image-one,
@@ -201,6 +195,7 @@ border:1px solid rgba(182,139,60,0.12);
 position:absolute;
 bottom:1.1rem;
 left:1.1rem;
+z-index:2;
 background:rgba(255,255,255,0.86);
 backdrop-filter:blur(10px);
 padding:0.8rem 0.95rem;
@@ -419,6 +414,7 @@ letter-spacing:0.01em;
 cursor:pointer;
 text-align:center;
 padding:1rem;
+z-index:3;
 }
 
 .editable-slot.edit-active .edit-overlay{
@@ -439,6 +435,7 @@ border:1px solid rgba(255,255,255,0.2);
 position:absolute;
 top:0.8rem;
 right:0.8rem;
+z-index:4;
 display:none;
 padding:0.45rem 0.7rem;
 border-radius:999px;
@@ -921,7 +918,6 @@ const editToolbar = document.getElementById("editToolbar")
 const editModeToggle = document.getElementById("editModeToggle")
 const editStatus = document.getElementById("editStatus")
 const imageFileInput = document.getElementById("imageFileInput")
-const heroImageElement = document.getElementById("heroImageElement")
 
 const DEFAULT_IMAGES = {
   hero: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
@@ -1305,21 +1301,12 @@ function applyImages(website){
   const portfolio5 = getImageUrl(website, "portfolio_5")
   const portfolio6 = getImageUrl(website, "portfolio_6")
 
-  const heroSlot = document.getElementById("heroImageSlot")
-  heroSlot.style.backgroundImage = buildImageBackground(heroUrl)
-  heroSlot.style.backgroundPosition = "center center"
-  heroSlot.style.backgroundRepeat = "no-repeat"
-
+  const heroImageElement = document.getElementById("heroImageElement")
   if(heroImageElement){
-    heroImageElement.style.objectPosition = "center center"
-    heroImageElement.onerror = ()=>{
-      if(heroImageElement.src !== DEFAULT_IMAGES.hero){
-        heroImageElement.src = DEFAULT_IMAGES.hero
-      }
-    }
     if(heroImageElement.src !== heroUrl){
       heroImageElement.src = heroUrl
     }
+    heroImageElement.style.objectPosition = "center center"
   }
 
   document.getElementById("portfolioImage1Slot").style.backgroundImage = buildPortfolioBackground(portfolio1)
