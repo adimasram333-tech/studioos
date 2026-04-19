@@ -695,6 +695,156 @@ border-color:rgba(99,102,241,0.28);
 color:rgb(199 210 254);
 }
 
+.purchase-modal-backdrop{
+position:fixed;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:1rem;
+background:rgba(2,6,23,0.7);
+backdrop-filter:blur(8px);
+z-index:1200;
+}
+
+.purchase-modal-backdrop.hidden{
+display:none;
+}
+
+.purchase-modal{
+width:min(100%, 420px);
+border-radius:1.4rem;
+padding:1.2rem;
+background:rgba(15,23,42,0.96);
+border:1px solid rgba(255,255,255,0.08);
+box-shadow:0 24px 60px rgba(0,0,0,0.35);
+}
+
+.purchase-modal-label{
+display:inline-flex;
+align-items:center;
+gap:0.4rem;
+padding:0.42rem 0.7rem;
+border-radius:999px;
+font-size:0.72rem;
+font-weight:600;
+letter-spacing:0.06em;
+text-transform:uppercase;
+background:rgba(99,102,241,0.12);
+border:1px solid rgba(99,102,241,0.24);
+color:rgb(199 210 254);
+}
+
+.purchase-modal-title{
+font-size:1.25rem;
+font-weight:800;
+color:white;
+margin-top:0.9rem;
+}
+
+.purchase-modal-subtitle{
+font-size:0.88rem;
+line-height:1.55;
+color:rgba(255,255,255,0.7);
+margin-top:0.5rem;
+}
+
+.purchase-modal-card{
+margin-top:1rem;
+padding:1rem;
+border-radius:1rem;
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.purchase-modal-template{
+font-size:1rem;
+font-weight:700;
+color:white;
+}
+
+.purchase-modal-price{
+font-size:1.35rem;
+font-weight:800;
+color:white;
+margin-top:0.35rem;
+}
+
+.purchase-modal-note{
+font-size:0.82rem;
+line-height:1.5;
+color:rgba(255,255,255,0.62);
+margin-top:0.4rem;
+}
+
+.purchase-modal-feedback{
+display:none;
+margin-top:0.9rem;
+padding:0.85rem 0.95rem;
+border-radius:0.95rem;
+font-size:0.84rem;
+line-height:1.45;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.purchase-modal-feedback.show{
+display:block;
+}
+
+.purchase-modal-feedback.error{
+background:rgba(239,68,68,0.12);
+border-color:rgba(239,68,68,0.28);
+color:rgb(254 202 202);
+}
+
+.purchase-modal-feedback.info{
+background:rgba(99,102,241,0.12);
+border-color:rgba(99,102,241,0.28);
+color:rgb(199 210 254);
+}
+
+.purchase-modal-actions{
+display:flex;
+gap:0.75rem;
+margin-top:1rem;
+}
+
+.purchase-modal-btn{
+flex:1;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:0.9rem 1rem;
+border-radius:0.95rem;
+font-size:0.86rem;
+font-weight:700;
+transition:all .2s ease;
+}
+
+.purchase-modal-btn.secondary{
+background:rgba(255,255,255,0.06);
+color:white;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.purchase-modal-btn.secondary:hover{
+background:rgba(255,255,255,0.1);
+}
+
+.purchase-modal-btn.primary{
+background:rgb(79 70 229);
+color:white;
+}
+
+.purchase-modal-btn.primary:hover{
+background:rgb(67 56 202);
+}
+
+.purchase-modal-btn:disabled{
+opacity:0.6;
+cursor:not-allowed;
+}
+
 @media (max-width: 480px){
 .template-preview{
 height:108px;
@@ -882,6 +1032,10 @@ width:auto;
 font-size:0.72rem;
 padding:0.4rem 0.7rem;
 }
+
+.purchase-modal-actions{
+flex-direction:column;
+}
 }
 
 @media (max-width: 360px){
@@ -994,7 +1148,7 @@ Create your personal photography website with ready-made premium templates.
 <h3 class="text-sm font-semibold">Template 2</h3>
 <div class="mt-1 flex items-center justify-between gap-3">
 <p class="text-xs text-gray-400">Luxury Wedding</p>
-<span class="text-xs font-semibold text-white/90">1099/- year</span>
+<span class="text-xs font-semibold text-white/90">₹1099 one-time</span>
 </div>
 </div>
 
@@ -1023,7 +1177,7 @@ Create your personal photography website with ready-made premium templates.
 <h3 class="text-sm font-semibold">Template 3</h3>
 <div class="mt-1 flex items-center justify-between gap-3">
 <p class="text-xs text-gray-400">Dark Cinematic</p>
-<span class="text-xs font-semibold text-white/90">1599/- year</span>
+<span class="text-xs font-semibold text-white/90">₹1599 one-time</span>
 </div>
 </div>
 
@@ -1048,7 +1202,7 @@ Create your personal photography website with ready-made premium templates.
 <h3 class="text-sm font-semibold">Template 4</h3>
 <div class="mt-1 flex items-center justify-between gap-3">
 <p class="text-xs text-gray-400">Modern Studio</p>
-<span class="text-xs font-semibold text-white/90">1499/- year</span>
+<span class="text-xs font-semibold text-white/90">₹1499 one-time</span>
 </div>
 </div>
 
@@ -1073,7 +1227,7 @@ Create your personal photography website with ready-made premium templates.
 <h3 class="text-sm font-semibold">Template 5</h3>
 <div class="mt-1 flex items-center justify-between gap-3">
 <p class="text-xs text-gray-400">Instagram Style</p>
-<span class="text-xs font-semibold text-white/90">1499/- year</span>
+<span class="text-xs font-semibold text-white/90">₹1499 one-time</span>
 </div>
 </div>
 
@@ -1100,7 +1254,7 @@ Create your personal photography website with ready-made premium templates.
 <h3 class="text-sm font-semibold">Template 6</h3>
 <div class="mt-1 flex items-center justify-between gap-3">
 <p class="text-xs text-gray-400">Premium Agency</p>
-<span class="text-xs font-semibold text-white/90">1099/- year</span>
+<span class="text-xs font-semibold text-white/90">₹1099 one-time</span>
 </div>
 </div>
 
@@ -1260,14 +1414,37 @@ Ready to save
 <div class="space-y-2 text-sm text-gray-300">
 <p>• 6 templates now have visible preview styles</p>
 <p>• Live preview updates from your builder details</p>
-<p>• Public website publish step will be added next</p>
+<p>• Public website publish step now supports paid template unlock flow</p>
 </div>
 </div>
 
 </div>
 
+<div id="purchaseModalBackdrop" class="purchase-modal-backdrop hidden" aria-hidden="true">
+<div class="purchase-modal">
+<div class="purchase-modal-label">Premium Template</div>
+<div class="purchase-modal-title">Unlock publishing</div>
+<p class="purchase-modal-subtitle">
+This template supports preview, editing and draft saving. A one-time purchase is required to unlock publishing and public website actions.
+</p>
+
+<div class="purchase-modal-card">
+<div id="purchaseTemplateName" class="purchase-modal-template">Template Name</div>
+<div id="purchaseTemplatePrice" class="purchase-modal-price">₹0</div>
+<div class="purchase-modal-note">One-time purchase to unlock publishing</div>
+</div>
+
+<div id="purchaseModalFeedback" class="purchase-modal-feedback info"></div>
+
+<div class="purchase-modal-actions">
+<button id="purchaseCancelBtn" type="button" class="purchase-modal-btn secondary">Cancel</button>
+<button id="purchaseBuyNowBtn" type="button" class="purchase-modal-btn primary">Buy Now</button>
+</div>
+</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="js/supabase.js"></script>
 
 <script type="module">
@@ -1318,11 +1495,70 @@ const siteCityInput = document.getElementById("siteCity")
 const siteSlugInput = document.getElementById("siteSlug")
 const saveWebsiteBtn = document.getElementById("saveWebsiteBtn")
 
+const purchaseModalBackdrop = document.getElementById("purchaseModalBackdrop")
+const purchaseTemplateName = document.getElementById("purchaseTemplateName")
+const purchaseTemplatePrice = document.getElementById("purchaseTemplatePrice")
+const purchaseModalFeedback = document.getElementById("purchaseModalFeedback")
+const purchaseCancelBtn = document.getElementById("purchaseCancelBtn")
+const purchaseBuyNowBtn = document.getElementById("purchaseBuyNowBtn")
+
 let selectedTemplateId = 1
 let existingWebsiteRowId = null
 let currentWebsiteData = null
 let currentPurchasedTemplates = []
+let pendingLockedAction = null
+let purchaseFlowInProgress = false
 setPublishToggleState(false)
+
+
+// =============================
+// TEMPLATE CONFIG
+// =============================
+
+const TEMPLATE_META = {
+1: {
+label: "Template 1",
+name: "Minimal Portfolio",
+price: 0,
+paid: false,
+previewPath: "template-1.html"
+},
+2: {
+label: "Template 2",
+name: "Luxury Wedding",
+price: 1099,
+paid: true,
+previewPath: "template-2.html"
+},
+3: {
+label: "Template 3",
+name: "Dark Cinematic",
+price: 1599,
+paid: true,
+previewPath: "template-3.html"
+},
+4: {
+label: "Template 4",
+name: "Modern Studio",
+price: 1499,
+paid: true,
+previewPath: "template-4.html"
+},
+5: {
+label: "Template 5",
+name: "Instagram Style",
+price: 1499,
+paid: true,
+previewPath: "template-5.html"
+},
+6: {
+label: "Template 6",
+name: "Premium Agency",
+price: 1099,
+paid: true,
+previewPath: "template-6.html"
+}
+}
 
 
 // =============================
@@ -1345,6 +1581,23 @@ saveFeedback.innerText = message
 
 }
 
+function setPurchaseModalFeedback(type, message){
+purchaseModalFeedback.className = "purchase-modal-feedback show"
+
+if(type === "error"){
+purchaseModalFeedback.classList.add("error")
+}else{
+purchaseModalFeedback.classList.add("info")
+}
+
+purchaseModalFeedback.innerText = message
+}
+
+function clearPurchaseModalFeedback(){
+purchaseModalFeedback.className = "purchase-modal-feedback info"
+purchaseModalFeedback.innerText = ""
+}
+
 function normalizeInstagram(value){
 return String(value || "").trim()
 }
@@ -1361,47 +1614,36 @@ return String(value || "")
 
 }
 
-function getTemplateLabel(templateId){
-const labels = {
-1: "Template 1",
-2: "Template 2",
-3: "Template 3",
-4: "Template 4",
-5: "Template 5",
-6: "Template 6"
+function formatPriceINR(value){
+const numericValue = Number(value || 0)
+return `₹${numericValue.toLocaleString("en-IN")}`
 }
-return labels[templateId] || `Template ${templateId}`
+
+function getTemplateMeta(templateId){
+return TEMPLATE_META[Number(templateId)] || TEMPLATE_META[1]
+}
+
+function getTemplateLabel(templateId){
+return getTemplateMeta(templateId).label || `Template ${templateId}`
 }
 
 function getTemplateEyebrow(templateId){
-const labels = {
-1: "Minimal Portfolio",
-2: "Luxury Wedding",
-3: "Dark Cinematic",
-4: "Modern Studio",
-5: "Instagram Style",
-6: "Premium Agency"
-}
-return labels[templateId] || "Template Preview"
+return getTemplateMeta(templateId).name || "Template Preview"
 }
 
 function getTemplatePreviewPath(templateId){
-const pathMap = {
-1: "template-1.html",
-2: "template-2.html",
-3: "template-3.html",
-4: "template-4.html",
-5: "template-5.html",
-6: "template-6.html"
-}
-return pathMap[templateId] || ""
+return getTemplateMeta(templateId).previewPath || ""
 }
 
 function normalizePurchasedTemplates(value){
 if(Array.isArray(value)){
-return value
+return Array.from(
+new Set(
+value
 .map(item => Number(item))
 .filter(item => Number.isInteger(item) && item >= 2 && item <= 6)
+)
+).sort((a,b)=>a-b)
 }
 return []
 }
@@ -1421,12 +1663,12 @@ return isTemplatePurchased(templateId)
 }
 
 function getTemplatePublishMessage(templateId = selectedTemplateId){
+const templateMeta = getTemplateMeta(templateId)
 if(Number(templateId) === 1){
 return ""
 }
-return `${getTemplateLabel(templateId)} publish karne ke liye separate purchase required hai.`
+return `${templateMeta.name} ko publish aur public actions ke liye one-time purchase required hai.`
 }
-
 
 function setPublishToggleState(isPublished){
 const published = Boolean(isPublished)
@@ -1434,6 +1676,17 @@ publishToggleBtn.classList.toggle("active", published)
 publishToggleBtn.setAttribute("aria-pressed", String(published))
 publishStatusText.innerText = published ? "Published" : "Draft"
 publishStatusText.classList.toggle("live", published)
+}
+
+function updatePublishUiFromCurrentState(){
+if(!canPublishSelectedTemplate(selectedTemplateId)){
+setPublishToggleState(false)
+publishStatusText.innerText = "Locked"
+publishStatusText.classList.remove("live")
+return
+}
+
+setPublishToggleState(Boolean(currentWebsiteData?.is_published))
 }
 
 function closePreviewMenu(){
@@ -1447,6 +1700,55 @@ previewMenuDropdown.classList.toggle("hidden", !isHidden)
 previewMenuBtn.setAttribute("aria-expanded", String(isHidden))
 }
 
+function openPurchaseModal(templateId = selectedTemplateId){
+const templateMeta = getTemplateMeta(templateId)
+purchaseTemplateName.innerText = templateMeta.name
+purchaseTemplatePrice.innerText = `${formatPriceINR(templateMeta.price)}`
+clearPurchaseModalFeedback()
+purchaseModalBackdrop.classList.remove("hidden")
+purchaseModalBackdrop.setAttribute("aria-hidden", "false")
+document.body.style.overflow = "hidden"
+}
+
+function closePurchaseModal(){
+if(purchaseFlowInProgress){
+return
+}
+purchaseModalBackdrop.classList.add("hidden")
+purchaseModalBackdrop.setAttribute("aria-hidden", "true")
+document.body.style.overflow = ""
+clearPurchaseModalFeedback()
+}
+
+function setPurchaseButtonsDisabled(disabled){
+purchaseCancelBtn.disabled = disabled
+purchaseBuyNowBtn.disabled = disabled
+}
+
+function clearPendingLockedAction(){
+pendingLockedAction = null
+}
+
+async function runPendingLockedAction(){
+if(typeof pendingLockedAction !== "function"){
+return
+}
+const actionToRun = pendingLockedAction
+clearPendingLockedAction()
+await actionToRun()
+}
+
+async function requireTemplatePurchaseForAction(actionCallback){
+if(canPublishSelectedTemplate(selectedTemplateId)){
+await actionCallback()
+return true
+}
+
+pendingLockedAction = actionCallback
+openPurchaseModal(selectedTemplateId)
+return false
+}
+
 function getWebsiteUrl({ publicView = false } = {}){
 
 const slug = currentWebsiteData?.site_slug
@@ -1455,7 +1757,6 @@ if(!slug) return ""
 const previewPath = getTemplatePreviewPath(selectedTemplateId)
 if(!previewPath) return ""
 
-// auto base path (GitHub Pages + future safe)
 const path = window.location.pathname
 const basePath = path.substring(0, path.lastIndexOf("/") + 1)
 
@@ -1511,13 +1812,7 @@ if(eyebrowElement){
 eyebrowElement.innerText = getTemplateEyebrow(selectedTemplateId)
 }
 
-if(!canPublishSelectedTemplate(selectedTemplateId)){
-setPublishToggleState(false)
-publishStatusText.innerText = "Locked"
-publishStatusText.classList.remove("live")
-}else{
-setPublishToggleState(Boolean(currentWebsiteData?.is_published))
-}
+updatePublishUiFromCurrentState()
 
 }
 
@@ -1585,12 +1880,14 @@ siteSlugInput.value = slugify(siteSlugInput.value)
 // LOAD WEBSITE BUILDER DATA
 // =============================
 
-async function loadWebsiteBuilder(){
+async function loadWebsiteBuilder({ preserveSelectedTemplate = false } = {}){
 
 const supabase = await window.getSupabase()
 const user = await getCurrentUser()
 
-if(!user) return
+if(!user) return null
+
+const activeTemplateBeforeLoad = selectedTemplateId
 
 const { data, error } =
 await supabase
@@ -1605,30 +1902,23 @@ if(error){
 console.error("Website builder load failed:", error)
 builderStatus.innerText = "Load failed"
 setSaveFeedback("error", "Unable to load saved website details.")
-return
+return null
 }
 
 if(!data){
+existingWebsiteRowId = null
 currentWebsiteData = null
 currentPurchasedTemplates = []
 setPublishToggleState(false)
 builderStatus.innerText = "New website setup"
 setSaveFeedback("info", "Fill in your details and save your website builder.")
 syncLivePreview()
-return
+return null
 }
 
 existingWebsiteRowId = data.id || null
 currentWebsiteData = data || null
 currentPurchasedTemplates = normalizePurchasedTemplates(data.purchased_templates)
-
-if(canPublishSelectedTemplate(data.template_id || 1)){
-setPublishToggleState(data.is_published)
-}else{
-setPublishToggleState(false)
-publishStatusText.innerText = "Locked"
-publishStatusText.classList.remove("live")
-}
 
 siteNameInput.value = data.name || ""
 siteTaglineInput.value = data.tagline || ""
@@ -1639,11 +1929,14 @@ siteCityInput.value = data.city || ""
 siteSlugInput.value = data.site_slug || ""
 siteSlugInput.dataset.userEdited = data.site_slug ? "true" : ""
 
-setSelectedTemplate(data.template_id || 1)
+const nextTemplateId = preserveSelectedTemplate ? activeTemplateBeforeLoad : (data.template_id || 1)
+setSelectedTemplate(nextTemplateId)
 syncLivePreview()
 
 builderStatus.innerText = "Existing website loaded"
 setSaveFeedback("success", "Saved website details loaded successfully.")
+
+return data
 
 }
 
@@ -1654,7 +1947,11 @@ await loadWebsiteBuilder()
 // SAVE WEBSITE BUILDER DATA
 // =============================
 
-async function saveWebsiteBuilder(){
+async function saveWebsiteBuilder({
+suppressSuccessMessage = false,
+suppressLoadingStatus = false,
+suppressButtonLoading = false
+} = {}){
 
 const supabase = await window.getSupabase()
 const user = await getCurrentUser()
@@ -1680,7 +1977,7 @@ whatsapp: currentWebsiteData?.whatsapp || null,
 template_content: currentWebsiteData?.template_content || {},
 template_images: currentWebsiteData?.template_images || {},
 theme_settings: currentWebsiteData?.theme_settings || {},
-purchased_templates: currentWebsiteData?.purchased_templates || [],
+purchased_templates: currentPurchasedTemplates,
 is_published: canPublishSelectedTemplate(selectedTemplateId) ? Boolean(currentWebsiteData?.is_published) : false
 }
 
@@ -1698,12 +1995,17 @@ return { ok:false }
 
 try{
 
+if(!suppressButtonLoading){
 saveWebsiteBtn.disabled = true
 previewTopBtn.disabled = true
 saveWebsiteBtn.innerText = "Saving..."
 previewTopBtn.innerText = "Preparing Preview..."
+}
+
+if(!suppressLoadingStatus){
 builderStatus.innerText = "Saving..."
 setSaveFeedback("info", "Saving website builder details...")
+}
 
 let query
 
@@ -1725,10 +2027,12 @@ query = supabase
 
 const { data, error } = await query
 
+if(!suppressButtonLoading){
 saveWebsiteBtn.disabled = false
 previewTopBtn.disabled = false
 saveWebsiteBtn.innerText = "Save Website Builder"
 previewTopBtn.innerText = "Preview Selected Template"
+}
 
 if(error){
 console.error("Website builder save failed:", error)
@@ -1746,17 +2050,13 @@ return { ok:false }
 existingWebsiteRowId = data?.id || existingWebsiteRowId
 currentWebsiteData = data || currentWebsiteData
 currentPurchasedTemplates = normalizePurchasedTemplates(currentWebsiteData?.purchased_templates)
-
-if(canPublishSelectedTemplate(selectedTemplateId)){
-setPublishToggleState(currentWebsiteData?.is_published)
-}else{
-setPublishToggleState(false)
-publishStatusText.innerText = "Locked"
-publishStatusText.classList.remove("live")
-}
+updatePublishUiFromCurrentState()
 
 builderStatus.innerText = "Saved successfully"
+
+if(!suppressSuccessMessage){
 setSaveFeedback("success", "Website Builder saved successfully.")
+}
 
 return {
 ok:true,
@@ -1766,10 +2066,12 @@ data
 }
 catch(error){
 console.error("Website builder unexpected save failed:", error)
+if(!suppressButtonLoading){
 saveWebsiteBtn.disabled = false
 previewTopBtn.disabled = false
 saveWebsiteBtn.innerText = "Save Website Builder"
 previewTopBtn.innerText = "Preview Selected Template"
+}
 builderStatus.innerText = "Save failed"
 setSaveFeedback("error", "Unexpected error while saving website builder.")
 return { ok:false }
@@ -1777,6 +2079,152 @@ return { ok:false }
 
 }
 
+async function invokeEdgeFunction(functionName, body){
+const supabase = await window.getSupabase()
+const { data, error } = await supabase.functions.invoke(functionName, {
+body
+})
+
+if(error){
+console.error(`${functionName} invoke failed:`, error)
+throw new Error(error.message || `Unable to call ${functionName}`)
+}
+
+return data
+}
+
+async function refreshWebsiteAfterPurchase(){
+const latestData = await loadWebsiteBuilder({ preserveSelectedTemplate: true })
+if(latestData?.purchased_templates){
+currentPurchasedTemplates = normalizePurchasedTemplates(latestData.purchased_templates)
+}
+updatePublishUiFromCurrentState()
+}
+
+async function startTemplatePurchaseFlow(){
+const templateId = selectedTemplateId
+const templateMeta = getTemplateMeta(templateId)
+
+if(!templateMeta.paid){
+closePurchaseModal()
+await runPendingLockedAction()
+return
+}
+
+try{
+purchaseFlowInProgress = true
+setPurchaseButtonsDisabled(true)
+setPurchaseModalFeedback("info", "Preparing secure payment order...")
+
+const saveResult = await saveWebsiteBuilder({
+suppressSuccessMessage: true,
+suppressLoadingStatus: true,
+suppressButtonLoading: true
+})
+
+if(!saveResult.ok){
+throw new Error("Please save valid website details before purchasing this template.")
+}
+
+const orderResponse = await invokeEdgeFunction("create-template-order", {
+template_id: templateId
+})
+
+if(!orderResponse?.ok){
+throw new Error(orderResponse?.error || "Unable to create template purchase order.")
+}
+
+if(orderResponse?.already_purchased){
+currentPurchasedTemplates = normalizePurchasedTemplates([...(currentPurchasedTemplates || []), templateId])
+await refreshWebsiteAfterPurchase()
+purchaseFlowInProgress = false
+setPurchaseButtonsDisabled(false)
+closePurchaseModal()
+setSaveFeedback("success", `${templateMeta.name} is already unlocked.`)
+await runPendingLockedAction()
+return
+}
+
+if(typeof window.Razorpay !== "function"){
+throw new Error("Razorpay checkout script failed to load.")
+}
+
+await new Promise((resolve, reject)=>{
+let paymentHandled = false
+
+const razorpayInstance = new window.Razorpay({
+key: orderResponse?.razorpay_key_id,
+amount: orderResponse?.amount,
+currency: orderResponse?.currency || "INR",
+name: "StudioOS",
+description: `${templateMeta.name} template unlock`,
+order_id: orderResponse?.order?.id,
+handler: async function (paymentResponse) {
+paymentHandled = true
+try{
+setPurchaseModalFeedback("info", "Verifying payment and unlocking template...")
+
+const verifyResponse = await invokeEdgeFunction("verify-template-payment", {
+template_id: templateId,
+razorpay_order_id: paymentResponse.razorpay_order_id,
+razorpay_payment_id: paymentResponse.razorpay_payment_id,
+razorpay_signature: paymentResponse.razorpay_signature
+})
+
+if(!verifyResponse?.ok){
+throw new Error(verifyResponse?.error || "Payment verification failed.")
+}
+
+currentPurchasedTemplates = normalizePurchasedTemplates(verifyResponse?.purchased_templates || [...currentPurchasedTemplates, templateId])
+await refreshWebsiteAfterPurchase()
+setSaveFeedback("success", `${templateMeta.name} unlocked successfully.`)
+resolve(true)
+}catch(error){
+reject(error)
+}
+},
+modal: {
+escape: true,
+ondismiss: function(){
+if(!paymentHandled){
+reject(new Error("Payment cancelled. Template is still locked."))
+}
+}
+},
+prefill: {
+name: siteNameInput.value.trim() || undefined,
+contact: sitePhoneInput.value.trim() || undefined
+},
+notes: {
+purchase_type: "template",
+template_id: String(templateId),
+template_name: templateMeta.name
+},
+theme: {
+color: "#4f46e5"
+}
+})
+
+razorpayInstance.on("payment.failed", function(response){
+const description = response?.error?.description || "Payment failed. Please try again."
+reject(new Error(description))
+})
+
+razorpayInstance.open()
+})
+
+purchaseFlowInProgress = false
+setPurchaseButtonsDisabled(false)
+closePurchaseModal()
+await runPendingLockedAction()
+}
+catch(error){
+console.error("Template purchase flow failed:", error)
+purchaseFlowInProgress = false
+setPurchaseButtonsDisabled(false)
+setPurchaseModalFeedback("error", error instanceof Error ? error.message : "Unable to complete template purchase right now.")
+}
+}
 
 
 // FIX: Save button direct handler
@@ -1793,15 +2241,7 @@ setSaveFeedback("error", "User session not found. Please login again.")
 return
 }
 
-if(!canPublishSelectedTemplate()){
-setPublishToggleState(false)
-publishStatusText.innerText = "Locked"
-publishStatusText.classList.remove("live")
-builderStatus.innerText = "Publish locked"
-setSaveFeedback("error", getTemplatePublishMessage())
-return
-}
-
+const unlocked = await requireTemplatePurchaseForAction(async ()=>{
 const nextPublished = !(currentWebsiteData?.is_published || false)
 
 if(!existingWebsiteRowId){
@@ -1838,7 +2278,7 @@ return
 }
 
 currentWebsiteData = data || currentWebsiteData
-setPublishToggleState(currentWebsiteData?.is_published)
+updatePublishUiFromCurrentState()
 builderStatus.innerText = nextPublished ? "Website published" : "Website draft"
 setSaveFeedback("success", `Website ${nextPublished ? "published" : "saved as draft"} successfully.`)
 }
@@ -1847,6 +2287,14 @@ console.error("Publish toggle unexpected update failed:", error)
 publishToggleBtn.disabled = false
 builderStatus.innerText = "Update failed"
 setSaveFeedback("error", "Unexpected error while updating publish status.")
+}
+})
+
+if(!unlocked){
+setPublishToggleState(false)
+publishStatusText.innerText = "Locked"
+publishStatusText.classList.remove("live")
+builderStatus.innerText = "Publish locked"
 }
 
 })
@@ -1861,6 +2309,10 @@ document.addEventListener("click", (event)=>{
 if(!previewMenuDropdown.contains(event.target) && event.target !== previewMenuBtn){
 closePreviewMenu()
 }
+
+if(event.target === purchaseModalBackdrop){
+closePurchaseModal()
+}
 })
 
 menuEditBtn.addEventListener("click", ()=>{
@@ -1874,11 +2326,7 @@ block:"start"
 menuCopyBtn.addEventListener("click", async ()=>{
 closePreviewMenu()
 
-if(!canPublishSelectedTemplate()){
-setSaveFeedback("error", getTemplatePublishMessage())
-return
-}
-
+await requireTemplatePurchaseForAction(async ()=>{
 if(!currentWebsiteData?.site_slug){
 setSaveFeedback("error", "Save website first to copy the share link.")
 return
@@ -1900,15 +2348,12 @@ console.error("Copy link failed:", error)
 setSaveFeedback("error", "Unable to copy website link right now.")
 }
 })
+})
 
-menuOpenBtn.addEventListener("click", ()=>{
+menuOpenBtn.addEventListener("click", async ()=>{
 closePreviewMenu()
 
-if(!canPublishSelectedTemplate()){
-setSaveFeedback("error", getTemplatePublishMessage())
-return
-}
-
+await requireTemplatePurchaseForAction(async ()=>{
 if(!currentWebsiteData?.site_slug){
 setSaveFeedback("error", "Save website first to open preview.")
 return
@@ -1923,15 +2368,12 @@ return
 
 window.open(editUrl, "_blank", "noopener,noreferrer")
 })
+})
 
-menuPublicBtn.addEventListener("click", ()=>{
+menuPublicBtn.addEventListener("click", async ()=>{
 closePreviewMenu()
 
-if(!canPublishSelectedTemplate()){
-setSaveFeedback("error", getTemplatePublishMessage())
-return
-}
-
+await requireTemplatePurchaseForAction(async ()=>{
 if(!currentWebsiteData?.site_slug){
 setSaveFeedback("error", "Save website first to view public page.")
 return
@@ -1945,6 +2387,23 @@ return
 }
 
 window.open(publicUrl, "_blank", "noopener,noreferrer")
+})
+})
+
+purchaseCancelBtn.addEventListener("click", ()=>{
+clearPendingLockedAction()
+closePurchaseModal()
+})
+
+purchaseBuyNowBtn.addEventListener("click", async ()=>{
+await startTemplatePurchaseFlow()
+})
+
+document.addEventListener("keydown", (event)=>{
+if(event.key === "Escape" && !purchaseFlowInProgress && !purchaseModalBackdrop.classList.contains("hidden")){
+clearPendingLockedAction()
+closePurchaseModal()
+}
 })
 
 
