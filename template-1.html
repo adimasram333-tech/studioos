@@ -70,7 +70,28 @@ background:linear-gradient(90deg, transparent, var(--gold), transparent);
 
 .hero-image{
 background-size:cover;
-background-position:center;
+background-position:center center;
+background-repeat:no-repeat;
+overflow:hidden;
+}
+
+.hero-image-media{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+object-fit:cover;
+object-position:center center;
+display:block;
+z-index:0;
+pointer-events:none;
+user-select:none;
+-webkit-user-drag:none;
+}
+
+.hero-image > *:not(.hero-image-media){
+position:relative;
+z-index:1;
 }
 
 .image-one,
@@ -564,6 +585,7 @@ id="heroImageSlot"
 class="relative portfolio-card hero-image min-h-[440px] md:min-h-[620px] editable-slot"
 data-image-slot="hero"
 >
+<img id="heroImageElement" class="hero-image-media" alt="Hero image">
 <div class="floating-badge">
 <p id="featuredStoryLabel" class="text-xs uppercase tracking-[0.18em] text-stone-500 editable-text" data-content-path="hero.featured_story_label">Featured Story</p>
 <p id="featuredStoryTitle" class="luxury-font text-xl font-semibold text-stone-900 mt-1 editable-text" data-content-path="hero.title" data-direct-field="name">Aurelia Frames</p>
@@ -899,6 +921,7 @@ const editToolbar = document.getElementById("editToolbar")
 const editModeToggle = document.getElementById("editModeToggle")
 const editStatus = document.getElementById("editStatus")
 const imageFileInput = document.getElementById("imageFileInput")
+const heroImageElement = document.getElementById("heroImageElement")
 
 const DEFAULT_IMAGES = {
   hero: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
@@ -1282,7 +1305,23 @@ function applyImages(website){
   const portfolio5 = getImageUrl(website, "portfolio_5")
   const portfolio6 = getImageUrl(website, "portfolio_6")
 
-  document.getElementById("heroImageSlot").style.backgroundImage = buildImageBackground(heroUrl)
+  const heroSlot = document.getElementById("heroImageSlot")
+  heroSlot.style.backgroundImage = buildImageBackground(heroUrl)
+  heroSlot.style.backgroundPosition = "center center"
+  heroSlot.style.backgroundRepeat = "no-repeat"
+
+  if(heroImageElement){
+    heroImageElement.style.objectPosition = "center center"
+    heroImageElement.onerror = ()=>{
+      if(heroImageElement.src !== DEFAULT_IMAGES.hero){
+        heroImageElement.src = DEFAULT_IMAGES.hero
+      }
+    }
+    if(heroImageElement.src !== heroUrl){
+      heroImageElement.src = heroUrl
+    }
+  }
+
   document.getElementById("portfolioImage1Slot").style.backgroundImage = buildPortfolioBackground(portfolio1)
   document.getElementById("portfolioImage2Slot").style.backgroundImage = buildPortfolioBackground(portfolio2)
   document.getElementById("portfolioImage3Slot").style.backgroundImage = buildPortfolioBackground(portfolio3)
