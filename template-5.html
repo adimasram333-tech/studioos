@@ -1320,6 +1320,15 @@
     function setText(id,value){const el=document.getElementById(id); if(!el) return; const next=value ?? ""; el.textContent=next; el.innerText=next;}
     function setHref(id,value){const el=document.getElementById(id); if(!el) return; el.href=value || "#";}
 
+    let renderFrameId=0;
+    function scheduleRender(website=currentWebsite){
+      if(renderFrameId) cancelAnimationFrame(renderFrameId);
+      renderFrameId=requestAnimationFrame(()=>{
+        renderFrameId=0;
+        forceRenderAllContent(website);
+      });
+    }
+
     function mergeDefaults(defaults,value){
       if(Array.isArray(defaults)){
         const input=Array.isArray(value)?value:[];
@@ -1405,15 +1414,23 @@
     function applyImages(website){
       const heroImageSlotEl = document.getElementById("heroImageSlot");
       const heroImageElement = document.getElementById("heroImageElement");
-      const heroUrl = getImageUrl(website,"hero");
+      const heroUrl = getImageUrl(website,"hero") || DEFAULT_IMAGES.hero || "";
 
       if(heroImageSlotEl){
-        heroImageSlotEl.style.backgroundImage = "";
+        heroImageSlotEl.style.backgroundImage = buildImageBackground(heroUrl);
         heroImageSlotEl.dataset.previewUrl = heroUrl;
       }
 
       if(heroImageElement){
-        heroImageElement.src = heroUrl;
+        heroImageElement.onerror = () => {
+          const fallbackUrl = DEFAULT_IMAGES.hero || "";
+          if(heroImageElement.src !== fallbackUrl){
+            heroImageElement.src = fallbackUrl;
+          }
+        };
+        if(heroImageElement.src !== heroUrl){
+          heroImageElement.src = heroUrl;
+        }
       }
 
       for(let i=1;i<=12;i+=1) applyImageToTile(`gridTile${i}`,`grid_${i}`,website);
@@ -1623,8 +1640,7 @@
         }
 
         applyWebsiteData(currentWebsite);
-        setTimeout(()=>forceRenderAllContent(currentWebsite), 50);
-        setTimeout(()=>forceRenderAllContent(currentWebsite), 180);
+        scheduleRender(currentWebsite);
         setEditStatus("Image replaced successfully.");
       }catch(error){
         console.error("Image replace failed:",error);
@@ -1661,7 +1677,7 @@
           try{
             setEditStatus("Saving text update...");
             await updateWebsiteField(fieldPath,cleanedValue);
-            forceRenderAllContent();
+            scheduleRender(currentWebsite);
             setEditStatus("Text updated successfully.");
           }catch(error){
             console.error("Text update failed:",error);
@@ -1784,13 +1800,11 @@
       }
     }
 
-    window.addEventListener("resize",()=>{ if(currentWebsite) forceRenderAllContent(); });
-    window.addEventListener("orientationchange",()=>{ if(currentWebsite) setTimeout(()=>forceRenderAllContent(),120); });
+    window.addEventListener("resize",()=>{ if(currentWebsite) scheduleRender(currentWebsite); });
+    window.addEventListener("orientationchange",()=>{ if(currentWebsite) scheduleRender(currentWebsite); });
     window.addEventListener("load", async ()=>{
   await initTemplate();
-  setTimeout(() => {
-    if(currentWebsite) forceRenderAllContent();
-  }, 120);
+  if(currentWebsite) scheduleRender(currentWebsite);
 });
   </script>
 </body>
