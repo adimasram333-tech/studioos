@@ -1276,15 +1276,7 @@ Create your personal photography website with ready-made premium templates.
 
 <div class="live-preview-shell">
 <div class="live-preview-frame">
-<div id="liveTemplatePreview" class="live-template t1">
-
-<div class="live-nav">
-<div id="previewBrandName" class="live-brand">Your Studio Name</div>
-<div class="live-nav-links">
-<span>Home</span>
-<span>Portfolio</span>
-<span>Contact</span>
-</div>
+<iframe id="livePreviewFrame" style="width:100%; height:500px; border:none; border-radius:16px;"></iframe>
 </div>
 
 <div class="live-hero">
@@ -1820,7 +1812,7 @@ templateCards.forEach(card=>{
 
 card.addEventListener("click", ()=>{
 setSelectedTemplate(card.dataset.template)
-syncLivePreview()
+syncLivePreview(); updateIframePreview()
 })
 
 })
@@ -1830,7 +1822,7 @@ syncLivePreview()
 // LIVE PREVIEW
 // =============================
 
-function syncLivePreview(){
+function syncLivePreview(); updateIframePreview(){
 
 const siteName =
 siteNameInput.value.trim() || "Your Studio Name"
@@ -1912,7 +1904,7 @@ currentPurchasedTemplates = []
 setPublishToggleState(false)
 builderStatus.innerText = "New website setup"
 setSaveFeedback("info", "Fill in your details and save your website builder.")
-syncLivePreview()
+syncLivePreview(); updateIframePreview()
 return null
 }
 
@@ -1931,7 +1923,7 @@ siteSlugInput.dataset.userEdited = data.site_slug ? "true" : ""
 
 const nextTemplateId = preserveSelectedTemplate ? activeTemplateBeforeLoad : (data.template_id || 1)
 setSelectedTemplate(nextTemplateId)
-syncLivePreview()
+syncLivePreview(); updateIframePreview()
 
 builderStatus.innerText = "Existing website loaded"
 setSaveFeedback("success", "Saved website details loaded successfully.")
@@ -2103,7 +2095,7 @@ currentPurchasedTemplates = normalizePurchasedTemplates(latestData.purchased_tem
 
 // force full UI rebind so purchased state reflects immediately
 setSelectedTemplate(selectedTemplateId)
-syncLivePreview()
+syncLivePreview(); updateIframePreview()
 updatePublishUiFromCurrentState()
 
 }
@@ -2421,6 +2413,19 @@ closePurchaseModal()
 }
 })
 
+
+
+function updateIframePreview(){
+  if (!currentWebsiteData?.site_slug) return;
+  const previewPath = getTemplatePreviewPath(selectedTemplateId);
+  if (!previewPath) return;
+  const iframe = document.getElementById("livePreviewFrame");
+  if (!iframe) return;
+  const slug = currentWebsiteData.site_slug;
+  const url = `${previewPath}?slug=${encodeURIComponent(slug)}&edit=true`;
+  iframe.src = "";
+  setTimeout(()=>{ iframe.src = url; }, 50);
+}
 
 // =============================
 // PREVIEW CONNECTION
