@@ -356,6 +356,13 @@ border:1px solid rgba(255,255,255,0.08);
 background:#0b1220;
 }
 
+#livePreviewFrame{
+display:block;
+width:100%;
+height:500px;
+background:#0b1220;
+}
+
 .live-template{
 padding:1rem;
 min-height:420px;
@@ -860,6 +867,11 @@ margin:0 auto;
 aspect-ratio:9 / 18.5;
 }
 
+#livePreviewFrame{
+height:100%;
+min-height:100%;
+}
+
 .live-template{
 padding:0.78rem;
 min-height:100%;
@@ -1276,56 +1288,14 @@ Create your personal photography website with ready-made premium templates.
 
 <div class="live-preview-shell">
 <div class="live-preview-frame">
-<iframe id="livePreviewFrame" style="width:100%; height:500px; border:none; border-radius:16px;"></iframe>
-</div>
-
-<div class="live-hero">
-<div class="live-eyebrow">Minimal Portfolio</div>
-<h3 id="previewHeading" class="live-heading">Aditya Masram Photography</h3>
-<p id="previewTagline" class="live-tagline">Capturing timeless wedding stories with emotion, elegance and detail.</p>
-
-<div class="live-cta-row">
-<div class="live-btn primary">Book Now</div>
-<div class="live-btn secondary">View Portfolio</div>
-</div>
-</div>
-
-<div class="mt-4">
-<div class="live-section-title">Featured Portfolio</div>
-<div class="live-grid">
-<div></div>
-<div></div>
-<div></div>
-</div>
-</div>
-
-<div class="mt-5">
-<div class="live-section-title">About</div>
-<p id="previewAbout" class="live-about">
-Write a short introduction about your photography brand. This live preview updates with your builder details.
-</p>
-</div>
-
-<div class="live-services">
-<div class="live-service-card">
-<div class="live-service-title">Wedding Stories</div>
-<div class="live-service-text">Elegant coverage with cinematic portraits and real moments.</div>
-</div>
-<div class="live-service-card">
-<div class="live-service-title">Pre-Wedding</div>
-<div class="live-service-text">Creative concept shoots designed for your personal style.</div>
-</div>
-</div>
-
-<div class="live-footer">
-<div id="previewFooterText" class="live-footer-text">Pune • 9876543210</div>
-<div class="live-social">
-<span>IG</span>
-<span>WA</span>
-</div>
-</div>
-
-</div>
+<iframe
+id="livePreviewFrame"
+title="Live Website Preview"
+class="w-full bg-white"
+style="width:100%;height:500px;border:none;border-radius:16px;"
+loading="lazy"
+referrerpolicy="strict-origin-when-cross-origin"
+></iframe>
 </div>
 
 <div class="preview-actions">
@@ -1459,12 +1429,7 @@ const templateCards = Array.from(document.querySelectorAll(".template-card"))
 const selectedTemplateText = document.getElementById("selectedTemplateText")
 const builderStatus = document.getElementById("builderStatus")
 const previewTemplateLabel = document.getElementById("previewTemplateLabel")
-const liveTemplatePreview = document.getElementById("liveTemplatePreview")
-const previewBrandName = document.getElementById("previewBrandName")
-const previewHeading = document.getElementById("previewHeading")
-const previewTagline = document.getElementById("previewTagline")
-const previewAbout = document.getElementById("previewAbout")
-const previewFooterText = document.getElementById("previewFooterText")
+const livePreviewFrame = document.getElementById("livePreviewFrame")
 const previewTopBtn = document.getElementById("previewTopBtn")
 const previewMenuBtn = document.getElementById("previewMenuBtn")
 const previewMenuDropdown = document.getElementById("previewMenuDropdown")
@@ -1763,6 +1728,33 @@ url.searchParams.set("edit", "true")
 return url.toString()
 }
 
+function setIframePlaceholder(message = "Save website details to preview the selected template."){
+if(!livePreviewFrame) return
+const safeMessage = String(message).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+livePreviewFrame.removeAttribute("src")
+livePreviewFrame.srcdoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0b1220;color:#cbd5e1;font-family:Inter,system-ui,sans-serif;padding:24px;text-align:center}div{max-width:320px;line-height:1.6;font-size:14px}</style></head><body><div>${safeMessage}</div></body></html>`
+}
+
+function updateIframePreview(){
+if(!livePreviewFrame) return
+
+const previewUrl = getWebsiteUrl({ publicView:false })
+
+if(!previewUrl){
+setIframePlaceholder("Save website details to preview the selected template.")
+return
+}
+
+if(livePreviewFrame.src === previewUrl){
+livePreviewFrame.contentWindow?.location.replace(previewUrl)
+return
+}
+
+livePreviewFrame.removeAttribute("srcdoc")
+livePreviewFrame.src = previewUrl
+}
+
+
 
 // =============================
 // GET CURRENT USER
@@ -1795,16 +1787,8 @@ card.classList.toggle("active", Number(card.dataset.template) === selectedTempla
 selectedTemplateText.innerText = `Selected: Template ${selectedTemplateId}`
 previewTemplateLabel.innerText = getTemplateLabel(selectedTemplateId)
 
-liveTemplatePreview.className = `live-template t${selectedTemplateId}`
-
-const eyebrowElement =
-liveTemplatePreview.querySelector(".live-eyebrow")
-
-if(eyebrowElement){
-eyebrowElement.innerText = getTemplateEyebrow(selectedTemplateId)
-}
-
 updatePublishUiFromCurrentState()
+updateIframePreview()
 
 }
 
@@ -1812,7 +1796,7 @@ templateCards.forEach(card=>{
 
 card.addEventListener("click", ()=>{
 setSelectedTemplate(card.dataset.template)
-syncLivePreview(); updateIframePreview()
+syncLivePreview()
 })
 
 })
@@ -1822,29 +1806,8 @@ syncLivePreview(); updateIframePreview()
 // LIVE PREVIEW
 // =============================
 
-function syncLivePreview(); updateIframePreview(){
-
-const siteName =
-siteNameInput.value.trim() || "Your Studio Name"
-
-const tagline =
-siteTaglineInput.value.trim() || "Capturing timeless wedding stories with emotion, elegance and detail."
-
-const about =
-siteAboutInput.value.trim() || "Write a short introduction about your photography brand. This live preview updates with your builder details."
-
-const city =
-siteCityInput.value.trim() || "Your City"
-
-const phone =
-sitePhoneInput.value.trim() || "Your Phone"
-
-previewBrandName.innerText = siteName
-previewHeading.innerText = siteName
-previewTagline.innerText = tagline
-previewAbout.innerText = about
-previewFooterText.innerText = `${city} • ${phone}`
-
+function syncLivePreview(){
+updateIframePreview()
 }
 
 
@@ -1904,7 +1867,7 @@ currentPurchasedTemplates = []
 setPublishToggleState(false)
 builderStatus.innerText = "New website setup"
 setSaveFeedback("info", "Fill in your details and save your website builder.")
-syncLivePreview(); updateIframePreview()
+syncLivePreview()
 return null
 }
 
@@ -1923,7 +1886,7 @@ siteSlugInput.dataset.userEdited = data.site_slug ? "true" : ""
 
 const nextTemplateId = preserveSelectedTemplate ? activeTemplateBeforeLoad : (data.template_id || 1)
 setSelectedTemplate(nextTemplateId)
-syncLivePreview(); updateIframePreview()
+syncLivePreview()
 
 builderStatus.innerText = "Existing website loaded"
 setSaveFeedback("success", "Saved website details loaded successfully.")
@@ -1933,6 +1896,7 @@ return data
 }
 
 await loadWebsiteBuilder()
+updateIframePreview()
 
 
 // =============================
@@ -2050,6 +2014,8 @@ if(!suppressSuccessMessage){
 setSaveFeedback("success", "Website Builder saved successfully.")
 }
 
+updateIframePreview()
+
 return {
 ok:true,
 data
@@ -2095,8 +2061,9 @@ currentPurchasedTemplates = normalizePurchasedTemplates(latestData.purchased_tem
 
 // force full UI rebind so purchased state reflects immediately
 setSelectedTemplate(selectedTemplateId)
-syncLivePreview(); updateIframePreview()
+syncLivePreview()
 updatePublishUiFromCurrentState()
+updateIframePreview()
 
 }
 
@@ -2413,19 +2380,6 @@ closePurchaseModal()
 }
 })
 
-
-
-function updateIframePreview(){
-  if (!currentWebsiteData?.site_slug) return;
-  const previewPath = getTemplatePreviewPath(selectedTemplateId);
-  if (!previewPath) return;
-  const iframe = document.getElementById("livePreviewFrame");
-  if (!iframe) return;
-  const slug = currentWebsiteData.site_slug;
-  const url = `${previewPath}?slug=${encodeURIComponent(slug)}&edit=true`;
-  iframe.src = "";
-  setTimeout(()=>{ iframe.src = url; }, 50);
-}
 
 // =============================
 // PREVIEW CONNECTION
