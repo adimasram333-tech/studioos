@@ -1409,22 +1409,41 @@
       const { data: authData } = await supabase.auth.getUser();
       currentUserId = authData?.user?.id || null;
 
-      let query = supabase
-        .from("user_websites")
-        .select("*")
-        .eq("site_slug", slug)
-        .eq("template_id", 2)
-        .limit(1);
-
-      if (currentUserId) {
-        query = query.or(`is_published.eq.true,user_id.eq.${currentUserId}`);
-      } else {
-        query = query.eq("is_published", true);
+      function applyAccessScope(query) {
+        if (currentUserId) {
+          return query.or(`is_published.eq.true,user_id.eq.${currentUserId}`);
+        }
+        return query.eq("is_published", true);
       }
 
-      const { data, error } = await query.maybeSingle();
-      if (error) throw error;
-      return data || null;
+      const exactQuery = applyAccessScope(
+        supabase
+          .from("user_websites")
+          .select("*")
+          .eq("site_slug", slug)
+          .eq("template_id", 2)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+      );
+
+      const { data: exactData, error: exactError } = await exactQuery.maybeSingle();
+      if (exactError) throw exactError;
+      if (exactData) return exactData;
+
+      const fallbackQuery = applyAccessScope(
+        supabase
+          .from("user_websites")
+          .select("*")
+          .eq("site_slug", slug)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+      );
+
+      const { data: fallbackData, error: fallbackError } = await fallbackQuery.maybeSingle();
+      if (fallbackError) throw fallbackError;
+      if (fallbackData) return { ...fallbackData, template_id: 2 };
+
+      return null;
     }
 
     function canCurrentUserEdit(website) {
