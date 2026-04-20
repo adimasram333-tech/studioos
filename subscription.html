@@ -807,7 +807,6 @@
     const SUBSCRIPTION_VERIFY_URL =
       "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/verify-subscription-payment";
 
-    const RAZORPAY_KEY = "rzp_test_SYs7AftkGNrQNe";
     const REQUEST_TIMEOUT_MS = 25000;
 
     let billingMode = "annual";
@@ -1113,6 +1112,10 @@
           throw new Error(orderData?.error || "Unable to create subscription order.");
         }
 
+        if(!orderData?.razorpay_key_id){
+          throw new Error("Missing Razorpay key from order response.");
+        }
+
         if(typeof window.Razorpay !== "function"){
           throw new Error("Razorpay checkout failed to load.");
         }
@@ -1120,7 +1123,7 @@
         closeOverlay();
 
         const options = {
-          key: RAZORPAY_KEY,
+          key: orderData.razorpay_key_id,
           amount: orderData.order.amount,
           currency: orderData.order.currency || "INR",
           name: "StudioOS",
@@ -1263,6 +1266,6 @@
 
     updateBillingMode("annual");
     await loadPlanState();
-  </script>  </script>
+  </script>
 </body>
 </html>
