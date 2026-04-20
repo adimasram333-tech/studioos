@@ -438,6 +438,155 @@
         font-size:0.74rem;
       }
     }
+    .status-toast{
+      position:fixed;
+      right:1rem;
+      bottom:1rem;
+      width:min(420px, calc(100vw - 2rem));
+      z-index:1200;
+      display:none;
+      padding:0.95rem 1rem;
+      border-radius:1rem;
+      border:1px solid rgba(255,255,255,0.1);
+      box-shadow:0 20px 50px rgba(0,0,0,0.3);
+      backdrop-filter:blur(14px);
+      color:white;
+      font-size:0.9rem;
+      line-height:1.55;
+    }
+
+    .status-toast.show{
+      display:block;
+    }
+
+    .status-toast.info{
+      background:rgba(79,70,229,0.18);
+      border-color:rgba(99,102,241,0.35);
+    }
+
+    .status-toast.success{
+      background:rgba(22,163,74,0.16);
+      border-color:rgba(22,163,74,0.35);
+    }
+
+    .status-toast.error{
+      background:rgba(239,68,68,0.16);
+      border-color:rgba(239,68,68,0.35);
+    }
+
+    .page-overlay{
+      position:fixed;
+      inset:0;
+      z-index:1100;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:1rem;
+      background:rgba(2,6,23,0.68);
+      backdrop-filter:blur(10px);
+    }
+
+    .page-overlay.show{
+      display:flex;
+    }
+
+    .page-overlay-card{
+      width:min(100%, 420px);
+      border-radius:1.35rem;
+      padding:1.1rem;
+      background:rgba(15,23,42,0.96);
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 24px 60px rgba(0,0,0,0.35);
+      color:white;
+    }
+
+    .page-overlay-badge{
+      display:inline-flex;
+      align-items:center;
+      min-height:30px;
+      padding:0 0.8rem;
+      border-radius:999px;
+      background:rgba(99,102,241,0.16);
+      border:1px solid rgba(99,102,241,0.3);
+      font-size:0.72rem;
+      font-weight:700;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    }
+
+    .page-overlay-title{
+      margin-top:0.9rem;
+      font-size:1.2rem;
+      font-weight:800;
+      line-height:1.2;
+    }
+
+    .page-overlay-text{
+      margin-top:0.55rem;
+      color:rgba(255,255,255,0.78);
+      font-size:0.9rem;
+      line-height:1.6;
+    }
+
+    .page-overlay-actions{
+      display:flex;
+      gap:0.75rem;
+      margin-top:1rem;
+    }
+
+    .page-overlay-btn{
+      flex:1;
+      min-height:46px;
+      border-radius:0.95rem;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.88rem;
+      font-weight:700;
+      transition:all .2s ease;
+      border:1px solid transparent;
+      cursor:pointer;
+    }
+
+    .page-overlay-btn.primary{
+      background:var(--primary);
+      color:white;
+    }
+
+    .page-overlay-btn.primary:hover{
+      background:#4338ca;
+    }
+
+    .page-overlay-btn.secondary{
+      background:rgba(255,255,255,0.06);
+      color:white;
+      border-color:rgba(255,255,255,0.08);
+    }
+
+    .page-overlay-btn.secondary:hover{
+      background:rgba(255,255,255,0.1);
+    }
+
+    .plan-btn:disabled,
+    .billing-btn:disabled{
+      opacity:0.7;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    @media (max-width: 480px){
+      .status-toast{
+        right:0.85rem;
+        left:0.85rem;
+        width:auto;
+        bottom:0.85rem;
+      }
+
+      .page-overlay-actions{
+        flex-direction:column;
+      }
+    }
+
   </style>
 </head>
 <body class="text-white min-h-screen p-4">
@@ -605,6 +754,20 @@
     </section>
   </div>
 
+  <div id="pageOverlay" class="page-overlay" aria-hidden="true">
+    <div class="page-overlay-card">
+      <div id="pageOverlayBadge" class="page-overlay-badge">Processing</div>
+      <div id="pageOverlayTitle" class="page-overlay-title">Please wait</div>
+      <div id="pageOverlayText" class="page-overlay-text">We are preparing your subscription payment.</div>
+      <div id="pageOverlayActions" class="page-overlay-actions hidden">
+        <button id="pageOverlaySecondaryBtn" type="button" class="page-overlay-btn secondary">Close</button>
+        <button id="pageOverlayPrimaryBtn" type="button" class="page-overlay-btn primary hidden">Retry</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="statusToast" class="status-toast info" role="status" aria-live="polite"></div>
+
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
@@ -623,6 +786,14 @@
     const freePlanBtn = document.getElementById("freePlanBtn");
     const basicPlanBtn = document.getElementById("basicPlanBtn");
     const proPlanBtn = document.getElementById("proPlanBtn");
+    const statusToast = document.getElementById("statusToast");
+    const pageOverlay = document.getElementById("pageOverlay");
+    const pageOverlayBadge = document.getElementById("pageOverlayBadge");
+    const pageOverlayTitle = document.getElementById("pageOverlayTitle");
+    const pageOverlayText = document.getElementById("pageOverlayText");
+    const pageOverlayActions = document.getElementById("pageOverlayActions");
+    const pageOverlaySecondaryBtn = document.getElementById("pageOverlaySecondaryBtn");
+    const pageOverlayPrimaryBtn = document.getElementById("pageOverlayPrimaryBtn");
 
     const planCards = {
       free: document.getElementById("freePlanCard"),
@@ -637,11 +808,15 @@
       "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/verify-subscription-payment";
 
     const RAZORPAY_KEY = "rzp_test_SYs7AftkGNrQNe";
+    const REQUEST_TIMEOUT_MS = 25000;
 
     let billingMode = "annual";
     let activePlan = "free";
     let currentUser = null;
     let currentSettings = null;
+    let checkoutInProgress = false;
+    let activeToastTimer = null;
+    let lastCheckoutPlan = null;
 
     function normalizePlan(value){
       const plan = String(value || "").trim().toLowerCase();
@@ -653,7 +828,6 @@
         basic: {
           annual: {
             displayPrice: "₹499",
-            amountInRupees: 5988,
             billing_cycle: "yearly",
             storage_limit_gb: 50,
             buttonLabel: "Choose Basic Yearly",
@@ -661,7 +835,6 @@
           },
           monthly: {
             displayPrice: "₹1499",
-            amountInRupees: 1499,
             billing_cycle: "monthly",
             storage_limit_gb: 50,
             buttonLabel: "Choose Basic 1 Month",
@@ -671,7 +844,6 @@
         pro: {
           annual: {
             displayPrice: "₹999",
-            amountInRupees: 11988,
             billing_cycle: "yearly",
             storage_limit_gb: 100,
             buttonLabel: "Choose Pro Yearly",
@@ -679,7 +851,6 @@
           },
           monthly: {
             displayPrice: "₹1999",
-            amountInRupees: 1999,
             billing_cycle: "monthly",
             storage_limit_gb: 100,
             buttonLabel: "Choose Pro 1 Month",
@@ -708,10 +879,92 @@
       proPlanBtn.disabled = isBusy;
       monthlyBtn.disabled = isBusy;
       annualBtn.disabled = isBusy;
+
+      if(isBusy){
+        basicPlanBtn.dataset.originalText = basicPlanBtn.dataset.originalText || basicPlanBtn.textContent;
+        proPlanBtn.dataset.originalText = proPlanBtn.dataset.originalText || proPlanBtn.textContent;
+        if(activePlan !== "basic") basicPlanBtn.textContent = "Processing...";
+        if(activePlan !== "pro") proPlanBtn.textContent = "Processing...";
+      }else{
+        updateBillingMode(billingMode);
+      }
     }
 
-    function showMessage(message){
-      alert(message);
+    function showToast(type, message, duration = 4200){
+      if(activeToastTimer){
+        window.clearTimeout(activeToastTimer);
+      }
+
+      statusToast.className = `status-toast show ${type}`;
+      statusToast.textContent = message;
+
+      activeToastTimer = window.setTimeout(() => {
+        statusToast.className = "status-toast info";
+        statusToast.textContent = "";
+      }, duration);
+    }
+
+    function openOverlay({
+      badge = "Processing",
+      title = "Please wait",
+      text = "We are preparing your request.",
+      secondaryLabel = "Close",
+      primaryLabel = "",
+      onSecondary = null,
+      onPrimary = null,
+      showActions = false,
+      showPrimary = false,
+      dismissible = false,
+    } = {}){
+      pageOverlayBadge.textContent = badge;
+      pageOverlayTitle.textContent = title;
+      pageOverlayText.textContent = text;
+      pageOverlay.classList.add("show");
+      pageOverlay.setAttribute("aria-hidden", "false");
+
+      pageOverlayActions.classList.toggle("hidden", !showActions);
+      pageOverlayPrimaryBtn.classList.toggle("hidden", !showPrimary);
+
+      pageOverlaySecondaryBtn.textContent = secondaryLabel;
+      pageOverlayPrimaryBtn.textContent = primaryLabel || "Retry";
+
+      pageOverlaySecondaryBtn.onclick = () => {
+        if(typeof onSecondary === "function"){
+          onSecondary();
+        }else if(dismissible){
+          closeOverlay();
+        }
+      };
+
+      pageOverlayPrimaryBtn.onclick = () => {
+        if(typeof onPrimary === "function"){
+          onPrimary();
+        }
+      };
+    }
+
+    function closeOverlay(){
+      pageOverlay.classList.remove("show");
+      pageOverlay.setAttribute("aria-hidden", "true");
+      pageOverlaySecondaryBtn.onclick = null;
+      pageOverlayPrimaryBtn.onclick = null;
+    }
+
+    async function fetchJsonWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS){
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+      try{
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+        });
+
+        const data = await response.json().catch(() => ({}));
+        return { response, data };
+      }finally{
+        window.clearTimeout(timeoutId);
+      }
     }
 
     function updateBillingMode(mode){
@@ -773,6 +1026,7 @@
         console.error("Unable to load photographer_settings:", error);
         setCurrentPlan("free");
         storageUsageText.textContent = "0GB / 5GB";
+        showToast("error", "Unable to load subscription state right now.");
         return;
       }
 
@@ -801,51 +1055,69 @@
     async function startSubscriptionCheckout(targetPlan){
       const selectedPlan = normalizePlan(targetPlan);
 
+      if(checkoutInProgress){
+        return;
+      }
+
       if(!currentUser){
-        showMessage("User session not found. Please login again.");
+        showToast("error", "User session not found. Please login again.");
         return;
       }
 
       if(activePlan === selectedPlan){
-        showMessage(`You are already on the ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan.`);
+        showToast("info", `You are already on the ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan.`);
         return;
       }
 
       const config = getPlanConfig(selectedPlan, billingMode);
       if(!config){
-        showMessage("Invalid plan selection.");
+        showToast("error", "Invalid plan selection.");
         return;
       }
 
       const accessToken = await getAccessToken();
       if (!accessToken) {
-        showMessage("Login session expired. Please login again.");
+        showToast("error", "Login session expired. Please login again.");
         return;
       }
 
+      checkoutInProgress = true;
+      lastCheckoutPlan = selectedPlan;
       setButtonBusy(true);
 
-      try{
-        const orderRes = await fetch(SUBSCRIPTION_ORDER_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": window.SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${accessToken}`
-          },
-          body: JSON.stringify({
-            plan: selectedPlan,
-            billing_cycle: config.billing_cycle,
-            amount: config.amountInRupees,
-            storage_limit_gb: config.storage_limit_gb
-          })
-        });
+      openOverlay({
+        badge: "Subscription",
+        title: "Preparing secure checkout",
+        text: `Creating ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} ${billingMode} order...`,
+        showActions: false,
+      });
 
-        const orderData = await orderRes.json();
+      try{
+        const { response: orderRes, data: orderData } = await fetchJsonWithTimeout(
+          SUBSCRIPTION_ORDER_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": window.SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              plan: selectedPlan,
+              billing_cycle: config.billing_cycle
+            })
+          }
+        );
 
         if(!orderRes.ok || !orderData?.success || !orderData?.order || !orderData?.order?.id){
           throw new Error(orderData?.error || "Unable to create subscription order.");
         }
+
+        if(typeof window.Razorpay !== "function"){
+          throw new Error("Razorpay checkout failed to load.");
+        }
+
+        closeOverlay();
 
         const options = {
           key: RAZORPAY_KEY,
@@ -855,41 +1127,62 @@
           description: orderData.order.description || `${selectedPlan} subscription`,
           order_id: orderData.order.id,
           handler: async function(response){
+            openOverlay({
+              badge: "Verifying",
+              title: "Confirming payment",
+              text: "Your payment was received. We are verifying and activating your subscription.",
+              showActions: false,
+            });
+
             try{
               const verifyAccessToken = await getAccessToken();
               if (!verifyAccessToken) {
                 throw new Error("Login session expired during payment verification.");
               }
 
-              const verifyRes = await fetch(SUBSCRIPTION_VERIFY_URL, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "apikey": window.SUPABASE_ANON_KEY,
-                  "Authorization": `Bearer ${verifyAccessToken}`
-                },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  plan: selectedPlan,
-                  billing_cycle: config.billing_cycle,
-                  storage_limit_gb: config.storage_limit_gb
-                })
-              });
-
-              const verifyData = await verifyRes.json();
+              const { response: verifyRes, data: verifyData } = await fetchJsonWithTimeout(
+                SUBSCRIPTION_VERIFY_URL,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "apikey": window.SUPABASE_ANON_KEY,
+                    "Authorization": `Bearer ${verifyAccessToken}`
+                  },
+                  body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    plan: selectedPlan,
+                    billing_cycle: config.billing_cycle
+                  })
+                }
+              );
 
               if(!verifyRes.ok || !verifyData?.success){
                 throw new Error(verifyData?.error || "Payment verification failed.");
               }
 
               await loadPlanState();
-              showMessage("Subscription activated successfully.");
+              closeOverlay();
+              showToast("success", "Subscription activated successfully.");
             }catch(verifyError){
               console.error("Subscription verify failed:", verifyError);
-              showMessage("Payment completed but subscription verification failed.");
+              openOverlay({
+                badge: "Verification Failed",
+                title: "Payment received, verification pending",
+                text: verifyError instanceof Error
+                  ? verifyError.message
+                  : "Payment completed but subscription verification failed.",
+                showActions: true,
+                showPrimary: false,
+                secondaryLabel: "Close",
+                onSecondary: () => closeOverlay(),
+                dismissible: true,
+              });
+              showToast("error", "Payment completed but subscription verification failed.");
             }finally{
+              checkoutInProgress = false;
               setButtonBusy(false);
             }
           },
@@ -901,33 +1194,75 @@
             color: "#4f46e5"
           },
           modal: {
+            escape: true,
             ondismiss: function(){
+              checkoutInProgress = false;
               setButtonBusy(false);
+              closeOverlay();
+              showToast("info", "Payment cancelled. No changes were made.");
             }
           }
         };
 
         const rzp = new Razorpay(options);
+
         rzp.on("payment.failed", function(errorResponse){
           console.error("Razorpay payment failed:", errorResponse);
+          checkoutInProgress = false;
           setButtonBusy(false);
-          showMessage("Payment failed. Please try again.");
+          closeOverlay();
+          showToast("error", "Payment failed. Please try again.");
         });
+
         rzp.open();
       }catch(error){
         console.error("Unable to start subscription checkout:", error);
+        checkoutInProgress = false;
         setButtonBusy(false);
-        showMessage("Unable to start payment right now.");
+        openOverlay({
+          badge: "Checkout Failed",
+          title: "Unable to start payment",
+          text: error instanceof Error
+            ? error.message
+            : "Unable to start payment right now.",
+          showActions: true,
+          showPrimary: true,
+          secondaryLabel: "Close",
+          primaryLabel: "Retry",
+          onSecondary: () => closeOverlay(),
+          onPrimary: async () => {
+            closeOverlay();
+            if(lastCheckoutPlan){
+              await startSubscriptionCheckout(lastCheckoutPlan);
+            }
+          },
+          dismissible: true,
+        });
+        showToast("error", "Unable to start payment right now.");
       }
     }
 
-    monthlyBtn.addEventListener("click", () => updateBillingMode("monthly"));
-    annualBtn.addEventListener("click", () => updateBillingMode("annual"));
+    monthlyBtn.addEventListener("click", () => {
+      if(checkoutInProgress) return;
+      updateBillingMode("monthly");
+    });
+
+    annualBtn.addEventListener("click", () => {
+      if(checkoutInProgress) return;
+      updateBillingMode("annual");
+    });
+
     basicPlanBtn.addEventListener("click", () => startSubscriptionCheckout("basic"));
     proPlanBtn.addEventListener("click", () => startSubscriptionCheckout("pro"));
 
+    document.addEventListener("keydown", (event) => {
+      if(event.key === "Escape" && !checkoutInProgress && pageOverlay.classList.contains("show")){
+        closeOverlay();
+      }
+    });
+
     updateBillingMode("annual");
     await loadPlanState();
-  </script>
+  </script>  </script>
 </body>
 </html>
