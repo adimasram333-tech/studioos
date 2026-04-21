@@ -2,10 +2,10 @@
 // SAFE SUPABASE ACCESS
 // =============================
 
-function getSupabase(){
+async function getSupabase(){
 
 if(window.getSupabase && window.getSupabase !== getSupabase){
-return window.getSupabase()
+return await window.getSupabase()
 }
 
 if(window.supabaseClient){
@@ -22,7 +22,7 @@ if(window.getCurrentUser && window.getCurrentUser !== getCurrentUser){
 return await window.getCurrentUser()
 }
 
-const supabase = getSupabase()
+const supabase = await getSupabase()
 
 try{
 
@@ -38,17 +38,80 @@ return data?.user || null
 }catch(err){
 console.error("Auth crash", err)
 return null
-
 }
 
 }
 
 
 // =============================
-// 🔥 NEW FACE FUNCTION (PERMANENT SAFE FIX)
+// IMAGE HELPERS
 // =============================
 
-async function processFace(imageUrl, eventId, userId){
+function sanitizeFileName(fileName){
+return String(fileName || "image.jpg")
+.trim()
+.toLowerCase()
+.replace(/\s+/g, "-")
+.replace(/[^a-z0-9.\-_]/g, "") || "image.jpg"
+}
+
+async function readImageDimensionsLocal(file){
+
+return await new Promise((resolve)=>{
+try{
+const objectUrl = URL.createObjectURL(file)
+const img = new Image()
+
+img.onload = function(){
+const width = Number(img.naturalWidth || img.width || 0) || null
+const height = Number(img.naturalHeight || img.height || 0) || null
+URL.revokeObjectURL(objectUrl)
+resolve({ width, height })
+}
+
+img.onerror = function(){
+URL.revokeObjectURL(objectUrl)
+resolve({ width: null, height: null })
+}
+
+img.src = objectUrl
+}catch(err){
+resolve({ width: null, height: null })
+}
+})
+
+}
+
+function resolveMediaUrlFromPhoto(photo){
+if(!photo) return ""
+
+if(typeof window.getBestMediaUrl === "function"){
+const best = window.getBestMediaUrl(photo, "original")
+if(best) return best
+}
+
+if(typeof window.buildMediaUrl === "function"){
+if(photo.object_key){
+return window.buildMediaUrl(photo.object_key)
+}
+if(typeof photo === "string"){
+return window.buildMediaUrl(photo)
+}
+}
+
+if(typeof photo.image_url === "string"){
+return String(photo.image_url).split("?")[0].trim()
+}
+
+return ""
+}
+
+
+// =============================
+// 🔥 FACE FUNCTION (TEMPORARY UNTIL ASYNC WORKER)
+// =============================
+
+async function processFace(imageUrl, eventId, userId, objectKey = null){
 
 try{
 
@@ -87,7 +150,7 @@ reason: "face_engine_missing"
 }
 }
 
-const supabase = getSupabase()
+const supabase = await getSupabase()
 
 let encodings = []
 
@@ -110,7 +173,6 @@ encodings = [singleEncoding]
 }
 
 if(!encodings || encodings.length === 0){
-// ✅ warning ko error jaisa noisy feel na ho
 console.log("No valid face detected:", cleanUrl)
 return {
 saved: false,
@@ -119,12 +181,19 @@ reason: "no_face_detected"
 }
 }
 
-const { data: existingFaces, error: existingError } = await supabase
+let query = supabase
 .from("face_data")
 .select("id, face_encoding")
 .eq("event_id", String(eventId))
-.eq("image_url", cleanUrl)
 .limit(100)
+
+if(objectKey){
+query = query.eq("object_key", String(objectKey))
+}else{
+query = query.eq("image_url", cleanUrl)
+}
+
+const { data: existingFaces, error: existingError } = await query
 
 if(existingError){
 console.error("Existing face fetch error:", existingError)
@@ -196,6 +265,7 @@ reason: "already_exists"
 const rows = uniqueEncodingsToInsert.map(encoding => ({
 event_id: String(eventId),
 image_url: cleanUrl,
+object_key: objectKey ? String(objectKey) : null,
 face_encoding: encoding,
 user_id: userId
 }))
@@ -233,14 +303,14 @@ reason: "processing_failed"
 
 
 // =============================
-// 🔥 AUTO FIX OLD BOOKINGS (SAFE ONE-TIME)
+// AUTO FIX OLD BOOKINGS
 // =============================
 
 async function autoFixOldBookings(){
 
 try{
 
-const supabase = getSupabase()
+const supabase = await getSupabase()
 const user = await getCurrentUser()
 
 if(!user) return
@@ -330,7 +400,7 @@ if(!select){
 return
 }
 
-const supabase = getSupabase()
+const supabase = await getSupabase()
 const user = await getCurrentUser()
 
 if(!user){
@@ -468,7 +538,66 @@ return results
 
 
 // =============================
-// 🔥 UPLOAD SYSTEM (OPTIMIZED SAFE FIX)
+// S3 UPLOAD HELPERS
+// =============================
+
+async function uploadSingleImageToS3(file, eventId){
+
+if(typeof window.requestS3UploadUrl !== "function"){
+throw new Error("S3 upload signer not loaded")
+}
+
+if(typeof window.uploadFileToSignedS3Url !== "function"){
+throw new Error("S3 uploader not loaded")
+}
+
+if(typeof window.saveS3GalleryPhoto !== "function"){
+throw new Error("S3 gallery saver not loaded")
+}
+
+const safeFileName = sanitizeFileName(file.name || "image.jpg")
+const dimensions = await readImageDimensionsLocal(file)
+
+const signedUpload = await window.requestS3UploadUrl({
+eventId: String(eventId),
+fileName: safeFileName,
+contentType: file.type || "image/jpeg"
+})
+
+await window.uploadFileToSignedS3Url({
+uploadUrl: signedUpload.upload_url,
+file,
+contentType: file.type || "image/jpeg"
+})
+
+const savedPhoto = await window.saveS3GalleryPhoto({
+eventId: String(eventId),
+bucket: signedUpload.bucket,
+objectKey: signedUpload.object_key,
+fileSize: Number(file.size || 0) || null,
+width: dimensions.width,
+height: dimensions.height,
+thumbnailKey: null,
+previewKey: null
+})
+
+const fileUrl = resolveMediaUrlFromPhoto(savedPhoto) || resolveMediaUrlFromPhoto({
+object_key: signedUpload.object_key
+})
+
+return {
+success: true,
+file,
+photo: savedPhoto,
+url: fileUrl,
+objectKey: signedUpload.object_key
+}
+
+}
+
+
+// =============================
+// UPLOAD SYSTEM (S3 PRODUCTION PATH)
 // =============================
 
 async function uploadImages(finalEventId){
@@ -518,16 +647,6 @@ return
 
 eventId = String(eventId)
 
-if(typeof window.uploadToCloudinary !== "function"){
-status.innerText = "Upload system not loaded"
-return
-}
-
-if(typeof window.saveGalleryImages !== "function"){
-status.innerText = "Database system not loaded"
-return
-}
-
 status.innerText = "Uploading photos..."
 progress.innerText = ""
 
@@ -535,7 +654,6 @@ let uploaded = 0
 let savedFacesImages = 0
 let totalFacesDetected = 0
 let skippedFaceImages = 0
-
 const skippedFiles = []
 
 const validFiles =
@@ -546,21 +664,16 @@ status.innerText = "No valid images selected"
 return
 }
 
-// ✅ FAST: parallel upload with safe limit
 const uploadResults = await runWithConcurrency(
 validFiles,
 async (file) => {
 try{
-const url = await window.uploadToCloudinary(file, eventId)
+const result = await uploadSingleImageToS3(file, eventId)
 
-if(url){
+if(result?.success && result?.photo){
 uploaded++
 progress.innerText = `Uploading ${uploaded} / ${validFiles.length}`
-return {
-success: true,
-file,
-url
-}
+return result
 }
 
 return {
@@ -570,20 +683,18 @@ reason: "upload_failed"
 }
 
 }catch(err){
-console.error("Upload error", err)
+console.error("S3 upload error", err)
 return {
 success: false,
 file,
-reason: "upload_failed"
+reason: err?.message || "upload_failed"
 }
 }
 },
 3
 )
 
-const successfulUploads = (uploadResults || []).filter(item => item && item.success && item.url)
-const urls = successfulUploads.map(item => item.url)
-
+const successfulUploads = (uploadResults || []).filter(item => item && item.success && item.photo)
 const failedUploads = (uploadResults || []).filter(item => item && !item.success)
 
 failedUploads.forEach(item => {
@@ -594,48 +705,19 @@ reason: item?.reason || "upload_failed"
 })
 })
 
-if(!urls.length){
+if(!successfulUploads.length){
 status.innerText = "Upload failed"
 progress.innerText = ""
 return
 }
 
-// ✅ Save gallery records before face processing
-status.innerText = "Saving photos..."
-progress.innerText = ""
-
-try{
-
-const rows = urls.map(url => ({
-event_id:eventId,
-image_url:String(url).split("?")[0].trim(),
-user_id:user.id
-}))
-
-const success =
-await window.saveGalleryImages(rows)
-
-if(!success){
-status.innerText = "Upload complete but database save failed"
-progress.innerText = ""
-return
-}
-
-}catch(err){
-console.error("Database save error",err)
-status.innerText = "Upload complete but database save failed"
-progress.innerText = ""
-return
-}
-
-// ✅ Faster than before: face processing in parallel with smaller safe limit
 status.innerText = "Processing faces..."
 let processedFaceCount = 0
 
 const faceResults = await runWithConcurrency(
 successfulUploads,
 async (item) => {
-const result = await processFace(item.url, eventId, user.id)
+const result = await processFace(item.url, eventId, user.id, item.objectKey)
 processedFaceCount++
 progress.innerText = `Faces ${processedFaceCount} / ${successfulUploads.length}`
 return {
@@ -669,10 +751,10 @@ reason: faceResult?.reason || "unknown"
 
 status.innerText = "Upload Complete"
 progress.innerText =
-`${urls.length} photos uploaded • ${savedFacesImages} photos processed for face • ${totalFacesDetected} faces detected • ${skippedFaceImages} skipped`
+`${successfulUploads.length} photos uploaded • ${savedFacesImages} photos processed for face • ${totalFacesDetected} faces detected • ${skippedFaceImages} skipped`
 
 if(skippedFiles.length > 0){
-console.warn("Skipped face processing files:", skippedFiles)
+console.warn("Skipped files:", skippedFiles)
 }
 
 await loadConfirmedEvents(eventId)
