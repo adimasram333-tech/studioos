@@ -1,92 +1,43 @@
-const CLOUDINARY_IMPORT_PATH = "./cloudinary.js"
-
-let cachedConfig = null
+let cachedCdnBase = null
 
 function pickNonEmpty(value){
   return typeof value === "string" && value.trim() ? value.trim() : ""
 }
 
-function buildConfigFromObject(obj){
-  if(!obj || typeof obj !== "object") return null
+function getCdnBaseUrl(){
+  if(cachedCdnBase) return cachedCdnBase
 
-  const cloudName =
-    pickNonEmpty(obj.cloudName) ||
-    pickNonEmpty(obj.CLOUDINARY_CLOUD_NAME)
-
-  const uploadPreset =
-    pickNonEmpty(obj.uploadPreset) ||
-    pickNonEmpty(obj.CLOUDINARY_UPLOAD_PRESET)
-
-  const folder =
-    pickNonEmpty(obj.folder) ||
-    pickNonEmpty(obj.CLOUDINARY_FOLDER) ||
-    "studioos/websites"
-
-  const deleteEndpoint =
-    pickNonEmpty(obj.deleteEndpoint) ||
-    pickNonEmpty(obj.CLOUDINARY_DELETE_ENDPOINT)
-
-  if(!cloudName || !uploadPreset) return null
-
-  return {
-    cloudName,
-    uploadPreset,
-    folder,
-    deleteEndpoint
-  }
-}
-
-async function getCloudinaryConfig(){
-  if(cachedConfig) return cachedConfig
-
-  const windowCandidates = [
-    window.__CLOUDINARY_CONFIG__,
-    window.CLOUDINARY_CONFIG,
-    {
-      cloudName: window.CLOUDINARY_CLOUD_NAME,
-      uploadPreset: window.CLOUDINARY_UPLOAD_PRESET,
-      folder: window.CLOUDINARY_FOLDER,
-      deleteEndpoint: window.CLOUDINARY_DELETE_ENDPOINT
-    }
+  const candidates = [
+    window.MEDIA_CDN_BASE_URL,
+    window.__MEDIA_CDN_BASE_URL__,
+    window.CDN_BASE_URL
   ]
 
-  for(const candidate of windowCandidates){
-    const config = buildConfigFromObject(candidate)
-    if(config){
-      cachedConfig = config
-      return cachedConfig
+  for(const value of candidates){
+    const safe = pickNonEmpty(value)
+    if(safe){
+      cachedCdnBase = safe.replace(/\/+$/, "")
+      return cachedCdnBase
     }
   }
 
-  try{
-    const mod = await import(CLOUDINARY_IMPORT_PATH)
+  throw new Error("CDN base URL not found. Expected window.MEDIA_CDN_BASE_URL.")
+}
 
-    const moduleCandidates = [
-      mod.default,
-      mod.CLOUDINARY_CONFIG,
-      {
-        cloudName: mod.CLOUDINARY_CLOUD_NAME || mod.cloudName,
-        uploadPreset: mod.CLOUDINARY_UPLOAD_PRESET || mod.uploadPreset,
-        folder: mod.CLOUDINARY_FOLDER || mod.folder,
-        deleteEndpoint: mod.CLOUDINARY_DELETE_ENDPOINT || mod.deleteEndpoint
-      }
-    ]
+function getDeleteObjectEndpoint(){
+  const supabaseUrl = pickNonEmpty(window.SUPABASE_URL) || "https://gnnaaagvlrmdveqxicob.supabase.co"
+  return `${supabaseUrl}/functions/v1/delete-s3-object`
+}
 
-    for(const candidate of moduleCandidates){
-      const config = buildConfigFromObject(candidate)
-      if(config){
-        cachedConfig = config
-        return cachedConfig
-      }
-    }
-  }
-  catch(error){
-    console.warn("Cloudinary config import skipped:", error)
-  }
+function normalizePath(value){
+  return String(value || "").replace(/^\/+/, "").trim()
+}
 
-  throw new Error(
-    "Cloudinary config not found. Expose cloudName + uploadPreset from js/cloudinary.js or window.CLOUDINARY_CONFIG."
-  )
+function joinCdnUrl(objectKey){
+  const base = getCdnBaseUrl()
+  const key = normalizePath(objectKey)
+  if(!key) return ""
+  return `${base}/${key}`
 }
 
 function validateImageFile(file){
@@ -96,92 +47,155 @@ function validateImageFile(file){
   }
 }
 
-function extractPublicIdFromUrl(url){
-  const value = String(url || "").trim()
-  if(!value) return ""
-
-  const uploadMarker = "/upload/"
-  const uploadIndex = value.indexOf(uploadMarker)
-  if(uploadIndex === -1) return ""
-
-  let remainder = value.slice(uploadIndex + uploadMarker.length)
-  remainder = remainder.replace(/^v\d+\//, "")
-  remainder = remainder.split("?")[0]
-
-  const lastDot = remainder.lastIndexOf(".")
-  if(lastDot !== -1){
-    remainder = remainder.slice(0, lastDot)
+async function getCurrentUserSafe(){
+  if(typeof window.getCurrentUser === "function"){
+    return await window.getCurrentUser()
   }
-
-  return remainder
+  return null
 }
 
-export async function uploadImage(file, options = {}){
-  validateImageFile(file)
-
-  const config = await getCloudinaryConfig()
-
-  const formData = new FormData()
-  formData.append("file", file)
-  formData.append("upload_preset", config.uploadPreset)
-  formData.append("folder", options.folder || config.folder)
-
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`,
-    {
-      method: "POST",
-      body: formData
-    }
-  )
-
-  const result = await response.json()
-
-  if(!response.ok){
-    throw new Error(result?.error?.message || "Cloudinary upload failed.")
+async function getCurrentSessionSafe(){
+  if(typeof window.getCurrentSession === "function"){
+    return await window.getCurrentSession()
   }
 
-  return {
-    url: result.secure_url,
-    publicId: result.public_id
+  if(typeof window.getSupabase === "function"){
+    const supabase = await window.getSupabase()
+    const { data } = await supabase.auth.getSession()
+    return data?.session || null
+  }
+
+  return null
+}
+
+function buildWebsiteObjectKey(userId, fileName){
+  const safeUserId = normalizePath(userId)
+  const safeFileName = String(fileName || "image.jpg")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9.\-_]/g, "") || "image.jpg"
+
+  const ext = safeFileName.includes(".") ? safeFileName.split(".").pop() : "jpg"
+  const uniqueId = crypto.randomUUID()
+
+  return `websites/${safeUserId}/${uniqueId}.${ext || "jpg"}`
+}
+
+function extractObjectKeyFromUrl(url){
+  const safeUrl = pickNonEmpty(url)
+  if(!safeUrl) return ""
+
+  const cdnBase = (() => {
+    try{
+      return getCdnBaseUrl()
+    }catch(_err){
+      return ""
+    }
+  })()
+
+  if(cdnBase && safeUrl.startsWith(cdnBase)){
+    return normalizePath(safeUrl.slice(cdnBase.length))
+  }
+
+  try{
+    const parsed = new URL(safeUrl)
+    return normalizePath(parsed.pathname)
+  }catch(_err){
+    return ""
   }
 }
 
-export async function deleteImageByUrl(url){
-  const config = await getCloudinaryConfig()
-  const publicId = extractPublicIdFromUrl(url)
+async function callDeleteObjectFunction(payload){
+  const session = await getCurrentSessionSafe()
 
-  if(!publicId){
-    return { skipped: true, reason: "No public id found." }
+  if(!session?.access_token){
+    throw new Error("Authenticated session required for object deletion.")
   }
 
-  if(!config.deleteEndpoint){
-    return {
-      skipped: true,
-      reason: "Delete endpoint not configured."
-    }
-  }
-
-  const response = await fetch(config.deleteEndpoint, {
+  const response = await fetch(getDeleteObjectEndpoint(), {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "apikey": window.SUPABASE_ANON_KEY || "",
+      "Authorization": `Bearer ${session.access_token}`
     },
-    body: JSON.stringify({ publicId })
+    body: JSON.stringify(payload || {})
   })
 
   let result = {}
   try{
     result = await response.json()
-  }
-  catch(error){
+  }catch(_err){
     result = {}
   }
 
   if(!response.ok){
-    throw new Error(result?.error || "Cloudinary delete failed.")
+    throw new Error(result?.error || "S3 delete failed.")
   }
 
   return result
+}
+
+export async function uploadImage(file, options = {}){
+  validateImageFile(file)
+
+  if(typeof window.requestS3UploadUrl !== "function"){
+    throw new Error("requestS3UploadUrl helper not found.")
+  }
+
+  if(typeof window.uploadFileToSignedS3Url !== "function"){
+    throw new Error("uploadFileToSignedS3Url helper not found.")
+  }
+
+  const user = await getCurrentUserSafe()
+
+  if(!user?.id){
+    throw new Error("Authenticated user required.")
+  }
+
+  const objectKey =
+    normalizePath(options.objectKey) ||
+    buildWebsiteObjectKey(user.id, file.name)
+
+  const signedUpload = await window.requestS3UploadUrl({
+    eventId: options.eventId || `website-${user.id}`,
+    fileName: objectKey.split("/").pop() || file.name || "image.jpg",
+    contentType: file.type || "image/jpeg"
+  })
+
+  let uploadUrl = signedUpload.upload_url
+  let finalObjectKey = signedUpload.object_key
+
+  // If caller explicitly wants a website object key, prefer it using same signer contract if supported later.
+  // Current signer returns its own object key; keep returned value as source of truth for no-break behavior.
+  await window.uploadFileToSignedS3Url({
+    uploadUrl,
+    file,
+    contentType: file.type || "image/jpeg"
+  })
+
+  return {
+    url: joinCdnUrl(finalObjectKey),
+    objectKey: finalObjectKey,
+    publicId: finalObjectKey
+  }
+}
+
+export async function deleteImageByUrl(url){
+  const objectKey = extractObjectKeyFromUrl(url)
+
+  if(!objectKey){
+    return { skipped: true, reason: "No object key found." }
+  }
+
+  const result = await callDeleteObjectFunction({ object_key: objectKey })
+
+  return {
+    success: true,
+    objectKey,
+    result
+  }
 }
 
 export async function replaceImageAsset({ oldUrl = "", file, folder = "" }){
@@ -189,12 +203,11 @@ export async function replaceImageAsset({ oldUrl = "", file, folder = "" }){
 
   let deleteResult = { skipped: true, reason: "No previous file." }
 
-  if(oldUrl && oldUrl !== uploaded.url){
+  if(oldUrl){
     try{
       deleteResult = await deleteImageByUrl(oldUrl)
-    }
-    catch(error){
-      console.warn("Old Cloudinary file cleanup skipped:", error)
+    }catch(error){
+      console.warn("Old S3 file cleanup skipped:", error)
       deleteResult = {
         skipped: true,
         reason: error.message || "Delete skipped"
@@ -205,13 +218,14 @@ export async function replaceImageAsset({ oldUrl = "", file, folder = "" }){
   return {
     newUrl: uploaded.url,
     oldUrl,
-    deleteResult
+    deleteResult,
+    objectKey: uploaded.objectKey
   }
 }
 
 
 // =============================
-// 🔥 NEW: TEMPLATE IMAGE SLOT SYSTEM
+// TEMPLATE IMAGE SLOT SYSTEM
 // =============================
 
 export async function replaceTemplateImage({
@@ -227,7 +241,7 @@ export async function replaceTemplateImage({
   const existingImages = currentData.template_images || {}
   const oldUrl = existingImages[slot] || ""
 
-  const { newUrl, deleteResult } = await replaceImageAsset({
+  const { newUrl, deleteResult, objectKey } = await replaceImageAsset({
     oldUrl,
     file,
     folder: `websites/${userId}`
@@ -238,11 +252,26 @@ export async function replaceTemplateImage({
     [slot]: newUrl
   }
 
+  const existingImageKeys =
+    currentData.template_image_keys && typeof currentData.template_image_keys === "object"
+      ? currentData.template_image_keys
+      : {}
+
+  const updatedImageKeys = {
+    ...existingImageKeys,
+    [slot]: objectKey || extractObjectKeyFromUrl(newUrl)
+  }
+
+  const updatePayload = {
+    template_images: updatedImages
+  }
+
+  // Safe optional support for future schema
+  updatePayload.template_image_keys = updatedImageKeys
+
   const { error } = await supabase
     .from("user_websites")
-    .update({
-      template_images: updatedImages
-    })
+    .update(updatePayload)
     .eq("id", websiteId)
     .eq("user_id", userId)
 
@@ -253,6 +282,7 @@ export async function replaceTemplateImage({
   return {
     slot,
     newUrl,
+    objectKey: updatedImageKeys[slot],
     deleteResult
   }
 }
