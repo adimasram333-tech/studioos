@@ -1,5 +1,5 @@
 // =============================
-// GLOBAL MENU SYSTEM (FINAL FIX)
+// GLOBAL MENU SYSTEM (S3 + LEGACY SAFE)
 // =============================
 
 let activeMenu = null
@@ -231,12 +231,12 @@ alert("Failed to update guest download mode")
 }
 
 // =============================
-// DELETE SYSTEM (FULL FIX)
+// DELETE SYSTEM
 // =============================
 
 window.deleteEvent = async function(id){
 
-const confirmDelete = confirm("Delete gallery permanently?\n\nThis will remove all event photos from Cloudinary and related gallery data from Supabase.")
+const confirmDelete = confirm("Delete gallery permanently?\n\nThis will remove all event photos and related gallery data.")
 if(!confirmDelete) return
 
 const existingMenu = document.getElementById("floatingMenu")
@@ -374,6 +374,55 @@ a.click()
 function normalizeImageUrl(url){
 if(!url) return ""
 return String(url).split("?")[0].trim()
+}
+
+function getPhotoOriginalUrl(photo){
+if(!photo) return ""
+
+if(typeof window.getBestMediaUrl === "function"){
+const best = window.getBestMediaUrl(photo, "original")
+if(best) return normalizeImageUrl(best)
+}
+
+if(typeof window.buildMediaUrl === "function" && photo.object_key){
+return normalizeImageUrl(window.buildMediaUrl(photo.object_key))
+}
+
+if(photo.image_url){
+return normalizeImageUrl(photo.image_url)
+}
+
+return ""
+}
+
+function getPhotoPreviewUrl(photo){
+if(!photo) return ""
+
+if(typeof window.getBestMediaUrl === "function"){
+const preview = window.getBestMediaUrl(photo, "preview")
+if(preview) return normalizeImageUrl(preview)
+}
+
+if(photo.preview_key && typeof window.buildMediaUrl === "function"){
+return normalizeImageUrl(window.buildMediaUrl(photo.preview_key))
+}
+
+return getPhotoOriginalUrl(photo)
+}
+
+function getPhotoThumbnailUrl(photo){
+if(!photo) return ""
+
+if(typeof window.getBestMediaUrl === "function"){
+const thumb = window.getBestMediaUrl(photo, "thumbnail")
+if(thumb) return normalizeImageUrl(thumb)
+}
+
+if(photo.thumbnail_key && typeof window.buildMediaUrl === "function"){
+return normalizeImageUrl(window.buildMediaUrl(photo.thumbnail_key))
+}
+
+return getPhotoPreviewUrl(photo)
 }
 
 function isMatchedImage(imgUrl, matchedImages){
@@ -533,32 +582,25 @@ return "client"
 return "guest"
 }
 
-function getLowQualityPreviewUrl(url){
-try{
-const cleanUrl = normalizeImageUrl(url)
-if(!cleanUrl.includes("/upload/")) return cleanUrl
-
-return cleanUrl.replace(
-"/upload/",
-"/upload/q_30,w_800,l_text:Arial_40:StudioOS,o_50/"
-)
-}catch(e){
-return normalizeImageUrl(url)
-}
+function getGuestPreviewUrl(photo){
+const previewUrl = getPhotoPreviewUrl(photo)
+if(previewUrl) return previewUrl
+return getPhotoOriginalUrl(photo)
 }
 
-function getDisplayImageUrl(url, role, guestFreeDownload = false){
-const cleanUrl = normalizeImageUrl(url)
+function getDisplayImageUrl(photo, role, guestFreeDownload = false){
+const originalUrl = getPhotoOriginalUrl(photo)
+const previewUrl = getPhotoPreviewUrl(photo)
 
 if(role === "photographer" || role === "client"){
-return cleanUrl
+return previewUrl || originalUrl
 }
 
 if(role === "guest" && guestFreeDownload){
-return cleanUrl
+return previewUrl || originalUrl
 }
 
-return getLowQualityPreviewUrl(cleanUrl)
+return previewUrl || originalUrl
 }
 
 function applyGuestImageProtection(target){
@@ -761,10 +803,6 @@ console.log("✅ Guest/Client verified | Role:", effectiveRole)
 
 }
 
-// =============================
-// FACE MATCH: GET USER FACE
-// =============================
-
 let userEncoding = null
 
 try{
@@ -784,10 +822,6 @@ console.log("FINAL EVENT ID:", eventId)
 const grid = document.getElementById("galleryGrid")
 const empty = document.getElementById("emptyState")
 
-// =============================
-// FACE MATCH: PREPARE MATCHED SET
-// =============================
-
 let matchedImages = new Set()
 
 if(effectiveRole === "guest" && eventId){
@@ -804,20 +838,18 @@ matchedImages.add(url)
 })
 }
 
-// guest ke liye DB re-match allow nahi
-// sirf client / photographer ke liye optional DB matching
 if(userEncoding && eventId && effectiveRole !== "guest"){
 
 const { data: faces } = await supabase
 .from("face_data")
-.select("face_encoding, image_url")
+.select("face_encoding, image_url, object_key")
 .eq("event_id", eventId)
 
 if(faces && faces.length > 0){
 
 faces.forEach(row=>{
 
-if(!row || !row.face_encoding || !row.image_url) return
+if(!row || !row.face_encoding) return
 if(!Array.isArray(row.face_encoding)) return
 if(row.face_encoding.length !== userEncoding.length) return
 
@@ -831,7 +863,13 @@ dist += diff * diff
 dist = Math.sqrt(dist)
 
 if(dist < 0.60){
-matchedImages.add(normalizeImageUrl(row.image_url))
+const matchedUrl = row.object_key && typeof window.buildMediaUrl === "function"
+? normalizeImageUrl(window.buildMediaUrl(row.object_key))
+: normalizeImageUrl(row.image_url)
+
+if(matchedUrl){
+matchedImages.add(matchedUrl)
+}
 }
 
 })
@@ -854,10 +892,6 @@ return
 
 grid.innerHTML = ""
 empty.classList.add("hidden")
-
-// =============================
-// FOLDER VIEW
-// =============================
 
 if(!eventId){
 
@@ -938,10 +972,6 @@ return
 
 }
 
-// =============================
-// PHOTO VIEW
-// =============================
-
 const safeEventId = String(eventId)
 
 const { data, error } =
@@ -968,7 +998,6 @@ empty.classList.remove("hidden")
 return
 }
 
-// guest = fail closed
 if(effectiveRole === "guest"){
 if(matchedImages.size === 0){
 empty.innerText = "No photos found for your face"
@@ -977,9 +1006,9 @@ return
 }
 }
 
-async function openImage(url){
-const cleanUrl = normalizeImageUrl(url)
-const displayUrl = getDisplayImageUrl(cleanUrl, effectiveRole, guestFreeDownload)
+async function openImage(photo){
+const cleanOriginalUrl = getPhotoOriginalUrl(photo)
+const displayUrl = getDisplayImageUrl(photo, effectiveRole, guestFreeDownload)
 
 let modal = document.getElementById("imageModal")
 
@@ -1019,20 +1048,22 @@ applyGuestImageProtection(modalImg)
 btn.onclick = async function(){
 
 if(effectiveRole === "photographer" || effectiveRole === "client"){
-const fileName = getSafeFileName(cleanUrl, "photo.jpg")
-await directDownloadImage(cleanUrl, fileName)
+const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
+await directDownloadImage(cleanOriginalUrl, fileName)
 return
 }
 
 if(guestFreeDownload){
-const fileName = getSafeFileName(cleanUrl, "photo.jpg")
-await directDownloadImage(cleanUrl, fileName)
+const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
+await directDownloadImage(cleanOriginalUrl, fileName)
 return
 }
 
 if(typeof window.handleDownload === "function"){
-window.handleDownload(cleanUrl, eventId, photographerId, eventName, {
-guestFreeDownload: false
+window.handleDownload(cleanOriginalUrl, eventId, photographerId, eventName, {
+guestFreeDownload: false,
+previewUrl: getGuestPreviewUrl(photo),
+photo
 })
 return
 }
@@ -1056,20 +1087,22 @@ const btn = document.getElementById("downloadBtn")
 btn.onclick = async function(){
 
 if(effectiveRole === "photographer" || effectiveRole === "client"){
-const fileName = getSafeFileName(cleanUrl, "photo.jpg")
-await directDownloadImage(cleanUrl, fileName)
+const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
+await directDownloadImage(cleanOriginalUrl, fileName)
 return
 }
 
 if(guestFreeDownload){
-const fileName = getSafeFileName(cleanUrl, "photo.jpg")
-await directDownloadImage(cleanUrl, fileName)
+const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
+await directDownloadImage(cleanOriginalUrl, fileName)
 return
 }
 
 if(typeof window.handleDownload === "function"){
-window.handleDownload(cleanUrl, eventId, photographerId, eventName, {
-guestFreeDownload: false
+window.handleDownload(cleanOriginalUrl, eventId, photographerId, eventName, {
+guestFreeDownload: false,
+previewUrl: getGuestPreviewUrl(photo),
+photo
 })
 return
 }
@@ -1081,24 +1114,25 @@ await directDownloadImage(displayUrl, previewFileName)
 }
 }
 
-data.forEach(img=>{
+data.forEach(photo=>{
 
-if(!img || !img.image_url) return
+const cleanOriginalUrl = getPhotoOriginalUrl(photo)
+if(!cleanOriginalUrl) return
 
 if(effectiveRole === "guest"){
-if(!isMatchedImage(img.image_url, matchedImages)){
+if(!isMatchedImage(cleanOriginalUrl, matchedImages)){
 return
 }
 }
 
 if(effectiveRole === "client" && FACE_FILTER_ACTIVE){
-if(!isMatchedImage(img.image_url, matchedImages)){
+if(!isMatchedImage(cleanOriginalUrl, matchedImages)){
 return
 }
 }
 
-const cleanUrl = normalizeImageUrl(img.image_url)
-const displayUrl = getDisplayImageUrl(cleanUrl, effectiveRole, guestFreeDownload)
+const displayUrl = getDisplayImageUrl(photo, effectiveRole, guestFreeDownload)
+const thumbnailUrl = getPhotoThumbnailUrl(photo) || displayUrl
 
 const div = document.createElement("div")
 
@@ -1106,8 +1140,9 @@ div.className =
 "glass rounded-xl overflow-hidden cursor-pointer"
 
 div.innerHTML = `
-<img src="${displayUrl}"
-class="w-full h-40 object-cover hover:scale-105 transition"/>
+<img src="${thumbnailUrl}"
+class="w-full h-40 object-cover hover:scale-105 transition"
+loading="lazy" />
 `
 
 const imageEl = div.querySelector("img")
@@ -1116,7 +1151,13 @@ if(effectiveRole === "guest"){
 applyGuestImageProtection(imageEl)
 }
 
-div.onclick = () => openImage(cleanUrl)
+imageEl.onerror = function(){
+if(displayUrl && imageEl.src !== displayUrl){
+imageEl.src = displayUrl
+}
+}
+
+div.onclick = () => openImage(photo)
 
 grid.appendChild(div)
 
