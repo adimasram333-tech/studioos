@@ -8,8 +8,25 @@ const SUPABASE_URL =
 const SUPABASE_ANON_KEY =
 "sb_publishable_TnjoiedXWPbSjjqh2tmfsQ_kpiIMaND"
 
-// ✅ FIX: global access for Razorpay + Edge Functions
+// ✅ global access for Razorpay + Edge Functions
 window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY
+
+// ================================
+// MEDIA / S3 CONFIG
+// ================================
+
+const MEDIA_CDN_BASE_URL =
+"https://d12gq83fx4cn2.cloudfront.net"
+
+const GENERATE_S3_UPLOAD_URL =
+`${SUPABASE_URL}/functions/v1/generate-s3-upload-url`
+
+const SAVE_S3_GALLERY_PHOTO_URL =
+`${SUPABASE_URL}/functions/v1/save-s3-gallery-photo`
+
+window.MEDIA_CDN_BASE_URL = MEDIA_CDN_BASE_URL
+window.GENERATE_S3_UPLOAD_URL = GENERATE_S3_UPLOAD_URL
+window.SAVE_S3_GALLERY_PHOTO_URL = SAVE_S3_GALLERY_PHOTO_URL
 
 
 // ================================
@@ -125,6 +142,37 @@ return await initializeSupabase()
 
 
 // ================================
+// SAFE SESSION
+// ================================
+
+window.getCurrentSession = async function(){
+
+try{
+
+const supabase = await window.getSupabase()
+
+if(!supabase) return null
+
+const { data, error } = await supabase.auth.getSession()
+
+if(error){
+console.error("Session fetch error:", error)
+return null
+}
+
+return data?.session || null
+
+}catch(err){
+
+console.error("Session fetch failed:", err)
+return null
+
+}
+
+}
+
+
+// ================================
 // SAFE CURRENT USER
 // ================================
 
@@ -136,7 +184,12 @@ const supabase = await window.getSupabase()
 
 if(!supabase) return null
 
-const { data } = await supabase.auth.getUser()
+const { data, error } = await supabase.auth.getUser()
+
+if(error){
+console.error("User fetch error:", error)
+return null
+}
 
 return data?.user || null
 
@@ -146,6 +199,254 @@ console.error("User fetch failed:",err)
 return null
 
 }
+
+}
+
+
+// ================================
+// MEDIA URL HELPERS
+// ================================
+
+function normalizeMediaPath(path){
+if(!path) return ""
+return String(path).replace(/^\/+/, "").trim()
+}
+
+function joinMediaUrl(base, path){
+const safeBase = String(base || "").replace(/\/+$/, "")
+const safePath = normalizeMediaPath(path)
+if(!safeBase || !safePath) return ""
+return `${safeBase}/${safePath}`
+}
+
+window.buildMediaUrl = function(input, variant = "original"){
+
+if(!input) return ""
+
+if(typeof input === "string"){
+return joinMediaUrl(MEDIA_CDN_BASE_URL, input)
+}
+
+if(typeof input !== "object"){
+return ""
+}
+
+const originalKey = normalizeMediaPath(input.object_key)
+const previewKey = normalizeMediaPath(input.preview_key)
+const thumbnailKey = normalizeMediaPath(input.thumbnail_key)
+const legacyUrl = typeof input.image_url === "string" ? input.image_url.trim() : ""
+
+if(variant === "thumbnail" && thumbnailKey){
+return joinMediaUrl(MEDIA_CDN_BASE_URL, thumbnailKey)
+}
+
+if(variant === "preview" && previewKey){
+return joinMediaUrl(MEDIA_CDN_BASE_URL, previewKey)
+}
+
+if(originalKey){
+return joinMediaUrl(MEDIA_CDN_BASE_URL, originalKey)
+}
+
+return legacyUrl || ""
+
+}
+
+window.getBestMediaUrl = function(photoRow, preferredVariant = "preview"){
+
+if(!photoRow) return ""
+
+if(preferredVariant === "thumbnail"){
+const thumbUrl = window.buildMediaUrl(photoRow, "thumbnail")
+if(thumbUrl) return thumbUrl
+}
+
+if(preferredVariant === "preview"){
+const previewUrl = window.buildMediaUrl(photoRow, "preview")
+if(previewUrl) return previewUrl
+}
+
+const originalUrl = window.buildMediaUrl(photoRow, "original")
+if(originalUrl) return originalUrl
+
+return typeof photoRow.image_url === "string" ? photoRow.image_url.trim() : ""
+
+}
+
+
+// ================================
+// EDGE FUNCTION FETCH HELPER
+// ================================
+
+async function callProtectedEdgeFunction(url, payload){
+
+const session = await window.getCurrentSession()
+
+if(!session?.access_token){
+throw new Error("Authenticated session required.")
+}
+
+const response = await fetch(url, {
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+"apikey": SUPABASE_ANON_KEY,
+"Authorization": `Bearer ${session.access_token}`
+},
+body: JSON.stringify(payload || {})
+})
+
+let result = null
+
+try{
+result = await response.json()
+}catch(err){
+result = null
+}
+
+if(!response.ok){
+throw new Error(result?.error || "Edge function request failed.")
+}
+
+return result
+
+}
+
+
+// ================================
+// S3 SIGNED UPLOAD REQUEST
+// ================================
+
+window.requestS3UploadUrl = async function({
+eventId,
+fileName,
+contentType
+}){
+
+if(!eventId) throw new Error("eventId is required.")
+if(!fileName) throw new Error("fileName is required.")
+if(!contentType) throw new Error("contentType is required.")
+
+const result = await callProtectedEdgeFunction(
+GENERATE_S3_UPLOAD_URL,
+{
+event_id: String(eventId),
+file_name: String(fileName),
+content_type: String(contentType)
+}
+)
+
+if(!result?.success || !result?.upload_url || !result?.object_key){
+throw new Error("Invalid S3 upload response.")
+}
+
+return result
+
+}
+
+
+// ================================
+// DIRECT S3 PUT UPLOAD
+// ================================
+
+window.uploadFileToSignedS3Url = async function({
+uploadUrl,
+file,
+contentType
+}){
+
+if(!uploadUrl) throw new Error("uploadUrl is required.")
+if(!file) throw new Error("file is required.")
+
+const response = await fetch(uploadUrl, {
+method: "PUT",
+headers: {
+"Content-Type": contentType || file.type || "application/octet-stream"
+},
+body: file
+})
+
+if(!response.ok){
+throw new Error("S3 upload failed.")
+}
+
+return true
+
+}
+
+
+// ================================
+// SAVE S3 GALLERY PHOTO
+// ================================
+
+window.saveS3GalleryPhoto = async function({
+eventId,
+bucket,
+objectKey,
+fileSize = null,
+width = null,
+height = null,
+thumbnailKey = null,
+previewKey = null
+}){
+
+if(!eventId) throw new Error("eventId is required.")
+if(!bucket) throw new Error("bucket is required.")
+if(!objectKey) throw new Error("objectKey is required.")
+
+const result = await callProtectedEdgeFunction(
+SAVE_S3_GALLERY_PHOTO_URL,
+{
+event_id: String(eventId),
+bucket: String(bucket),
+object_key: String(objectKey),
+file_size: typeof fileSize === "number" ? fileSize : null,
+width: typeof width === "number" ? width : null,
+height: typeof height === "number" ? height : null,
+thumbnail_key: thumbnailKey ? String(thumbnailKey) : null,
+preview_key: previewKey ? String(previewKey) : null
+}
+)
+
+if(!result?.success || !result?.photo){
+throw new Error("S3 gallery photo save failed.")
+}
+
+return result.photo
+
+}
+
+
+// ================================
+// IMAGE METADATA HELPER
+// ================================
+
+window.readImageDimensions = async function(file){
+
+if(!file) return { width: null, height: null }
+
+return await new Promise((resolve) => {
+try{
+const objectUrl = URL.createObjectURL(file)
+const img = new Image()
+
+img.onload = function(){
+const width = Number(img.naturalWidth || img.width || 0) || null
+const height = Number(img.naturalHeight || img.height || 0) || null
+URL.revokeObjectURL(objectUrl)
+resolve({ width, height })
+}
+
+img.onerror = function(){
+URL.revokeObjectURL(objectUrl)
+resolve({ width: null, height: null })
+}
+
+img.src = objectUrl
+}catch(err){
+resolve({ width: null, height: null })
+}
+})
 
 }
 
@@ -344,7 +645,7 @@ return null
 
 
 // ================================
-// SAVE GALLERY IMAGES
+// LEGACY GALLERY SAVE (DO NOT USE FOR NEW S3 FLOW)
 // ================================
 
 window.saveGalleryImages = async function(images){
@@ -354,7 +655,6 @@ if(!supabase) return false
 
 try{
 
-// 🔥 SAFE USER ATTACH (NO BREAK)
 const user = await window.getCurrentUser()
 
 const safeImages = images.map(img => ({
