@@ -603,6 +603,27 @@ return previewUrl || originalUrl
 return previewUrl || originalUrl
 }
 
+function getModalImagesList(photos, effectiveRole, matchedImages, faceFilterActive){
+return (photos || []).filter(photo => {
+const cleanOriginalUrl = getPhotoOriginalUrl(photo)
+if(!cleanOriginalUrl) return false
+
+if(effectiveRole === "guest"){
+if(!isMatchedImage(cleanOriginalUrl, matchedImages)){
+return false
+}
+}
+
+if(effectiveRole === "client" && faceFilterActive){
+if(!isMatchedImage(cleanOriginalUrl, matchedImages)){
+return false
+}
+}
+
+return true
+})
+}
+
 function applyGuestImageProtection(target){
 if(!target) return
 
@@ -1006,9 +1027,85 @@ return
 }
 }
 
-async function openImage(photo){
+const modalPhotos = getModalImagesList(data, effectiveRole, matchedImages, FACE_FILTER_ACTIVE)
+let currentModalIndex = -1
+
+function updateModalButtonStates(){
+const prevBtn = document.getElementById("prevImageBtn")
+const nextBtn = document.getElementById("nextImageBtn")
+
+if(!prevBtn || !nextBtn) return
+
+const hasPrev = currentModalIndex > 0
+const hasNext = currentModalIndex >= 0 && currentModalIndex < modalPhotos.length - 1
+
+prevBtn.disabled = !hasPrev
+nextBtn.disabled = !hasNext
+prevBtn.style.opacity = hasPrev ? "1" : "0.4"
+nextBtn.style.opacity = hasNext ? "1" : "0.4"
+}
+
+function renderModalPhoto(photo){
 const cleanOriginalUrl = getPhotoOriginalUrl(photo)
 const displayUrl = getDisplayImageUrl(photo, effectiveRole, guestFreeDownload)
+const modalImg = document.getElementById("modalImg")
+const btn = document.getElementById("downloadBtn")
+
+if(!modalImg || !btn) return
+
+modalImg.src = displayUrl
+
+if(effectiveRole === "guest"){
+applyGuestImageProtection(modalImg)
+}else{
+modalImg.setAttribute("draggable", "false")
+}
+
+btn.onclick = async function(){
+
+if(effectiveRole === "photographer" || effectiveRole === "client"){
+const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
+await directDownloadImage(cleanOriginalUrl, fileName)
+return
+}
+
+if(guestFreeDownload){
+const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
+await directDownloadImage(cleanOriginalUrl, fileName)
+return
+}
+
+if(typeof window.handleDownload === "function"){
+window.handleDownload(cleanOriginalUrl, eventId, photographerId, eventName, {
+guestFreeDownload: false,
+previewUrl: getGuestPreviewUrl(photo),
+photo
+})
+return
+}
+
+const previewFileName = getSafeFileName(displayUrl, "photo.jpg")
+await directDownloadImage(displayUrl, previewFileName)
+
+}
+
+updateModalButtonStates()
+}
+
+function showPrevImage(){
+if(currentModalIndex <= 0) return
+currentModalIndex -= 1
+renderModalPhoto(modalPhotos[currentModalIndex])
+}
+
+function showNextImage(){
+if(currentModalIndex < 0 || currentModalIndex >= modalPhotos.length - 1) return
+currentModalIndex += 1
+renderModalPhoto(modalPhotos[currentModalIndex])
+}
+
+async function openImage(photo){
+currentModalIndex = modalPhotos.findIndex(item => getPhotoOriginalUrl(item) === getPhotoOriginalUrl(photo))
 
 let modal = document.getElementById("imageModal")
 
@@ -1027,7 +1124,14 @@ modal.style.justifyContent = "center"
 modal.style.zIndex = 9999
 
 modal.innerHTML = `
-<img id="modalImg" src="${displayUrl}" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:12px;" />
+<button id="prevImageBtn"
+style="position:absolute; left:20px; top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.85); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center;">‹</button>
+
+<img id="modalImg" src="" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:12px;" />
+
+<button id="nextImageBtn"
+style="position:absolute; right:20px; top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.85); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center;">›</button>
+
 <button id="downloadBtn"
 style="position:absolute; bottom:30px; background:#4f46e5; color:white; padding:8px 16px; border-radius:8px;">
 Download
@@ -1038,79 +1142,36 @@ modal.onclick = (e)=>{ if(e.target === modal) modal.remove() }
 
 document.body.appendChild(modal)
 
-const btn = document.getElementById("downloadBtn")
-const modalImg = document.getElementById("modalImg")
-
-if(effectiveRole === "guest"){
-applyGuestImageProtection(modalImg)
+document.getElementById("prevImageBtn").onclick = function(e){
+e.stopPropagation()
+showPrevImage()
 }
 
-btn.onclick = async function(){
-
-if(effectiveRole === "photographer" || effectiveRole === "client"){
-const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
-await directDownloadImage(cleanOriginalUrl, fileName)
-return
+document.getElementById("nextImageBtn").onclick = function(e){
+e.stopPropagation()
+showNextImage()
 }
 
-if(guestFreeDownload){
-const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
-await directDownloadImage(cleanOriginalUrl, fileName)
-return
-}
+document.addEventListener("keydown", function modalKeyHandler(e){
+const imageModal = document.getElementById("imageModal")
+if(!imageModal) return
 
-if(typeof window.handleDownload === "function"){
-window.handleDownload(cleanOriginalUrl, eventId, photographerId, eventName, {
-guestFreeDownload: false,
-previewUrl: getGuestPreviewUrl(photo),
-photo
+if(e.key === "ArrowLeft"){
+showPrevImage()
+}
+if(e.key === "ArrowRight"){
+showNextImage()
+}
+if(e.key === "Escape"){
+imageModal.remove()
+document.removeEventListener("keydown", modalKeyHandler)
+}
 })
-return
-}
 
-const previewFileName = getSafeFileName(displayUrl, "photo.jpg")
-await directDownloadImage(displayUrl, previewFileName)
-
-}
+renderModalPhoto(modalPhotos[currentModalIndex])
 
 }else{
-const modalImg = document.getElementById("modalImg")
-modalImg.src = displayUrl
-
-if(effectiveRole === "guest"){
-applyGuestImageProtection(modalImg)
-}else{
-modalImg.setAttribute("draggable", "false")
-}
-
-const btn = document.getElementById("downloadBtn")
-btn.onclick = async function(){
-
-if(effectiveRole === "photographer" || effectiveRole === "client"){
-const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
-await directDownloadImage(cleanOriginalUrl, fileName)
-return
-}
-
-if(guestFreeDownload){
-const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
-await directDownloadImage(cleanOriginalUrl, fileName)
-return
-}
-
-if(typeof window.handleDownload === "function"){
-window.handleDownload(cleanOriginalUrl, eventId, photographerId, eventName, {
-guestFreeDownload: false,
-previewUrl: getGuestPreviewUrl(photo),
-photo
-})
-return
-}
-
-const previewFileName = getSafeFileName(displayUrl, "photo.jpg")
-await directDownloadImage(displayUrl, previewFileName)
-
-}
+renderModalPhoto(modalPhotos[currentModalIndex])
 }
 }
 
@@ -1132,7 +1193,11 @@ return
 }
 
 const displayUrl = getDisplayImageUrl(photo, effectiveRole, guestFreeDownload)
-const thumbnailUrl = getPhotoThumbnailUrl(photo) || displayUrl
+let thumbnailUrl = getPhotoThumbnailUrl(photo)
+
+if(!photo.thumbnail_key){
+thumbnailUrl = getPhotoPreviewUrl(photo) || displayUrl
+}
 
 const div = document.createElement("div")
 
@@ -1142,7 +1207,9 @@ div.className =
 div.innerHTML = `
 <img src="${thumbnailUrl}"
 class="w-full h-40 object-cover hover:scale-105 transition"
-loading="lazy" />
+loading="lazy"
+decoding="async"
+fetchpriority="low" />
 `
 
 const imageEl = div.querySelector("img")
@@ -1154,7 +1221,9 @@ applyGuestImageProtection(imageEl)
 imageEl.onerror = function(){
 if(displayUrl && imageEl.src !== displayUrl){
 imageEl.src = displayUrl
+return
 }
+imageEl.onerror = null
 }
 
 div.onclick = () => openImage(photo)
