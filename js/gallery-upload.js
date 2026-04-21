@@ -581,6 +581,25 @@ thumbnailKey: null,
 previewKey: null
 })
 
+// 🔥 TRIGGER IMAGE PROCESSING (AUTO)
+try{
+await fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/process-image", {
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+"apikey": window.SUPABASE_ANON_KEY,
+"Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`
+},
+body: JSON.stringify({
+object_key: signedUpload.object_key,
+event_id: String(eventId)
+})
+})
+}catch(err){
+console.error("Process-image trigger failed", err)
+}
+
+
 const fileUrl = resolveMediaUrlFromPhoto(savedPhoto) || resolveMediaUrlFromPhoto({
 object_key: signedUpload.object_key
 })
