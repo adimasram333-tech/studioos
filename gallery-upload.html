@@ -183,11 +183,16 @@ alert("Login required")
 return
 }
 
-const faceReady = await ensureFaceReady()
+let faceReady = false
+
+try{
+faceReady = await ensureFaceReady()
+}catch(e){
+console.warn("Face system init skipped:", e)
+}
 
 if(!faceReady){
-alert("Face system not ready. Refresh page.")
-return
+console.warn("Face system not ready. Upload will continue and face processing may be skipped for this batch.")
 }
 
 const select = document.getElementById("eventSelect")
@@ -279,7 +284,6 @@ window.location.href = `gallery.html?event_id=${eventId}`
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <script src="js/face.js?v=5"></script>
 
-<script src="js/cloudinary.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/gallery-upload.js?v=2"></script>
 
