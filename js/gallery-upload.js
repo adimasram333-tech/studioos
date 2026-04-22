@@ -778,9 +778,9 @@ console.warn("Skipped files:", skippedFiles)
 
 await loadConfirmedEvents(eventId)
 
-setTimeout(()=>{
-window.location.href = `gallery.html?event_id=${eventId}`
-}, 300)
+if(typeof window.onUploadComplete === "function"){
+window.onUploadComplete(eventId)
+}
 
 }
 
