@@ -260,7 +260,7 @@ return
 }
 
 const response = await fetch(
-"https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/smart-processor",
+"https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/delete-gallery",
 {
 method: "POST",
 headers: {
@@ -618,6 +618,23 @@ if(effectiveRole === "client" && faceFilterActive){
 if(!isMatchedImage(cleanOriginalUrl, matchedImages)){
 return false
 }
+}
+
+return true
+})
+}
+
+function getVisibleGalleryPhotos(photos, effectiveRole, matchedImages, faceFilterActive){
+return (photos || []).filter(photo => {
+const cleanOriginalUrl = getPhotoOriginalUrl(photo)
+if(!cleanOriginalUrl) return false
+
+if(effectiveRole === "guest" && !isMatchedImage(cleanOriginalUrl, matchedImages)){
+return false
+}
+
+if(effectiveRole === "client" && faceFilterActive && !isMatchedImage(cleanOriginalUrl, matchedImages)){
+return false
 }
 
 return true
@@ -998,7 +1015,7 @@ const safeEventId = String(eventId)
 const { data, error } =
 await supabase
 .from("gallery_photos")
-.select("*")
+.select("id,user_id,event_id,object_key,preview_key,thumbnail_key,image_url,created_at")
 .eq("event_id", safeEventId)
 .order("created_at",{ ascending:false })
 
@@ -1027,7 +1044,8 @@ return
 }
 }
 
-const modalPhotos = getModalImagesList(data, effectiveRole, matchedImages, FACE_FILTER_ACTIVE)
+const visiblePhotos = getVisibleGalleryPhotos(data, effectiveRole, matchedImages, FACE_FILTER_ACTIVE)
+const modalPhotos = visiblePhotos
 let currentModalIndex = -1
 
 function updateModalButtonStates(){
@@ -1106,6 +1124,12 @@ renderModalPhoto(modalPhotos[currentModalIndex])
 
 async function openImage(photo){
 currentModalIndex = modalPhotos.findIndex(item => getPhotoOriginalUrl(item) === getPhotoOriginalUrl(photo))
+if(currentModalIndex < 0){
+currentModalIndex = 0
+}
+if(!modalPhotos.length){
+return
+}
 
 let modal = document.getElementById("imageModal")
 
@@ -1175,22 +1199,11 @@ renderModalPhoto(modalPhotos[currentModalIndex])
 }
 }
 
-data.forEach(photo=>{
+visiblePhotos.forEach(photo=>{
 
 const cleanOriginalUrl = getPhotoOriginalUrl(photo)
 if(!cleanOriginalUrl) return
 
-if(effectiveRole === "guest"){
-if(!isMatchedImage(cleanOriginalUrl, matchedImages)){
-return
-}
-}
-
-if(effectiveRole === "client" && FACE_FILTER_ACTIVE){
-if(!isMatchedImage(cleanOriginalUrl, matchedImages)){
-return
-}
-}
 
 const displayUrl = getDisplayImageUrl(photo, effectiveRole, guestFreeDownload)
 let thumbnailUrl = getPhotoThumbnailUrl(photo)
