@@ -61,10 +61,10 @@ function saveMatchedImagesToSession(eventId, images){
 let faceModelsLoaded = false;
 
 async function loadFaceModels() {
-    if (faceModelsLoaded) return;
+    if (faceModelsLoaded) return true;
 
     try {
-        const MODEL_URL = "/studioos/models";
+        const MODEL_URL = `${window.location.origin}/studioos/models`;
 
         console.log("Loading models from:", MODEL_URL);
 
@@ -76,10 +76,12 @@ async function loadFaceModels() {
 
         faceModelsLoaded = true;
         console.log("✅ Face models loaded");
+        return true;
 
     } catch (err) {
         console.error("❌ Face load error:", err);
         faceModelsLoaded = false;
+        throw err;
     }
 }
 
@@ -157,7 +159,7 @@ async function detectSingleFace(imageElement) {
 // MATCH (UPDATED)
 // ==============================
 
-function matchFaces(selfieEncoding, storedEncodings, threshold = 0.5, eventId = null) {
+function matchFaces(selfieEncoding, storedEncodings, threshold = 0.6, eventId = null) {
 
     const matchedImages = [];
 
