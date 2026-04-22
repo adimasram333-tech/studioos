@@ -59,30 +59,54 @@ function saveMatchedImagesToSession(eventId, images){
 // ==============================
 
 let faceModelsLoaded = false;
+let faceModelsPromise = null;
+
+function resolveModelUrl(){
+    const runtimeConfigured =
+        (typeof window !== "undefined" && typeof window.MODEL_BASE_URL === "string" && window.MODEL_BASE_URL.trim())
+            ? window.MODEL_BASE_URL.trim()
+            : ""
+
+    if(runtimeConfigured){
+        return runtimeConfigured.replace(/\/+$/, "")
+    }
+
+    return `${window.location.origin}/studioos/models`
+}
 
 async function loadFaceModels() {
     if (faceModelsLoaded) return true;
+    if (faceModelsPromise) return faceModelsPromise;
 
-    try {
-        const MODEL_URL = `${window.location.origin}/studioos/models`;
+    faceModelsPromise = (async () => {
+        try {
+            if (typeof faceapi === "undefined") {
+                throw new Error("face-api.js not loaded")
+            }
 
-        console.log("Loading models from:", MODEL_URL);
+            const MODEL_URL = resolveModelUrl();
 
-        await Promise.all([
-            faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-        ]);
+            console.log("Loading models from:", MODEL_URL);
 
-        faceModelsLoaded = true;
-        console.log("✅ Face models loaded");
-        return true;
+            await Promise.all([
+                faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
+                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+            ]);
 
-    } catch (err) {
-        console.error("❌ Face load error:", err);
-        faceModelsLoaded = false;
-        throw err;
-    }
+            faceModelsLoaded = true;
+            console.log("✅ Face models loaded");
+            return true;
+
+        } catch (err) {
+            console.error("❌ Face load error:", err);
+            faceModelsLoaded = false;
+            faceModelsPromise = null;
+            throw err;
+        }
+    })();
+
+    return faceModelsPromise;
 }
 
 // ==============================
@@ -161,9 +185,25 @@ async function detectSingleFace(imageElement) {
 
 function matchFaces(selfieEncoding, storedEncodings, threshold = 0.6, eventId = null) {
 
+    if(!Array.isArray(selfieEncoding) || selfieEncoding.length === 0){
+        return [];
+    }
+
+    if(!Array.isArray(storedEncodings) || storedEncodings.length === 0){
+        return [];
+    }
+
     const matchedImages = [];
 
     for (let item of storedEncodings) {
+
+        if(!item || !Array.isArray(item.face_encoding) || item.face_encoding.length === 0){
+            continue;
+        }
+
+        if(!item.image_url){
+            continue;
+        }
 
         const distance = faceapi.euclideanDistance(
             new Float32Array(selfieEncoding),
@@ -285,11 +325,3 @@ window.faceEngine = {
 window.loadFaceModels = loadFaceModels;
 window.getFaceEncoding = getFaceEncoding;
 window.processImageForFaces = processImageForFaces;
-
-// ==============================
-// AUTO LOAD
-// ==============================
-
-window.addEventListener("load", () => {
-    loadFaceModels();
-});
