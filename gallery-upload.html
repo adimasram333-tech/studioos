@@ -55,6 +55,14 @@ id="manualEventDate"
 class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 text-sm"
 />
 
+<button
+type="button"
+id="createEventBtn"
+onclick="createManualEvent()"
+class="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl text-sm font-medium">
+Create Event
+</button>
+
 </div>
 
 <input
@@ -121,6 +129,121 @@ input.click()
 function getEventFromURL(){
 const params = new URLSearchParams(window.location.search)
 return params.get("event_id") || params.get("event")
+}
+
+let manualEventCreateInFlight = false
+
+function setStatusMessage(message, colorClass = "text-gray-400"){
+const status = document.getElementById("status")
+if(!status) return
+status.className = `text-center text-sm mt-3 ${colorClass}`
+status.innerText = message
+}
+
+async function createManualEvent(){
+
+if(manualEventCreateInFlight){
+return
+}
+
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!user){
+alert("Login required")
+return
+}
+
+const select = document.getElementById("eventSelect")
+const createBtn = document.getElementById("createEventBtn")
+const createBox = document.getElementById("createEventBox")
+const nameInput = document.getElementById("manualEventName")
+const dateInput = document.getElementById("manualEventDate")
+
+if(!select || !createBtn || !createBox || !nameInput || !dateInput){
+alert("Create event form not ready")
+return
+}
+
+if(select.value !== "create_new"){
+setStatusMessage("Select Create New Event first", "text-amber-400")
+return
+}
+
+const name = nameInput.value.trim()
+const date = dateInput.value
+
+if(!name || !date){
+alert("Enter event name and date")
+return
+}
+
+try{
+
+manualEventCreateInFlight = true
+createBtn.disabled = true
+createBtn.innerText = "Creating Event..."
+setStatusMessage("Creating event...", "text-indigo-300")
+
+const { data, error } =
+await supabase
+.from("events")
+.insert([{
+user_id: user.id,
+client_name: name,
+event_name: name,
+event_type: name,
+event_date: date,
+status: "active"
+}])
+.select()
+.single()
+
+if(error){
+console.error("EVENT ERROR:", error)
+alert("Event create failed")
+setStatusMessage("Event create failed", "text-red-400")
+return
+}
+
+const token =
+Math.random().toString(36).substring(2,10).toUpperCase()
+
+const { error: tokenError } = await supabase
+.from("event_tokens")
+.insert([{
+event_id: data.id,
+token: token,
+used: false
+}])
+
+if(tokenError){
+console.error("TOKEN ERROR:", tokenError)
+alert("Token creation failed")
+setStatusMessage("Token creation failed", "text-red-400")
+return
+}
+
+if(typeof loadConfirmedEvents === "function"){
+await loadConfirmedEvents(data.id)
+}
+
+select.value = String(data.id)
+createBox.style.display = "none"
+nameInput.value = ""
+dateInput.value = ""
+
+setStatusMessage("Event created successfully. Now select images and upload.", "text-green-400")
+
+}catch(err){
+console.error("Manual event create crash:", err)
+alert("Event create failed")
+setStatusMessage("Event create failed", "text-red-400")
+}finally{
+manualEventCreateInFlight = false
+createBtn.disabled = false
+createBtn.innerText = "Create Event"
+}
 }
 
 // =============================
@@ -196,6 +319,7 @@ console.warn("Face system not ready. Upload will continue and face processing ma
 }
 
 const select = document.getElementById("eventSelect")
+const imagesInput = document.getElementById("images")
 
 let eventId = select.value
 
@@ -204,78 +328,26 @@ eventId = getEventFromURL()
 }
 
 if(eventId === "create_new"){
-
-const name = document.getElementById("manualEventName").value.trim()
-const date = document.getElementById("manualEventDate").value
-
-if(!name || !date){
-alert("Enter event name and date")
+alert("Please click Create Event first")
+setStatusMessage("Create the event first, then upload photos.", "text-amber-400")
 return
-}
-
-const { data, error } =
-await supabase
-.from("events")
-.insert([{
-user_id: user.id,
-client_name: name,
-event_name: name,
-event_type: name,
-event_date: date,
-status: "active"
-}])
-.select()
-.single()
-
-if(error){
-console.error("EVENT ERROR:", error)
-alert("Event create failed")
-return
-}
-
-eventId = data.id
-
-const token =
-Math.random().toString(36).substring(2,10).toUpperCase()
-
-const { error: tokenError } = await supabase
-.from("event_tokens")
-.insert([{
-event_id: data.id,
-token: token,
-used: false
-}])
-
-if(tokenError){
-console.error("TOKEN ERROR:", tokenError)
-alert("Token creation failed")
-return
-}
-
-if(typeof loadConfirmedEvents === "function"){
-await loadConfirmedEvents(eventId)
-}
-
-const createBox = document.getElementById("createEventBox")
-if(createBox){
-createBox.style.display = "none"
-}
-
-const selectBox = document.getElementById("eventSelect")
-if(selectBox){
-selectBox.value = String(eventId)
-}
-
 }
 
 if(!eventId){
 alert("Please select event")
+setStatusMessage("Please select an event", "text-amber-400")
 return
 }
 
-await window.uploadImages(eventId)
+if(!imagesInput || !imagesInput.files || !imagesInput.files.length){
+alert("Please select images or folder")
+setStatusMessage("Please select images or folder", "text-amber-400")
+return
+}
 
-window.location.href = `gallery.html?event_id=${eventId}`
+setStatusMessage("Starting upload...", "text-indigo-300")
+
+await window.uploadImages(eventId)
 
 }
 
