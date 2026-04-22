@@ -16,7 +16,7 @@ window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY
 // ================================
 
 const MEDIA_CDN_BASE_URL =
-"https://d12gq83fx4cn2.cloudfront.net"
+"https://d12gq834fx4cn2.cloudfront.net"
 
 const GENERATE_S3_UPLOAD_URL =
 `${SUPABASE_URL}/functions/v1/generate-s3-upload-url`
