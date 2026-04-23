@@ -107,6 +107,37 @@ return ""
 }
 
 
+function extractErrorMessage(err){
+if(!err) return "Upload failed"
+
+if(typeof err === "string"){
+return err
+}
+
+if(typeof err?.message === "string" && err.message.trim()){
+return err.message.trim()
+}
+
+if(typeof err?.error === "string" && err.error.trim()){
+return err.error.trim()
+}
+
+return "Upload failed"
+}
+
+function isStorageLimitError(err){
+const message = extractErrorMessage(err).toLowerCase()
+const code = String(err?.code || "").toLowerCase()
+
+return (
+code === "storage_limit_exceeded" ||
+message.includes("storage limit exceeded") ||
+message.includes("storage full") ||
+message.includes("upgrade your plan")
+)
+}
+
+
 // =============================
 // 🔥 FACE FUNCTION (TEMPORARY UNTIL ASYNC WORKER)
 // =============================
@@ -558,12 +589,23 @@ throw new Error("S3 gallery saver not loaded")
 const safeFileName = sanitizeFileName(file.name || "image.jpg")
 const dimensions = await readImageDimensionsLocal(file)
 
-const signedUpload = await window.requestS3UploadUrl({
+let signedUpload = null
+
+try{
+signedUpload = await window.requestS3UploadUrl({
 eventId: String(eventId),
 fileName: safeFileName,
 contentType: file.type || "image/jpeg",
 fileSize: Number(file.size || 0)
 })
+}catch(err){
+if(isStorageLimitError(err)){
+const storageError = new Error("Your storage is full. Please upgrade your plan to upload more photos.")
+storageError.code = "storage_limit_exceeded"
+throw storageError
+}
+throw err
+}
 
 await window.uploadFileToSignedS3Url({
 uploadUrl: signedUpload.upload_url,
@@ -705,7 +747,8 @@ console.error("S3 upload error", err)
 return {
 success: false,
 file,
-reason: err?.message || "upload_failed"
+reason: extractErrorMessage(err),
+code: err?.code || null
 }
 }
 },
@@ -714,6 +757,15 @@ reason: err?.message || "upload_failed"
 
 const successfulUploads = (uploadResults || []).filter(item => item && item.success && item.photo)
 const failedUploads = (uploadResults || []).filter(item => item && !item.success)
+
+const storageLimitFailure = failedUploads.find(item => String(item?.code || "").toLowerCase() === "storage_limit_exceeded")
+
+if(storageLimitFailure){
+status.innerText = "Storage full. Upgrade your plan to continue uploads."
+progress.innerText = ""
+alert("Your storage is full. Please upgrade your plan to upload more photos.")
+return
+}
 
 failedUploads.forEach(item => {
 skippedFaceImages++
