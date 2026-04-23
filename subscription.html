@@ -822,6 +822,62 @@
       return ["free", "basic", "pro"].includes(plan) ? plan : "free";
     }
 
+    function formatStorageGbFromBytes(bytes){
+      const gb = Number(bytes || 0) / (1024 * 1024 * 1024);
+      if (!Number.isFinite(gb) || gb <= 0) return "0.00";
+      return gb.toFixed(2);
+    }
+
+    function bytesFromGb(gb){
+      const numeric = Number(gb || 0);
+      if(!Number.isFinite(numeric) || numeric <= 0) return 0;
+      return Math.floor(numeric * 1024 * 1024 * 1024);
+    }
+
+    function applyStorageQuotaUi({
+      effectivePlan,
+      storageLimitGb,
+      usedBytes,
+      reservedBytes
+    }){
+      const safeLimitGb = Number(storageLimitGb || 0) || (effectivePlan === "pro" ? 100 : effectivePlan === "basic" ? 50 : 5);
+      const limitBytes = bytesFromGb(safeLimitGb);
+      const used = Math.max(0, Number(usedBytes || 0));
+      const reserved = Math.max(0, Number(reservedBytes || 0));
+      const trackedBytes = used + reserved;
+
+      storageUsageText.textContent = `${formatStorageGbFromBytes(used)}GB / ${safeLimitGb}GB`;
+
+      const usageRatio = limitBytes > 0 ? trackedBytes / limitBytes : 0;
+
+      if(usageRatio >= 1){
+        planStatusBadge.textContent = "Storage Full";
+        planStatusBadge.className = "inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-red-400/30 bg-red-500/10 text-red-100";
+        showToast("error", "Your storage limit is full. Upgrade your plan to continue uploads.", 5200);
+
+        if(effectivePlan === "free"){
+          basicPlanBtn.classList.remove("secondary");
+          basicPlanBtn.classList.add("primary");
+          basicPlanBtn.textContent = billingMode === "monthly" ? "Upgrade to Basic 1 Month" : "Upgrade to Basic Yearly";
+        }else if(effectivePlan === "basic"){
+          proPlanBtn.classList.remove("secondary");
+          proPlanBtn.classList.add("primary");
+          proPlanBtn.textContent = billingMode === "monthly" ? "Upgrade to Pro 1 Month" : "Upgrade to Pro Yearly";
+        }
+        return;
+      }
+
+      if(usageRatio >= 0.9){
+        planStatusBadge.textContent = "Storage Near Limit";
+        planStatusBadge.className = "inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-amber-300/30 bg-amber-400/10 text-amber-50";
+        showToast("info", "Your storage is almost full. Upgrade soon to avoid upload interruptions.", 5000);
+        return;
+      }
+
+      planStatusBadge.textContent = `${currentPlanText.textContent} Plan`;
+      planStatusBadge.className = "inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-white/10 bg-white/5 text-white/80";
+    }
+
     function getPlanConfig(plan, mode){
       const plans = {
         basic: {
@@ -1024,7 +1080,8 @@
       if(error){
         console.error("Unable to load photographer_settings:", error);
         setCurrentPlan("free");
-        storageUsageText.textContent = "0GB / 5GB";
+        storageUsageText.textContent = "0.00GB / 5GB";
+        planStatusBadge.textContent = "Plan Center";
         showToast("error", "Unable to load subscription state right now.");
         return;
       }
@@ -1042,13 +1099,47 @@
       );
 
       setCurrentPlan(effectivePlan);
-      storageUsageText.textContent = `0GB / ${storageLimit}GB`;
+
+      let usedBytes = 0;
+      let reservedBytes = 0;
+
+      try{
+        const { data: usageData, error: usageError } = await supabase
+          .from("user_storage_usage")
+          .select("used_bytes, reserved_bytes")
+          .eq("user_id", currentUser.id)
+          .maybeSingle();
+
+        if(usageError){
+          console.error("Unable to load user_storage_usage:", usageError);
+        }else{
+          usedBytes = Number(usageData?.used_bytes || 0);
+          reservedBytes = Number(usageData?.reserved_bytes || 0);
+        }
+      }catch(storageErr){
+        console.error("Storage usage load crash:", storageErr);
+      }
+
+      applyStorageQuotaUi({
+        effectivePlan,
+        storageLimitGb: storageLimit,
+        usedBytes,
+        reservedBytes
+      });
 
       if(effectivePlan !== "free" && (dbBilling === "monthly" || dbBilling === "yearly")){
         updateBillingMode(dbBilling === "monthly" ? "monthly" : "annual");
       }else{
         updateBillingMode("annual");
       }
+
+      // Re-apply after button labels refresh
+      applyStorageQuotaUi({
+        effectivePlan,
+        storageLimitGb: storageLimit,
+        usedBytes,
+        reservedBytes
+      });
     }
 
     async function startSubscriptionCheckout(targetPlan){
