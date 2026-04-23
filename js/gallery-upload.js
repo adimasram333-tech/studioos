@@ -561,7 +561,8 @@ const dimensions = await readImageDimensionsLocal(file)
 const signedUpload = await window.requestS3UploadUrl({
 eventId: String(eventId),
 fileName: safeFileName,
-contentType: file.type || "image/jpeg"
+contentType: file.type || "image/jpeg",
+fileSize: Number(file.size || 0)
 })
 
 await window.uploadFileToSignedS3Url({
