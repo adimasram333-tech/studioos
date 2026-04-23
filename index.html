@@ -27,13 +27,55 @@ color:#818cf8;
 cursor:pointer;
 }
 
+.link:hover{
+text-decoration:underline;
+}
+
+.helper-row{
+display:flex;
+align-items:center;
+justify-content:flex-end;
+margin-top:-0.5rem;
+margin-bottom:1rem;
+}
+
+.feedback{
+display:none;
+margin-top:1rem;
+padding:0.85rem 1rem;
+border-radius:0.85rem;
+font-size:0.9rem;
+line-height:1.5;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.feedback.show{
+display:block;
+}
+
+.feedback.info{
+background:rgba(99,102,241,0.12);
+border-color:rgba(99,102,241,0.3);
+color:#c7d2fe;
+}
+
+.feedback.success{
+background:rgba(34,197,94,0.12);
+border-color:rgba(34,197,94,0.28);
+color:#bbf7d0;
+}
+
+.feedback.error{
+background:rgba(239,68,68,0.12);
+border-color:rgba(239,68,68,0.28);
+color:#fecaca;
+}
+
 </style>
 
 </head>
 
-<body class="text-white min-h-screen flex items-center justify-center">
-
-<!-- LOGIN CONTAINER -->
+<body class="text-white min-h-screen flex items-center justify-center px-4">
 
 <div id="loginBox" class="glass p-8 rounded-2xl w-80 hidden">
 
@@ -54,8 +96,12 @@ required>
 id="password"
 type="password"
 placeholder="Password"
-class="w-full mb-6 p-3 rounded-lg bg-black/40"
+class="w-full mb-3 p-3 rounded-lg bg-black/40"
 required>
+
+<div id="forgotPasswordRow" class="helper-row">
+<span id="forgotPasswordBtn" class="link text-sm">Forgot Password?</span>
+</div>
 
 <button
 id="submitBtn"
@@ -65,6 +111,8 @@ Login
 </button>
 
 </form>
+
+<div id="authFeedback" class="feedback info"></div>
 
 <button
 id="googleBtn"
@@ -80,19 +128,15 @@ Continue with Google
 </button>
 
 <p class="text-center text-sm mt-4">
-
 <span id="toggleText">
 Don't have an account?
 </span>
-
 <span id="toggleBtn" class="link">
 Signup
 </span>
-
 </p>
 
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
@@ -101,34 +145,43 @@ Signup
 
 import { login, signup, googleLogin } from "./js/auth.js"
 
-
-// ======================
-// WAIT FOR SUPABASE CLIENT
-// ======================
-
 function waitForSupabase(){
-
 return new Promise(resolve=>{
-
 const check = setInterval(()=>{
-
 if(window.supabaseClient){
-
 clearInterval(check)
 resolve(window.supabaseClient)
-
 }
-
 },50)
-
 })
-
 }
 
+function setFeedback(type, message){
+const box = document.getElementById("authFeedback")
+box.className = "feedback show"
 
-// ======================
-// SESSION CHECK
-// ======================
+if(type === "success"){
+box.classList.add("success")
+}else if(type === "error"){
+box.classList.add("error")
+}else{
+box.classList.add("info")
+}
+
+box.innerText = message
+}
+
+function clearFeedback(){
+const box = document.getElementById("authFeedback")
+box.className = "feedback info"
+box.innerText = ""
+}
+
+function getResetRedirectUrl(){
+const current = window.location.href
+const base = current.substring(0, current.lastIndexOf("/") + 1)
+return `${base}reset-password.html`
+}
 
 const supabase = await waitForSupabase()
 
@@ -136,101 +189,131 @@ const { data:{ session } } =
 await supabase.auth.getSession()
 
 if(session){
-
 window.location.replace("dashboard.html")
-
 }else{
-
 document.getElementById("loginBox").classList.remove("hidden")
-
 }
-
-
-// ======================
-// LOGIN / SIGNUP LOGIC
-// ======================
 
 let mode = "login"
 
-const form =
-document.getElementById("authForm")
+const form = document.getElementById("authForm")
+const title = document.getElementById("title")
+const btn = document.getElementById("submitBtn")
+const toggle = document.getElementById("toggleBtn")
+const text = document.getElementById("toggleText")
+const googleBtn = document.getElementById("googleBtn")
+const passwordInput = document.getElementById("password")
+const forgotPasswordRow = document.getElementById("forgotPasswordRow")
+const forgotPasswordBtn = document.getElementById("forgotPasswordBtn")
 
-const title =
-document.getElementById("title")
-
-const btn =
-document.getElementById("submitBtn")
-
-const toggle =
-document.getElementById("toggleBtn")
-
-const text =
-document.getElementById("toggleText")
-
-const googleBtn =
-document.getElementById("googleBtn")
-
-
-// TOGGLE LOGIN / SIGNUP
-
-toggle.addEventListener("click",()=>{
+function syncModeUi(){
+clearFeedback()
 
 if(mode==="login"){
-
-mode="signup"
-
-title.innerText="Create Account"
-btn.innerText="Signup"
-
-text.innerText="Already have an account?"
-toggle.innerText="Login"
-
-}else{
-
-mode="login"
-
 title.innerText="StudioOS Login"
 btn.innerText="Login"
-
 text.innerText="Don't have an account?"
 toggle.innerText="Signup"
-
+passwordInput.required = true
+passwordInput.disabled = false
+passwordInput.placeholder = "Password"
+forgotPasswordRow.style.display = "flex"
+}else{
+title.innerText="Create Account"
+btn.innerText="Signup"
+text.innerText="Already have an account?"
+toggle.innerText="Login"
+passwordInput.required = true
+passwordInput.disabled = false
+passwordInput.placeholder = "Password"
+forgotPasswordRow.style.display = "none"
+}
 }
 
+syncModeUi()
+
+toggle.addEventListener("click",()=>{
+mode = mode === "login" ? "signup" : "login"
+syncModeUi()
 })
 
+forgotPasswordBtn.addEventListener("click", async ()=>{
+clearFeedback()
 
-// FORM SUBMIT
+const email = document.getElementById("email").value.trim()
+
+if(!email){
+setFeedback("error", "Please enter your email first to receive a password reset link.")
+document.getElementById("email").focus()
+return
+}
+
+try{
+forgotPasswordBtn.style.pointerEvents = "none"
+forgotPasswordBtn.style.opacity = "0.7"
+
+const { error } = await supabase.auth.resetPasswordForEmail(email, {
+redirectTo: getResetRedirectUrl()
+})
+
+forgotPasswordBtn.style.pointerEvents = ""
+forgotPasswordBtn.style.opacity = ""
+
+if(error){
+console.error("Reset password request failed:", error)
+setFeedback("error", error.message || "Unable to send password reset email right now.")
+return
+}
+
+setFeedback("success", "Password reset link sent. Check your email and open the link to create a new password.")
+}catch(err){
+console.error("Reset password request crashed:", err)
+forgotPasswordBtn.style.pointerEvents = ""
+forgotPasswordBtn.style.opacity = ""
+setFeedback("error", "Unexpected error while sending reset email.")
+}
+})
 
 form.addEventListener("submit", async (e)=>{
-
 e.preventDefault()
+clearFeedback()
 
-const email =
-document.getElementById("email").value
+const email = document.getElementById("email").value.trim()
+const password = document.getElementById("password").value
 
-const password =
-document.getElementById("password").value
+try{
+btn.disabled = true
+googleBtn.disabled = true
 
 if(mode==="login"){
-
 await login(email,password)
-
 }else{
-
 await signup(email,password)
-
+setFeedback("success", "Signup request submitted. Please check your email if confirmation is required.")
 }
-
+}catch(err){
+console.error("Auth submit crashed:", err)
+setFeedback("error", "Authentication failed. Please try again.")
+}finally{
+btn.disabled = false
+googleBtn.disabled = false
+}
 })
 
-
-// GOOGLE LOGIN
-
 googleBtn.addEventListener("click", async ()=>{
+clearFeedback()
 
+try{
+googleBtn.disabled = true
+btn.disabled = true
 await googleLogin()
-
+}catch(err){
+console.error("Google login crashed:", err)
+setFeedback("error", "Google login failed. Please try again.")
+}finally{
+googleBtn.disabled = false
+btn.disabled = false
+}
 })
 
 </script>
