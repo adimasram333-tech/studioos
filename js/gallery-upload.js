@@ -593,6 +593,11 @@ let signedUpload = null
 
 try{
 signedUpload = await window.requestS3UploadUrl({
+// compatibility: send both snake_case and camelCase until all callers/helpers are aligned
+event_id: String(eventId),
+file_name: safeFileName,
+content_type: file.type || "image/jpeg",
+file_size: Number(file.size || 0),
 eventId: String(eventId),
 fileName: safeFileName,
 contentType: file.type || "image/jpeg",
@@ -614,12 +619,18 @@ contentType: file.type || "image/jpeg"
 })
 
 const savedPhoto = await window.saveS3GalleryPhoto({
-eventId: String(eventId),
+// compatibility: send both snake_case and camelCase until saver/helper is fully normalized
+event_id: String(eventId),
 bucket: signedUpload.bucket,
-objectKey: signedUpload.object_key,
-fileSize: Number(file.size || 0) || null,
+object_key: signedUpload.object_key,
+file_size: Number(file.size || 0) || null,
 width: dimensions.width,
 height: dimensions.height,
+thumbnail_key: null,
+preview_key: null,
+eventId: String(eventId),
+objectKey: signedUpload.object_key,
+fileSize: Number(file.size || 0) || null,
 thumbnailKey: null,
 previewKey: null
 })
