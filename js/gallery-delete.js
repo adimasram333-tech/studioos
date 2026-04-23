@@ -4,55 +4,66 @@
 
 window.deleteGallery = async function(eventId){
 
-  const confirmDelete = confirm("Delete gallery permanently?\n\nThis will remove all photos, tokens and the event.")
-  if(!confirmDelete) return
+  const confirmDelete = confirm(
+    "Delete gallery permanently?\n\nThis will remove all photos, tokens and the event."
+  );
+  if(!confirmDelete) return;
 
   try{
 
-    const supabase = await window.getSupabase()
-    const { data: { session } } = await supabase.auth.getSession()
+    const supabase = await window.getSupabase();
+    const { data: { session } } = await supabase.auth.getSession();
 
     if(!session){
-      alert("Please login again")
-      return
+      alert("Session expired. Please login again.");
+      return;
     }
 
-    // 🔥 CALL FINAL BACKEND (NO CLOUDINARY, NO DOUBLE DELETE)
-    const res = await fetch(
-      "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/delete-gallery",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": window.SUPABASE_ANON_KEY || "",
-          "Authorization": `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({ event_id: String(eventId) })
-      }
-    )
+    // 🔥 USE ENV BASE URL (NO HARDCODE)
+    const functionUrl = `${window.SUPABASE_URL}/functions/v1/delete-gallery`;
 
-    let result = null
+    const res = await fetch(functionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": window.SUPABASE_ANON_KEY || "",
+        "Authorization": `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({ event_id: String(eventId) })
+    });
+
+    let result = null;
+
     try{
-      result = await res.json()
+      result = await res.json();
     }catch(_err){
-      result = null
+      result = null;
     }
 
-    if(!res.ok || !result?.success){
-      console.error("Delete failed:", result)
-      alert(result?.error || "Delete failed")
-      return
+    if(!res.ok){
+      console.error("Delete HTTP error:", res.status, result);
+      alert(result?.error || "Delete failed. Please try again.");
+      return;
     }
 
-    alert("Gallery deleted successfully")
+    if(!result || result.success !== true){
+      console.error("Delete failed:", result);
+      alert(result?.error || "Delete failed");
+      return;
+    }
 
-    const menu = document.getElementById("floatingMenu")
-    if(menu) menu.remove()
+    // 🔥 SUCCESS
+    alert("Gallery deleted successfully");
 
-    location.reload()
+    // Clean UI
+    const menu = document.getElementById("floatingMenu");
+    if(menu) menu.remove();
+
+    // Reload page
+    location.reload();
 
   }catch(err){
-    console.error(err)
-    alert("Delete failed")
+    console.error("Delete exception:", err);
+    alert("Delete failed. Please try again.");
   }
-}
+};
