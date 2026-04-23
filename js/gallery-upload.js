@@ -581,9 +581,8 @@ thumbnailKey: null,
 previewKey: null
 })
 
-// 🔥 TRIGGER IMAGE PROCESSING (AUTO)
-try{
-await fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/process-image", {
+// 🔥 TRIGGER IMAGE PROCESSING (NON-BLOCKING)
+fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/process-image", {
 method: "POST",
 headers: {
 "Content-Type": "application/json",
@@ -594,10 +593,9 @@ body: JSON.stringify({
 object_key: signedUpload.object_key,
 event_id: String(eventId)
 })
-})
-}catch(err){
+}).catch(err=>{
 console.error("Process-image trigger failed", err)
-}
+})
 
 
 const fileUrl = resolveMediaUrlFromPhoto(savedPhoto) || resolveMediaUrlFromPhoto({
@@ -730,7 +728,17 @@ progress.innerText = ""
 return
 }
 
-status.innerText = "Processing faces..."
+status.innerText = "Upload Complete"
+progress.innerText =
+`${successfulUploads.length} photos uploaded • Face processing continues in background`
+
+if(skippedFiles.length > 0){
+console.warn("Skipped files:", skippedFiles)
+}
+
+// 🔥 BACKGROUND FACE PROCESSING (NON-BLOCKING)
+setTimeout(async ()=>{
+try{
 let processedFaceCount = 0
 
 const faceResults = await runWithConcurrency(
@@ -738,7 +746,7 @@ successfulUploads,
 async (item) => {
 const result = await processFace(item.url, eventId, user.id, item.objectKey)
 processedFaceCount++
-progress.innerText = `Faces ${processedFaceCount} / ${successfulUploads.length}`
+console.log(`Background face processing ${processedFaceCount} / ${successfulUploads.length}`)
 return {
 file: item.file,
 result
@@ -768,13 +776,18 @@ reason: faceResult?.reason || "unknown"
 
 })
 
-status.innerText = "Upload Complete"
-progress.innerText =
-`${successfulUploads.length} photos uploaded • ${savedFacesImages} photos processed for face • ${totalFacesDetected} faces detected • ${skippedFaceImages} skipped`
-
-if(skippedFiles.length > 0){
-console.warn("Skipped files:", skippedFiles)
+console.log("Background face processing completed", {
+eventId,
+uploaded: successfulUploads.length,
+savedFacesImages,
+totalFacesDetected,
+skippedFaceImages,
+skippedFiles
+})
+}catch(err){
+console.error("Background face processing failed", err)
 }
+}, 0)
 
 await loadConfirmedEvents(eventId)
 
