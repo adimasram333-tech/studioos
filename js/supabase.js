@@ -305,7 +305,14 @@ result = null
 }
 
 if(!response.ok){
-throw new Error(result?.error || "Edge function request failed.")
+const error = new Error(result?.error || "Edge function request failed.")
+if(result?.code){
+error.code = result.code
+}
+if(result?.details){
+error.details = result.details
+}
+throw error
 }
 
 return result
@@ -317,22 +324,30 @@ return result
 // S3 SIGNED UPLOAD REQUEST
 // ================================
 
-window.requestS3UploadUrl = async function({
-eventId,
-fileName,
-contentType
-}){
+window.requestS3UploadUrl = async function(payload = {}){
 
-if(!eventId) throw new Error("eventId is required.")
-if(!fileName) throw new Error("fileName is required.")
-if(!contentType) throw new Error("contentType is required.")
+const eventId = payload.event_id ?? payload.eventId
+const fileName = payload.file_name ?? payload.fileName
+const contentType = payload.content_type ?? payload.contentType
+const fileSizeRaw = payload.file_size ?? payload.fileSize
+
+if(!eventId) throw new Error("event_id is required.")
+if(!fileName) throw new Error("file_name is required.")
+if(!contentType) throw new Error("content_type is required.")
+
+const fileSize = Number(fileSizeRaw)
+
+if(!Number.isFinite(fileSize) || fileSize <= 0){
+throw new Error("file_size is required.")
+}
 
 const result = await callProtectedEdgeFunction(
 GENERATE_S3_UPLOAD_URL,
 {
 event_id: String(eventId),
 file_name: String(fileName),
-content_type: String(contentType)
+content_type: String(contentType),
+file_size: Math.floor(fileSize)
 }
 )
 
@@ -379,20 +394,24 @@ return true
 // SAVE S3 GALLERY PHOTO
 // ================================
 
-window.saveS3GalleryPhoto = async function({
-eventId,
-bucket,
-objectKey,
-fileSize = null,
-width = null,
-height = null,
-thumbnailKey = null,
-previewKey = null
-}){
+window.saveS3GalleryPhoto = async function(payload = {}){
 
-if(!eventId) throw new Error("eventId is required.")
+const eventId = payload.event_id ?? payload.eventId
+const bucket = payload.bucket
+const objectKey = payload.object_key ?? payload.objectKey
+const fileSizeRaw = payload.file_size ?? payload.fileSize ?? null
+const widthRaw = payload.width ?? null
+const heightRaw = payload.height ?? null
+const thumbnailKey = payload.thumbnail_key ?? payload.thumbnailKey ?? null
+const previewKey = payload.preview_key ?? payload.previewKey ?? null
+
+if(!eventId) throw new Error("event_id is required.")
 if(!bucket) throw new Error("bucket is required.")
-if(!objectKey) throw new Error("objectKey is required.")
+if(!objectKey) throw new Error("object_key is required.")
+
+const fileSize = fileSizeRaw === null ? null : Number(fileSizeRaw)
+const width = widthRaw === null ? null : Number(widthRaw)
+const height = heightRaw === null ? null : Number(heightRaw)
 
 const result = await callProtectedEdgeFunction(
 SAVE_S3_GALLERY_PHOTO_URL,
@@ -400,9 +419,9 @@ SAVE_S3_GALLERY_PHOTO_URL,
 event_id: String(eventId),
 bucket: String(bucket),
 object_key: String(objectKey),
-file_size: typeof fileSize === "number" ? fileSize : null,
-width: typeof width === "number" ? width : null,
-height: typeof height === "number" ? height : null,
+file_size: Number.isFinite(fileSize) ? Math.floor(fileSize) : null,
+width: Number.isFinite(width) ? Math.floor(width) : null,
+height: Number.isFinite(height) ? Math.floor(height) : null,
 thumbnail_key: thumbnailKey ? String(thumbnailKey) : null,
 preview_key: previewKey ? String(previewKey) : null
 }
