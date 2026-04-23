@@ -878,6 +878,38 @@
       planStatusBadge.className = "inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-white/10 bg-white/5 text-white/80";
     }
 
+    function applyExpiredSubscriptionUi({
+      subscriptionStatus,
+      effectivePlan,
+      usedBytes,
+      storageLimitGb
+    }){
+      const status = String(subscriptionStatus || "").trim().toLowerCase();
+      const used = Math.max(0, Number(usedBytes || 0));
+      const limitGb = Number(storageLimitGb || 0) || 5;
+      const overLimit = used > bytesFromGb(limitGb);
+
+      if(status !== "expired"){
+        return;
+      }
+
+      planStatusBadge.textContent = "Subscription Expired";
+      planStatusBadge.className = "inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-amber-300/30 bg-amber-400/10 text-amber-50";
+
+      if(overLimit){
+        showToast("error", "Your subscription expired and your current storage is above the free plan limit. Upgrade to continue uploads.", 5600);
+        basicPlanBtn.classList.remove("secondary");
+        basicPlanBtn.classList.add("primary");
+        basicPlanBtn.textContent = billingMode === "monthly" ? "Upgrade to Basic 1 Month" : "Upgrade to Basic Yearly";
+      }else{
+        showToast("info", "Your subscription expired. You are now on the Free plan.", 5000);
+      }
+
+      if(effectivePlan === "free"){
+        freePlanBtn.textContent = "Current Plan";
+      }
+    }
+
     function getPlanConfig(plan, mode){
       const plans = {
         basic: {
@@ -1093,7 +1125,7 @@
 
       const { data, error } = await supabase
         .from("photographer_settings")
-        .select("plan, billing_cycle, subscription_status, storage_limit_gb, studio_name")
+        .select("plan, billing_cycle, subscription_status, storage_limit_gb, studio_name, plan_expires_at")
         .eq("user_id", currentUser.id)
         .maybeSingle();
 
@@ -1111,8 +1143,13 @@
       const dbPlan = normalizePlan(data?.plan);
       const dbBilling = String(data?.billing_cycle || "").trim().toLowerCase();
       const subscriptionStatus = String(data?.subscription_status || "").trim().toLowerCase();
+      const planExpiresAt = String(data?.plan_expires_at || "").trim();
 
-      const effectivePlan = subscriptionStatus === "active" ? dbPlan : "free";
+      const subscriptionExpired =
+        subscriptionStatus === "expired" ||
+        (subscriptionStatus === "active" && planExpiresAt && new Date(planExpiresAt).getTime() <= Date.now());
+
+      const effectivePlan = subscriptionStatus === "active" && !subscriptionExpired ? dbPlan : "free";
       const storageLimit = Number(
         data?.storage_limit_gb ||
         (effectivePlan === "pro" ? 100 : effectivePlan === "basic" ? 50 : 5)
@@ -1159,6 +1196,13 @@
         storageLimitGb: storageLimit,
         usedBytes,
         reservedBytes
+      });
+
+      applyExpiredSubscriptionUi({
+        subscriptionStatus: subscriptionExpired ? "expired" : subscriptionStatus,
+        effectivePlan,
+        usedBytes,
+        storageLimitGb: storageLimit
       });
     }
 
