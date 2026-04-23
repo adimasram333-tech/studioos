@@ -1022,6 +1022,26 @@
       }
     }
 
+    function getFriendlySubscriptionError(message, code = ""){
+      const raw = String(message || "").trim();
+      const safeCode = String(code || "").trim().toLowerCase();
+      const lower = raw.toLowerCase();
+
+      if(safeCode === "subscription_already_active" || lower.includes("already have an active subscription")){
+        return "You already have an active subscription for this plan.";
+      }
+
+      if(lower.includes("login session expired")){
+        return "Your login session expired. Please login again and retry.";
+      }
+
+      if(lower.includes("payment verified but") || lower.includes("verification failed")){
+        return "Payment received, but subscription activation is still pending. Please wait a moment and refresh.";
+      }
+
+      return raw || "Unable to process subscription right now.";
+    }
+
     function updateBillingMode(mode){
       billingMode = mode === "monthly" ? "monthly" : "annual";
 
@@ -1200,7 +1220,8 @@
         );
 
         if(!orderRes.ok || !orderData?.success || !orderData?.order || !orderData?.order?.id){
-          throw new Error(orderData?.error || "Unable to create subscription order.");
+          const backendCode = String(orderData?.code || "").trim().toLowerCase();
+          throw new Error(getFriendlySubscriptionError(orderData?.error || "Unable to create subscription order.", backendCode));
         }
 
         if(!orderData?.razorpay_key_id){
@@ -1254,27 +1275,29 @@
               );
 
               if(!verifyRes.ok || !verifyData?.success){
-                throw new Error(verifyData?.error || "Payment verification failed.");
+                throw new Error(getFriendlySubscriptionError(verifyData?.error || "Payment verification failed."));
               }
 
               await loadPlanState();
               closeOverlay();
-              showToast("success", "Subscription activated successfully.");
+              showToast("success", verifyData?.idempotent ? "Subscription already verified and active." : "Subscription activated successfully.");
             }catch(verifyError){
               console.error("Subscription verify failed:", verifyError);
+              const verifyMessage = verifyError instanceof Error
+                ? getFriendlySubscriptionError(verifyError.message)
+                : "Payment completed but subscription verification failed.";
+
               openOverlay({
                 badge: "Verification Failed",
                 title: "Payment received, verification pending",
-                text: verifyError instanceof Error
-                  ? verifyError.message
-                  : "Payment completed but subscription verification failed.",
+                text: verifyMessage,
                 showActions: true,
                 showPrimary: false,
                 secondaryLabel: "Close",
                 onSecondary: () => closeOverlay(),
                 dismissible: true,
               });
-              showToast("error", "Payment completed but subscription verification failed.");
+              showToast("error", verifyMessage);
             }finally{
               checkoutInProgress = false;
               setButtonBusy(false);
@@ -1305,7 +1328,13 @@
           checkoutInProgress = false;
           setButtonBusy(false);
           closeOverlay();
-          showToast("error", "Payment failed. Please try again.");
+
+          const paymentFailedMessage =
+            errorResponse?.error?.description ||
+            errorResponse?.error?.reason ||
+            "Payment failed. Please try again.";
+
+          showToast("error", paymentFailedMessage);
         });
 
         rzp.open();
@@ -1313,12 +1342,15 @@
         console.error("Unable to start subscription checkout:", error);
         checkoutInProgress = false;
         setButtonBusy(false);
+
+        const checkoutMessage = error instanceof Error
+          ? getFriendlySubscriptionError(error.message)
+          : "Unable to start payment right now.";
+
         openOverlay({
           badge: "Checkout Failed",
           title: "Unable to start payment",
-          text: error instanceof Error
-            ? error.message
-            : "Unable to start payment right now.",
+          text: checkoutMessage,
           showActions: true,
           showPrimary: true,
           secondaryLabel: "Close",
@@ -1332,7 +1364,7 @@
           },
           dismissible: true,
         });
-        showToast("error", "Unable to start payment right now.");
+        showToast("error", checkoutMessage);
       }
     }
 
