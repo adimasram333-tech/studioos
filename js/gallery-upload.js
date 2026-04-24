@@ -71,7 +71,17 @@ return false
 const allowedPrefixes = [
 `${userId}/${eventId}/original/`,
 `${userId}/${eventId}/preview/`,
-`${userId}/${eventId}/thumb/`
+`${userId}/${eventId}/thumb/`,
+`${userId}/${eventId}/originals/`,
+`${userId}/${eventId}/previews/`,
+`${userId}/${eventId}/thumbs/`,
+
+`tenant/${userId}/event/${eventId}/original/`,
+`tenant/${userId}/event/${eventId}/preview/`,
+`tenant/${userId}/event/${eventId}/thumb/`,
+`tenant/${userId}/event/${eventId}/originals/`,
+`tenant/${userId}/event/${eventId}/previews/`,
+`tenant/${userId}/event/${eventId}/thumbs/`
 ]
 
 return allowedPrefixes.some(prefix => cleanKey.startsWith(prefix))
@@ -645,12 +655,59 @@ await Promise.all(runners)
 return results
 }
 
+function getAdaptiveUploadConcurrency(files){
+
+const list = Array.isArray(files) ? files : []
+const totalBytes = list.reduce((sum, file) => sum + Number(file?.size || 0), 0)
+const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection || null
+const effectiveType = String(connection?.effectiveType || "").toLowerCase()
+const downlink = Number(connection?.downlink || 0)
+const saveData = !!connection?.saveData
+const isMobile =
+/android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent || "") ||
+window.innerWidth < 768
+
+if(saveData){
+return 2
+}
+
+if(effectiveType.includes("2g")){
+return 2
+}
+
+if(effectiveType.includes("3g")){
+return isMobile ? 2 : 3
+}
+
+if(totalBytes >= 1024 * 1024 * 1024){
+return isMobile ? 3 : 6
+}
+
+if(downlink && downlink < 5){
+return isMobile ? 2 : 3
+}
+
+if(isMobile){
+return 3
+}
+
+if(list.length >= 50){
+return 6
+}
+
+return 5
+}
+
+function sortFilesForUpload(files){
+return [...files].sort((a, b) => Number(b?.size || 0) - Number(a?.size || 0))
+}
+
 
 // =============================
 // S3 UPLOAD HELPERS
 // =============================
 
-async function uploadSingleImageToS3(file, eventId){
+async function uploadSingleImageToS3(file, eventId, user){
 
 if(typeof window.requestS3UploadUrl !== "function"){
 throw new Error("S3 upload signer not loaded")
@@ -665,10 +722,9 @@ throw new Error("S3 gallery saver not loaded")
 }
 
 const safeFileName = sanitizeFileName(file.name || "image.jpg")
-const dimensions = await readImageDimensionsLocal(file)
-const user = await getCurrentUser()
+const dimensionsPromise = readImageDimensionsLocal(file)
 
-if(!user){
+if(!user || !user.id){
 throw new Error("Login required")
 }
 
@@ -708,6 +764,8 @@ uploadUrl: signedUpload.upload_url,
 file,
 contentType: file.type || "image/jpeg"
 })
+
+const dimensions = await dimensionsPromise
 
 const savedPhoto = await window.saveS3GalleryPhoto({
 // permanent compatibility fix: support both normalized backend payload and existing helper payload
@@ -812,15 +870,20 @@ status.innerText = "No valid images selected"
 return
 }
 
+const uploadQueue = sortFilesForUpload(validFiles)
+const uploadConcurrency = getAdaptiveUploadConcurrency(uploadQueue)
+
+progress.innerText = `Preparing upload • ${uploadConcurrency} parallel uploads`
+
 const uploadResults = await runWithConcurrency(
-validFiles,
+uploadQueue,
 async (file) => {
 try{
-const result = await uploadSingleImageToS3(file, eventId)
+const result = await uploadSingleImageToS3(file, eventId, user)
 
 if(result?.success && result?.photo){
 uploaded++
-progress.innerText = `Uploading ${uploaded} / ${validFiles.length}`
+progress.innerText = `Uploading ${uploaded} / ${uploadQueue.length}`
 return result
 }
 
@@ -840,7 +903,7 @@ code: err?.code || null
 }
 }
 },
-3
+uploadConcurrency
 )
 
 const successfulUploads = (uploadResults || []).filter(item => item && item.success && item.photo)
