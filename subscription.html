@@ -1125,7 +1125,7 @@
 
       const { data, error } = await supabase
         .from("photographer_settings")
-        .select("plan, billing_cycle, subscription_status, storage_limit_gb, studio_name, plan_expires_at, used_storage_bytes, reserved_storage_bytes")
+        .select("plan, billing_cycle, subscription_status, storage_limit_gb, studio_name, plan_expires_at")
         .eq("user_id", currentUser.id)
         .maybeSingle();
 
@@ -1157,8 +1157,25 @@
 
       setCurrentPlan(effectivePlan);
 
-      const usedBytes = Math.max(0, Number(data?.used_storage_bytes || 0));
-      const reservedBytes = Math.max(0, Number(data?.reserved_storage_bytes || 0));
+      let usedBytes = 0;
+      let reservedBytes = 0;
+
+      try{
+        const { data: usageData, error: usageError } = await supabase
+          .from("user_storage_usage")
+          .select("used_bytes, reserved_bytes")
+          .eq("user_id", currentUser.id)
+          .maybeSingle();
+
+        if(usageError){
+          console.error("Unable to load user_storage_usage:", usageError);
+        }else{
+          usedBytes = Number(usageData?.used_bytes || 0);
+          reservedBytes = Number(usageData?.reserved_bytes || 0);
+        }
+      }catch(storageErr){
+        console.error("Storage usage load crash:", storageErr);
+      }
 
       applyStorageQuotaUi({
         effectivePlan,
