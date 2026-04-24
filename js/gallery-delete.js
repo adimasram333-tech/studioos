@@ -1,69 +1,163 @@
-// =============================
-// DELETE MODULE (FINAL PRODUCTION SAFE - S3)
-// =============================
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { S3Client, DeleteObjectCommand } from "https://esm.sh/@aws-sdk/client-s3@3.787.0";
 
-window.deleteGallery = async function(eventId){
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
-  const confirmDelete = confirm(
-    "Delete gallery permanently?\n\nThis will remove all photos, tokens and the event."
-  );
-  if(!confirmDelete) return;
+const s3 = new S3Client({
+  region: Deno.env.get("AWS_REGION"),
+  credentials: {
+    accessKeyId: Deno.env.get("AWS_ACCESS_KEY_ID"),
+    secretAccessKey: Deno.env.get("AWS_SECRET_ACCESS_KEY"),
+  },
+});
 
-  try{
+serve(async (req) => {
 
-    const supabase = await window.getSupabase();
-    const { data: { session } } = await supabase.auth.getSession();
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
 
-    if(!session){
-      alert("Session expired. Please login again.");
-      return;
+  try {
+
+    const { event_id } = await req.json();
+
+    if (!event_id) {
+      return new Response(JSON.stringify({ error: "Missing event_id" }), { status: 400 });
     }
 
-    // 🔥 USE ENV BASE URL (NO HARDCODE)
-    const functionUrl = `${window.SUPABASE_URL}/functions/v1/delete-gallery`;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    const res = await fetch(functionUrl, {
-      method: "POST",
+    // 🔥 GET ALL PHOTOS
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/gallery_photos?event_id=eq.${event_id}`,
+      {
+        headers: {
+          "apikey": serviceKey,
+          "Authorization": `Bearer ${serviceKey}`
+        }
+      }
+    );
+
+    const photos = await res.json();
+
+    if (!Array.isArray(photos)) {
+      throw new Error("Invalid photos response");
+    }
+
+    // 🔥 CALCULATE TOTAL SIZE (IMPORTANT FIX)
+    let totalDeletedBytes = 0;
+    let userId = null;
+
+    for (const photo of photos) {
+
+      if (!userId && photo.user_id) {
+        userId = photo.user_id;
+      }
+
+      if (photo.file_size) {
+        totalDeletedBytes += Number(photo.file_size || 0);
+      }
+
+      // 🔥 DELETE ORIGINAL
+      if (photo.object_key) {
+        await s3.send(new DeleteObjectCommand({
+          Bucket: Deno.env.get("AWS_S3_BUCKET"),
+          Key: photo.object_key
+        }));
+      }
+
+      // 🔥 DELETE PREVIEW
+      if (photo.preview_key && photo.preview_key !== photo.object_key) {
+        await s3.send(new DeleteObjectCommand({
+          Bucket: Deno.env.get("AWS_S3_BUCKET"),
+          Key: photo.preview_key
+        }));
+      }
+
+      // 🔥 DELETE THUMB
+      if (photo.thumbnail_key && photo.thumbnail_key !== photo.object_key) {
+        await s3.send(new DeleteObjectCommand({
+          Bucket: Deno.env.get("AWS_S3_BUCKET"),
+          Key: photo.thumbnail_key
+        }));
+      }
+    }
+
+    // 🔥 DELETE DB RECORDS
+    await fetch(`${supabaseUrl}/rest/v1/gallery_photos?event_id=eq.${event_id}`, {
+      method: "DELETE",
       headers: {
-        "Content-Type": "application/json",
-        "apikey": window.SUPABASE_ANON_KEY || "",
-        "Authorization": `Bearer ${session.access_token}`
-      },
-      body: JSON.stringify({ event_id: String(eventId) })
+        "apikey": serviceKey,
+        "Authorization": `Bearer ${serviceKey}`
+      }
     });
 
-    let result = null;
+    await fetch(`${supabaseUrl}/rest/v1/event_tokens?event_id=eq.${event_id}`, {
+      method: "DELETE",
+      headers: {
+        "apikey": serviceKey,
+        "Authorization": `Bearer ${serviceKey}`
+      }
+    });
 
-    try{
-      result = await res.json();
-    }catch(_err){
-      result = null;
+    await fetch(`${supabaseUrl}/rest/v1/events?id=eq.${event_id}`, {
+      method: "DELETE",
+      headers: {
+        "apikey": serviceKey,
+        "Authorization": `Bearer ${serviceKey}`
+      }
+    });
+
+    // 🔥🔥🔥 STORAGE MINUS FIX (MAIN PART)
+    if (userId && totalDeletedBytes > 0) {
+
+      const settingsRes = await fetch(
+        `${supabaseUrl}/rest/v1/photographer_settings?user_id=eq.${userId}`,
+        {
+          headers: {
+            "apikey": serviceKey,
+            "Authorization": `Bearer ${serviceKey}`
+          }
+        }
+      );
+
+      const settings = await settingsRes.json();
+
+      if (settings && settings.length > 0) {
+
+        const currentUsed = Number(settings[0].used_storage_bytes || 0);
+
+        const newUsed = Math.max(0, currentUsed - totalDeletedBytes);
+
+        await fetch(
+          `${supabaseUrl}/rest/v1/photographer_settings?user_id=eq.${userId}`,
+          {
+            method: "PATCH",
+            headers: {
+              "apikey": serviceKey,
+              "Authorization": `Bearer ${serviceKey}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              used_storage_bytes: newUsed
+            })
+          }
+        );
+      }
     }
 
-    if(!res.ok){
-      console.error("Delete HTTP error:", res.status, result);
-      alert(result?.error || "Delete failed. Please try again.");
-      return;
-    }
+    return new Response(JSON.stringify({
+      success: true
+    }), { headers: corsHeaders });
 
-    if(!result || result.success !== true){
-      console.error("Delete failed:", result);
-      alert(result?.error || "Delete failed");
-      return;
-    }
-
-    // 🔥 SUCCESS
-    alert("Gallery deleted successfully");
-
-    // Clean UI
-    const menu = document.getElementById("floatingMenu");
-    if(menu) menu.remove();
-
-    // Reload page
-    location.reload();
-
-  }catch(err){
-    console.error("Delete exception:", err);
-    alert("Delete failed. Please try again.");
+  } catch (err) {
+    return new Response(JSON.stringify({
+      error: err.message
+    }), { status: 500 });
   }
-};
+
+});
