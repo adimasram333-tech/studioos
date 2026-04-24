@@ -822,10 +822,39 @@
       return ["free", "basic", "pro"].includes(plan) ? plan : "free";
     }
 
-    function formatStorageGbFromBytes(bytes){
-      const gb = Number(bytes || 0) / (1024 * 1024 * 1024);
-      if (!Number.isFinite(gb) || gb <= 0) return "0.00";
-      return gb.toFixed(2);
+    function formatStorageUsageFromBytes(bytes){
+      const safeBytes = Math.max(0, Number(bytes || 0));
+
+      if(!Number.isFinite(safeBytes) || safeBytes <= 0){
+        return "0 MB";
+      }
+
+      const mb = safeBytes / (1024 * 1024);
+      const gb = safeBytes / (1024 * 1024 * 1024);
+
+      if(gb >= 1){
+        return `${gb.toFixed(2)} GB`;
+      }
+
+      if(mb >= 1){
+        return `${Math.ceil(mb)} MB`;
+      }
+
+      return "1 MB";
+    }
+
+    function formatStorageLimitFromGb(gb){
+      const safeGb = Number(gb || 0);
+
+      if(!Number.isFinite(safeGb) || safeGb <= 0){
+        return "0 GB";
+      }
+
+      if(Number.isInteger(safeGb)){
+        return `${safeGb} GB`;
+      }
+
+      return `${safeGb.toFixed(2)} GB`;
     }
 
     function bytesFromGb(gb){
@@ -846,7 +875,7 @@
       const reserved = Math.max(0, Number(reservedBytes || 0));
       const trackedBytes = used + reserved;
 
-      storageUsageText.textContent = `${formatStorageGbFromBytes(used)}GB / ${safeLimitGb}GB`;
+      storageUsageText.textContent = `${formatStorageUsageFromBytes(trackedBytes)} / ${formatStorageLimitFromGb(safeLimitGb)}`;
 
       const usageRatio = limitBytes > 0 ? trackedBytes / limitBytes : 0;
 
@@ -1132,7 +1161,7 @@
       if(error){
         console.error("Unable to load photographer_settings:", error);
         setCurrentPlan("free");
-        storageUsageText.textContent = "0.00GB / 5GB";
+        storageUsageText.textContent = "0 MB / 5 GB";
         planStatusBadge.textContent = "Plan Center";
         showToast("error", "Unable to load subscription state right now.");
         return;
