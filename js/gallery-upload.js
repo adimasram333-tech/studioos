@@ -131,6 +131,110 @@ return { success: false, reason: "process_image_crashed" }
 }
 
 
+function sleep(ms){
+return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function isRetryableUploadError(err){
+const message = extractErrorMessage(err).toLowerCase()
+
+return (
+message.includes("network") ||
+message.includes("failed to fetch") ||
+message.includes("timeout") ||
+message.includes("temporarily") ||
+message.includes("s3 upload failed") ||
+message.includes("edge function request failed")
+)
+}
+
+async function runWithRetry(task, options = {}){
+const retries = Number(options.retries || 2)
+const baseDelay = Number(options.baseDelay || 700)
+let lastError = null
+
+for(let attempt = 0; attempt <= retries; attempt++){
+try{
+return await task(attempt)
+}catch(err){
+lastError = err
+
+if(attempt >= retries || !isRetryableUploadError(err)){
+throw err
+}
+
+await sleep(baseDelay * Math.pow(2, attempt))
+}
+}
+
+throw lastError || new Error("Operation failed")
+}
+
+function getRollbackS3UploadUrl(){
+if(window.ROLLBACK_S3_UPLOAD_URL){
+return window.ROLLBACK_S3_UPLOAD_URL
+}
+
+if(window.GENERATE_S3_UPLOAD_URL){
+return String(window.GENERATE_S3_UPLOAD_URL).replace("/generate-s3-upload-url", "/rollback-s3-upload")
+}
+
+return "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/rollback-s3-upload"
+}
+
+async function rollbackUploadedS3Object(objectKey, eventId, userId){
+try{
+const cleanKey = String(objectKey || "").replace(/^\/+/, "").trim()
+
+if(!cleanKey || !eventId || !userId){
+return { success: false, reason: "missing_rollback_params" }
+}
+
+if(!isSafeS3ObjectKey(cleanKey, userId, String(eventId))){
+console.error("Rollback skipped: unsafe object key", cleanKey)
+return { success: false, reason: "unsafe_key" }
+}
+
+const accessToken = await getCurrentSessionAccessToken()
+
+if(!accessToken){
+console.error("Rollback skipped: missing authenticated session")
+return { success: false, reason: "missing_session" }
+}
+
+const response = await fetch(getRollbackS3UploadUrl(), {
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+"apikey": window.SUPABASE_ANON_KEY || "",
+"Authorization": `Bearer ${accessToken}`
+},
+body: JSON.stringify({
+event_id: String(eventId),
+object_key: cleanKey
+})
+})
+
+let result = null
+try{
+result = await response.json()
+}catch(_err){
+result = null
+}
+
+if(!response.ok || !result?.success){
+console.error("S3 rollback failed", result || response.status)
+return { success: false, reason: "rollback_failed", status: response.status, result }
+}
+
+return { success: true, result }
+}catch(err){
+console.error("S3 rollback crashed", err)
+return { success: false, reason: "rollback_crashed" }
+}
+}
+
+
 // =============================
 // IMAGE HELPERS
 // =============================
@@ -759,15 +863,22 @@ if(!isSafeS3ObjectKey(signedUpload.object_key, user.id, String(eventId))){
 throw new Error("Unsafe S3 object key returned by upload signer")
 }
 
-await window.uploadFileToSignedS3Url({
+await runWithRetry(
+async () => await window.uploadFileToSignedS3Url({
 uploadUrl: signedUpload.upload_url,
 file,
 contentType: file.type || "image/jpeg"
-})
+}),
+{ retries: 2, baseDelay: 900 }
+)
 
 const dimensions = await dimensionsPromise
 
-const savedPhoto = await window.saveS3GalleryPhoto({
+let savedPhoto = null
+
+try{
+savedPhoto = await runWithRetry(
+async () => await window.saveS3GalleryPhoto({
 // permanent compatibility fix: support both normalized backend payload and existing helper payload
 event_id: String(eventId),
 bucket: signedUpload.bucket,
@@ -782,7 +893,13 @@ objectKey: signedUpload.object_key,
 fileSize: Number(file.size || 0) || null,
 thumbnailKey: null,
 previewKey: null
-})
+}),
+{ retries: 1, baseDelay: 800 }
+)
+}catch(saveErr){
+await rollbackUploadedS3Object(signedUpload.object_key, String(eventId), user.id)
+throw saveErr
+}
 
 // 🔥 TRIGGER IMAGE PROCESSING (NON-BLOCKING, AUTHENTICATED)
 triggerImageProcessingJob(signedUpload.object_key, String(eventId))
