@@ -1105,8 +1105,39 @@ totalFacesDetected,
 skippedFaceImages,
 skippedFiles
 })
+
+if(status){
+status.innerText = "Upload Complete"
+}
+
+if(progress){
+const noFaceCount = skippedFiles.filter(item => item && item.reason === "no_face_detected").length
+const failedFaceCount = skippedFiles.filter(item => item && item.reason !== "no_face_detected" && item.reason !== "upload_failed").length
+const summaryParts = [
+`${successfulUploads.length} photos uploaded`,
+`Face processing completed`,
+`${totalFacesDetected} faces detected`
+]
+
+if(savedFacesImages > 0){
+summaryParts.push(`${savedFacesImages} photos saved for face search`)
+}
+
+if(noFaceCount > 0){
+summaryParts.push(`${noFaceCount} photos had no clear face`)
+}
+
+if(failedFaceCount > 0){
+summaryParts.push(`${failedFaceCount} face checks skipped`)
+}
+
+progress.innerText = summaryParts.join(" • ")
+}
 }catch(err){
 console.error("Background face processing failed", err)
+if(progress){
+progress.innerText = `${successfulUploads.length} photos uploaded • Face processing could not finish automatically`
+}
 }
 }, 0)
 
