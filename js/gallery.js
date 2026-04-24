@@ -29,6 +29,53 @@ ${buildGuestDownloadLabel(guestFreeDownload)}
 `
 }
 
+function removeEventCardFromDom(id){
+const safeId = String(id || "").trim()
+if(!safeId) return false
+
+const card = document.querySelector(`[data-gallery-event-id="${CSS.escape(safeId)}"]`)
+if(card){
+card.remove()
+}
+
+const grid = document.getElementById("galleryGrid")
+const empty = document.getElementById("emptyState")
+
+if(grid && grid.children.length === 0 && empty){
+empty.innerText = "No events found"
+empty.classList.remove("hidden")
+}
+
+return !!card
+}
+
+function clearDeletedEventSession(id){
+const safeId = String(id || "").trim()
+if(!safeId) return
+
+const storedEventId = sessionStorage.getItem("event_id")
+if(storedEventId && String(storedEventId) === safeId){
+sessionStorage.removeItem("event_id")
+}
+
+const eventScopedKeys = [
+"gallery_access",
+"visitor_id",
+"face_encoding",
+"matched_images",
+"matched_image_urls",
+"face_matched_images",
+"face_match_images",
+"guest_matched_images"
+]
+
+eventScopedKeys.forEach(key=>{
+try{
+sessionStorage.removeItem(key)
+}catch(e){}
+})
+}
+
 function positionFloatingMenu(menu, btn){
 
 if(!menu || !btn) return
@@ -132,8 +179,48 @@ activeMenu = null
 }
 }, true)
 
-window.openEvent = function(id){
-window.location.href = `gallery.html?event_id=${id}`
+window.openEvent = async function(id){
+
+const safeId = String(id || "").trim()
+if(!safeId){
+alert("Invalid event")
+return
+}
+
+try{
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!supabase || !user){
+alert("Please login again")
+return
+}
+
+const { data: ev, error } = await supabase
+.from("events")
+.select("id,user_id")
+.eq("id", safeId)
+.eq("user_id", user.id)
+.maybeSingle()
+
+if(error){
+console.error("Event validation failed:", error)
+alert("Failed to open event")
+return
+}
+
+if(!ev){
+removeEventCardFromDom(safeId)
+clearDeletedEventSession(safeId)
+alert("This event was already deleted or no longer exists.")
+return
+}
+
+window.location.href = `gallery.html?event_id=${safeId}`
+}catch(err){
+console.error("Open event failed:", err)
+alert("Failed to open event")
+}
 }
 
 window.shareEvent = function(id){
@@ -286,8 +373,17 @@ alert(result?.error || "Delete failed")
 return
 }
 
+clearDeletedEventSession(id)
+removeEventCardFromDom(id)
+
 alert("Gallery deleted successfully")
-location.reload()
+
+const params = new URLSearchParams(window.location.search)
+const activeEventId = params.get("event_id") || params.get("event") || ""
+
+if(activeEventId && String(activeEventId) === String(id)){
+window.location.href = "gallery.html"
+}
 
 }catch(err){
 console.error(err)
@@ -788,16 +884,48 @@ let eventOwnerId = null
 let guestFreeDownload = false
 
 if(eventId){
-const { data: ev } = await supabase
+const { data: ev, error: eventFetchError } = await supabase
 .from("events")
 .select("event_name, client_name, user_id, guest_free_download")
 .eq("id", eventId)
-.single()
+.maybeSingle()
+
+if(eventFetchError){
+console.error("Event fetch failed:", eventFetchError)
+}
 
 if(ev){
 eventName = ev.event_name || ev.client_name || "Event"
 eventOwnerId = ev.user_id || null
 guestFreeDownload = !!ev.guest_free_download
+}else{
+clearDeletedEventSession(eventId)
+
+const grid = document.getElementById("galleryGrid")
+const empty = document.getElementById("emptyState")
+
+if(grid){
+grid.innerHTML = ""
+}
+
+if(empty){
+empty.innerText = "This event was deleted or no longer exists"
+empty.classList.remove("hidden")
+}
+
+updateUploadButton("photographer")
+
+if(user){
+setTimeout(()=>{
+window.location.href = "gallery.html"
+}, 900)
+}else{
+setTimeout(()=>{
+window.location.href = "access.html"
+}, 900)
+}
+
+return
 }
 }
 
@@ -976,6 +1104,7 @@ const div = document.createElement("div")
 
 div.className =
 "glass rounded-xl p-3 relative overflow-visible hover:scale-105 transition"
+div.dataset.galleryEventId = String(e.id)
 
 const date =
 e.event_date ? new Date(e.event_date).toLocaleDateString("en-IN") : ""
