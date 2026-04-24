@@ -42,6 +42,84 @@ return null
 
 }
 
+async function getCurrentSessionAccessToken(){
+
+try{
+const supabase = await getSupabase()
+const { data, error } = await supabase.auth.getSession()
+
+if(error){
+console.error("Session fetch error", error)
+return null
+}
+
+return data?.session?.access_token || null
+}catch(err){
+console.error("Session fetch crash", err)
+return null
+}
+
+}
+
+function isSafeS3ObjectKey(key, userId, eventId){
+const cleanKey = String(key || "").replace(/^\/+/, "").trim()
+
+if(!cleanKey || !userId || !eventId){
+return false
+}
+
+const allowedPrefixes = [
+`${userId}/${eventId}/original/`,
+`${userId}/${eventId}/preview/`,
+`${userId}/${eventId}/thumb/`
+]
+
+return allowedPrefixes.some(prefix => cleanKey.startsWith(prefix))
+}
+
+async function triggerImageProcessingJob(objectKey, eventId){
+
+try{
+const accessToken = await getCurrentSessionAccessToken()
+
+if(!accessToken){
+console.error("Process-image trigger skipped: missing authenticated session")
+return { success: false, reason: "missing_session" }
+}
+
+const response = await fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/process-image", {
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+"apikey": window.SUPABASE_ANON_KEY || "",
+"Authorization": `Bearer ${accessToken}`
+},
+body: JSON.stringify({
+object_key: String(objectKey),
+event_id: String(eventId)
+})
+})
+
+let result = null
+try{
+result = await response.json()
+}catch(_err){
+result = null
+}
+
+if(!response.ok){
+console.error("Process-image trigger failed", result || response.status)
+return { success: false, reason: "process_image_failed", status: response.status, result }
+}
+
+return { success: true, result }
+}catch(err){
+console.error("Process-image trigger failed", err)
+return { success: false, reason: "process_image_crashed" }
+}
+
+}
+
 
 // =============================
 // IMAGE HELPERS
@@ -588,6 +666,11 @@ throw new Error("S3 gallery saver not loaded")
 
 const safeFileName = sanitizeFileName(file.name || "image.jpg")
 const dimensions = await readImageDimensionsLocal(file)
+const user = await getCurrentUser()
+
+if(!user){
+throw new Error("Login required")
+}
 
 let signedUpload = null
 
@@ -610,6 +693,14 @@ storageError.code = "storage_limit_exceeded"
 throw storageError
 }
 throw err
+}
+
+if(!signedUpload || !signedUpload.upload_url || !signedUpload.object_key){
+throw new Error("Invalid S3 upload signer response")
+}
+
+if(!isSafeS3ObjectKey(signedUpload.object_key, user.id, String(eventId))){
+throw new Error("Unsafe S3 object key returned by upload signer")
 }
 
 await window.uploadFileToSignedS3Url({
@@ -635,22 +726,8 @@ thumbnailKey: null,
 previewKey: null
 })
 
-// 🔥 TRIGGER IMAGE PROCESSING (NON-BLOCKING)
-fetch("https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/process-image", {
-method: "POST",
-headers: {
-"Content-Type": "application/json",
-"apikey": window.SUPABASE_ANON_KEY,
-"Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`
-},
-body: JSON.stringify({
-object_key: signedUpload.object_key,
-event_id: String(eventId)
-})
-}).catch(err=>{
-console.error("Process-image trigger failed", err)
-})
-
+// 🔥 TRIGGER IMAGE PROCESSING (NON-BLOCKING, AUTHENTICATED)
+triggerImageProcessingJob(signedUpload.object_key, String(eventId))
 
 const fileUrl = resolveMediaUrlFromPhoto(savedPhoto) || resolveMediaUrlFromPhoto({
 object_key: signedUpload.object_key
