@@ -247,6 +247,140 @@ return String(fileName || "image.jpg")
 .replace(/[^a-z0-9.\-_]/g, "") || "image.jpg"
 }
 
+
+function buildCompressedFileName(fileName){
+const safeName = sanitizeFileName(fileName || "image.jpg")
+const withoutExt = safeName.replace(/\.[^.]+$/, "") || "image"
+return `${withoutExt}.jpg`
+}
+
+function shouldCompressImage(file){
+if(!file || !file.type || !file.type.startsWith("image/")){
+return false
+}
+
+const type = String(file.type || "").toLowerCase()
+
+if(type.includes("gif") || type.includes("svg")){
+return false
+}
+
+return true
+}
+
+async function compressImageForUpload(file, options = {}){
+if(!shouldCompressImage(file)){
+return file
+}
+
+const maxWidth = Number(options.maxWidth || 1920)
+const maxHeight = Number(options.maxHeight || 1920)
+const initialQuality = Number(options.quality || 0.78)
+const minQuality = Number(options.minQuality || 0.62)
+const targetBytes = Number(options.targetBytes || (2.5 * 1024 * 1024))
+
+return await new Promise((resolve) => {
+try{
+const objectUrl = URL.createObjectURL(file)
+const img = new Image()
+
+img.onload = function(){
+try{
+const sourceWidth = Number(img.naturalWidth || img.width || 0)
+const sourceHeight = Number(img.naturalHeight || img.height || 0)
+
+if(!sourceWidth || !sourceHeight){
+URL.revokeObjectURL(objectUrl)
+resolve(file)
+return
+}
+
+const scale = Math.min(1, maxWidth / sourceWidth, maxHeight / sourceHeight)
+const targetWidth = Math.max(1, Math.round(sourceWidth * scale))
+const targetHeight = Math.max(1, Math.round(sourceHeight * scale))
+
+const canvas = document.createElement("canvas")
+canvas.width = targetWidth
+canvas.height = targetHeight
+
+const ctx = canvas.getContext("2d", { alpha: false })
+
+if(!ctx){
+URL.revokeObjectURL(objectUrl)
+resolve(file)
+return
+}
+
+ctx.fillStyle = "#ffffff"
+ctx.fillRect(0, 0, targetWidth, targetHeight)
+ctx.drawImage(img, 0, 0, targetWidth, targetHeight)
+
+const tryQualities = [
+initialQuality,
+0.72,
+0.68,
+0.64,
+minQuality
+].filter((value, index, arr) => Number.isFinite(value) && value > 0 && arr.indexOf(value) === index)
+
+function convertAt(index){
+const quality = tryQualities[index] || minQuality
+
+canvas.toBlob((blob) => {
+if(!blob){
+URL.revokeObjectURL(objectUrl)
+resolve(file)
+return
+}
+
+const isLast = index >= tryQualities.length - 1
+
+if(blob.size <= targetBytes || isLast){
+URL.revokeObjectURL(objectUrl)
+
+const compressedFile = new File(
+[blob],
+buildCompressedFileName(file.name),
+{
+type: "image/jpeg",
+lastModified: file.lastModified || Date.now()
+}
+)
+
+if(compressedFile.size > 0 && compressedFile.size < file.size){
+resolve(compressedFile)
+return
+}
+
+resolve(file)
+return
+}
+
+convertAt(index + 1)
+}, "image/jpeg", quality)
+}
+
+convertAt(0)
+}catch(err){
+console.error("Image compression failed", err)
+URL.revokeObjectURL(objectUrl)
+resolve(file)
+}
+}
+
+img.onerror = function(){
+URL.revokeObjectURL(objectUrl)
+resolve(file)
+}
+
+img.src = objectUrl
+}catch(err){
+console.error("Image compression crashed", err)
+resolve(file)
+}
+})
+}
+
 async function readImageDimensionsLocal(file){
 
 return await new Promise((resolve)=>{
@@ -634,8 +768,9 @@ if(typeof window.saveS3GalleryPhoto !== "function"){
 throw new Error("S3 gallery saver not loaded")
 }
 
-const safeFileName = sanitizeFileName(file.name || "image.jpg")
-const dimensionsPromise = readImageDimensionsLocal(file)
+const uploadFile = await compressImageForUpload(file)
+const safeFileName = sanitizeFileName(uploadFile.name || file.name || "image.jpg")
+const dimensionsPromise = readImageDimensionsLocal(uploadFile)
 
 if(!user || !user.id){
 throw new Error("Login required")
@@ -648,12 +783,12 @@ signedUpload = await window.requestS3UploadUrl({
 // permanent compatibility fix: send both backend-safe snake_case and helper-safe camelCase
 event_id: String(eventId),
 file_name: safeFileName,
-content_type: file.type || "image/jpeg",
-file_size: Number(file.size || 0),
+content_type: uploadFile.type || "image/jpeg",
+file_size: Number(uploadFile.size || 0),
 eventId: String(eventId),
 fileName: safeFileName,
-contentType: file.type || "image/jpeg",
-fileSize: Number(file.size || 0)
+contentType: uploadFile.type || "image/jpeg",
+fileSize: Number(uploadFile.size || 0)
 })
 }catch(err){
 if(isStorageLimitError(err)){
@@ -675,8 +810,8 @@ throw new Error("Unsafe S3 object key returned by upload signer")
 await runWithRetry(
 async () => await window.uploadFileToSignedS3Url({
 uploadUrl: signedUpload.upload_url,
-file,
-contentType: file.type || "image/jpeg"
+file: uploadFile,
+contentType: uploadFile.type || "image/jpeg"
 }),
 { retries: 2, baseDelay: 900 }
 )
@@ -692,14 +827,14 @@ async () => await window.saveS3GalleryPhoto({
 event_id: String(eventId),
 bucket: signedUpload.bucket,
 object_key: signedUpload.object_key,
-file_size: Number(file.size || 0) || null,
+file_size: Number(uploadFile.size || 0) || null,
 width: dimensions.width,
 height: dimensions.height,
 thumbnail_key: null,
 preview_key: null,
 eventId: String(eventId),
 objectKey: signedUpload.object_key,
-fileSize: Number(file.size || 0) || null,
+fileSize: Number(uploadFile.size || 0) || null,
 thumbnailKey: null,
 previewKey: null
 }),
