@@ -327,12 +327,12 @@ message.includes("upgrade your plan")
 
 
 // =============================
-// BACKEND FACE PROCESSING
+// BACKEND IMAGE PROCESSING ONLY
 // =============================
 
-// Face processing is handled by the backend process-image pipeline.
-// Browser-side face-api processing is intentionally disabled for production scalability.
-
+// Face processing is intentionally handled by the backend process-image pipeline.
+// Browser-side face-api processing was removed to prevent duplicate AI work,
+// client CPU overload, and inconsistent face_data writes at scale.
 
 // =============================
 // AUTO FIX OLD BOOKINGS
@@ -860,21 +860,15 @@ return
 
 status.innerText = "Upload Complete"
 progress.innerText =
-`${successfulUploads.length} photos uploaded • Backend processing started`
+`${successfulUploads.length} photos uploaded • Backend processing continues in background`
 
 if(skippedFiles.length > 0){
 console.warn("Skipped files:", skippedFiles)
 }
 
-// Backend processing is triggered per upload by process-image.
-// No browser-side face processing runs here.
-// Preview/thumbnail/AI status will be finalized by backend processing.
-
-if(progress){
-progress.innerText =
-`${successfulUploads.length} photos uploaded • Processing continues in backend`
-}
-
+// 🔥 BACKEND PROCESSING ONLY (NON-BLOCKING)
+// process-image handles preview/thumbnail processing after upload.
+// Client-side face processing is intentionally disabled for production scale.
 
 await loadConfirmedEvents(eventId)
 
