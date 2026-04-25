@@ -291,10 +291,6 @@ return window.buildMediaUrl(photo)
 }
 }
 
-if(typeof photo.image_url === "string"){
-return String(photo.image_url).split("?")[0].trim()
-}
-
 return ""
 }
 
@@ -331,198 +327,11 @@ message.includes("upgrade your plan")
 
 
 // =============================
-// 🔥 FACE FUNCTION (TEMPORARY UNTIL ASYNC WORKER)
+// BACKEND FACE PROCESSING
 // =============================
 
-async function processFace(imageUrl, eventId, userId, objectKey = null){
-
-try{
-
-if(!imageUrl || !eventId){
-return {
-saved: false,
-facesDetected: 0,
-reason: "missing_image_or_event"
-}
-}
-
-const cleanUrl = String(imageUrl).split("?")[0].trim()
-
-const loadModelsFn =
-window.loadFaceModels ||
-(window.faceEngine && window.faceEngine.loadFaceModels)
-
-const processMultiFaceFn =
-window.processImageForFaces ||
-(window.faceEngine && window.faceEngine.processImageForFaces)
-
-const getEncodingFn =
-window.getFaceEncoding ||
-(window.faceEngine && window.faceEngine.getFaceEncoding)
-
-if(loadModelsFn){
-await loadModelsFn()
-}
-
-if(!processMultiFaceFn && !getEncodingFn){
-console.warn("face.js not loaded")
-return {
-saved: false,
-facesDetected: 0,
-reason: "face_engine_missing"
-}
-}
-
-const supabase = await getSupabase()
-
-let encodings = []
-
-if(processMultiFaceFn){
-const multiResult = await processMultiFaceFn(cleanUrl)
-
-if(Array.isArray(multiResult) && multiResult.length > 0){
-encodings = multiResult.filter(arr =>
-Array.isArray(arr) && arr.length > 0
-)
-}
-}
-
-if((!encodings || encodings.length === 0) && getEncodingFn){
-const singleEncoding = await getEncodingFn(cleanUrl)
-
-if(singleEncoding && Array.isArray(singleEncoding) && singleEncoding.length > 0){
-encodings = [singleEncoding]
-}
-}
-
-if(!encodings || encodings.length === 0){
-console.log("No valid face detected:", cleanUrl)
-return {
-saved: false,
-facesDetected: 0,
-reason: "no_face_detected"
-}
-}
-
-let query = supabase
-.from("face_data")
-.select("id, face_encoding")
-.eq("event_id", String(eventId))
-.limit(100)
-
-if(objectKey){
-query = query.eq("object_key", String(objectKey))
-}else{
-query = query.eq("image_url", cleanUrl)
-}
-
-const { data: existingFaces, error: existingError } = await query
-
-if(existingError){
-console.error("Existing face fetch error:", existingError)
-return {
-saved: false,
-facesDetected: 0,
-reason: "existing_face_fetch_failed"
-}
-}
-
-function getFaceDistance(a, b){
-if(!Array.isArray(a) || !Array.isArray(b)) return Number.POSITIVE_INFINITY
-if(a.length !== b.length) return Number.POSITIVE_INFINITY
-
-let dist = 0
-
-for(let i=0;i<a.length;i++){
-const diff = Number(a[i]) - Number(b[i])
-dist += diff * diff
-}
-
-return Math.sqrt(dist)
-}
-
-const duplicateThreshold = 0.01
-const knownEncodings = []
-
-;(existingFaces || []).forEach(row=>{
-if(row && Array.isArray(row.face_encoding) && row.face_encoding.length > 0){
-knownEncodings.push(row.face_encoding)
-}
-})
-
-const uniqueEncodingsToInsert = []
-
-encodings.forEach(encoding=>{
-
-if(!Array.isArray(encoding) || encoding.length === 0){
-return
-}
-
-let duplicateFound = false
-
-for(const known of knownEncodings){
-if(getFaceDistance(known, encoding) < duplicateThreshold){
-duplicateFound = true
-break
-}
-}
-
-if(duplicateFound){
-return
-}
-
-uniqueEncodingsToInsert.push(encoding)
-knownEncodings.push(encoding)
-
-})
-
-if(uniqueEncodingsToInsert.length === 0){
-console.log("Face data already exists:", cleanUrl)
-return {
-saved: true,
-facesDetected: existingFaces?.length || 0,
-reason: "already_exists"
-}
-}
-
-const rows = uniqueEncodingsToInsert.map(encoding => ({
-event_id: String(eventId),
-image_url: cleanUrl,
-object_key: objectKey ? String(objectKey) : null,
-face_encoding: encoding,
-user_id: userId
-}))
-
-const { error } = await supabase
-.from("face_data")
-.insert(rows)
-
-if(error){
-console.error("Face save error:", error)
-return {
-saved: false,
-facesDetected: 0,
-reason: "db_insert_failed"
-}
-}else{
-console.log(`Face saved (${rows.length} face${rows.length > 1 ? "s" : ""}):`, cleanUrl)
-return {
-saved: true,
-facesDetected: rows.length,
-reason: "saved"
-}
-}
-
-}catch(err){
-console.error("Face processing failed:", err)
-return {
-saved: false,
-facesDetected: 0,
-reason: "processing_failed"
-}
-}
-
-}
+// Face processing is handled by the backend process-image pipeline.
+// Browser-side face-api processing is intentionally disabled for production scalability.
 
 
 // =============================
@@ -1051,95 +860,21 @@ return
 
 status.innerText = "Upload Complete"
 progress.innerText =
-`${successfulUploads.length} photos uploaded • Face processing continues in background`
+`${successfulUploads.length} photos uploaded • Backend processing started`
 
 if(skippedFiles.length > 0){
 console.warn("Skipped files:", skippedFiles)
 }
 
-// 🔥 BACKGROUND FACE PROCESSING (NON-BLOCKING)
-setTimeout(async ()=>{
-try{
-let processedFaceCount = 0
-
-const faceResults = await runWithConcurrency(
-successfulUploads,
-async (item) => {
-const result = await processFace(item.url, eventId, user.id, item.objectKey)
-processedFaceCount++
-console.log(`Background face processing ${processedFaceCount} / ${successfulUploads.length}`)
-return {
-file: item.file,
-result
-}
-},
-2
-)
-
-;(faceResults || []).forEach(item => {
-
-const faceResult = item?.result
-
-if(faceResult && faceResult.saved){
-if(faceResult.reason !== "already_exists"){
-savedFacesImages++
-}
-if(faceResult.facesDetected > 0){
-totalFacesDetected += faceResult.facesDetected
-}
-}else{
-skippedFaceImages++
-skippedFiles.push({
-name: item?.file?.name || "unknown",
-reason: faceResult?.reason || "unknown"
-})
-}
-
-})
-
-console.log("Background face processing completed", {
-eventId,
-uploaded: successfulUploads.length,
-savedFacesImages,
-totalFacesDetected,
-skippedFaceImages,
-skippedFiles
-})
-
-if(status){
-status.innerText = "Upload Complete"
-}
+// Backend processing is triggered per upload by process-image.
+// No browser-side face processing runs here.
+// Preview/thumbnail/AI status will be finalized by backend processing.
 
 if(progress){
-const noFaceCount = skippedFiles.filter(item => item && item.reason === "no_face_detected").length
-const failedFaceCount = skippedFiles.filter(item => item && item.reason !== "no_face_detected" && item.reason !== "upload_failed").length
-const summaryParts = [
-`${successfulUploads.length} photos uploaded`,
-`Face processing completed`,
-`${totalFacesDetected} faces detected`
-]
-
-if(savedFacesImages > 0){
-summaryParts.push(`${savedFacesImages} photos saved for face search`)
+progress.innerText =
+`${successfulUploads.length} photos uploaded • Processing continues in backend`
 }
 
-if(noFaceCount > 0){
-summaryParts.push(`${noFaceCount} photos had no clear face`)
-}
-
-if(failedFaceCount > 0){
-summaryParts.push(`${failedFaceCount} face checks skipped`)
-}
-
-progress.innerText = summaryParts.join(" • ")
-}
-}catch(err){
-console.error("Background face processing failed", err)
-if(progress){
-progress.innerText = `${successfulUploads.length} photos uploaded • Face processing could not finish automatically`
-}
-}
-}, 0)
 
 await loadConfirmedEvents(eventId)
 
