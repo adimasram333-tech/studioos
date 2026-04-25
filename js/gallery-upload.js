@@ -273,11 +273,11 @@ if(!shouldCompressImage(file)){
 return file
 }
 
-const maxWidth = Number(options.maxWidth || 1920)
-const maxHeight = Number(options.maxHeight || 1920)
-const initialQuality = Number(options.quality || 0.78)
-const minQuality = Number(options.minQuality || 0.62)
-const targetBytes = Number(options.targetBytes || (2.5 * 1024 * 1024))
+const maxWidth = Number(options.maxWidth || 2560)
+const maxHeight = Number(options.maxHeight || 2560)
+const initialQuality = Number(options.quality || 0.88)
+const minQuality = Number(options.minQuality || 0.82)
+const targetBytes = Number(options.targetBytes || (4 * 1024 * 1024))
 
 return await new Promise((resolve) => {
 try{
@@ -317,9 +317,8 @@ ctx.drawImage(img, 0, 0, targetWidth, targetHeight)
 
 const tryQualities = [
 initialQuality,
-0.72,
-0.68,
-0.64,
+0.86,
+0.84,
 minQuality
 ].filter((value, index, arr) => Number.isFinite(value) && value > 0 && arr.indexOf(value) === index)
 
@@ -727,7 +726,7 @@ return isMobile ? 2 : 3
 }
 
 if(totalBytes >= 1024 * 1024 * 1024){
-return isMobile ? 3 : 6
+return isMobile ? 2 : 4
 }
 
 if(downlink && downlink < 5){
@@ -739,10 +738,10 @@ return 3
 }
 
 if(list.length >= 50){
-return 6
+return 4
 }
 
-return 5
+return 4
 }
 
 function sortFilesForUpload(files){
@@ -813,7 +812,7 @@ uploadUrl: signedUpload.upload_url,
 file: uploadFile,
 contentType: uploadFile.type || "image/jpeg"
 }),
-{ retries: 2, baseDelay: 900 }
+{ retries: 3, baseDelay: 1200 }
 )
 
 const dimensions = await dimensionsPromise
