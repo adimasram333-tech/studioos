@@ -273,11 +273,16 @@ if(!shouldCompressImage(file)){
 return file
 }
 
-const maxWidth = Number(options.maxWidth || 2560)
-const maxHeight = Number(options.maxHeight || 2560)
-const initialQuality = Number(options.quality || 0.88)
-const minQuality = Number(options.minQuality || 0.82)
-const targetBytes = Number(options.targetBytes || (4 * 1024 * 1024))
+const maxWidth = Number(options.maxWidth || 3200)
+const maxHeight = Number(options.maxHeight || 3200)
+const initialQuality = Number(options.quality || 0.90)
+const minQuality = Number(options.minQuality || 0.86)
+const targetBytes = Number(options.targetBytes || (3 * 1024 * 1024))
+const minCompressSourceBytes = Number(options.minCompressSourceBytes || (3 * 1024 * 1024))
+
+if(Number(file.size || 0) > 0 && Number(file.size || 0) <= minCompressSourceBytes){
+return file
+}
 
 return await new Promise((resolve) => {
 try{
@@ -317,8 +322,8 @@ ctx.drawImage(img, 0, 0, targetWidth, targetHeight)
 
 const tryQualities = [
 initialQuality,
+0.88,
 0.86,
-0.84,
 minQuality
 ].filter((value, index, arr) => Number.isFinite(value) && value > 0 && arr.indexOf(value) === index)
 
@@ -726,7 +731,7 @@ return isMobile ? 2 : 3
 }
 
 if(totalBytes >= 1024 * 1024 * 1024){
-return isMobile ? 2 : 4
+return isMobile ? 3 : 6
 }
 
 if(downlink && downlink < 5){
@@ -741,7 +746,7 @@ if(list.length >= 50){
 return 4
 }
 
-return 4
+return 5
 }
 
 function sortFilesForUpload(files){
@@ -812,7 +817,7 @@ uploadUrl: signedUpload.upload_url,
 file: uploadFile,
 contentType: uploadFile.type || "image/jpeg"
 }),
-{ retries: 3, baseDelay: 1200 }
+{ retries: 3, baseDelay: 900 }
 )
 
 const dimensions = await dimensionsPromise
@@ -994,7 +999,7 @@ return
 
 status.innerText = "Upload Complete"
 progress.innerText =
-`${successfulUploads.length} photos uploaded • Backend processing continues in background`
+`${successfulUploads.length} photos uploaded`
 
 if(skippedFiles.length > 0){
 console.warn("Skipped files:", skippedFiles)
