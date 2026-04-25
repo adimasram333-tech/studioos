@@ -1,5 +1,5 @@
 // =============================
-// GLOBAL MENU SYSTEM (S3 + LEGACY SAFE)
+// GLOBAL MENU SYSTEM (S3 ONLY)
 // =============================
 
 let activeMenu = null
@@ -482,10 +482,6 @@ if(best) return normalizeImageUrl(best)
 
 if(typeof window.buildMediaUrl === "function" && photo.object_key){
 return normalizeImageUrl(window.buildMediaUrl(photo.object_key))
-}
-
-if(photo.image_url){
-return normalizeImageUrl(photo.image_url)
 }
 
 return ""
@@ -1008,7 +1004,7 @@ if(userEncoding && eventId && effectiveRole !== "guest"){
 
 const { data: faces } = await supabase
 .from("face_data")
-.select("face_encoding, image_url, object_key")
+.select("face_encoding, object_key")
 .eq("event_id", eventId)
 
 if(faces && faces.length > 0){
@@ -1031,7 +1027,7 @@ dist = Math.sqrt(dist)
 if(dist < 0.60){
 const matchedUrl = row.object_key && typeof window.buildMediaUrl === "function"
 ? normalizeImageUrl(window.buildMediaUrl(row.object_key))
-: normalizeImageUrl(row.image_url)
+: ""
 
 if(matchedUrl){
 matchedImages.add(matchedUrl)
@@ -1144,7 +1140,7 @@ const safeEventId = String(eventId)
 const { data, error } =
 await supabase
 .from("gallery_photos")
-.select("id,user_id,event_id,object_key,preview_key,thumbnail_key,image_url,created_at")
+.select("id,user_id,event_id,object_key,preview_key,thumbnail_key,created_at")
 .eq("event_id", safeEventId)
 .order("created_at",{ ascending:false })
 
