@@ -204,7 +204,7 @@ return null
 
 
 // ================================
-// MEDIA URL HELPERS
+// MEDIA URL HELPERS (S3 / CLOUDFRONT ONLY)
 // ================================
 
 function normalizeMediaPath(path){
@@ -234,7 +234,6 @@ return ""
 const originalKey = normalizeMediaPath(input.object_key)
 const previewKey = normalizeMediaPath(input.preview_key)
 const thumbnailKey = normalizeMediaPath(input.thumbnail_key)
-const legacyUrl = typeof input.image_url === "string" ? input.image_url.trim() : ""
 
 if(variant === "thumbnail" && thumbnailKey){
 return joinMediaUrl(MEDIA_CDN_BASE_URL, thumbnailKey)
@@ -248,7 +247,7 @@ if(originalKey){
 return joinMediaUrl(MEDIA_CDN_BASE_URL, originalKey)
 }
 
-return legacyUrl || ""
+return ""
 
 }
 
@@ -269,7 +268,7 @@ if(previewUrl) return previewUrl
 const originalUrl = window.buildMediaUrl(photoRow, "original")
 if(originalUrl) return originalUrl
 
-return typeof photoRow.image_url === "string" ? photoRow.image_url.trim() : ""
+return ""
 
 }
 
@@ -657,48 +656,6 @@ return data
 
 console.error("Settings fetch failed:",err)
 return null
-
-}
-
-}
-
-
-// ================================
-// LEGACY GALLERY SAVE (DO NOT USE FOR NEW S3 FLOW)
-// ================================
-
-window.saveGalleryImages = async function(images){
-
-const supabase = await window.getSupabase()
-if(!supabase) return false
-
-try{
-
-const user = await window.getCurrentUser()
-
-const safeImages = images.map(img => ({
-...img,
-user_id: img.user_id || user?.id || null
-}))
-
-const { error } =
-await supabase
-.from("gallery_photos")
-.insert(safeImages)
-
-if(error){
-
-console.error("Gallery save error:",error)
-return false
-
-}
-
-return true
-
-}catch(err){
-
-console.error("Gallery save failed:",err)
-return false
 
 }
 
