@@ -772,7 +772,13 @@ if(typeof window.saveS3GalleryPhoto !== "function"){
 throw new Error("S3 gallery saver not loaded")
 }
 
+// Billing must use the original selected file size.
+// S3 storage uses the compressed upload file size.
+const originalFileSize = Number(file.size || 0)
+
 const uploadFile = await compressImageForUpload(file)
+const storedFileSize = Number(uploadFile.size || 0)
+
 const safeFileName = sanitizeFileName(uploadFile.name || file.name || "image.jpg")
 const dimensionsPromise = readImageDimensionsLocal(uploadFile)
 
@@ -788,15 +794,15 @@ signedUpload = await window.requestS3UploadUrl({
 event_id: String(eventId),
 file_name: safeFileName,
 content_type: uploadFile.type || "image/jpeg",
-file_size: Number(uploadFile.size || 0),
+file_size: storedFileSize,
 eventId: String(eventId),
 fileName: safeFileName,
 contentType: uploadFile.type || "image/jpeg",
-fileSize: Number(uploadFile.size || 0)
+fileSize: storedFileSize
 })
 }catch(err){
 if(isStorageLimitError(err)){
-const storageError = new Error("Your storage is full. Please upgrade your plan to upload more photos.")
+const storageError = new Error("Storage full. Please delete some photos or upgrade your plan.")
 storageError.code = "storage_limit_exceeded"
 throw storageError
 }
@@ -831,14 +837,18 @@ async () => await window.saveS3GalleryPhoto({
 event_id: String(eventId),
 bucket: signedUpload.bucket,
 object_key: signedUpload.object_key,
-file_size: Number(uploadFile.size || 0) || null,
+file_size: storedFileSize || null,
+original_file_size: originalFileSize || null,
+stored_file_size: storedFileSize || null,
 width: dimensions.width,
 height: dimensions.height,
 thumbnail_key: null,
 preview_key: null,
 eventId: String(eventId),
 objectKey: signedUpload.object_key,
-fileSize: Number(uploadFile.size || 0) || null,
+fileSize: storedFileSize || null,
+originalFileSize: originalFileSize || null,
+storedFileSize: storedFileSize || null,
 thumbnailKey: null,
 previewKey: null
 }),
@@ -977,9 +987,9 @@ const failedUploads = (uploadResults || []).filter(item => item && !item.success
 const storageLimitFailure = failedUploads.find(item => String(item?.code || "").toLowerCase() === "storage_limit_exceeded")
 
 if(storageLimitFailure){
-status.innerText = "Storage full. Upgrade your plan to continue uploads."
+status.innerText = "Storage full. Please delete some photos or upgrade your plan."
 progress.innerText = ""
-alert("Your storage is full. Please upgrade your plan to upload more photos.")
+alert("Storage full. Please delete some photos or upgrade your plan.")
 return
 }
 
