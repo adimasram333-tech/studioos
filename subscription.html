@@ -623,7 +623,7 @@
           <div id="currentPlanText" class="mini-stat-value">Free</div>
         </div>
         <div class="mini-stat">
-          <div class="mini-stat-label">Storage Usage</div>
+          <div class="mini-stat-label">Billable Storage Usage</div>
           <div id="storageUsageText" class="mini-stat-value">0GB / 5GB</div>
         </div>
         <div class="mini-stat">
@@ -681,7 +681,7 @@
         </div>
 
         <div class="plan-body">
-          <div class="storage-pill">Storage • 50GB</div>
+          <div class="storage-pill">Storage • 50GB billable</div>
 
           <ul class="feature-list">
             <li>Everything in Free plan</li>
@@ -719,7 +719,7 @@
         </div>
 
         <div class="plan-body">
-          <div class="storage-pill">Storage • 100GB</div>
+          <div class="storage-pill">Storage • 100GB billable</div>
 
           <ul class="feature-list">
             <li>Everything in Basic plan</li>
@@ -748,7 +748,7 @@
 
     <section class="note-strip">
       <strong class="text-white">Important:</strong>
-      Subscription unlocks platform features, storage, sharing, and workflow tools.
+      Subscription unlocks platform features, billable storage, sharing, and workflow tools. Storage usage is calculated from the original selected image size while StudioOS optimizes the stored image internally.
       Basic and Pro support both yearly and one-month billing. Yearly plans are billed once for 12 months.
       Premium website templates are separate products and are not included automatically in subscription plans.
     </section>
@@ -882,7 +882,7 @@
       if(usageRatio >= 1){
         planStatusBadge.textContent = "Storage Full";
         planStatusBadge.className = "inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-red-400/30 bg-red-500/10 text-red-100";
-        showToast("error", "Your storage limit is full. Upgrade your plan to continue uploads.", 5200);
+        showToast("error", "Your storage is full. Please delete some photos or upgrade your plan.", 5200);
 
         if(effectivePlan === "free"){
           basicPlanBtn.classList.remove("secondary");
@@ -899,7 +899,7 @@
       if(usageRatio >= 0.9){
         planStatusBadge.textContent = "Storage Near Limit";
         planStatusBadge.className = "inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-amber-300/30 bg-amber-400/10 text-amber-50";
-        showToast("info", "Your storage is almost full. Upgrade soon to avoid upload interruptions.", 5000);
+        showToast("info", "Your storage is almost full. Please delete unused photos or upgrade soon to avoid upload interruptions.", 5000);
         return;
       }
 
