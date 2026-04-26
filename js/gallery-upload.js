@@ -754,6 +754,24 @@ function sortFilesForUpload(files){
 return [...files].sort((a, b) => Number(b?.size || 0) - Number(a?.size || 0))
 }
 
+function buildUploadSizePayload(originalFileSize, storedFileSize){
+const originalSize = Math.max(0, Math.floor(Number(originalFileSize || 0)))
+const storedSize = Math.max(0, Math.floor(Number(storedFileSize || 0)))
+
+if(!originalSize || !storedSize){
+throw new Error("Invalid upload size metadata")
+}
+
+return {
+file_size: storedSize,
+original_file_size: originalSize,
+stored_file_size: storedSize,
+fileSize: storedSize,
+originalFileSize: originalSize,
+storedFileSize: storedSize
+}
+}
+
 
 // =============================
 // S3 UPLOAD HELPERS
@@ -787,6 +805,10 @@ if(!user || !user.id){
 throw new Error("Login required")
 }
 
+if(!originalFileSize || !storedFileSize){
+throw new Error("Invalid upload size metadata")
+}
+
 let signedUpload = null
 
 try{
@@ -795,15 +817,10 @@ signedUpload = await window.requestS3UploadUrl({
 event_id: String(eventId),
 file_name: safeFileName,
 content_type: uploadFile.type || "image/jpeg",
-file_size: storedFileSize,
-original_file_size: originalFileSize,
-stored_file_size: storedFileSize,
+...buildUploadSizePayload(originalFileSize, storedFileSize),
 eventId: String(eventId),
 fileName: safeFileName,
-contentType: uploadFile.type || "image/jpeg",
-fileSize: storedFileSize,
-originalFileSize: originalFileSize,
-storedFileSize: storedFileSize
+contentType: uploadFile.type || "image/jpeg"
 })
 }catch(err){
 if(isStorageLimitError(err)){
@@ -842,18 +859,13 @@ async () => await window.saveS3GalleryPhoto({
 event_id: String(eventId),
 bucket: signedUpload.bucket,
 object_key: signedUpload.object_key,
-file_size: storedFileSize || null,
-original_file_size: originalFileSize || null,
-stored_file_size: storedFileSize || null,
+...buildUploadSizePayload(originalFileSize, storedFileSize),
 width: dimensions.width,
 height: dimensions.height,
 thumbnail_key: null,
 preview_key: null,
 eventId: String(eventId),
 objectKey: signedUpload.object_key,
-fileSize: storedFileSize || null,
-originalFileSize: originalFileSize || null,
-storedFileSize: storedFileSize || null,
 thumbnailKey: null,
 previewKey: null
 }),
