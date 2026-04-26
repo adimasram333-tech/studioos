@@ -796,10 +796,14 @@ event_id: String(eventId),
 file_name: safeFileName,
 content_type: uploadFile.type || "image/jpeg",
 file_size: storedFileSize,
+original_file_size: originalFileSize,
+stored_file_size: storedFileSize,
 eventId: String(eventId),
 fileName: safeFileName,
 contentType: uploadFile.type || "image/jpeg",
-fileSize: storedFileSize
+fileSize: storedFileSize,
+originalFileSize: originalFileSize,
+storedFileSize: storedFileSize
 })
 }catch(err){
 if(isStorageLimitError(err)){
