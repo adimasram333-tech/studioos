@@ -158,10 +158,22 @@ export async function uploadImage(file, options = {}){
     normalizePath(options.objectKey) ||
     buildWebsiteObjectKey(user.id, file.name)
 
+  const originalFileSize = Number(file.size || 0)
+
   const signedUpload = await window.requestS3UploadUrl({
     eventId: options.eventId || `website-${user.id}`,
     fileName: objectKey.split("/").pop() || file.name || "image.jpg",
-    contentType: file.type || "image/jpeg"
+    contentType: file.type || "image/jpeg",
+
+    // Storage reservation must receive original size for billable tracking.
+    // This helper does not compress, so original and stored size are the same here.
+    file_size: originalFileSize,
+    original_file_size: originalFileSize,
+    stored_file_size: originalFileSize,
+
+    fileSize: originalFileSize,
+    originalFileSize: originalFileSize,
+    storedFileSize: originalFileSize
   })
 
   let uploadUrl = signedUpload.upload_url
