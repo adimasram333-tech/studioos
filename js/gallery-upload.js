@@ -273,12 +273,12 @@ if(!shouldCompressImage(file)){
 return file
 }
 
-const maxWidth = Number(options.maxWidth || 3200)
-const maxHeight = Number(options.maxHeight || 3200)
-const initialQuality = Number(options.quality || 0.90)
-const minQuality = Number(options.minQuality || 0.86)
-const targetBytes = Number(options.targetBytes || (3 * 1024 * 1024))
-const minCompressSourceBytes = Number(options.minCompressSourceBytes || (3 * 1024 * 1024))
+const maxWidth = Number(options.maxWidth || 4000)
+const maxHeight = Number(options.maxHeight || 4000)
+const initialQuality = Number(options.quality || 0.94)
+const minQuality = Number(options.minQuality || 0.90)
+const targetBytes = Number(options.targetBytes || (2.5 * 1024 * 1024))
+const minCompressSourceBytes = Number(options.minCompressSourceBytes || (4 * 1024 * 1024))
 
 if(Number(file.size || 0) > 0 && Number(file.size || 0) <= minCompressSourceBytes){
 return file
@@ -322,8 +322,9 @@ ctx.drawImage(img, 0, 0, targetWidth, targetHeight)
 
 const tryQualities = [
 initialQuality,
-0.88,
-0.86,
+0.93,
+0.92,
+0.91,
 minQuality
 ].filter((value, index, arr) => Number.isFinite(value) && value > 0 && arr.indexOf(value) === index)
 
