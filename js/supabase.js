@@ -328,17 +328,34 @@ window.requestS3UploadUrl = async function(payload = {}){
 const eventId = payload.event_id ?? payload.eventId
 const fileName = payload.file_name ?? payload.fileName
 const contentType = payload.content_type ?? payload.contentType
-const fileSizeRaw = payload.file_size ?? payload.fileSize
+
+const storedSizeRaw =
+payload.stored_file_size ??
+payload.storedFileSize ??
+payload.file_size ??
+payload.fileSize
+
+const originalSizeRaw =
+payload.original_file_size ??
+payload.originalFileSize
 
 if(!eventId) throw new Error("event_id is required.")
 if(!fileName) throw new Error("file_name is required.")
 if(!contentType) throw new Error("content_type is required.")
 
-const fileSize = Number(fileSizeRaw)
+const storedFileSize = Number(storedSizeRaw)
+const originalFileSize = Number(originalSizeRaw)
 
-if(!Number.isFinite(fileSize) || fileSize <= 0){
-throw new Error("file_size is required.")
+if(!Number.isFinite(storedFileSize) || storedFileSize <= 0){
+throw new Error("stored_file_size is required.")
 }
+
+if(!Number.isFinite(originalFileSize) || originalFileSize <= 0){
+throw new Error("original_file_size is required.")
+}
+
+const normalizedStoredSize = Math.floor(storedFileSize)
+const normalizedOriginalSize = Math.floor(originalFileSize)
 
 const result = await callProtectedEdgeFunction(
 GENERATE_S3_UPLOAD_URL,
@@ -346,7 +363,17 @@ GENERATE_S3_UPLOAD_URL,
 event_id: String(eventId),
 file_name: String(fileName),
 content_type: String(contentType),
-file_size: Math.floor(fileSize)
+
+// Billing must always use original selected file size.
+// S3 upload stores the compressed file size.
+file_size: normalizedStoredSize,
+original_file_size: normalizedOriginalSize,
+stored_file_size: normalizedStoredSize,
+
+// Backward-compatible aliases for any future helper/edge compatibility.
+fileSize: normalizedStoredSize,
+originalFileSize: normalizedOriginalSize,
+storedFileSize: normalizedStoredSize
 }
 )
 
@@ -398,7 +425,19 @@ window.saveS3GalleryPhoto = async function(payload = {}){
 const eventId = payload.event_id ?? payload.eventId
 const bucket = payload.bucket
 const objectKey = payload.object_key ?? payload.objectKey
-const fileSizeRaw = payload.file_size ?? payload.fileSize ?? null
+
+const storedSizeRaw =
+payload.stored_file_size ??
+payload.storedFileSize ??
+payload.file_size ??
+payload.fileSize ??
+null
+
+const originalSizeRaw =
+payload.original_file_size ??
+payload.originalFileSize ??
+null
+
 const widthRaw = payload.width ?? null
 const heightRaw = payload.height ?? null
 const thumbnailKey = payload.thumbnail_key ?? payload.thumbnailKey ?? null
@@ -408,9 +447,21 @@ if(!eventId) throw new Error("event_id is required.")
 if(!bucket) throw new Error("bucket is required.")
 if(!objectKey) throw new Error("object_key is required.")
 
-const fileSize = fileSizeRaw === null ? null : Number(fileSizeRaw)
+const storedFileSize = storedSizeRaw === null ? null : Number(storedSizeRaw)
+const originalFileSize = originalSizeRaw === null ? null : Number(originalSizeRaw)
 const width = widthRaw === null ? null : Number(widthRaw)
 const height = heightRaw === null ? null : Number(heightRaw)
+
+if(!Number.isFinite(storedFileSize) || storedFileSize <= 0){
+throw new Error("stored_file_size is required.")
+}
+
+if(!Number.isFinite(originalFileSize) || originalFileSize <= 0){
+throw new Error("original_file_size is required.")
+}
+
+const normalizedStoredSize = Math.floor(storedFileSize)
+const normalizedOriginalSize = Math.floor(originalFileSize)
 
 const result = await callProtectedEdgeFunction(
 SAVE_S3_GALLERY_PHOTO_URL,
@@ -418,7 +469,18 @@ SAVE_S3_GALLERY_PHOTO_URL,
 event_id: String(eventId),
 bucket: String(bucket),
 object_key: String(objectKey),
-file_size: Number.isFinite(fileSize) ? Math.floor(fileSize) : null,
+
+// Billing must always use original selected file size.
+// S3/internal storage tracking uses compressed uploaded size.
+file_size: normalizedStoredSize,
+original_file_size: normalizedOriginalSize,
+stored_file_size: normalizedStoredSize,
+
+// Backward-compatible aliases for any future helper/edge compatibility.
+fileSize: normalizedStoredSize,
+originalFileSize: normalizedOriginalSize,
+storedFileSize: normalizedStoredSize,
+
 width: Number.isFinite(width) ? Math.floor(width) : null,
 height: Number.isFinite(height) ? Math.floor(height) : null,
 thumbnail_key: thumbnailKey ? String(thumbnailKey) : null,
