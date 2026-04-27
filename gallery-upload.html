@@ -160,11 +160,6 @@ const createBox = document.getElementById("createEventBox")
 const nameInput = document.getElementById("manualEventName")
 const dateInput = document.getElementById("manualEventDate")
 
-if(!select || !createBtn || !createBox || !nameInput || !dateInput){
-alert("Create event form not ready")
-return
-}
-
 if(select.value !== "create_new"){
 setStatusMessage("Select Create New Event first", "text-amber-400")
 return
@@ -200,33 +195,20 @@ status: "active"
 .single()
 
 if(error){
-console.error("EVENT ERROR:", error)
 alert("Event create failed")
-setStatusMessage("Event create failed", "text-red-400")
 return
 }
 
 const token =
 Math.random().toString(36).substring(2,10).toUpperCase()
 
-const { error: tokenError } = await supabase
+await supabase
 .from("event_tokens")
 .insert([{
 event_id: data.id,
 token: token,
 used: false
 }])
-
-if(tokenError){
-console.error("TOKEN ERROR:", tokenError)
-alert("Token creation failed")
-setStatusMessage("Token creation failed", "text-red-400")
-return
-}
-
-if(typeof loadConfirmedEvents === "function"){
-await loadConfirmedEvents(data.id)
-}
 
 select.value = String(data.id)
 createBox.style.display = "none"
@@ -236,59 +218,11 @@ dateInput.value = ""
 setStatusMessage("Event created successfully. Now select images and upload.", "text-green-400")
 
 }catch(err){
-console.error("Manual event create crash:", err)
 alert("Event create failed")
-setStatusMessage("Event create failed", "text-red-400")
 }finally{
 manualEventCreateInFlight = false
 createBtn.disabled = false
 createBtn.innerText = "Create Event"
-}
-}
-
-// =============================
-// SHOW / HIDE CREATE EVENT BOX
-// =============================
-
-document.addEventListener("change", function(e){
-
-if(e.target.id === "eventSelect"){
-
-const value = e.target.value
-const box = document.getElementById("createEventBox")
-
-if(value === "create_new"){
-box.style.display = "block"
-}else{
-box.style.display = "none"
-}
-
-}
-
-})
-
-// =============================
-// 🔥 FACE READY CHECK
-// =============================
-
-async function ensureFaceReady(){
-
-if(typeof faceapi === "undefined"){
-console.error("❌ face-api not loaded")
-return false
-}
-
-if(!window.faceEngine){
-console.error("❌ faceEngine not loaded")
-return false
-}
-
-try{
-await window.faceEngine.loadFaceModels()
-return true
-}catch(e){
-console.error("❌ Face load error", e)
-return false
 }
 }
 
@@ -298,24 +232,11 @@ return false
 
 async function handleUpload(){
 
-const supabase = await window.getSupabase()
 const user = await window.getCurrentUser()
 
 if(!user){
 alert("Login required")
 return
-}
-
-let faceReady = false
-
-try{
-faceReady = await ensureFaceReady()
-}catch(e){
-console.warn("Face system init skipped:", e)
-}
-
-if(!faceReady){
-console.warn("Face system not ready. Upload will continue and face processing may be skipped for this batch.")
 }
 
 const select = document.getElementById("eventSelect")
@@ -327,21 +248,13 @@ if(!eventId){
 eventId = getEventFromURL()
 }
 
-if(eventId === "create_new"){
-alert("Please click Create Event first")
-setStatusMessage("Create the event first, then upload photos.", "text-amber-400")
-return
-}
-
 if(!eventId){
 alert("Please select event")
-setStatusMessage("Please select an event", "text-amber-400")
 return
 }
 
 if(!imagesInput || !imagesInput.files || !imagesInput.files.length){
 alert("Please select images or folder")
-setStatusMessage("Please select images or folder", "text-amber-400")
 return
 }
 
@@ -352,9 +265,6 @@ await window.uploadImages(eventId)
 }
 
 </script>
-
-<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-<script src="js/face.js?v=5"></script>
 
 <script src="js/supabase.js"></script>
 <script src="js/gallery-upload.js?v=2"></script>
