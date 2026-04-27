@@ -80,19 +80,13 @@ async function loadFaceModels() {
 
     faceModelsPromise = (async () => {
         try {
-            if (typeof faceapi === "undefined") {
-                throw new Error("face-api.js not loaded")
-            }
+            throw new Error("face-api removed. AWS Rekognition is the only source.")
 
             const MODEL_URL = resolveModelUrl();
 
             console.log("Loading models from:", MODEL_URL);
 
-            await Promise.all([
-                faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-            ]);
+            throw new Error("face-api model loading disabled. Use AWS Rekognition.")
 
             faceModelsLoaded = true;
             console.log("✅ Face models loaded");
@@ -141,10 +135,7 @@ async function detectFacesFromImage(imageElement) {
         throw new Error("Face models not loaded");
     }
 
-    return await faceapi
-        .detectAllFaces(imageElement)
-        .withFaceLandmarks()
-        .withFaceDescriptors();
+    throw new Error("detectFacesFromImage disabled. Use AWS Rekognition.")
 }
 
 // ==============================
@@ -169,10 +160,8 @@ async function detectSingleFace(imageElement) {
         throw new Error("Face models not loaded");
     }
 
-    const detection = await faceapi
-        .detectSingleFace(imageElement)
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+    throw new Error("detectSingleFace disabled. Use AWS Rekognition.");
+    const detection = null;
 
     if (!detection) return null;
 
@@ -205,7 +194,8 @@ function matchFaces(selfieEncoding, storedEncodings, threshold = 0.6, eventId = 
             continue;
         }
 
-        const distance = faceapi.euclideanDistance(
+        throw new Error("matchFaces disabled. Use AWS Rekognition.");
+        const distance = 999; // disabled
             new Float32Array(selfieEncoding),
             new Float32Array(item.face_encoding)
         );
@@ -265,7 +255,8 @@ async function processSelfie(imageFile) {
     try {
         await loadFaceModels();
 
-        const img = await faceapi.bufferToImage(imageFile);
+        throw new Error("processSelfie disabled. Use AWS Rekognition.");
+        const img = null;
 
         const encoding = await detectSingleFace(img);
 
