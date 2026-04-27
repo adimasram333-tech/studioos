@@ -877,7 +877,7 @@ throw saveErr
 }
 
 // 🔥 TRIGGER IMAGE PROCESSING (NON-BLOCKING, AUTHENTICATED)
-triggerImageProcessingJob(signedUpload.object_key, String(eventId))
+enqueueImageProcessingJob(signedUpload.object_key, String(eventId))
 
 const fileUrl = resolveMediaUrlFromPhoto(savedPhoto) || resolveMediaUrlFromPhoto({
 object_key: signedUpload.object_key
@@ -893,6 +893,26 @@ objectKey: signedUpload.object_key
 
 }
 
+
+
+
+// =============================
+// CONTROLLED PROCESS QUEUE (NEW)
+// =============================
+const PROCESS_QUEUE = []
+let PROCESS_RUNNING = false
+
+async function enqueueImageProcessingJob(objectKey, eventId){
+PROCESS_QUEUE.push({ objectKey, eventId })
+if(PROCESS_RUNNING) return
+PROCESS_RUNNING = true
+while(PROCESS_QUEUE.length){
+const batch = PROCESS_QUEUE.splice(0, 3)
+await Promise.all(batch.map(item => triggerImageProcessingJob(item.objectKey, item.eventId)))
+await sleep(300)
+}
+PROCESS_RUNNING = false
+}
 
 // =============================
 // UPLOAD SYSTEM (S3 PRODUCTION PATH)
