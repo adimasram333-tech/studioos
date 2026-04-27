@@ -965,20 +965,6 @@ console.log("✅ Guest/Client verified | Role:", effectiveRole)
 
 }
 
-let userEncoding = null
-
-try{
-const stored = sessionStorage.getItem("face_encoding")
-if(stored){
-const parsed = JSON.parse(stored)
-if(Array.isArray(parsed) && parsed.length > 0){
-userEncoding = parsed
-}
-}
-}catch(e){
-userEncoding = null
-}
-
 console.log("FINAL EVENT ID:", eventId)
 
 const grid = document.getElementById("galleryGrid")
@@ -998,46 +984,6 @@ const sessionMatchedImages = getGuestMatchedImagesFromSession(eventId)
 sessionMatchedImages.forEach(url=>{
 matchedImages.add(url)
 })
-}
-
-if(userEncoding && eventId && effectiveRole !== "guest"){
-
-const { data: faces } = await supabase
-.from("face_data")
-.select("face_encoding, object_key")
-.eq("event_id", eventId)
-
-if(faces && faces.length > 0){
-
-faces.forEach(row=>{
-
-if(!row || !row.face_encoding) return
-if(!Array.isArray(row.face_encoding)) return
-if(row.face_encoding.length !== userEncoding.length) return
-
-let dist = 0
-
-for(let i=0;i<row.face_encoding.length;i++){
-const diff = Number(row.face_encoding[i]) - Number(userEncoding[i])
-dist += diff * diff
-}
-
-dist = Math.sqrt(dist)
-
-if(dist < 0.60){
-const matchedUrl = row.object_key && typeof window.buildMediaUrl === "function"
-? normalizeImageUrl(window.buildMediaUrl(row.object_key))
-: ""
-
-if(matchedUrl){
-matchedImages.add(matchedUrl)
-}
-}
-
-})
-
-}
-
 }
 
 CURRENT_GALLERY_STATE = {
