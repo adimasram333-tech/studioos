@@ -8,12 +8,10 @@
 <title>Face Capture</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
 <!-- 🔥 REQUIRED DEPENDENCIES -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
-<script src="js/face.js"></script>
 
 <style>
 body{
@@ -62,6 +60,11 @@ class="mt-6 bg-indigo-600 px-6 py-2 rounded-lg">
 Start Camera
 </button>
 
+<button id="captureBtn"
+class="mt-3 bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg hidden">
+Capture & Search
+</button>
+
 <button id="retryBtn"
 class="mt-3 bg-amber-500 hover:bg-amber-600 px-6 py-2 rounded-lg hidden">
 Retry Scan
@@ -76,14 +79,13 @@ Try again with front face, eyes open, and better lighting. Avoid sunglasses if p
 <script>
 
 let stream = null
-let modelsLoaded = false
-let detecting = false
-let stableFrames = 0
 let processingFace = false
+let cameraReady = false
 
 const video = document.getElementById("video")
 const status = document.getElementById("status")
 const startBtn = document.getElementById("startBtn")
+const captureBtn = document.getElementById("captureBtn")
 const retryBtn = document.getElementById("retryBtn")
 const helpText = document.getElementById("helpText")
 
@@ -94,17 +96,22 @@ return eventId || null
 }
 
 function clearFaceSession(){
+
+// Old browser face-api session cleanup
 sessionStorage.removeItem("face_encoding")
+
+// Current AWS Rekognition result session cleanup
 sessionStorage.removeItem("matched_images")
 sessionStorage.removeItem("matched_images_by_event")
 sessionStorage.removeItem("face_verified")
 sessionStorage.removeItem("face_scan_done")
 sessionStorage.removeItem("face_scan_event_id")
+
 }
 
-function normalizeImageUrl(url){
-if(!url) return ""
-return String(url).split("?")[0].trim()
+function normalizeImageKey(value){
+if(!value) return ""
+return String(value).split("?")[0].replace(/^\/+/,"").trim()
 }
 
 function stopCamera(){
@@ -116,16 +123,24 @@ stream.getTracks().forEach(track=>track.stop())
 console.error("Camera stop error:", e)
 }
 stream = null
+cameraReady = false
 }
 
 function setBusyState(isBusy, text){
 processingFace = isBusy
+
 startBtn.disabled = isBusy
 startBtn.style.opacity = isBusy ? "0.7" : "1"
 startBtn.style.pointerEvents = isBusy ? "none" : "auto"
+
+captureBtn.disabled = isBusy
+captureBtn.style.opacity = isBusy ? "0.7" : "1"
+captureBtn.style.pointerEvents = isBusy ? "none" : "auto"
+
 retryBtn.disabled = isBusy
 retryBtn.style.opacity = isBusy ? "0.7" : "1"
 retryBtn.style.pointerEvents = isBusy ? "none" : "auto"
+
 if(text){
 status.innerText = text
 }
@@ -135,6 +150,7 @@ function showRetryUI(message){
 setBusyState(false, message || "No Match Found ❌")
 retryBtn.classList.remove("hidden")
 helpText.classList.remove("hidden")
+captureBtn.classList.add("hidden")
 }
 
 function hideRetryUI(){
@@ -162,7 +178,7 @@ reject(err)
 
 function saveMatchedImagesToSession(eventId, matchedImages){
 const cleanImages = matchedImages
-.map(normalizeImageUrl)
+.map(normalizeImageKey)
 .filter(Boolean)
 
 sessionStorage.setItem("matched_images", JSON.stringify(cleanImages))
@@ -182,58 +198,35 @@ sessionStorage.setItem("face_scan_done", "true")
 sessionStorage.setItem("face_scan_event_id", eventId)
 }
 
-function getFaceDistance(a, b){
-if(!Array.isArray(a) || !Array.isArray(b)) return Number.POSITIVE_INFINITY
-if(a.length !== b.length) return Number.POSITIVE_INFINITY
-
-let dist = 0
-
-for(let i=0;i<a.length;i++){
-const diff = Number(a[i]) - Number(b[i])
-dist += diff * diff
+function getSearchFacesEndpoint(){
+if(window.SEARCH_FACES_BY_SELFIE_URL){
+return window.SEARCH_FACES_BY_SELFIE_URL
 }
 
-return Math.sqrt(dist)
+if(window.SAVE_S3_GALLERY_PHOTO_URL){
+return String(window.SAVE_S3_GALLERY_PHOTO_URL).replace("/save-s3-gallery-photo", "/search-faces-by-selfie")
 }
 
-function buildMatchedImages(sortedMatches, absoluteThreshold, bestMatchMargin){
-if(!Array.isArray(sortedMatches) || sortedMatches.length === 0){
-return []
+return "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/search-faces-by-selfie"
 }
 
-const bestDistance = sortedMatches[0].distance
-const dynamicThreshold = Math.min(absoluteThreshold, bestDistance + bestMatchMargin)
-
-return sortedMatches
-.filter(item => item.distance <= dynamicThreshold)
-.map(item => item.image_url)
-}
-
-async function loadModels(){
-
-if(modelsLoaded) return
-
+async function getAccessToken(){
 try{
-setBusyState(true, "Loading AI...")
-hideRetryUI()
-
-if(!window.faceEngine || typeof window.faceEngine.loadFaceModels !== "function"){
-throw new Error("Face engine not loaded")
+if(typeof window.getCurrentSession === "function"){
+const session = await window.getCurrentSession()
+return session?.access_token || null
 }
 
-await withTimeout(
-window.faceEngine.loadFaceModels(),
-15000,
-"AI models load timeout"
-)
-
-modelsLoaded = true
-setBusyState(false, "Ready")
+if(typeof window.getSupabase === "function"){
+const supabase = await window.getSupabase()
+const { data } = await supabase.auth.getSession()
+return data?.session?.access_token || null
+}
 }catch(err){
-console.error("MODEL ERROR:", err)
-setBusyState(false, "Model Error")
-alert("Model load error: " + err.message)
+console.warn("Session token unavailable for face search:", err)
 }
+
+return null
 }
 
 async function startCamera(){
@@ -248,14 +241,6 @@ return
 
 clearFaceSession()
 hideRetryUI()
-stableFrames = 0
-detecting = false
-
-if(!modelsLoaded){
-alert("Models not loaded yet")
-return
-}
-
 setBusyState(true, "Opening Camera...")
 
 stream = await navigator.mediaDevices.getUserMedia({
@@ -272,10 +257,10 @@ video.srcObject = stream
 video.onloadedmetadata = async () => {
 try{
 await video.play()
-stableFrames = 0
-detecting = true
-setBusyState(false, "Detecting...")
-requestAnimationFrame(detectLoop)
+cameraReady = true
+setBusyState(false, "Camera Ready")
+captureBtn.classList.remove("hidden")
+startBtn.innerText = "Restart Camera"
 }catch(err){
 console.error("Video play error:", err)
 stopCamera()
@@ -292,54 +277,75 @@ alert("Camera permission denied")
 }
 }
 
-async function detectLoop(){
+function captureVideoFrameBase64(){
+if(!cameraReady || !video.videoWidth || !video.videoHeight){
+throw new Error("Camera is not ready yet")
+}
 
-if(!detecting || processingFace) return
+const canvas = document.createElement("canvas")
+canvas.width = video.videoWidth
+canvas.height = video.videoHeight
 
+const ctx = canvas.getContext("2d")
+if(!ctx){
+throw new Error("Unable to capture image")
+}
+
+ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+const dataUrl = canvas.toDataURL("image/jpeg", 0.88)
+const parts = dataUrl.split(",")
+
+if(parts.length < 2 || !parts[1]){
+throw new Error("Invalid captured image")
+}
+
+return parts[1]
+}
+
+async function searchFaceWithAWS(eventId, imageBase64){
+const endpoint = getSearchFacesEndpoint()
+const accessToken = await getAccessToken()
+
+const headers = {
+"Content-Type": "application/json",
+"apikey": window.SUPABASE_ANON_KEY || ""
+}
+
+if(accessToken){
+headers.Authorization = `Bearer ${accessToken}`
+}
+
+const response = await withTimeout(
+fetch(endpoint, {
+method: "POST",
+headers,
+body: JSON.stringify({
+event_id: eventId,
+image_base64: imageBase64
+})
+}),
+30000,
+"Face search timeout"
+)
+
+let result = null
 try{
-
-if(!window.faceEngine || typeof window.faceEngine.detectSingleFace !== "function"){
-throw new Error("Face engine detect function missing")
+result = await response.json()
+}catch(_err){
+result = null
 }
 
-const encoding = await window.faceEngine.detectSingleFace(video)
-
-if(encoding){
-
-stableFrames++
-status.innerText = "Hold Still..."
-
-if(stableFrames >= 5){
-await captureFace(encoding)
-return
+if(!response.ok || !result?.success){
+throw new Error(result?.error || "Face search failed")
 }
 
-}else{
-stableFrames = 0
-status.innerText = "No Face"
+return result
 }
 
-}catch(err){
-console.error("Detection loop error:", err)
-stableFrames = 0
-status.innerText = "Detection Error"
-}
-
-if(detecting && !processingFace){
-requestAnimationFrame(detectLoop)
-}
-}
-
-async function captureFace(descriptor){
+async function captureAndSearch(){
 
 if(processingFace) return
-
-detecting = false
-setBusyState(true, "Processing...")
-
-stopCamera()
-
-sessionStorage.setItem("face_encoding", JSON.stringify(descriptor))
 
 const eventId = getEventId()
 
@@ -352,88 +358,29 @@ return
 
 try{
 
-const supabase = await withTimeout(
-window.getSupabase(),
-10000,
-"Supabase initialization timeout"
-)
+setBusyState(true, "Processing...")
 
-const { data: faces, error } = await withTimeout(
-supabase
-.from("face_data")
-.select("face_encoding, image_url")
-.eq("event_id", eventId),
-15000,
-"Face data fetch timeout"
-)
+const imageBase64 = captureVideoFrameBase64()
 
-if(error){
-throw error
-}
+const result = await searchFaceWithAWS(eventId, imageBase64)
 
-const bestDistanceByImage = new Map()
+const matches = Array.isArray(result?.matches) ? result.matches : []
 
-if(Array.isArray(faces)){
+const matchedImages = matches
+.map(item => item?.object_key || item?.preview_key || item?.image_url || "")
+.map(normalizeImageKey)
+.filter(Boolean)
 
-for(const row of faces){
+saveMatchedImagesToSession(eventId, matchedImages)
 
-if(!row || !Array.isArray(row.face_encoding) || !row.image_url){
-continue
-}
-
-const cleanUrl = normalizeImageUrl(row.image_url)
-if(!cleanUrl){
-continue
-}
-
-const dist = getFaceDistance(row.face_encoding, descriptor)
-if(!Number.isFinite(dist)){
-continue
-}
-
-const existingBest = bestDistanceByImage.get(cleanUrl)
-
-if(existingBest === undefined || dist < existingBest){
-bestDistanceByImage.set(cleanUrl, dist)
-}
-}
-
-}
-
-const sortedMatches = Array.from(bestDistanceByImage.entries())
-.map(([image_url, distance]) => ({ image_url, distance }))
-.sort((a, b) => a.distance - b.distance)
-
-const STRICT_ABSOLUTE_THRESHOLD = 0.57
-const STRICT_BEST_MATCH_MARGIN = 0.12
-
-const RELAXED_ABSOLUTE_THRESHOLD = 0.60
-const RELAXED_BEST_MATCH_MARGIN = 0.04
-
-let matched = buildMatchedImages(
-sortedMatches,
-STRICT_ABSOLUTE_THRESHOLD,
-STRICT_BEST_MATCH_MARGIN
-)
-
-// difficult cases: eyes closed / sunglasses / angle change
-if(matched.length === 0 && sortedMatches.length > 0){
-matched = buildMatchedImages(
-sortedMatches,
-RELAXED_ABSOLUTE_THRESHOLD,
-RELAXED_BEST_MATCH_MARGIN
-)
-}
-
-saveMatchedImagesToSession(eventId, matched)
-
-if(matched.length === 0){
+if(matchedImages.length === 0){
 clearFaceSession()
 showRetryUI("No Match Found ❌")
 return
 }
 
 hideRetryUI()
+stopCamera()
 setBusyState(false, "Match Found ✅")
 
 setTimeout(()=>{
@@ -441,27 +388,28 @@ window.location.href = `gallery.html?event_id=${eventId}`
 }, 500)
 
 }catch(err){
-console.error("Face processing error:", err)
+console.error("Face search error:", err)
 clearFaceSession()
 showRetryUI("Processing Failed")
-alert("Face processing failed: " + err.message)
+alert("Face processing failed: " + (err?.message || "Unknown error"))
 }
 }
 
 startBtn.onclick = async ()=>{
 if(processingFace) return
-await loadModels()
-if(modelsLoaded){
+stopCamera()
 await startCamera()
 }
+
+captureBtn.onclick = async ()=>{
+if(processingFace) return
+await captureAndSearch()
 }
 
 retryBtn.onclick = async ()=>{
 if(processingFace) return
-await loadModels()
-if(modelsLoaded){
+stopCamera()
 await startCamera()
-}
 }
 
 window.addEventListener("beforeunload", ()=>{
