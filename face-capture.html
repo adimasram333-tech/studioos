@@ -445,9 +445,21 @@ const imageBase64 = captureVideoFrameBase64()
 
 const result = await searchFaceWithAWS(eventId, imageBase64)
 
+// =============================
+// 🔥 ADAPTIVE SAFE MERGE (CONFIRMED + POSSIBLE)
+// =============================
+const confirmed = Array.isArray(result?.confirmed) ? result.confirmed : []
+const possible = Array.isArray(result?.possible) ? result.possible : []
+
+// fallback for backward compatibility
 const matches = Array.isArray(result?.matches) ? result.matches : []
 
-const matchedImages = matches
+// PRIORITY: confirmed first, then possible (controlled)
+const mergedResults = confirmed.length > 0
+    ? [...confirmed, ...possible]
+    : matches
+
+const matchedImages = mergedResults
 .map(item => item?.object_key || item?.preview_key || item?.image_url || "")
 .map(normalizeImageKey)
 .filter(Boolean)
