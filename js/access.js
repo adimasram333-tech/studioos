@@ -38,6 +38,12 @@ async function initAccess() {
     return;
   }
 
+  const eventIsValid = await validateEventAccess();
+
+  if (!eventIsValid) {
+    return;
+  }
+
   // =============================
   // DEVICE ID
   // =============================
@@ -50,6 +56,46 @@ async function initAccess() {
 
   let otpAttempts = 0;
   const maxAttempts = 3;
+  let accessSubmitLocked = false;
+  let otpVerifyLocked = false;
+
+  function setButtonBusy(button, isBusy, text) {
+    if (!button) return;
+
+    if (isBusy) {
+      button.dataset.originalText = button.dataset.originalText || button.innerText;
+      button.innerText = text || "Please wait...";
+      button.disabled = true;
+      button.style.opacity = "0.7";
+      button.style.pointerEvents = "none";
+    } else {
+      button.innerText = button.dataset.originalText || button.innerText;
+      button.disabled = false;
+      button.style.opacity = "1";
+      button.style.pointerEvents = "auto";
+    }
+  }
+
+  async function validateEventAccess() {
+    const { data, error } = await supabase
+      .from("events")
+      .select("id")
+      .eq("id", eventId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Event access validation failed:", error);
+      alert("Unable to verify event access. Please try again.");
+      return false;
+    }
+
+    if (!data?.id) {
+      alert("This event no longer exists or the access link is invalid.");
+      return false;
+    }
+
+    return true;
+  }
 
   let currentPhone = null;
   let currentName = null;
@@ -62,23 +108,38 @@ async function initAccess() {
 
   function clearOldFaceSession() {
 
-    // OLD
-    sessionStorage.removeItem("face_encoding");
+    const keys = [
+      "face_encoding",
+      "matched_images",
+      "matched_image_urls",
+      "face_matched_images",
+      "face_match_images",
+      "guest_matched_images",
+      "matched_images_by_event",
+      "matched_image_urls_by_event",
+      "face_matched_images_by_event",
+      "face_verified",
+      "face_scan_done",
+      "face_scan_event_id"
+    ];
 
-    // 🔥 NEW (CRITICAL FIX)
-    sessionStorage.removeItem("matched_images");
-    sessionStorage.removeItem("matched_images_by_event");
-    sessionStorage.removeItem("face_verified");
-    sessionStorage.removeItem("face_scan_done");
-    sessionStorage.removeItem("face_scan_event_id");
+    keys.forEach((key) => {
+      try {
+        sessionStorage.removeItem(key);
+      } catch (err) {
+        console.warn("Session cleanup skipped:", key, err);
+      }
+    });
 
   }
 
   function setGallerySession(visitorId, role) {
+    const safeRole = role === "client" ? "client" : "guest";
+
     sessionStorage.setItem("gallery_access", "true");
     sessionStorage.setItem("event_id", eventId);
     sessionStorage.setItem("visitor_id", visitorId);
-    sessionStorage.setItem("role", role);
+    sessionStorage.setItem("role", safeRole);
   }
 
   function goNext(role) {
@@ -124,7 +185,7 @@ async function initAccess() {
   async function verifyToken(visitorId) {
 
     const tokenInput = document.getElementById("tokenInput");
-    const token = tokenInput ? tokenInput.value.trim() : "";
+    const token = tokenInput ? tokenInput.value.trim().toUpperCase() : "";
 
     if (!token) return false;
 
@@ -218,6 +279,9 @@ async function initAccess() {
 
   async function verifyOTP() {
 
+    if (otpVerifyLocked) return;
+
+    const otpBtn = document.getElementById("verifyOtpBtn");
     const entered = document.getElementById("otpInput").value.trim();
 
     if (!entered) {
@@ -241,6 +305,9 @@ async function initAccess() {
     otpAttempts = 0;
 
     try {
+
+      otpVerifyLocked = true;
+      setButtonBusy(otpBtn, true, "Verifying...");
 
       let visitorId;
 
@@ -305,6 +372,9 @@ async function initAccess() {
     } catch (err) {
       console.error(err);
       alert("Something went wrong");
+    } finally {
+      otpVerifyLocked = false;
+      setButtonBusy(otpBtn, false);
     }
   }
 
@@ -316,62 +386,76 @@ async function initAccess() {
 
     e.preventDefault();
 
-    const name = document.getElementById("name").value.trim();
-    const phone = document.getElementById("phone").value.trim();
+    if (accessSubmitLocked) return;
 
-    if (!name || !phone) {
-      alert("Please fill all details");
-      return;
-    }
+    const submitBtn = form.querySelector("button[type='submit']");
 
-    if (!/^[0-9]{10}$/.test(phone)) {
-      alert("Enter valid 10 digit number");
-      return;
-    }
+    try {
 
-    currentName = name;
-    currentPhone = phone;
+      accessSubmitLocked = true;
+      setButtonBusy(submitBtn, true, "Checking...");
 
-    const { data } = await supabase
-      .from("event_visitors")
-      .select("*")
-      .eq("event_id", eventId)
-      .eq("phone", phone)
-      .limit(1);
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
 
-    if (data && data.length > 0) {
-
-      existingVisitor = data[0];
-
-      const tokenResult = await verifyToken(existingVisitor.id);
-
-      if (tokenResult === null) return;
-
-      if (tokenResult === true) {
-
-        setGallerySession(existingVisitor.id, "client");
-        goNext("client");
+      if (!name || !phone) {
+        alert("Please fill all details");
         return;
       }
 
-      if (existingVisitor.verified) {
-
-        await supabase
-          .from("event_visitors")
-          .update({ last_visit: new Date().toISOString() })
-          .eq("id", existingVisitor.id);
-
-        setGallerySession(existingVisitor.id, "guest");
-        goNext("guest");
+      if (!/^[0-9]{10}$/.test(phone)) {
+        alert("Enter valid 10 digit number");
         return;
       }
+
+      currentName = name;
+      currentPhone = phone;
+
+      const { data } = await supabase
+        .from("event_visitors")
+        .select("*")
+        .eq("event_id", eventId)
+        .eq("phone", phone)
+        .limit(1);
+
+      if (data && data.length > 0) {
+
+        existingVisitor = data[0];
+
+        const tokenResult = await verifyToken(existingVisitor.id);
+
+        if (tokenResult === null) return;
+
+        if (tokenResult === true) {
+
+          setGallerySession(existingVisitor.id, "client");
+          goNext("client");
+          return;
+        }
+
+        if (existingVisitor.verified) {
+
+          await supabase
+            .from("event_visitors")
+            .update({ last_visit: new Date().toISOString() })
+            .eq("id", existingVisitor.id);
+
+          setGallerySession(existingVisitor.id, "guest");
+          goNext("guest");
+          return;
+        }
+      }
+
+      alert("Verifying...");
+
+      await new Promise(res => setTimeout(res, 800));
+
+      showOTPInput();
+
+    } finally {
+      accessSubmitLocked = false;
+      setButtonBusy(submitBtn, false);
     }
-
-    alert("Verifying...");
-
-    await new Promise(res => setTimeout(res, 800));
-
-    showOTPInput();
 
   });
 
