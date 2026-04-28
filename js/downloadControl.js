@@ -13,12 +13,40 @@ const CREATE_ORDER_URL =
 const VERIFY_PAYMENT_URL =
   "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/verify-payment";
 
+const TRACK_USAGE_URL =
+  "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/track-usage";
+
 // 🔥 IMPORTANT: use dynamic key (future safe)
 const RAZORPAY_KEY = "rzp_test_SYs7AftkGNrQNe";
 
 // get role
 function getUserRole() {
   return sessionStorage.getItem("role") || "guest";
+}
+
+async function trackDownloadUsage(imageUrl, eventId, options = {}) {
+  try {
+    const role = getUserRole();
+
+    await fetch(TRACK_USAGE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": window.SUPABASE_ANON_KEY || ""
+      },
+      body: JSON.stringify({
+        type: "download",
+        user_id: options.userId || options.photographerId || null,
+        event_id: eventId || null,
+        photo_id: options.photoId || null,
+        role,
+        file_type: options.fileType || "unknown",
+        file_size_bytes: Number(options.fileSizeBytes || 0)
+      })
+    });
+  } catch (e) {
+    console.warn("Usage tracking skipped", e);
+  }
 }
 
 // store last image
@@ -61,7 +89,7 @@ function getLowQualityUrl(url) {
 // FORCE DOWNLOAD
 // =============================
 
-function triggerDownload(imageUrl) {
+function triggerDownload(imageUrl, eventId = null, trackingOptions = {}) {
   fetch(imageUrl)
     .then((res) => res.blob())
     .then((blob) => {
@@ -75,6 +103,11 @@ function triggerDownload(imageUrl) {
       document.body.removeChild(a);
 
       URL.revokeObjectURL(blobUrl);
+
+      trackDownloadUsage(imageUrl, eventId, {
+        ...trackingOptions,
+        fileSizeBytes: blob.size || trackingOptions.fileSizeBytes || 0
+      });
     })
     .catch((err) => {
       console.error(err);
@@ -144,7 +177,10 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 
   document.getElementById("freeDownloadBtn").onclick = function () {
     const lowUrl = getLowQualityUrl(imageUrl);
-    triggerDownload(lowUrl);
+    triggerDownload(lowUrl, eventId, {
+      photographerId,
+      fileType: "preview"
+    });
     modal.remove();
   };
 
@@ -227,7 +263,10 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 
           markImagePurchased(imageUrl);
           modal.remove();
-          triggerDownload(imageUrl);
+          triggerDownload(imageUrl, eventId, {
+            photographerId,
+            fileType: "original"
+          });
         },
 
         prefill: {
@@ -264,17 +303,26 @@ window.handleDownload = function (imageUrl, eventId, photographerId, eventName, 
   const guestFreeDownload = !!options.guestFreeDownload;
 
   if (role === "client") {
-    triggerDownload(imageUrl);
+    triggerDownload(imageUrl, eventId, {
+      photographerId,
+      fileType: "original"
+    });
     return;
   }
 
   if (guestFreeDownload) {
-    triggerDownload(imageUrl);
+    triggerDownload(imageUrl, eventId, {
+      photographerId,
+      fileType: "preview"
+    });
     return;
   }
 
   if (isPurchased(imageUrl)) {
-    triggerDownload(imageUrl);
+    triggerDownload(imageUrl, eventId, {
+      photographerId,
+      fileType: "original"
+    });
     return;
   }
 
