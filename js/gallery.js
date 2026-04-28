@@ -1130,7 +1130,8 @@ await supabase
 .from("gallery_photos")
 .select("id,user_id,event_id,object_key,preview_key,thumbnail_key,created_at")
 .eq("event_id", safeEventId)
-.order("created_at",{ ascending:false })
+.order("created_at",{ ascending:true })
+.order("id",{ ascending:true })
 
 const photographerId = data && data.length > 0 ? data[0].user_id : null
 
