@@ -66,7 +66,13 @@ const eventScopedKeys = [
 "matched_image_urls",
 "face_matched_images",
 "face_match_images",
-"guest_matched_images"
+"guest_matched_images",
+"matched_images_by_event",
+"matched_image_urls_by_event",
+"face_matched_images_by_event",
+"face_scan_done",
+"face_scan_event_id",
+"face_verified"
 ]
 
 eventScopedKeys.forEach(key=>{
@@ -522,9 +528,21 @@ function isMatchedImage(imgUrl, matchedImages){
 if(!matchedImages || matchedImages.size === 0) return false
 
 const cleanUrl = normalizeImageUrl(imgUrl)
+const cleanPath = cleanUrl
+  .replace(/^https?:\/\/[^/]+\//i, "")
+  .replace(/^\/+/, "")
 
 for(const m of matchedImages){
-if(normalizeImageUrl(m) === cleanUrl){
+const cleanMatch = normalizeImageUrl(m)
+const cleanMatchPath = cleanMatch
+  .replace(/^https?:\/\/[^/]+\//i, "")
+  .replace(/^\/+/, "")
+
+if(cleanMatch === cleanUrl || cleanMatchPath === cleanPath){
+return true
+}
+
+if(cleanPath && cleanMatchPath && (cleanUrl.endsWith(cleanMatchPath) || cleanMatch.endsWith(cleanPath))){
 return true
 }
 }
@@ -619,6 +637,35 @@ return null
 
 function getGuestMatchedImagesFromSession(eventId){
 const matched = new Set()
+const safeEventId = String(eventId || "").trim()
+const scanEventId = String(sessionStorage.getItem("face_scan_event_id") || "").trim()
+
+const byEventMaps = [
+"matched_images_by_event",
+"matched_image_urls_by_event",
+"face_matched_images_by_event"
+]
+
+byEventMaps.forEach(key=>{
+const mapValue = readJsonSessionObject(key)
+if(mapValue && safeEventId && Array.isArray(mapValue[safeEventId])){
+mapValue[safeEventId].forEach(url=>{
+const clean = normalizeImageUrl(url)
+if(clean){
+matched.add(clean)
+}
+})
+}
+})
+
+if(matched.size > 0){
+return matched
+}
+
+// Backward compatibility: direct arrays are accepted only when they belong to the same event.
+if(scanEventId && safeEventId && scanEventId !== safeEventId){
+return matched
+}
 
 const directArrays = [
 "matched_images",
@@ -636,24 +683,6 @@ if(clean){
 matched.add(clean)
 }
 })
-})
-
-const byEventMaps = [
-"matched_images_by_event",
-"matched_image_urls_by_event",
-"face_matched_images_by_event"
-]
-
-byEventMaps.forEach(key=>{
-const mapValue = readJsonSessionObject(key)
-if(mapValue && eventId && Array.isArray(mapValue[eventId])){
-mapValue[eventId].forEach(url=>{
-const clean = normalizeImageUrl(url)
-if(clean){
-matched.add(clean)
-}
-})
-}
 })
 
 return matched
@@ -1270,6 +1299,8 @@ renderModalPhoto(modalPhotos[currentModalIndex])
 }
 }
 
+const galleryFragment = document.createDocumentFragment()
+
 visiblePhotos.forEach(photo=>{
 
 const cleanOriginalUrl = getPhotoOriginalUrl(photo)
@@ -1312,9 +1343,11 @@ imageEl.onerror = null
 
 div.onclick = () => openImage(photo)
 
-grid.appendChild(div)
+galleryFragment.appendChild(div)
 
 })
+
+grid.appendChild(galleryFragment)
 
 if(effectiveRole === "guest" && grid.children.length === 0){
 empty.innerText = "No photos found for your face"
