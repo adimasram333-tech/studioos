@@ -10,6 +10,9 @@ effectiveRole: "guest",
 matchedImages: new Set()
 }
 
+const GALLERY_RENDER_BATCH_SIZE = 80
+const GALLERY_RENDER_IDLE_DELAY = 16
+
 function buildGuestDownloadLabel(isFree){
 return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
 }
@@ -778,6 +781,16 @@ e.preventDefault()
 })
 }
 
+function waitForGalleryIdle(){
+return new Promise(resolve=>{
+if("requestIdleCallback" in window){
+window.requestIdleCallback(resolve, { timeout: 250 })
+return
+}
+setTimeout(resolve, GALLERY_RENDER_IDLE_DELAY)
+})
+}
+
 function buildToggleMarkup(eventId, isGuestFree){
 const bgColor = isGuestFree ? "#6366f1" : "rgba(255,255,255,0.28)"
 const knobLeft = isGuestFree ? "22px" : "2px"
@@ -1299,13 +1312,12 @@ renderModalPhoto(modalPhotos[currentModalIndex])
 }
 }
 
-const galleryFragment = document.createDocumentFragment()
+let renderedPhotoCount = 0
 
-visiblePhotos.forEach(photo=>{
+function createGalleryPhotoCard(photo){
 
 const cleanOriginalUrl = getPhotoOriginalUrl(photo)
-if(!cleanOriginalUrl) return
-
+if(!cleanOriginalUrl) return null
 
 const displayUrl = getDisplayImageUrl(photo, effectiveRole, guestFreeDownload)
 let thumbnailUrl = getPhotoThumbnailUrl(photo)
@@ -1343,11 +1355,49 @@ imageEl.onerror = null
 
 div.onclick = () => openImage(photo)
 
-galleryFragment.appendChild(div)
+return div
+}
 
-})
+function removeLoadMoreButton(){
+const existing = document.getElementById("galleryLoadMoreBtn")
+if(existing){
+existing.remove()
+}
+}
 
-grid.appendChild(galleryFragment)
+function renderPhotoBatch(){
+removeLoadMoreButton()
+
+const fragment = document.createDocumentFragment()
+const nextLimit = Math.min(renderedPhotoCount + GALLERY_RENDER_BATCH_SIZE, visiblePhotos.length)
+
+for(let i = renderedPhotoCount; i < nextLimit; i++){
+const card = createGalleryPhotoCard(visiblePhotos[i])
+if(card){
+fragment.appendChild(card)
+}
+}
+
+grid.appendChild(fragment)
+renderedPhotoCount = nextLimit
+
+if(renderedPhotoCount < visiblePhotos.length){
+const loadMoreBtn = document.createElement("button")
+loadMoreBtn.id = "galleryLoadMoreBtn"
+loadMoreBtn.type = "button"
+loadMoreBtn.className = "col-span-full mt-4 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm font-medium"
+loadMoreBtn.innerText = `Load more (${visiblePhotos.length - renderedPhotoCount} left)`
+loadMoreBtn.onclick = async function(){
+loadMoreBtn.disabled = true
+loadMoreBtn.innerText = "Loading..."
+await waitForGalleryIdle()
+renderPhotoBatch()
+}
+grid.appendChild(loadMoreBtn)
+}
+}
+
+renderPhotoBatch()
 
 if(effectiveRole === "guest" && grid.children.length === 0){
 empty.innerText = "No photos found for your face"
