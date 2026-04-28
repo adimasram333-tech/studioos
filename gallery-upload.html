@@ -210,6 +210,16 @@ token: token,
 used: false
 }])
 
+if(typeof window.loadConfirmedEvents === "function"){
+await window.loadConfirmedEvents(data.id)
+}else{
+const option = document.createElement("option")
+option.value = String(data.id)
+option.textContent = `${name} (${date})`
+select.appendChild(option)
+select.value = String(data.id)
+}
+
 select.value = String(data.id)
 createBox.style.display = "none"
 nameInput.value = ""
