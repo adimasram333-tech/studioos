@@ -82,6 +82,11 @@ let stream = null
 let processingFace = false
 let cameraReady = false
 
+const FACE_CAPTURE_MAX_SIZE = 1280
+const FACE_CAPTURE_JPEG_QUALITY = 0.72
+const FACE_SEARCH_TIMEOUT_MS = 25000
+const FACE_SEARCH_RETRIES = 2
+
 const video = document.getElementById("video")
 const status = document.getElementById("status")
 const startBtn = document.getElementById("startBtn")
@@ -93,6 +98,22 @@ function getEventId(){
 const params = new URLSearchParams(window.location.search)
 const eventId = (params.get("event_id") || "").trim()
 return eventId || null
+}
+
+function getRedirectUrl(eventId){
+const params = new URLSearchParams(window.location.search)
+const redirect = (params.get("redirect") || "").trim()
+
+if(redirect){
+try{
+const parsed = new URL(redirect, window.location.origin)
+if(parsed.origin === window.location.origin){
+return parsed.href
+}
+}catch(_err){}
+}
+
+return `gallery.html?event_id=${encodeURIComponent(eventId)}`
 }
 
 function clearFaceSession(){
@@ -112,6 +133,10 @@ sessionStorage.removeItem("face_scan_event_id")
 function normalizeImageKey(value){
 if(!value) return ""
 return String(value).split("?")[0].replace(/^\/+/,"").trim()
+}
+
+function sleep(ms){
+return new Promise(resolve=>setTimeout(resolve, ms))
 }
 
 function stopCamera(){
@@ -174,6 +199,18 @@ clearTimeout(timer)
 reject(err)
 })
 })
+}
+
+function isRetryableFaceSearchError(err){
+const message = String(err?.message || err || "").toLowerCase()
+return (
+message.includes("timeout") ||
+message.includes("network") ||
+message.includes("failed to fetch") ||
+message.includes("temporarily") ||
+message.includes("rate") ||
+message.includes("throttl")
+)
 }
 
 function saveMatchedImagesToSession(eventId, matchedImages){
@@ -243,6 +280,10 @@ clearFaceSession()
 hideRetryUI()
 setBusyState(true, "Opening Camera...")
 
+if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+throw new Error("Camera is not supported on this device/browser")
+}
+
 stream = await navigator.mediaDevices.getUserMedia({
 video: {
 facingMode: "user",
@@ -273,7 +314,7 @@ alert("Unable to start camera preview")
 console.error("Camera start error:", err)
 stopCamera()
 setBusyState(false, "Camera Error")
-alert("Camera permission denied")
+alert(err?.message || "Camera permission denied")
 }
 }
 
@@ -282,22 +323,39 @@ if(!cameraReady || !video.videoWidth || !video.videoHeight){
 throw new Error("Camera is not ready yet")
 }
 
-const canvas = document.createElement("canvas")
-canvas.width = video.videoWidth
-canvas.height = video.videoHeight
+const sourceWidth = Number(video.videoWidth || 0)
+const sourceHeight = Number(video.videoHeight || 0)
 
-const ctx = canvas.getContext("2d")
+if(!sourceWidth || !sourceHeight){
+throw new Error("Invalid camera frame")
+}
+
+const scale = Math.min(1, FACE_CAPTURE_MAX_SIZE / sourceWidth, FACE_CAPTURE_MAX_SIZE / sourceHeight)
+const targetWidth = Math.max(1, Math.round(sourceWidth * scale))
+const targetHeight = Math.max(1, Math.round(sourceHeight * scale))
+
+const canvas = document.createElement("canvas")
+canvas.width = targetWidth
+canvas.height = targetHeight
+
+const ctx = canvas.getContext("2d", { alpha:false })
 if(!ctx){
 throw new Error("Unable to capture image")
 }
 
-ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+ctx.fillStyle = "#ffffff"
+ctx.fillRect(0, 0, targetWidth, targetHeight)
+ctx.drawImage(video, 0, 0, targetWidth, targetHeight)
 
-const dataUrl = canvas.toDataURL("image/jpeg", 0.88)
+const dataUrl = canvas.toDataURL("image/jpeg", FACE_CAPTURE_JPEG_QUALITY)
 const parts = dataUrl.split(",")
 
 if(parts.length < 2 || !parts[1]){
 throw new Error("Invalid captured image")
+}
+
+if(parts[1].length < 1000){
+throw new Error("Captured image is too small")
 }
 
 return parts[1]
@@ -316,6 +374,12 @@ if(accessToken){
 headers.Authorization = `Bearer ${accessToken}`
 }
 
+let lastError = null
+
+for(let attempt = 0; attempt <= FACE_SEARCH_RETRIES; attempt++){
+
+try{
+
 const response = await withTimeout(
 fetch(endpoint, {
 method: "POST",
@@ -325,7 +389,7 @@ event_id: eventId,
 image_base64: imageBase64
 })
 }),
-30000,
+FACE_SEARCH_TIMEOUT_MS,
 "Face search timeout"
 )
 
@@ -341,6 +405,23 @@ throw new Error(result?.error || "Face search failed")
 }
 
 return result
+
+}catch(err){
+
+lastError = err
+
+if(attempt >= FACE_SEARCH_RETRIES || !isRetryableFaceSearchError(err)){
+throw err
+}
+
+status.innerText = `Retrying scan ${attempt + 1}/${FACE_SEARCH_RETRIES}...`
+await sleep(700 * Math.pow(2, attempt))
+
+}
+
+}
+
+throw lastError || new Error("Face search failed")
 }
 
 async function captureAndSearch(){
@@ -384,7 +465,7 @@ stopCamera()
 setBusyState(false, "Match Found ✅")
 
 setTimeout(()=>{
-window.location.href = `gallery.html?event_id=${eventId}`
+window.location.href = getRedirectUrl(eventId)
 }, 500)
 
 }catch(err){
