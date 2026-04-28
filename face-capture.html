@@ -44,28 +44,36 @@ font-size:12px;
 
 </head>
 
-<body class="text-white flex items-center justify-center min-h-screen">
+<body class="text-white flex items-center justify-center min-h-screen" style="
+background: radial-gradient(circle at 20% 20%, #1e293b, #0f172a 70%);
+font-family: system-ui, -apple-system, sans-serif;
+">
 
-<div class="text-center">
+<div class="text-center backdrop-blur-xl bg-white/5 border border-white/10 p-8 rounded-2xl shadow-2xl">
 
-<h2 class="text-xl mb-4">Capture Your Face</h2>
+<h2 class="text-xl mb-4 font-semibold tracking-wide">AI Face Scan</h2>
+<p class="text-xs text-gray-400 mb-4">Align your face inside the circle for best results</p>
 
-<div class="circle mx-auto">
+<div class="circle mx-auto" style="
+box-shadow: 0 0 40px rgba(99,102,241,0.3),
+inset 0 0 20px rgba(255,255,255,0.1);
+border: 4px solid rgba(99,102,241,0.4);
+">
 <video id="video" autoplay muted playsinline></video>
 <div id="status" class="status">Click Start</div>
 </div>
 
-<button id="startBtn"
+<button id="startBtn" style="box-shadow:0 0 20px rgba(99,102,241,0.4);"
 class="mt-6 bg-indigo-600 px-6 py-2 rounded-lg">
 Start Camera
 </button>
 
-<button id="captureBtn"
+<button id="captureBtn" style="box-shadow:0 0 20px rgba(34,197,94,0.4);"
 class="mt-3 bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg hidden">
 Capture & Search
 </button>
 
-<button id="retryBtn"
+<button id="retryBtn" style="box-shadow:0 0 20px rgba(245,158,11,0.4);"
 class="mt-3 bg-amber-500 hover:bg-amber-600 px-6 py-2 rounded-lg hidden">
 Retry Scan
 </button>
@@ -445,21 +453,9 @@ const imageBase64 = captureVideoFrameBase64()
 
 const result = await searchFaceWithAWS(eventId, imageBase64)
 
-// =============================
-// 🔥 ADAPTIVE SAFE MERGE (CONFIRMED + POSSIBLE)
-// =============================
-const confirmed = Array.isArray(result?.confirmed) ? result.confirmed : []
-const possible = Array.isArray(result?.possible) ? result.possible : []
-
-// fallback for backward compatibility
 const matches = Array.isArray(result?.matches) ? result.matches : []
 
-// PRIORITY: confirmed first, then possible (controlled)
-const mergedResults = confirmed.length > 0
-    ? [...confirmed, ...possible]
-    : matches
-
-const matchedImages = mergedResults
+const matchedImages = matches
 .map(item => item?.object_key || item?.preview_key || item?.image_url || "")
 .map(normalizeImageKey)
 .filter(Boolean)
