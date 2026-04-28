@@ -565,6 +565,46 @@ return fallback
 }
 }
 
+function getPhotoSequenceName(photo){
+const key =
+photo?.object_key ||
+photo?.preview_key ||
+photo?.thumbnail_key ||
+""
+
+try{
+const cleanKey = normalizeImageUrl(key)
+const fileName = decodeURIComponent(cleanKey.split("/").pop() || "")
+return fileName.toLowerCase()
+}catch(e){
+return String(key || "").toLowerCase()
+}
+}
+
+function naturalCompareText(a, b){
+return String(a || "").localeCompare(String(b || ""), undefined, {
+numeric: true,
+sensitivity: "base"
+})
+}
+
+function sortPhotosByFileSequence(photos){
+return (photos || []).slice().sort((a, b) => {
+const nameA = getPhotoSequenceName(a)
+const nameB = getPhotoSequenceName(b)
+
+const nameCompare = naturalCompareText(nameA, nameB)
+if(nameCompare !== 0) return nameCompare
+
+const dateA = new Date(a?.created_at || 0).getTime()
+const dateB = new Date(b?.created_at || 0).getTime()
+
+if(dateA !== dateB) return dateA - dateB
+
+return naturalCompareText(a?.id, b?.id)
+})
+}
+
 function triggerBlobDownload(blob, filename){
 const blobUrl = URL.createObjectURL(blob)
 const a = document.createElement("a")
@@ -1158,7 +1198,9 @@ return
 }
 }
 
-const visiblePhotos = getVisibleGalleryPhotos(data, effectiveRole, matchedImages, FACE_FILTER_ACTIVE)
+const visiblePhotos = sortPhotosByFileSequence(
+getVisibleGalleryPhotos(data, effectiveRole, matchedImages, FACE_FILTER_ACTIVE)
+)
 const modalPhotos = visiblePhotos
 let currentModalIndex = -1
 
@@ -1315,7 +1357,7 @@ renderModalPhoto(modalPhotos[currentModalIndex])
 
 let renderedPhotoCount = 0
 
-function createGalleryPhotoCard(photo){
+function createGalleryPhotoCard(photo, index = 0){
 
 const cleanOriginalUrl = getPhotoOriginalUrl(photo)
 if(!cleanOriginalUrl) return null
@@ -1332,12 +1374,14 @@ const div = document.createElement("div")
 div.className =
 "glass rounded-xl overflow-hidden cursor-pointer"
 
+const shouldPrioritize = index < 12
+
 div.innerHTML = `
 <img src="${thumbnailUrl}"
 class="w-full h-40 object-cover hover:scale-105 transition"
-loading="lazy"
+loading="${shouldPrioritize ? "eager" : "lazy"}"
 decoding="async"
-fetchpriority="low" />
+fetchpriority="${shouldPrioritize ? "high" : "low"}" />
 `
 
 const imageEl = div.querySelector("img")
@@ -1373,7 +1417,7 @@ const fragment = document.createDocumentFragment()
 const nextLimit = Math.min(renderedPhotoCount + GALLERY_RENDER_BATCH_SIZE, visiblePhotos.length)
 
 for(let i = renderedPhotoCount; i < nextLimit; i++){
-const card = createGalleryPhotoCard(visiblePhotos[i])
+const card = createGalleryPhotoCard(visiblePhotos[i], i)
 if(card){
 fragment.appendChild(card)
 }
