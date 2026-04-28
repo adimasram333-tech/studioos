@@ -645,6 +645,8 @@ createEventBox.style.display = "none"
 }
 }
 
+bindCreateEventSelector()
+
 }catch(err){
 console.error("Dropdown load error",err)
 }
@@ -655,11 +657,56 @@ window.loadConfirmedEvents = loadConfirmedEvents
 
 
 // =============================
+// CREATE EVENT DROPDOWN BINDING
+// =============================
+
+function syncCreateEventBoxVisibility(){
+const select = document.getElementById("eventSelect")
+const createBox = document.getElementById("createEventBox")
+
+if(!select || !createBox){
+return
+}
+
+if(select.value === "create_new"){
+createBox.style.display = "block"
+}else{
+createBox.style.display = "none"
+}
+}
+
+function bindCreateEventSelector(){
+const select = document.getElementById("eventSelect")
+
+if(!select){
+return
+}
+
+if(select.dataset.createEventBound === "true"){
+syncCreateEventBoxVisibility()
+return
+}
+
+select.dataset.createEventBound = "true"
+
+select.addEventListener("change", ()=>{
+syncCreateEventBoxVisibility()
+})
+
+syncCreateEventBoxVisibility()
+}
+
+window.bindCreateEventSelector = bindCreateEventSelector
+window.syncCreateEventBoxVisibility = syncCreateEventBoxVisibility
+
+
+// =============================
 // INIT
 // =============================
 
-document.addEventListener("DOMContentLoaded",()=>{
-loadConfirmedEvents()
+document.addEventListener("DOMContentLoaded",async ()=>{
+await loadConfirmedEvents()
+bindCreateEventSelector()
 })
 
 
