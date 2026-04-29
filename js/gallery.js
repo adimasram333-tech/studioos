@@ -1495,12 +1495,12 @@ modal.style.zIndex = 9999
 
 modal.innerHTML = `
 <button id="prevImageBtn"
-style="position:absolute; left:20px; top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.85); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center;">‹</button>
+style="position:absolute; left:max(10px, env(safe-area-inset-left)); top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.9); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center; z-index:10002; pointer-events:auto; box-shadow:0 12px 32px rgba(0,0,0,0.35);">‹</button>
 
-<img id="modalImg" src="" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:14px; transition:opacity 180ms ease, transform 180ms ease; will-change:opacity, transform; box-shadow:0 24px 80px rgba(0,0,0,0.45);" />
+<img id="modalImg" src="" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:14px; transition:opacity 180ms ease, transform 180ms ease; will-change:opacity, transform; box-shadow:0 24px 80px rgba(0,0,0,0.45); position:relative; z-index:10000;" />
 
 <button id="nextImageBtn"
-style="position:absolute; right:20px; top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.85); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center;">›</button>
+style="position:absolute; right:max(10px, env(safe-area-inset-right)); top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.9); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center; z-index:10002; pointer-events:auto; box-shadow:0 12px 32px rgba(0,0,0,0.35);">›</button>
 
 <button id="downloadBtn"
 style="position:absolute; bottom:30px; background:#4f46e5; color:white; padding:8px 16px; border-radius:8px;">
