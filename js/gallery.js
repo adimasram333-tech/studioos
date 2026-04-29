@@ -12,6 +12,14 @@ matchedImages: new Set()
 
 const GALLERY_RENDER_BATCH_SIZE = 80
 const GALLERY_RENDER_IDLE_DELAY = 16
+const GALLERY_PRIORITY_IMAGE_COUNT = 24
+const GALLERY_PRELOAD_AHEAD_COUNT = 18
+const GALLERY_IMAGE_OBSERVER_ROOT_MARGIN = "900px 0px"
+const MODAL_PRELOAD_RANGE = 2
+const IMAGE_PRELOAD_CACHE_LIMIT = 300
+
+const galleryPreviewPreloadCache = new Map()
+const modalImagePreloadCache = new Map()
 
 function buildGuestDownloadLabel(isFree){
 return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
@@ -812,6 +820,12 @@ target.setAttribute("draggable", "false")
 target.style.webkitUserDrag = "none"
 target.style.userSelect = "none"
 
+if(target.dataset.guestProtectionApplied === "true"){
+return
+}
+
+target.dataset.guestProtectionApplied = "true"
+
 target.addEventListener("dragstart", (e)=>{
 e.preventDefault()
 })
@@ -862,7 +876,7 @@ galleryImageObserver.unobserve(img)
 })
 }, {
 root: null,
-rootMargin: "500px 0px",
+rootMargin: GALLERY_IMAGE_OBSERVER_ROOT_MARGIN,
 threshold: 0.01
 })
 
@@ -884,6 +898,126 @@ if(src){
 img.src = src
 img.removeAttribute("data-src")
 }
+}
+
+function trimImagePreloadCache(cache){
+if(!cache || cache.size <= IMAGE_PRELOAD_CACHE_LIMIT) return
+
+const overflow = cache.size - IMAGE_PRELOAD_CACHE_LIMIT
+let removed = 0
+
+for(const key of cache.keys()){
+cache.delete(key)
+removed += 1
+if(removed >= overflow) break
+}
+}
+
+function preloadImageUrl(url, cache = modalImagePreloadCache){
+const cleanUrl = normalizeImageUrl(url)
+if(!cleanUrl) return Promise.resolve(false)
+
+if(cache.has(cleanUrl)){
+return cache.get(cleanUrl)
+}
+
+const preloadPromise = new Promise(resolve=>{
+const img = new Image()
+img.decoding = "async"
+img.onload = ()=> resolve(true)
+img.onerror = ()=> resolve(false)
+img.src = cleanUrl
+})
+
+cache.set(cleanUrl, preloadPromise)
+trimImagePreloadCache(cache)
+
+return preloadPromise
+}
+
+function warmGalleryPreviewImages(photos, startIndex, count, effectiveRole, guestFreeDownload){
+if(!photos || !photos.length) return
+
+const runWarmup = ()=>{
+const endIndex = Math.min(startIndex + count, photos.length)
+
+for(let i = startIndex; i < endIndex; i++){
+const photo = photos[i]
+if(!photo) continue
+
+let url = getPhotoThumbnailUrl(photo)
+
+if(!photo.thumbnail_key){
+url = getPhotoPreviewUrl(photo) || getDisplayImageUrl(photo, effectiveRole, guestFreeDownload)
+}
+
+if(url){
+preloadImageUrl(url, galleryPreviewPreloadCache)
+}
+}
+}
+
+if("requestIdleCallback" in window){
+window.requestIdleCallback(runWarmup, { timeout: 500 })
+return
+}
+
+setTimeout(runWarmup, 80)
+}
+
+function preloadModalAroundIndex(photos, currentIndex, effectiveRole, guestFreeDownload){
+if(!photos || !photos.length || currentIndex < 0) return
+
+for(let offset = 1; offset <= MODAL_PRELOAD_RANGE; offset++){
+const nextPhoto = photos[currentIndex + offset]
+const prevPhoto = photos[currentIndex - offset]
+
+if(nextPhoto){
+preloadImageUrl(getDisplayImageUrl(nextPhoto, effectiveRole, guestFreeDownload), modalImagePreloadCache)
+}
+
+if(prevPhoto){
+preloadImageUrl(getDisplayImageUrl(prevPhoto, effectiveRole, guestFreeDownload), modalImagePreloadCache)
+}
+}
+}
+
+function updateModalImageWithPremiumTransition(modalImg, imageUrl){
+if(!modalImg || !imageUrl) return
+
+const cleanUrl = normalizeImageUrl(imageUrl)
+
+if(modalImg.dataset.currentImageUrl === cleanUrl){
+return
+}
+
+modalImg.dataset.currentImageUrl = cleanUrl
+modalImg.style.opacity = "0.35"
+modalImg.style.transform = "scale(0.985)"
+
+const applyLoadedState = ()=>{
+requestAnimationFrame(()=>{
+modalImg.style.opacity = "1"
+modalImg.style.transform = "scale(1)"
+})
+}
+
+const cached = modalImagePreloadCache.get(cleanUrl)
+
+if(cached){
+cached.finally(()=>{
+modalImg.src = cleanUrl
+if(typeof modalImg.decode === "function"){
+modalImg.decode().catch(()=>{}).finally(applyLoadedState)
+return
+}
+applyLoadedState()
+})
+return
+}
+
+modalImg.src = cleanUrl
+preloadImageUrl(cleanUrl, modalImagePreloadCache).finally(applyLoadedState)
 }
 
 function buildToggleMarkup(eventId, isGuestFree){
@@ -1282,7 +1416,7 @@ const btn = document.getElementById("downloadBtn")
 
 if(!modalImg || !btn) return
 
-modalImg.src = displayUrl
+updateModalImageWithPremiumTransition(modalImg, displayUrl)
 
 if(effectiveRole === "guest"){
 applyGuestImageProtection(modalImg)
@@ -1318,6 +1452,7 @@ await directDownloadImage(displayUrl, previewFileName)
 
 }
 
+preloadModalAroundIndex(modalPhotos, currentModalIndex, effectiveRole, guestFreeDownload)
 updateModalButtonStates()
 }
 
@@ -1362,7 +1497,7 @@ modal.innerHTML = `
 <button id="prevImageBtn"
 style="position:absolute; left:20px; top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.85); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center;">‹</button>
 
-<img id="modalImg" src="" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:12px;" />
+<img id="modalImg" src="" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:14px; transition:opacity 180ms ease, transform 180ms ease; will-change:opacity, transform; box-shadow:0 24px 80px rgba(0,0,0,0.45);" />
 
 <button id="nextImageBtn"
 style="position:absolute; right:20px; top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.85); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center;">›</button>
@@ -1429,7 +1564,7 @@ const div = document.createElement("div")
 div.className =
 "glass rounded-xl overflow-hidden cursor-pointer"
 
-const shouldPrioritize = index < 12
+const shouldPrioritize = index < GALLERY_PRIORITY_IMAGE_COUNT
 
 const initialImageSrc = shouldPrioritize ? thumbnailUrl : getTransparentImagePlaceholder()
 const lazyImageSrc = shouldPrioritize ? "" : thumbnailUrl
@@ -1438,6 +1573,7 @@ div.innerHTML = `
 <img src="${initialImageSrc}"
 ${lazyImageSrc ? `data-src="${lazyImageSrc}"` : ""}
 class="w-full h-40 object-cover hover:scale-105 transition"
+style="background:#111827; transform:translateZ(0);"
 loading="${shouldPrioritize ? "eager" : "lazy"}"
 decoding="async"
 fetchpriority="${shouldPrioritize ? "high" : "low"}" />
@@ -1487,6 +1623,13 @@ fragment.appendChild(card)
 }
 
 grid.appendChild(fragment)
+warmGalleryPreviewImages(
+visiblePhotos,
+nextLimit,
+GALLERY_PRELOAD_AHEAD_COUNT,
+effectiveRole,
+guestFreeDownload
+)
 renderedPhotoCount = nextLimit
 
 if(renderedPhotoCount < visiblePhotos.length){
