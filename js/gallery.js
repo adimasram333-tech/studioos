@@ -831,6 +831,61 @@ setTimeout(resolve, GALLERY_RENDER_IDLE_DELAY)
 })
 }
 
+function getTransparentImagePlaceholder(){
+return "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%3E%3Crect%20width='16'%20height='16'%20fill='%23111827'/%3E%3C/svg%3E"
+}
+
+let galleryImageObserver = null
+
+function getGalleryImageObserver(){
+if(galleryImageObserver){
+return galleryImageObserver
+}
+
+if(!("IntersectionObserver" in window)){
+return null
+}
+
+galleryImageObserver = new IntersectionObserver((entries)=>{
+entries.forEach(entry=>{
+if(!entry.isIntersecting) return
+
+const img = entry.target
+const src = img.dataset.src || ""
+
+if(src){
+img.src = src
+img.removeAttribute("data-src")
+}
+
+galleryImageObserver.unobserve(img)
+})
+}, {
+root: null,
+rootMargin: "500px 0px",
+threshold: 0.01
+})
+
+return galleryImageObserver
+}
+
+function activateGalleryImageLazyLoad(img){
+if(!img) return
+
+const observer = getGalleryImageObserver()
+
+if(observer){
+observer.observe(img)
+return
+}
+
+const src = img.dataset.src || ""
+if(src){
+img.src = src
+img.removeAttribute("data-src")
+}
+}
+
 function buildToggleMarkup(eventId, isGuestFree){
 const bgColor = isGuestFree ? "#6366f1" : "rgba(255,255,255,0.28)"
 const knobLeft = isGuestFree ? "22px" : "2px"
@@ -1376,8 +1431,12 @@ div.className =
 
 const shouldPrioritize = index < 12
 
+const initialImageSrc = shouldPrioritize ? thumbnailUrl : getTransparentImagePlaceholder()
+const lazyImageSrc = shouldPrioritize ? "" : thumbnailUrl
+
 div.innerHTML = `
-<img src="${thumbnailUrl}"
+<img src="${initialImageSrc}"
+${lazyImageSrc ? `data-src="${lazyImageSrc}"` : ""}
 class="w-full h-40 object-cover hover:scale-105 transition"
 loading="${shouldPrioritize ? "eager" : "lazy"}"
 decoding="async"
@@ -1396,6 +1455,10 @@ imageEl.src = displayUrl
 return
 }
 imageEl.onerror = null
+}
+
+if(!shouldPrioritize){
+activateGalleryImageLazyLoad(imageEl)
 }
 
 div.onclick = () => openImage(photo)
