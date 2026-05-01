@@ -53,6 +53,82 @@ async function trackDownloadUsage(imageUrl, eventId, options = {}) {
 window.lastDownloadedImage = null;
 
 // =============================
+// PHOTO SELLING SUBSCRIPTION GATE
+// =============================
+
+const PHOTO_SELLING_PLAN_CACHE_TTL_MS = 60000;
+const photoSellingPlanCache = new Map();
+
+function normalizePlanValue(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function isActivePaidPhotoSellingPlan(settings) {
+  if (!settings) return false;
+
+  const plan = normalizePlanValue(settings.plan);
+  const status = normalizePlanValue(settings.subscription_status);
+  const isPaid = settings.is_paid === true;
+  const expiresAt = settings.plan_expires_at ? new Date(settings.plan_expires_at).getTime() : 0;
+  const hasValidExpiry = Number.isFinite(expiresAt) && expiresAt > Date.now();
+
+  return isPaid && status === "active" && hasValidExpiry && (plan === "basic" || plan === "pro");
+}
+
+async function canPhotographerSellPhotos(photographerId) {
+  const safePhotographerId = String(photographerId || "").trim();
+
+  if (!safePhotographerId) {
+    return false;
+  }
+
+  const cached = photoSellingPlanCache.get(safePhotographerId);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.allowed;
+  }
+
+  try {
+    if (typeof window.getSupabase !== "function") {
+      console.error("Supabase helper missing for photo selling plan check");
+      return false;
+    }
+
+    const supabase = await window.getSupabase();
+
+    if (!supabase) {
+      return false;
+    }
+
+    const { data, error } = await supabase
+      .from("photographer_settings")
+      .select("plan, subscription_status, is_paid, plan_expires_at")
+      .eq("user_id", safePhotographerId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Photo selling plan check failed:", error);
+      return false;
+    }
+
+    const allowed = isActivePaidPhotoSellingPlan(data);
+
+    photoSellingPlanCache.set(safePhotographerId, {
+      allowed,
+      expiresAt: Date.now() + PHOTO_SELLING_PLAN_CACHE_TTL_MS
+    });
+
+    return allowed;
+  } catch (err) {
+    console.error("Photo selling plan check error:", err);
+    return false;
+  }
+}
+
+function showPhotoSellingUpgradeMessage() {
+  alert("Photo selling is available only on Basic and Pro plans. Please upgrade the photographer account to enable paid image downloads.");
+}
+
+// =============================
 // PURCHASE STORAGE
 // =============================
 
@@ -296,7 +372,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 // DOWNLOAD HANDLER
 // =============================
 
-window.handleDownload = function (imageUrl, eventId, photographerId, eventName, options = {}) {
+window.handleDownload = async function (imageUrl, eventId, photographerId, eventName, options = {}) {
   window.lastDownloadedImage = imageUrl;
 
   const role = getUserRole();
@@ -323,6 +399,13 @@ window.handleDownload = function (imageUrl, eventId, photographerId, eventName, 
       photographerId,
       fileType: "original"
     });
+    return;
+  }
+
+  const photoSellingAllowed = await canPhotographerSellPhotos(photographerId);
+
+  if (!photoSellingAllowed) {
+    showPhotoSellingUpgradeMessage();
     return;
   }
 
