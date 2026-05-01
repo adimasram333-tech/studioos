@@ -57,12 +57,144 @@ activeMenu = null
 }
 
 function showPublicGalleryUpgradeMessage(){
-const shouldOpenSubscription = confirm(
-"Gallery sharing, QR, client tokens, guest access and guest free downloads are available only on Basic and Pro plans.\n\nDo you want to open the subscription page now?"
-)
+let existingModal = document.getElementById("publicGalleryUpgradeModal")
+if(existingModal){
+existingModal.remove()
+}
 
-if(shouldOpenSubscription){
+const modal = document.createElement("div")
+modal.id = "publicGalleryUpgradeModal"
+modal.style.position = "fixed"
+modal.style.inset = "0"
+modal.style.display = "flex"
+modal.style.alignItems = "center"
+modal.style.justifyContent = "center"
+modal.style.padding = "1rem"
+modal.style.background = "rgba(2,6,23,0.7)"
+modal.style.backdropFilter = "blur(8px)"
+modal.style.zIndex = "1200"
+
+modal.innerHTML = `
+<div style="
+  width:min(100%, 420px);
+  border-radius:1.4rem;
+  padding:1.2rem;
+  background:rgba(15,23,42,0.96);
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 24px 60px rgba(0,0,0,0.35);
+  color:white;
+">
+  <div style="
+    display:inline-flex;
+    align-items:center;
+    gap:0.4rem;
+    padding:0.42rem 0.7rem;
+    border-radius:999px;
+    font-size:0.72rem;
+    font-weight:600;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    background:rgba(99,102,241,0.12);
+    border:1px solid rgba(99,102,241,0.24);
+    color:rgb(199 210 254);
+  ">Basic / Pro Required</div>
+
+  <div style="
+    font-size:1.25rem;
+    font-weight:800;
+    color:white;
+    margin-top:0.9rem;
+  ">Unlock these features</div>
+
+  <div style="
+    display:grid;
+    gap:0.45rem;
+    margin-top:0.85rem;
+    color:rgba(255,255,255,0.76);
+    font-size:0.9rem;
+    line-height:1.45;
+  ">
+    <div>• Share Link</div>
+    <div>• Show QR</div>
+    <div>• Show Token</div>
+    <div>• Guest Free Download</div>
+  </div>
+
+  <div style="
+    margin-top:1rem;
+    padding:1rem;
+    border-radius:1rem;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+  ">
+    <div style="font-size:1rem; font-weight:700; color:white;">Basic Plan</div>
+    <div style="font-size:1.35rem; font-weight:800; color:white; margin-top:0.35rem;">₹499/mo</div>
+    <div style="font-size:0.82rem; line-height:1.5; color:rgba(255,255,255,0.62); margin-top:0.4rem;">
+      Upgrade to enable public gallery sharing.
+    </div>
+  </div>
+
+  <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+    <button id="publicGalleryUpgradeCancelBtn" type="button" style="
+      flex:1;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0.9rem 1rem;
+      border-radius:0.95rem;
+      font-size:0.86rem;
+      font-weight:700;
+      transition:all .2s ease;
+      background:rgba(255,255,255,0.06);
+      color:white;
+      border:1px solid rgba(255,255,255,0.08);
+      cursor:pointer;
+    ">Cancel</button>
+
+    <button id="publicGalleryUpgradeViewPlansBtn" type="button" style="
+      flex:1;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0.9rem 1rem;
+      border-radius:0.95rem;
+      font-size:0.86rem;
+      font-weight:700;
+      transition:all .2s ease;
+      background:rgb(79 70 229);
+      color:white;
+      border:1px solid transparent;
+      cursor:pointer;
+    ">View Plans</button>
+  </div>
+</div>
+`
+
+document.body.appendChild(modal)
+document.body.style.overflow = "hidden"
+
+const closeModal = ()=>{
+modal.remove()
+document.body.style.overflow = ""
+}
+
+modal.addEventListener("click", (event)=>{
+if(event.target === modal){
+closeModal()
+}
+})
+
+const cancelBtn = document.getElementById("publicGalleryUpgradeCancelBtn")
+const viewPlansBtn = document.getElementById("publicGalleryUpgradeViewPlansBtn")
+
+if(cancelBtn){
+cancelBtn.onclick = closeModal
+}
+
+if(viewPlansBtn){
+viewPlansBtn.onclick = ()=>{
 window.location.href = "subscription.html"
+}
 }
 }
 
