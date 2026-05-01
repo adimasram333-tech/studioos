@@ -79,7 +79,7 @@ async function initAccess() {
   async function validateEventAccess() {
     const { data, error } = await supabase
       .from("events")
-      .select("id")
+      .select("id, user_id")
       .eq("id", eventId)
       .maybeSingle();
 
@@ -91,6 +91,37 @@ async function initAccess() {
 
     if (!data?.id) {
       alert("This event no longer exists or the access link is invalid.");
+      return false;
+    }
+
+    const { data: settings, error: settingsError } = await supabase
+      .from("photographer_settings")
+      .select("plan, subscription_status, is_paid, plan_expires_at")
+      .eq("user_id", data.user_id)
+      .maybeSingle();
+
+    if (settingsError) {
+      console.error("Subscription validation failed:", settingsError);
+      alert("Unable to verify gallery access. Please try again.");
+      return false;
+    }
+
+    const plan = String(settings?.plan || "").trim().toLowerCase();
+    const subscriptionStatus = String(settings?.subscription_status || "").trim().toLowerCase();
+    const isPaid = settings?.is_paid === true;
+    const planExpiresAt = settings?.plan_expires_at
+      ? new Date(settings.plan_expires_at).getTime()
+      : 0;
+
+    const isAllowed =
+      isPaid &&
+      subscriptionStatus === "active" &&
+      (plan === "basic" || plan === "pro") &&
+      Number.isFinite(planExpiresAt) &&
+      planExpiresAt > Date.now();
+
+    if (!isAllowed) {
+      alert("This gallery is not available for public access. Please contact the photographer.");
       return false;
     }
 
