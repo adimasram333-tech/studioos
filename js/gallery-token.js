@@ -8,6 +8,16 @@ window.showToken = async function(eventId){
 const menu = document.getElementById("floatingMenu")
 if(menu) menu.remove()
 
+// 🔐 SUBSCRIPTION GATE: token access must stay locked for Free plan
+if(typeof guardPublicGalleryFeature !== "function"){
+console.error("Public gallery subscription guard missing")
+alert("Unable to verify gallery access. Please try again.")
+return
+}
+
+const allowed = await guardPublicGalleryFeature(eventId)
+if(!allowed) return
+
 const supabase = await window.getSupabase()
 
 // =============================
