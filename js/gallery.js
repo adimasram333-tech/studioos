@@ -25,6 +25,134 @@ function buildGuestDownloadLabel(isFree){
 return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
 }
 
+// =============================
+// SUBSCRIPTION GATE FOR PUBLIC GALLERY ACCESS
+// =============================
+
+const PUBLIC_GALLERY_PLAN_CACHE_TTL_MS = 60000
+const publicGalleryPlanCache = new Map()
+
+function normalizePlanValue(value){
+return String(value || "").trim().toLowerCase()
+}
+
+function isActivePaidPublicGalleryPlan(settings){
+if(!settings) return false
+
+const plan = normalizePlanValue(settings.plan)
+const status = normalizePlanValue(settings.subscription_status)
+const isPaid = settings.is_paid === true
+const expiresAt = settings.plan_expires_at ? new Date(settings.plan_expires_at).getTime() : 0
+const hasValidExpiry = Number.isFinite(expiresAt) && expiresAt > Date.now()
+
+return isPaid && status === "active" && hasValidExpiry && (plan === "basic" || plan === "pro")
+}
+
+function closeFloatingMenu(){
+const existingMenu = document.getElementById("floatingMenu")
+if(existingMenu){
+existingMenu.remove()
+}
+activeMenu = null
+}
+
+function showPublicGalleryUpgradeMessage(){
+const shouldOpenSubscription = confirm(
+"Gallery sharing, QR, client tokens, guest access and guest free downloads are available only on Basic and Pro plans.\n\nDo you want to open the subscription page now?"
+)
+
+if(shouldOpenSubscription){
+window.location.href = "subscription.html"
+}
+}
+
+async function getEventOwnerIdForGate(eventId){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId) return ""
+
+try{
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!supabase || !user){
+return ""
+}
+
+const { data, error } = await supabase
+.from("events")
+.select("id,user_id")
+.eq("id", safeEventId)
+.eq("user_id", user.id)
+.maybeSingle()
+
+if(error){
+console.error("Public gallery event ownership check failed:", error)
+return ""
+}
+
+return data?.user_id || ""
+}catch(err){
+console.error("Public gallery event ownership check error:", err)
+return ""
+}
+}
+
+async function canUsePublicGalleryFeatures(eventId){
+const ownerId = await getEventOwnerIdForGate(eventId)
+
+if(!ownerId){
+return false
+}
+
+const cached = publicGalleryPlanCache.get(ownerId)
+if(cached && cached.expiresAt > Date.now()){
+return cached.allowed
+}
+
+try{
+const supabase = await window.getSupabase()
+
+if(!supabase){
+return false
+}
+
+const { data, error } = await supabase
+.from("photographer_settings")
+.select("plan, subscription_status, is_paid, plan_expires_at")
+.eq("user_id", ownerId)
+.maybeSingle()
+
+if(error){
+console.error("Public gallery plan check failed:", error)
+return false
+}
+
+const allowed = isActivePaidPublicGalleryPlan(data)
+
+publicGalleryPlanCache.set(ownerId, {
+allowed,
+expiresAt: Date.now() + PUBLIC_GALLERY_PLAN_CACHE_TTL_MS
+})
+
+return allowed
+}catch(err){
+console.error("Public gallery plan check error:", err)
+return false
+}
+}
+
+async function guardPublicGalleryFeature(eventId){
+const allowed = await canUsePublicGalleryFeatures(eventId)
+
+if(!allowed){
+closeFloatingMenu()
+showPublicGalleryUpgradeMessage()
+return false
+}
+
+return true
+}
+
 function buildMenuHtml(id, guestFreeDownload){
 const safeMode = guestFreeDownload ? "true" : "false"
 
@@ -240,7 +368,10 @@ alert("Failed to open event")
 }
 }
 
-window.shareEvent = function(id){
+window.shareEvent = async function(id){
+const allowed = await guardPublicGalleryFeature(id)
+if(!allowed) return
+
 const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
 navigator.clipboard.writeText(link)
 alert("Link copied")
@@ -251,6 +382,9 @@ alert("Link copied")
 // =============================
 
 window.showToken = async function(id){
+
+const allowed = await guardPublicGalleryFeature(id)
+if(!allowed) return
 
 const supabase = await window.getSupabase()
 
@@ -287,6 +421,9 @@ alert("Token: " + token)
 // =============================
 
 window.toggleGuestFreeDownload = async function(id, currentValue = false){
+
+const allowed = await guardPublicGalleryFeature(id)
+if(!allowed) return
 
 const nextValue = !currentValue
 const confirmMessage = nextValue
@@ -413,7 +550,10 @@ alert("Delete failed")
 // QR
 // =============================
 
-window.showQR = function(id){
+window.showQR = async function(id){
+
+const allowed = await guardPublicGalleryFeature(id)
+if(!allowed) return
 
 const existingMenu = document.getElementById("floatingMenu")
 if(existingMenu) existingMenu.remove()
