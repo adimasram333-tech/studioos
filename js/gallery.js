@@ -12,7 +12,7 @@ matchedImages: new Set()
 
 const GALLERY_RENDER_BATCH_SIZE = 80
 const GALLERY_RENDER_IDLE_DELAY = 16
-const GALLERY_PRIORITY_IMAGE_COUNT = 24
+const GALLERY_PRIORITY_IMAGE_COUNT = 12
 const GALLERY_PRELOAD_AHEAD_COUNT = 18
 const GALLERY_IMAGE_OBSERVER_ROOT_MARGIN = "900px 0px"
 const MODAL_PRELOAD_RANGE = 2
@@ -1697,7 +1697,7 @@ const safeEventId = String(eventId)
 const { data, error } =
 await supabase
 .from("gallery_photos")
-.select("id,user_id,event_id,object_key,preview_key,thumbnail_key,created_at")
+.select("id,user_id,event_id,storage_provider,bucket,object_key,preview_key,thumbnail_key,file_size,width,height,original_file_size,stored_file_size,sequence_number,created_at")
 .eq("event_id", safeEventId)
 .order("sequence_number",{ ascending:true })
 .order("id",{ ascending:true })
