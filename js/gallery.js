@@ -31,6 +31,8 @@ return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
 
 const PUBLIC_GALLERY_PLAN_CACHE_TTL_MS = 60000
 const publicGalleryPlanCache = new Map()
+const EVENT_PHOTO_PRICE_CACHE = new Map()
+const MIN_PHOTO_SELLING_PRICE = 49
 
 function normalizePlanValue(value){
 return String(value || "").trim().toLowerCase()
@@ -57,144 +59,12 @@ activeMenu = null
 }
 
 function showPublicGalleryUpgradeMessage(){
-let existingModal = document.getElementById("publicGalleryUpgradeModal")
-if(existingModal){
-existingModal.remove()
-}
+const shouldOpenSubscription = confirm(
+"Gallery sharing, QR, client tokens, guest access and guest free downloads are available only on Basic and Pro plans.\n\nDo you want to open the subscription page now?"
+)
 
-const modal = document.createElement("div")
-modal.id = "publicGalleryUpgradeModal"
-modal.style.position = "fixed"
-modal.style.inset = "0"
-modal.style.display = "flex"
-modal.style.alignItems = "center"
-modal.style.justifyContent = "center"
-modal.style.padding = "1rem"
-modal.style.background = "rgba(2,6,23,0.7)"
-modal.style.backdropFilter = "blur(8px)"
-modal.style.zIndex = "1200"
-
-modal.innerHTML = `
-<div style="
-  width:min(100%, 420px);
-  border-radius:1.4rem;
-  padding:1.2rem;
-  background:rgba(15,23,42,0.96);
-  border:1px solid rgba(255,255,255,0.08);
-  box-shadow:0 24px 60px rgba(0,0,0,0.35);
-  color:white;
-">
-  <div style="
-    display:inline-flex;
-    align-items:center;
-    gap:0.4rem;
-    padding:0.42rem 0.7rem;
-    border-radius:999px;
-    font-size:0.72rem;
-    font-weight:600;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    background:rgba(99,102,241,0.12);
-    border:1px solid rgba(99,102,241,0.24);
-    color:rgb(199 210 254);
-  ">Basic / Pro Required</div>
-
-  <div style="
-    font-size:1.25rem;
-    font-weight:800;
-    color:white;
-    margin-top:0.9rem;
-  ">Unlock these features</div>
-
-  <div style="
-    display:grid;
-    gap:0.45rem;
-    margin-top:0.85rem;
-    color:rgba(255,255,255,0.76);
-    font-size:0.9rem;
-    line-height:1.45;
-  ">
-    <div>• Share Link</div>
-    <div>• Show QR</div>
-    <div>• Show Token</div>
-    <div>• Guest Free Download</div>
-  </div>
-
-  <div style="
-    margin-top:1rem;
-    padding:1rem;
-    border-radius:1rem;
-    background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.08);
-  ">
-    <div style="font-size:1rem; font-weight:700; color:white;">Basic Plan</div>
-    <div style="font-size:1.35rem; font-weight:800; color:white; margin-top:0.35rem;">₹499/mo</div>
-    <div style="font-size:0.82rem; line-height:1.5; color:rgba(255,255,255,0.62); margin-top:0.4rem;">
-      Upgrade to enable public gallery sharing.
-    </div>
-  </div>
-
-  <div style="display:flex; gap:0.75rem; margin-top:1rem;">
-    <button id="publicGalleryUpgradeCancelBtn" type="button" style="
-      flex:1;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:0.9rem 1rem;
-      border-radius:0.95rem;
-      font-size:0.86rem;
-      font-weight:700;
-      transition:all .2s ease;
-      background:rgba(255,255,255,0.06);
-      color:white;
-      border:1px solid rgba(255,255,255,0.08);
-      cursor:pointer;
-    ">Cancel</button>
-
-    <button id="publicGalleryUpgradeViewPlansBtn" type="button" style="
-      flex:1;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:0.9rem 1rem;
-      border-radius:0.95rem;
-      font-size:0.86rem;
-      font-weight:700;
-      transition:all .2s ease;
-      background:rgb(79 70 229);
-      color:white;
-      border:1px solid transparent;
-      cursor:pointer;
-    ">View Plans</button>
-  </div>
-</div>
-`
-
-document.body.appendChild(modal)
-document.body.style.overflow = "hidden"
-
-const closeModal = ()=>{
-modal.remove()
-document.body.style.overflow = ""
-}
-
-modal.addEventListener("click", (event)=>{
-if(event.target === modal){
-closeModal()
-}
-})
-
-const cancelBtn = document.getElementById("publicGalleryUpgradeCancelBtn")
-const viewPlansBtn = document.getElementById("publicGalleryUpgradeViewPlansBtn")
-
-if(cancelBtn){
-cancelBtn.onclick = closeModal
-}
-
-if(viewPlansBtn){
-viewPlansBtn.onclick = ()=>{
+if(shouldOpenSubscription){
 window.location.href = "subscription.html"
-}
 }
 }
 
@@ -285,6 +155,202 @@ return false
 return true
 }
 
+function normalizePhotoSellingPrice(value){
+const amount = Number(value)
+if(!Number.isFinite(amount)) return MIN_PHOTO_SELLING_PRICE
+return Math.max(MIN_PHOTO_SELLING_PRICE, Math.floor(amount))
+}
+
+function setEventPhotoPriceCache(eventId, price){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId) return
+EVENT_PHOTO_PRICE_CACHE.set(safeEventId, normalizePhotoSellingPrice(price))
+}
+
+function getSafePhotoSellingPriceFromMenu(eventId){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId) return MIN_PHOTO_SELLING_PRICE
+return normalizePhotoSellingPrice(EVENT_PHOTO_PRICE_CACHE.get(safeEventId))
+}
+
+function showPhotoPriceModal(eventId, currentPrice){
+let existingModal = document.getElementById("photoPriceModal")
+if(existingModal){
+existingModal.remove()
+}
+
+const safePrice = normalizePhotoSellingPrice(currentPrice)
+const modal = document.createElement("div")
+modal.id = "photoPriceModal"
+modal.style.position = "fixed"
+modal.style.inset = "0"
+modal.style.display = "flex"
+modal.style.alignItems = "center"
+modal.style.justifyContent = "center"
+modal.style.padding = "1rem"
+modal.style.background = "rgba(2,6,23,0.7)"
+modal.style.backdropFilter = "blur(8px)"
+modal.style.zIndex = "1200"
+
+modal.innerHTML = `
+<div style="
+  width:min(100%, 360px);
+  border-radius:1.25rem;
+  padding:1.15rem;
+  background:rgba(15,23,42,0.96);
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 24px 60px rgba(0,0,0,0.35);
+  color:white;
+">
+  <div style="
+    display:inline-flex;
+    align-items:center;
+    padding:0.38rem 0.65rem;
+    border-radius:999px;
+    font-size:0.7rem;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    background:rgba(99,102,241,0.12);
+    border:1px solid rgba(99,102,241,0.24);
+    color:rgb(199 210 254);
+  ">Photo Price</div>
+
+  <div style="font-size:1.2rem; font-weight:800; margin-top:0.9rem;">Set download price</div>
+
+  <div style="margin-top:1rem;">
+    <label style="display:block; font-size:0.78rem; color:rgba(255,255,255,0.62); margin-bottom:0.45rem;">Minimum ₹49</label>
+    <div style="
+      display:flex;
+      align-items:center;
+      gap:0.55rem;
+      padding:0.85rem 0.9rem;
+      border-radius:0.95rem;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.08);
+    ">
+      <span style="font-size:1rem; font-weight:800;">₹</span>
+      <input id="photoPriceInput" type="number" min="49" step="1" value="${safePrice}" style="
+        width:100%;
+        background:transparent;
+        border:none;
+        outline:none;
+        color:white;
+        font-size:1.2rem;
+        font-weight:800;
+      ">
+    </div>
+    <div id="photoPriceFeedback" style="display:none; margin-top:0.7rem; color:rgb(254 202 202); font-size:0.82rem;"></div>
+  </div>
+
+  <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+    <button id="photoPriceCancelBtn" type="button" style="
+      flex:1;
+      padding:0.85rem 1rem;
+      border-radius:0.9rem;
+      font-size:0.86rem;
+      font-weight:700;
+      background:rgba(255,255,255,0.06);
+      color:white;
+      border:1px solid rgba(255,255,255,0.08);
+      cursor:pointer;
+    ">Cancel</button>
+
+    <button id="photoPriceSaveBtn" type="button" style="
+      flex:1;
+      padding:0.85rem 1rem;
+      border-radius:0.9rem;
+      font-size:0.86rem;
+      font-weight:700;
+      background:rgb(79 70 229);
+      color:white;
+      border:1px solid transparent;
+      cursor:pointer;
+    ">Save</button>
+  </div>
+</div>
+`
+
+document.body.appendChild(modal)
+document.body.style.overflow = "hidden"
+
+const closeModal = ()=>{
+modal.remove()
+document.body.style.overflow = ""
+}
+
+modal.addEventListener("click", (event)=>{
+if(event.target === modal){
+closeModal()
+}
+})
+
+document.getElementById("photoPriceCancelBtn").onclick = closeModal
+
+document.getElementById("photoPriceSaveBtn").onclick = async ()=>{
+const input = document.getElementById("photoPriceInput")
+const feedback = document.getElementById("photoPriceFeedback")
+const nextPrice = Number(input?.value || 0)
+
+if(!Number.isFinite(nextPrice) || nextPrice < MIN_PHOTO_SELLING_PRICE){
+if(feedback){
+feedback.innerText = "Minimum price is ₹49"
+feedback.style.display = "block"
+}
+return
+}
+
+try{
+const saveBtn = document.getElementById("photoPriceSaveBtn")
+saveBtn.disabled = true
+saveBtn.innerText = "Saving..."
+
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!supabase || !user){
+alert("Please login again")
+return
+}
+
+const safeEventId = String(eventId || "").trim()
+const cleanPrice = normalizePhotoSellingPrice(nextPrice)
+
+const { error } = await supabase
+.from("events")
+.update({ photo_selling_price: cleanPrice })
+.eq("id", safeEventId)
+.eq("user_id", user.id)
+
+if(error){
+console.error("Photo price update failed:", error)
+if(feedback){
+feedback.innerText = "Failed to save price"
+feedback.style.display = "block"
+}
+saveBtn.disabled = false
+saveBtn.innerText = "Save"
+return
+}
+
+setEventPhotoPriceCache(safeEventId, cleanPrice)
+closeModal()
+location.reload()
+}catch(err){
+console.error("Photo price save failed:", err)
+alert("Failed to save price")
+}
+}
+}
+
+window.openPhotoPriceModal = async function(eventId){
+const allowed = await guardPublicGalleryFeature(eventId)
+if(!allowed) return
+
+closeFloatingMenu()
+showPhotoPriceModal(eventId, getSafePhotoSellingPriceFromMenu(eventId))
+}
+
 function buildMenuHtml(id, guestFreeDownload){
 const safeMode = guestFreeDownload ? "true" : "false"
 
@@ -293,6 +359,7 @@ return `
 <div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
 <div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
+<div onclick="openPhotoPriceModal('${id}', this)" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Price ₹${getSafePhotoSellingPriceFromMenu(id)}</div>
 <div onclick="toggleGuestFreeDownload('${id}', ${safeMode})" class="px-3 py-2 hover:bg-white/10 cursor-pointer">
 ${buildGuestDownloadLabel(guestFreeDownload)}
 </div>
@@ -1601,6 +1668,7 @@ displayName = e.client_name || "Booking Event"
 }
 
 const isGuestFree = !!e.guest_free_download
+setEventPhotoPriceCache(e.id, e.photo_selling_price)
 
 div.innerHTML = `
 <div class="flex justify-between items-start gap-3">
