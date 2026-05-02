@@ -32,7 +32,7 @@ return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
 const PUBLIC_GALLERY_PLAN_CACHE_TTL_MS = 60000
 const publicGalleryPlanCache = new Map()
 const EVENT_PHOTO_PRICE_CACHE = new Map()
-const MIN_PHOTO_SELLING_PRICE = 49
+const GALLERY_MIN_PHOTO_SELLING_PRICE = 49
 
 function normalizePlanValue(value){
 return String(value || "").trim().toLowerCase()
@@ -157,8 +157,8 @@ return true
 
 function normalizePhotoSellingPrice(value){
 const amount = Number(value)
-if(!Number.isFinite(amount)) return MIN_PHOTO_SELLING_PRICE
-return Math.max(MIN_PHOTO_SELLING_PRICE, Math.floor(amount))
+if(!Number.isFinite(amount)) return GALLERY_MIN_PHOTO_SELLING_PRICE
+return Math.max(GALLERY_MIN_PHOTO_SELLING_PRICE, Math.floor(amount))
 }
 
 function setEventPhotoPriceCache(eventId, price){
@@ -169,7 +169,7 @@ EVENT_PHOTO_PRICE_CACHE.set(safeEventId, normalizePhotoSellingPrice(price))
 
 function getSafePhotoSellingPriceFromMenu(eventId){
 const safeEventId = String(eventId || "").trim()
-if(!safeEventId) return MIN_PHOTO_SELLING_PRICE
+if(!safeEventId) return GALLERY_MIN_PHOTO_SELLING_PRICE
 return normalizePhotoSellingPrice(EVENT_PHOTO_PRICE_CACHE.get(safeEventId))
 }
 
@@ -292,7 +292,7 @@ const input = document.getElementById("photoPriceInput")
 const feedback = document.getElementById("photoPriceFeedback")
 const nextPrice = Number(input?.value || 0)
 
-if(!Number.isFinite(nextPrice) || nextPrice < MIN_PHOTO_SELLING_PRICE){
+if(!Number.isFinite(nextPrice) || nextPrice < GALLERY_MIN_PHOTO_SELLING_PRICE){
 if(feedback){
 feedback.innerText = "Minimum price is ₹49"
 feedback.style.display = "block"
