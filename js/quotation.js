@@ -58,6 +58,8 @@ let editId = null
 let selectedProposalCoverFile = null
 let existingProposalCoverImage = ""
 let existingProposalTitleColor = ""
+let proposalBrandingAllowed = false
+let currentPlanProfile = null
 
 function getQueryParam(name){
 const url = new URL(window.location.href)
@@ -65,6 +67,98 @@ return url.searchParams.get(name)
 }
 
 editId = getQueryParam("edit")
+
+
+// =============================
+// PREMIUM BRANDING PLAN GATE
+// =============================
+
+function normalizePlanValue(value){
+
+return String(value || "").trim().toLowerCase()
+
+}
+
+function isActivePaidPlan(profile){
+
+if(!profile) return false
+
+const plan = normalizePlanValue(profile.plan)
+const status = normalizePlanValue(profile.subscription_status)
+const isPaid = profile.is_paid === true
+const expiresAt = profile.plan_expires_at ? new Date(profile.plan_expires_at).getTime() : 0
+const hasValidExpiry = Number.isFinite(expiresAt) && expiresAt > Date.now()
+
+return isPaid && status === "active" && hasValidExpiry && (plan === "basic" || plan === "pro")
+
+}
+
+function setProposalBrandingSectionVisible(isVisible){
+
+const section = get("proposalBrandingSection")
+const input = get("proposalCoverInput")
+const chooseBtn = get("proposalCoverChooseBtn")
+const removeBtn = get("proposalCoverRemoveBtn")
+
+if(section){
+section.style.display = isVisible ? "" : "none"
+section.setAttribute("aria-hidden", isVisible ? "false" : "true")
+}
+
+if(input){
+input.disabled = !isVisible
+}
+
+if(chooseBtn){
+chooseBtn.disabled = !isVisible
+chooseBtn.style.pointerEvents = isVisible ? "" : "none"
+chooseBtn.style.opacity = isVisible ? "" : "0.65"
+}
+
+if(removeBtn){
+removeBtn.disabled = !isVisible
+removeBtn.style.pointerEvents = isVisible ? "" : "none"
+removeBtn.style.opacity = isVisible ? "" : "0.65"
+}
+
+}
+
+async function loadCurrentPlanProfile(userId){
+
+try{
+
+const supabase = getSupabase()
+
+const { data, error } =
+await supabase
+.from("photographer_settings")
+.select("plan, subscription_status, is_paid, plan_expires_at")
+.eq("user_id", userId)
+.maybeSingle()
+
+if(error){
+console.error("LOAD PLAN PROFILE ERROR:", error)
+currentPlanProfile = null
+proposalBrandingAllowed = false
+setProposalBrandingSectionVisible(false)
+return null
+}
+
+currentPlanProfile = data || null
+proposalBrandingAllowed = isActivePaidPlan(currentPlanProfile)
+setProposalBrandingSectionVisible(proposalBrandingAllowed)
+
+return currentPlanProfile
+
+}catch(err){
+console.error("LOAD PLAN PROFILE ERROR:", err)
+currentPlanProfile = null
+proposalBrandingAllowed = false
+setProposalBrandingSectionVisible(false)
+return null
+}
+
+}
 
 
 // =============================
@@ -137,6 +231,9 @@ const removeBtn = get("proposalCoverRemoveBtn")
 
 if(chooseBtn && input){
 chooseBtn.addEventListener("click",function(){
+if(!proposalBrandingAllowed){
+return
+}
 input.click()
 })
 }
@@ -144,6 +241,12 @@ input.click()
 if(input){
 
 input.addEventListener("change",function(e){
+
+if(!proposalBrandingAllowed){
+input.value = ""
+selectedProposalCoverFile = null
+return
+}
 
 const file = e.target.files?.[0]
 
@@ -186,6 +289,10 @@ reader.readAsDataURL(file)
 if(removeBtn){
 
 removeBtn.addEventListener("click",function(){
+
+if(!proposalBrandingAllowed){
+return
+}
 
 selectedProposalCoverFile = null
 existingProposalCoverImage = ""
@@ -486,6 +593,14 @@ throw insertError
 }
 
 async function uploadProposalCoverAndSaveBranding(userId){
+
+if(!proposalBrandingAllowed){
+selectedProposalCoverFile = null
+return {
+proposal_cover_image: null,
+proposal_title_color: null
+}
+}
 
 const supabase = getSupabase()
 
@@ -936,17 +1051,33 @@ return null
 window.addEventListener("DOMContentLoaded", async function(){
 
 initProposalCoverUI()
+setProposalBrandingSectionVisible(false)
 
 try{
 
 const user = await getCurrentUser()
 
 if(user?.id){
+await loadCurrentPlanProfile(user.id)
+
+if(proposalBrandingAllowed){
 await loadExistingProposalBranding(user.id)
+}else{
+selectedProposalCoverFile = null
+existingProposalCoverImage = ""
+existingProposalTitleColor = ""
+setProposalCoverPreviewState(
+"",
+"Default image",
+false
+)
+}
 }
 
 }catch(err){
 console.error("INIT PROPOSAL BRANDING ERROR:", err)
+proposalBrandingAllowed = false
+setProposalBrandingSectionVisible(false)
 }
 
 })
@@ -1043,9 +1174,14 @@ alert(
 
 // PROPOSAL BRANDING SAVE
 
-let proposalBranding = {
+let proposalBranding = proposalBrandingAllowed
+? {
 proposal_cover_image: existingProposalCoverImage || null,
 proposal_title_color: existingProposalTitleColor || null
+}
+: {
+proposal_cover_image: null,
+proposal_title_color: null
 }
 
 try{
