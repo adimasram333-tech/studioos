@@ -76,6 +76,99 @@ tries++
 
 
 // ======================
+// PREMIUM PLAN GATE
+// ======================
+
+function normalizePlanValue(value){
+return String(value || "").trim().toLowerCase()
+}
+
+function isActivePremiumProposalPlan(profile){
+if(!profile) return false
+
+const plan = normalizePlanValue(profile.plan)
+const status = normalizePlanValue(profile.subscription_status)
+const isPaid = profile.is_paid === true
+const expiresAt = profile.plan_expires_at ? new Date(profile.plan_expires_at).getTime() : 0
+const hasValidExpiry = Number.isFinite(expiresAt) && expiresAt > Date.now()
+
+return isPaid && status === "active" && hasValidExpiry && (plan === "basic" || plan === "pro")
+}
+
+async function isCurrentViewerOwner(supabase, ownerId){
+try{
+const { data } = await supabase.auth.getUser()
+const currentUserId = data?.user?.id || ""
+return !!currentUserId && String(currentUserId) === String(ownerId)
+}catch(e){
+return false
+}
+}
+
+function renderPremiumProposalLocked(isOwner = false){
+const actionHtml = isOwner
+? `
+  <button onclick="window.location.href='subscription.html'" style="
+    margin-top:18px;
+    padding:12px 18px;
+    border:none;
+    border-radius:14px;
+    background:#4f46e5;
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+  ">View Plans</button>
+`
+: ""
+
+document.body.innerHTML = `
+  <div style="
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:radial-gradient(circle at top, #1e293b, #0f172a);
+    color:white;
+    font-family:Inter, sans-serif;
+    text-align:center;
+  ">
+    <div style="
+      width:min(100%, 420px);
+      border-radius:24px;
+      padding:24px;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:0 24px 60px rgba(0,0,0,0.35);
+    ">
+      <div style="
+        display:inline-flex;
+        padding:6px 12px;
+        border-radius:999px;
+        background:rgba(79,70,229,0.18);
+        color:#c7d2fe;
+        font-size:12px;
+        font-weight:800;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+      ">Premium Feature</div>
+
+      <h2 style="margin:16px 0 8px; font-size:24px; line-height:1.25;">
+        Premium proposal is locked
+      </h2>
+
+      <p style="margin:0; color:rgba(255,255,255,0.72); line-height:1.65; font-size:14px;">
+        Premium proposals are available on Basic and Pro plans.
+      </p>
+
+      ${actionHtml}
+    </div>
+  </div>
+`
+}
+
+
+// ======================
 // LOAD PROPOSAL
 // ======================
 
@@ -145,6 +238,14 @@ profile = row
 }
 }catch(e){
 console.log(e)
+}
+
+const premiumAllowed = isActivePremiumProposalPlan(profile)
+
+if(!premiumAllowed){
+const viewerIsOwner = await isCurrentViewerOwner(supabase, data.user_id)
+renderPremiumProposalLocked(viewerIsOwner)
+return
 }
 
 
