@@ -182,7 +182,7 @@ return String(window.GENERATE_S3_UPLOAD_URL).replace("/generate-s3-upload-url", 
 return "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/rollback-s3-upload"
 }
 
-async function rollbackUploadedS3Object(objectKey, eventId, userId){
+async function rollbackUploadedS3Object(objectKey, eventId, userId, originalFileSize = 0){
 try{
 const cleanKey = String(objectKey || "").replace(/^\/+/, "").trim()
 
@@ -211,7 +211,8 @@ headers: {
 },
 body: JSON.stringify({
 event_id: String(eventId),
-object_key: cleanKey
+object_key: cleanKey,
+original_file_size: Math.max(0, Math.floor(Number(originalFileSize || 0)))
 })
 })
 
@@ -919,7 +920,7 @@ previewKey: null
 { retries: 1, baseDelay: 800 }
 )
 }catch(saveErr){
-await rollbackUploadedS3Object(signedUpload.object_key, String(eventId), user.id)
+await rollbackUploadedS3Object(signedUpload.object_key, String(eventId), user.id, originalFileSize)
 throw saveErr
 }
 
