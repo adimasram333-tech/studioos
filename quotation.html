@@ -55,6 +55,42 @@ width:100%;
 min-width:0;
 }
 
+.dateField{
+position:relative;
+width:100%;
+min-width:0;
+}
+
+.dateField .input{
+padding-right:34px;
+}
+
+.dateFieldLabel{
+position:absolute;
+left:12px;
+top:50%;
+transform:translateY(-50%);
+font-size:14px;
+line-height:1;
+color:#d1d5db;
+pointer-events:none;
+transition:0.15s ease;
+max-width:calc(100% - 42px);
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.dateField.hasValue .dateFieldLabel{
+opacity:0;
+visibility:hidden;
+}
+
+.dateField .input:focus + .dateFieldLabel{
+opacity:0;
+visibility:hidden;
+}
+
 .deliverable{
 display:block;
 margin-top:6px;
@@ -352,8 +388,14 @@ required>
 </select>
 
 <div class="dateRow flex gap-2">
+<div class="dateField">
 <input id="startDate" type="date" class="input" required>
+<span class="dateFieldLabel">Start Date</span>
+</div>
+<div class="dateField">
 <input id="endDate" type="date" class="input">
+<span class="dateFieldLabel">End Date</span>
+</div>
 </div>
 
 <select id="packageSelect" class="input">
@@ -584,6 +626,57 @@ setDefaultState()
 }
 
 setDefaultState()
+
+})()
+</script>
+
+
+<script>
+(function(){
+
+function syncDateFieldState(input){
+if(!input) return
+
+const wrap = input.closest(".dateField")
+if(!wrap) return
+
+if(input.value){
+wrap.classList.add("hasValue")
+}else{
+wrap.classList.remove("hasValue")
+}
+}
+
+function bindDateFieldLabels(){
+const inputs = [
+document.getElementById("startDate"),
+document.getElementById("endDate")
+]
+
+inputs.forEach(function(input){
+if(!input) return
+
+syncDateFieldState(input)
+
+input.addEventListener("input", function(){
+syncDateFieldState(input)
+})
+
+input.addEventListener("change", function(){
+syncDateFieldState(input)
+})
+
+input.addEventListener("blur", function(){
+syncDateFieldState(input)
+})
+})
+}
+
+if(document.readyState === "loading"){
+document.addEventListener("DOMContentLoaded", bindDateFieldLabels)
+}else{
+bindDateFieldLabels()
+}
 
 })()
 </script>
