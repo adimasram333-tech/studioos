@@ -51,6 +51,145 @@ year:"numeric"
 
 
 // =============================
+// TEAM SHARE PLAN GATE
+// =============================
+
+function normalizePlanValue(value){
+
+return String(value || "").trim().toLowerCase()
+
+}
+
+function isActivePaidTeamSharePlan(settings){
+
+if(!settings) return false
+
+const plan = normalizePlanValue(settings.plan)
+const status = normalizePlanValue(settings.subscription_status)
+const isPaid = settings.is_paid === true
+const expiresAt = settings.plan_expires_at ? new Date(settings.plan_expires_at).getTime() : 0
+const hasValidExpiry = Number.isFinite(expiresAt) && expiresAt > Date.now()
+
+return isPaid && status === "active" && hasValidExpiry && (plan === "basic" || plan === "pro")
+
+}
+
+async function canCurrentUserShareTeam(supabase,userId){
+
+if(!userId) return false
+
+try{
+
+const { data, error } =
+await supabase
+.from("photographer_settings")
+.select("plan, subscription_status, is_paid, plan_expires_at")
+.eq("user_id",userId)
+.maybeSingle()
+
+if(error){
+console.error("TEAM SHARE PLAN CHECK ERROR:", error)
+return false
+}
+
+return isActivePaidTeamSharePlan(data)
+
+}catch(err){
+console.error("TEAM SHARE PLAN CHECK ERROR:", err)
+return false
+}
+
+}
+
+function closeTeamShareUpgradeModal(){
+
+const existing = document.getElementById("teamShareUpgradeModal")
+
+if(existing){
+existing.remove()
+}
+
+document.body.classList.remove("overflow-hidden")
+
+}
+
+function showTeamShareUpgradeModal(){
+
+closeTeamShareUpgradeModal()
+
+const modal = document.createElement("div")
+modal.id = "teamShareUpgradeModal"
+modal.className = "fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+
+modal.innerHTML = `
+  <div class="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0f172a] p-5 text-white shadow-2xl">
+    <div class="inline-flex rounded-full border border-indigo-400/30 bg-indigo-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-indigo-200">
+      Basic / Pro Required
+    </div>
+
+    <h2 class="mt-4 text-xl font-bold">
+      Unlock team sharing
+    </h2>
+
+    <div class="mt-3 space-y-2 text-sm text-gray-300">
+      <p>• Share Team Sheet link</p>
+      <p>• Client/public team sheet access</p>
+      <p>• Team Sheet PDF sharing</p>
+    </div>
+
+    <div class="mt-5 rounded-xl border border-white/10 bg-white/5 p-4">
+      <div class="text-sm font-semibold">Basic Plan</div>
+      <div class="mt-1 text-2xl font-bold">₹499/mo</div>
+      <p class="mt-2 text-xs text-gray-400">
+        Upgrade to enable team sharing.
+      </p>
+    </div>
+
+    <div class="mt-5 grid grid-cols-2 gap-3">
+      <button
+        type="button"
+        id="teamShareUpgradeCancel"
+        class="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10">
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        id="teamShareUpgradePlans"
+        class="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700">
+        View Plans
+      </button>
+    </div>
+  </div>
+`
+
+document.body.appendChild(modal)
+document.body.classList.add("overflow-hidden")
+
+const cancelBtn = document.getElementById("teamShareUpgradeCancel")
+const plansBtn = document.getElementById("teamShareUpgradePlans")
+
+if(cancelBtn){
+cancelBtn.onclick = closeTeamShareUpgradeModal
+}
+
+if(plansBtn){
+plansBtn.onclick = function(){
+window.location.href = "subscription.html"
+}
+}
+
+modal.addEventListener("click",function(e){
+if(e.target === modal){
+closeTeamShareUpgradeModal()
+}
+})
+
+}
+
+
+
+// =============================
 // LOAD CLIENT PROFILE
 // =============================
 
@@ -86,6 +225,10 @@ return
 }
 
 if(!quote) return
+
+const currentUser = await getCurrentUser()
+const currentUserId = currentUser?.id || ""
+const quotationOwnerId = quote.user_id || currentUserId
 
 
 
@@ -302,6 +445,15 @@ window.location.href =
 if(shareTeamBtn){
 shareTeamBtn.onclick = async ()=>{
 try{
+
+const canShareTeam =
+await canCurrentUserShareTeam(supabase, quotationOwnerId)
+
+if(!canShareTeam){
+showTeamShareUpgradeModal()
+return
+}
+
 const url =
 window.location.origin +
 "/studioos/team-sheet.html?quotation=" +
