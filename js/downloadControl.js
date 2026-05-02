@@ -18,10 +18,66 @@ const TRACK_USAGE_URL =
 
 // 🔥 IMPORTANT: use dynamic key (future safe)
 const RAZORPAY_KEY = "rzp_test_SYs7AftkGNrQNe";
+const MIN_PHOTO_SELLING_PRICE = 49;
+const eventPhotoPriceCache = new Map();
 
 // get role
 function getUserRole() {
   return sessionStorage.getItem("role") || "guest";
+}
+
+function normalizePhotoSellingPrice(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return MIN_PHOTO_SELLING_PRICE;
+  return Math.max(MIN_PHOTO_SELLING_PRICE, Math.floor(amount));
+}
+
+async function getEventPhotoSellingPrice(eventId) {
+  const safeEventId = String(eventId || "").trim();
+
+  if (!safeEventId) {
+    return MIN_PHOTO_SELLING_PRICE;
+  }
+
+  const cached = eventPhotoPriceCache.get(safeEventId);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.price;
+  }
+
+  try {
+    if (typeof window.getSupabase !== "function") {
+      return MIN_PHOTO_SELLING_PRICE;
+    }
+
+    const supabase = await window.getSupabase();
+
+    if (!supabase) {
+      return MIN_PHOTO_SELLING_PRICE;
+    }
+
+    const { data, error } = await supabase
+      .from("events")
+      .select("photo_selling_price")
+      .eq("id", safeEventId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Photo selling price fetch failed:", error);
+      return MIN_PHOTO_SELLING_PRICE;
+    }
+
+    const price = normalizePhotoSellingPrice(data?.photo_selling_price);
+
+    eventPhotoPriceCache.set(safeEventId, {
+      price,
+      expiresAt: Date.now() + 60000
+    });
+
+    return price;
+  } catch (err) {
+    console.error("Photo selling price fetch error:", err);
+    return MIN_PHOTO_SELLING_PRICE;
+  }
 }
 
 async function trackDownloadUsage(imageUrl, eventId, options = {}) {
@@ -195,7 +251,7 @@ function triggerDownload(imageUrl, eventId = null, trackingOptions = {}) {
 // PAYMENT MODAL
 // =============================
 
-function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
+async function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
   let modal = document.getElementById("paymentModal");
   if (modal) return;
 
@@ -219,6 +275,8 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
   modal.style.justifyContent = "center";
   modal.style.zIndex = 9999;
 
+  const photoSellingPrice = await getEventPhotoSellingPrice(eventId);
+
   modal.innerHTML = `
     <div style="background:#111; padding:20px; border-radius:12px; text-align:center; max-width:300px">
       <div style="font-size:16px; margin-bottom:10px; color:#fff;">Download Photo</div>
@@ -239,7 +297,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 
       <button id="payNowBtn"
         style="margin-top:10px; width:100%; background:#22c55e; color:white; padding:8px; border-radius:8px;">
-        Pay ₹49 (UPI)
+        Pay ₹${photoSellingPrice} (HD)
       </button>
 
       <button id="closeModal"
@@ -280,7 +338,7 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         image_url: imageUrl,
         photographer_id: photographerId,
         visitor_id,
-        amount: 49,
+        amount: photoSellingPrice,
         buyer_name,
         buyer_upi_id,
         buyer_upi_name
@@ -290,40 +348,23 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": window.SUPABASE_ANON_KEY || "",
-          "Authorization": `Bearer ${window.SUPABASE_ANON_KEY || ""}`
+          "apikey": window.SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`
         },
-        body: JSON.stringify({ amount: 49 })
+        body: JSON.stringify({
+          event_id: eventId,
+          photographer_id: photographerId,
+          image_url: imageUrl
+        })
       });
 
-      let orderData = null;
-
-      try {
-        orderData = await orderRes.json();
-      } catch (parseErr) {
-        console.error("Create order response parse failed:", parseErr);
-        alert("Unable to start payment. Please try again.");
-        return;
-      }
-
-      if (!orderRes.ok || !orderData?.success || !orderData?.order?.id || !orderData?.order?.amount) {
-        console.error("Create order failed:", orderData);
-        alert(orderData?.error || "Unable to create payment order. Please try again.");
-        return;
-      }
-
-      if (typeof Razorpay !== "function") {
-        console.error("Razorpay checkout script missing");
-        alert("Payment system is not ready. Please refresh and try again.");
-        return;
-      }
-
+      const orderData = await orderRes.json();
       const order = orderData.order;
 
       const options = {
         key: RAZORPAY_KEY,
         amount: order.amount,
-        currency: order.currency || "INR",
+        currency: "INR",
         name: "StudioOS",
         description: "Photo Purchase",
         order_id: order.id,
@@ -430,5 +471,5 @@ window.handleDownload = async function (imageUrl, eventId, photographerId, event
     return;
   }
 
-  showPaymentModal(imageUrl, eventId, photographerId, eventName);
+  await showPaymentModal(imageUrl, eventId, photographerId, eventName);
 };
