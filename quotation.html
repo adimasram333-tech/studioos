@@ -44,6 +44,17 @@ border-color:var(--primary);
 outline:none;
 }
 
+.dateRow{
+display:grid;
+grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+gap:8px;
+width:100%;
+}
+
+.dateRow .input{
+min-width:0;
+}
+
 .deliverable{
 display:block;
 margin-top:6px;
@@ -261,15 +272,22 @@ body{
 padding:12px;
 }
 
+.dateRow{
+display:grid;
+grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+gap:8px;
+}
+
+.dateRow .input{
+font-size:13px;
+padding:10px 8px;
+}
+
 .quotationCard{
 padding:16px;
 border-radius:18px;
 }
 
-.flex.gap-2{
-flex-direction:column;
-gap:0;
-}
 
 .serviceHeader{
 grid-template-columns:1fr 52px 52px;
@@ -333,7 +351,7 @@ required>
 <option>Other</option>
 </select>
 
-<div class="flex gap-2">
+<div class="dateRow flex gap-2">
 <input id="startDate" type="date" class="input" required>
 <input id="endDate" type="date" class="input">
 </div>
