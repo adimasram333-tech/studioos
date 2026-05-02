@@ -360,9 +360,16 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 
       const orderData = await orderRes.json();
       const order = orderData.order;
+      const razorpayKey = orderData.razorpay_key_id || RAZORPAY_KEY;
+
+      if (!razorpayKey) {
+        console.error("Razorpay key missing from create-order response");
+        alert("Payment configuration missing. Please try again later.");
+        return;
+      }
 
       const options = {
-        key: RAZORPAY_KEY,
+        key: razorpayKey,
         amount: order.amount,
         currency: "INR",
         name: "StudioOS",
@@ -417,6 +424,16 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
       };
 
       const rzp = new Razorpay(options);
+
+      rzp.on("payment.failed", function (response) {
+        console.error("Razorpay payment failed:", response);
+        const message =
+          response?.error?.description ||
+          response?.error?.reason ||
+          "Payment failed. Please try again.";
+        alert(message);
+      });
+
       rzp.open();
 
     } catch (err) {
