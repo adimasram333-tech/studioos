@@ -205,17 +205,44 @@ justify-content:center;
 .quotationCard{
 width:100%;
 max-width:460px;
+padding:20px;
 }
 
-.serviceRow span{
-width:auto;
-min-width:130px;
-font-size:13px;
+.serviceHeader{
+display:grid;
+grid-template-columns:1fr 56px 56px;
+gap:8px;
+align-items:center;
 }
 
 .serviceHeader .blank{
 width:auto;
-min-width:130px;
+min-width:0;
+}
+
+.serviceHeader span{
+width:auto;
+font-size:11px;
+}
+
+.serviceRow{
+display:grid;
+grid-template-columns:1fr 56px 56px;
+gap:8px;
+align-items:center;
+}
+
+.serviceRow span{
+width:auto;
+min-width:0;
+font-size:13px;
+line-height:1.35;
+word-break:break-word;
+}
+
+.serviceInput{
+width:56px;
+height:34px;
 }
 
 .brandingActions{
@@ -224,6 +251,47 @@ flex-direction:column;
 
 .brandPreview{
 height:150px;
+}
+
+}
+
+@media (max-width:420px){
+
+body{
+padding:12px;
+}
+
+.quotationCard{
+padding:16px;
+border-radius:18px;
+}
+
+.flex.gap-2{
+flex-direction:column;
+gap:0;
+}
+
+.serviceHeader{
+grid-template-columns:1fr 52px 52px;
+gap:7px;
+}
+
+.serviceRow{
+grid-template-columns:1fr 52px 52px;
+gap:7px;
+}
+
+.serviceInput{
+width:52px;
+height:34px;
+}
+
+.serviceRow span{
+font-size:12.5px;
+}
+
+.input{
+font-size:14px;
 }
 
 }
@@ -279,7 +347,7 @@ required>
 
 <!-- PROPOSAL COVER BRANDING -->
 
-<div class="brandingCard">
+<div id="proposalBrandingSection" class="brandingCard">
 
 <div class="brandingHeader">
 <div class="brandingTitle">Proposal Cover Branding</div>
