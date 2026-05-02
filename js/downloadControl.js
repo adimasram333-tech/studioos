@@ -27,28 +27,6 @@ function getUserRole() {
   return sessionStorage.getItem("role") || "guest";
 }
 
-function safeString(value) {
-  return String(value || "").trim();
-}
-
-function getPhotoPurchaseIdentity(photo) {
-  const source = photo && typeof photo === "object" ? photo : {};
-
-  return {
-    photo_id: safeString(source.id),
-    object_key: safeString(source.object_key),
-    preview_key: safeString(source.preview_key),
-    thumbnail_key: safeString(source.thumbnail_key),
-    storage_provider: safeString(source.storage_provider || "s3"),
-    bucket: safeString(source.bucket),
-    file_size: Number(source.file_size || source.stored_file_size || 0),
-    original_file_size: Number(source.original_file_size || 0),
-    stored_file_size: Number(source.stored_file_size || source.file_size || 0),
-    width: Number(source.width || 0),
-    height: Number(source.height || 0)
-  };
-}
-
 function normalizePhotoSellingPrice(value) {
   const amount = Number(value);
   if (!Number.isFinite(amount)) return MIN_PHOTO_SELLING_PRICE;
@@ -274,7 +252,7 @@ function triggerDownload(imageUrl, eventId = null, trackingOptions = {}) {
 // PAYMENT MODAL
 // =============================
 
-async function showPaymentModal(imageUrl, eventId, photographerId, eventName, options = {}) {
+async function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
   let modal = document.getElementById("paymentModal");
   if (modal) return;
 
@@ -298,7 +276,6 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName, op
   modal.style.zIndex = 10050;
 
   const photoSellingPrice = await getEventPhotoSellingPrice(eventId);
-  const photoIdentity = getPhotoPurchaseIdentity(options.photo);
 
   modal.innerHTML = `
     <div style="
@@ -353,12 +330,7 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName, op
         line-height:1.45;
       "></div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:1rem;">
-        <button id="freeDownloadBtn" type="button"
-          style="display:inline-flex; align-items:center; justify-content:center; padding:0.9rem 1rem; border-radius:0.95rem; font-size:0.86rem; font-weight:700; background:rgba(255,255,255,0.06); color:white; border:1px solid rgba(255,255,255,0.08); cursor:pointer;">
-          Free Preview
-        </button>
-
+      <div style="display:grid; grid-template-columns:1fr; gap:0.75rem; margin-top:1rem;">
         <button id="payNowBtn" type="button"
           style="display:inline-flex; align-items:center; justify-content:center; padding:0.9rem 1rem; border-radius:0.95rem; font-size:0.86rem; font-weight:700; background:rgb(79 70 229); color:white; border:1px solid transparent; cursor:pointer;">
           Pay ₹${photoSellingPrice}
@@ -373,15 +345,6 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName, op
   `;
 
   document.body.appendChild(modal);
-
-  document.getElementById("freeDownloadBtn").onclick = function () {
-    const lowUrl = getLowQualityUrl(imageUrl);
-    triggerDownload(lowUrl, eventId, {
-      photographerId,
-      fileType: "preview"
-    });
-    modal.remove();
-  };
 
   document.getElementById("payNowBtn").onclick = async function () {
     const payBtn = document.getElementById("payNowBtn");
@@ -445,18 +408,8 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName, op
 
       const payload = {
         event_id: eventId,
-        photo_id: photoIdentity.photo_id,
+        event_name: eventName,
         image_url: imageUrl,
-        object_key: photoIdentity.object_key,
-        preview_key: photoIdentity.preview_key,
-        thumbnail_key: photoIdentity.thumbnail_key,
-        storage_provider: photoIdentity.storage_provider,
-        bucket: photoIdentity.bucket,
-        file_size: photoIdentity.file_size,
-        original_file_size: photoIdentity.original_file_size,
-        stored_file_size: photoIdentity.stored_file_size,
-        width: photoIdentity.width,
-        height: photoIdentity.height,
         photographer_id: photographerId,
         visitor_id,
         amount: photoSellingPrice,
@@ -475,7 +428,6 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName, op
         body: JSON.stringify({
           event_id: eventId,
           photographer_id: photographerId,
-          photo_id: photoIdentity.photo_id,
           image_url: imageUrl
         })
       });
@@ -662,5 +614,5 @@ window.handleDownload = async function (imageUrl, eventId, photographerId, event
     return;
   }
 
-  await showPaymentModal(imageUrl, eventId, photographerId, eventName, options);
+  await showPaymentModal(imageUrl, eventId, photographerId, eventName);
 };
