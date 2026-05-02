@@ -5,6 +5,12 @@
 let quotationId = null;
 let db = null;
 let teamSheetPdfScrollTop = 0;
+let teamSheetQuotation = null;
+let teamSheetAccess = {
+  ownerId: "",
+  viewerIsOwner: false,
+  paidSharingAllowed: false
+};
 
 
 // =============================
@@ -92,6 +98,162 @@ async function getCurrentUserSafe() {
 
 
 // =============================
+// TEAM SHEET ACCESS GATE
+// =============================
+
+function normalizePlanValue(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function isActivePaidTeamSheetPlan(settings) {
+  if (!settings) return false;
+
+  const plan = normalizePlanValue(settings.plan);
+  const status = normalizePlanValue(settings.subscription_status);
+  const isPaid = settings.is_paid === true;
+  const expiresAt = settings.plan_expires_at ? new Date(settings.plan_expires_at).getTime() : 0;
+  const hasValidExpiry = Number.isFinite(expiresAt) && expiresAt > Date.now();
+
+  return isPaid && status === "active" && hasValidExpiry && (plan === "basic" || plan === "pro");
+}
+
+function closeTeamSheetUpgradeModal() {
+  const existing = document.getElementById("teamSheetUpgradeModal");
+  if (existing) existing.remove();
+
+  document.body.classList.remove("overflow-hidden");
+}
+
+function showTeamSheetUpgradeModal() {
+  closeTeamSheetUpgradeModal();
+
+  const modal = document.createElement("div");
+  modal.id = "teamSheetUpgradeModal";
+  modal.className = "fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm";
+
+  modal.innerHTML = `
+    <div class="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0f172a] p-5 text-white shadow-2xl">
+      <div class="inline-flex rounded-full border border-indigo-400/30 bg-indigo-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-indigo-200">
+        Basic / Pro Required
+      </div>
+
+      <h2 class="mt-4 text-xl font-bold">
+        Unlock team sharing
+      </h2>
+
+      <div class="mt-3 space-y-2 text-sm text-gray-300">
+        <p>• Share Team Sheet link</p>
+        <p>• Client/public team sheet access</p>
+        <p>• Team Sheet PDF sharing</p>
+      </div>
+
+      <div class="mt-5 rounded-xl border border-white/10 bg-white/5 p-4">
+        <div class="text-sm font-semibold">Basic Plan</div>
+        <div class="mt-1 text-2xl font-bold">₹499/mo</div>
+        <p class="mt-2 text-xs text-gray-400">
+          Upgrade to enable team sharing.
+        </p>
+      </div>
+
+      <div class="mt-5 grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          id="teamSheetUpgradeCancel"
+          class="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          id="teamSheetUpgradePlans"
+          class="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700">
+          View Plans
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  document.body.classList.add("overflow-hidden");
+
+  const cancelBtn = document.getElementById("teamSheetUpgradeCancel");
+  const plansBtn = document.getElementById("teamSheetUpgradePlans");
+
+  if (cancelBtn) {
+    cancelBtn.onclick = closeTeamSheetUpgradeModal;
+  }
+
+  if (plansBtn) {
+    plansBtn.onclick = function() {
+      window.location.href = "subscription.html";
+    };
+  }
+
+  modal.addEventListener("click", function(e) {
+    if (e.target === modal) {
+      closeTeamSheetUpgradeModal();
+    }
+  });
+}
+
+function renderTeamSheetLockedScreen() {
+  document.body.innerHTML = `
+    <div class="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(circle_at_top,#1e293b,#0f172a)] text-white">
+      <div class="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0f172a] p-5 text-center shadow-2xl">
+        <div class="inline-flex rounded-full border border-indigo-400/30 bg-indigo-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-indigo-200">
+          Basic / Pro Required
+        </div>
+
+        <h2 class="mt-4 text-xl font-bold">
+          Team Sheet sharing is locked
+        </h2>
+
+        <p class="mt-3 text-sm leading-6 text-gray-300">
+          This Team Sheet can be shared publicly only when the photographer has an active Basic or Pro plan.
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+async function evaluateTeamSheetAccess() {
+  const quotation = teamSheetQuotation || await getQuotationData();
+  teamSheetQuotation = quotation;
+
+  const ownerId = quotation?.user_id || "";
+  const viewer = await getCurrentUserSafe();
+  const viewerId = viewer?.id || "";
+
+  teamSheetAccess.ownerId = ownerId;
+  teamSheetAccess.viewerIsOwner = !!ownerId && !!viewerId && String(ownerId) === String(viewerId);
+  teamSheetAccess.paidSharingAllowed = false;
+
+  if (!ownerId) {
+    return false;
+  }
+
+  const { data: settings, error } = await db
+    .from("photographer_settings")
+    .select("plan, subscription_status, is_paid, plan_expires_at")
+    .eq("user_id", ownerId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("TEAM SHEET PLAN CHECK ERROR:", error);
+  }
+
+  teamSheetAccess.paidSharingAllowed = isActivePaidTeamSheetPlan(settings);
+
+  if (!teamSheetAccess.paidSharingAllowed && !teamSheetAccess.viewerIsOwner) {
+    renderTeamSheetLockedScreen();
+    return false;
+  }
+
+  return true;
+}
+
+
+// =============================
 // GET QUOTATION DATA
 // =============================
 
@@ -173,7 +335,14 @@ window.addEventListener("DOMContentLoaded", async () => {
       throw new Error("Supabase not initialized");
     }
 
+    const accessAllowed = await evaluateTeamSheetAccess();
+
+    if (!accessAllowed) {
+      return;
+    }
+
     await loadStudio();
+    await loadOwnerCoverAndColor();
     await loadTeamData();
   } catch (err) {
     console.error("TEAM SHEET INIT ERROR:", err);
@@ -188,9 +357,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 async function loadStudio() {
   try {
-    const user = await getCurrentUserSafe();
+    const ownerId = teamSheetAccess.ownerId || teamSheetQuotation?.user_id || "";
 
-    if (!user?.id) {
+    if (!ownerId) {
       document.getElementById("studioName").innerText = "Studio Name";
       document.getElementById("studioPhone").innerText = "Phone";
       return;
@@ -199,7 +368,7 @@ async function loadStudio() {
     const { data, error } = await db
       .from("photographer_settings")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", ownerId)
       .maybeSingle();
 
     if (error) {
@@ -215,6 +384,42 @@ async function loadStudio() {
     console.error("LOAD STUDIO ERROR:", err);
     document.getElementById("studioName").innerText = "Studio Name";
     document.getElementById("studioPhone").innerText = "Phone";
+  }
+}
+
+
+// =============================
+// LOAD OWNER COVER + COLOR
+// =============================
+
+async function loadOwnerCoverAndColor() {
+  try {
+    const ownerId = teamSheetAccess.ownerId || teamSheetQuotation?.user_id || "";
+
+    if (!ownerId) return;
+
+    const { data: settings, error } = await db
+      .from("photographer_settings")
+      .select("team_sheet_cover_image, team_sheet_title_color")
+      .eq("user_id", ownerId)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    const img = document.getElementById("coverImage");
+    const title = document.getElementById("sheetTitle");
+
+    if (img && settings?.team_sheet_cover_image) {
+      img.src = settings.team_sheet_cover_image;
+    }
+
+    if (title && settings?.team_sheet_title_color) {
+      title.style.color = settings.team_sheet_title_color;
+    }
+  } catch (err) {
+    console.error("OWNER COVER LOAD ERROR:", err);
   }
 }
 
@@ -237,10 +442,14 @@ async function loadTeamData() {
       throw error;
     }
 
-    const quotation = await getQuotationData().catch(err => {
+    const quotation = teamSheetQuotation || await getQuotationData().catch(err => {
       console.error("QUOTATION FETCH ERROR:", err);
       return null;
     });
+
+    if (quotation) {
+      teamSheetQuotation = quotation;
+    }
 
     if (!data || data.length === 0) {
       document.getElementById("clientName").innerText =
@@ -405,6 +614,11 @@ function removeTeamSheetPdfExportMode() {
 
 async function downloadPDF() {
   try {
+    if (!teamSheetAccess.paidSharingAllowed) {
+      showTeamSheetUpgradeModal();
+      return;
+    }
+
     if (typeof window.html2pdf === "undefined") {
       console.error("PDF library not loaded");
       return;
@@ -459,6 +673,11 @@ async function downloadPDF() {
 
 async function shareTeam() {
   try {
+    if (!teamSheetAccess.paidSharingAllowed) {
+      showTeamSheetUpgradeModal();
+      return;
+    }
+
     const url = window.location.href;
 
     if (navigator.share) {
