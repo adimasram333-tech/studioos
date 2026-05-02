@@ -27,6 +27,28 @@ function getUserRole() {
   return sessionStorage.getItem("role") || "guest";
 }
 
+function safeString(value) {
+  return String(value || "").trim();
+}
+
+function getPhotoPurchaseIdentity(photo) {
+  const source = photo && typeof photo === "object" ? photo : {};
+
+  return {
+    photo_id: safeString(source.id),
+    object_key: safeString(source.object_key),
+    preview_key: safeString(source.preview_key),
+    thumbnail_key: safeString(source.thumbnail_key),
+    storage_provider: safeString(source.storage_provider || "s3"),
+    bucket: safeString(source.bucket),
+    file_size: Number(source.file_size || source.stored_file_size || 0),
+    original_file_size: Number(source.original_file_size || 0),
+    stored_file_size: Number(source.stored_file_size || source.file_size || 0),
+    width: Number(source.width || 0),
+    height: Number(source.height || 0)
+  };
+}
+
 function normalizePhotoSellingPrice(value) {
   const amount = Number(value);
   if (!Number.isFinite(amount)) return MIN_PHOTO_SELLING_PRICE;
@@ -252,7 +274,7 @@ function triggerDownload(imageUrl, eventId = null, trackingOptions = {}) {
 // PAYMENT MODAL
 // =============================
 
-async function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
+async function showPaymentModal(imageUrl, eventId, photographerId, eventName, options = {}) {
   let modal = document.getElementById("paymentModal");
   if (modal) return;
 
@@ -276,6 +298,7 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
   modal.style.zIndex = 10050;
 
   const photoSellingPrice = await getEventPhotoSellingPrice(eventId);
+  const photoIdentity = getPhotoPurchaseIdentity(options.photo);
 
   modal.innerHTML = `
     <div style="
@@ -408,8 +431,18 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
 
       const payload = {
         event_id: eventId,
-        event_name: eventName,
+        photo_id: photoIdentity.photo_id,
         image_url: imageUrl,
+        object_key: photoIdentity.object_key,
+        preview_key: photoIdentity.preview_key,
+        thumbnail_key: photoIdentity.thumbnail_key,
+        storage_provider: photoIdentity.storage_provider,
+        bucket: photoIdentity.bucket,
+        file_size: photoIdentity.file_size,
+        original_file_size: photoIdentity.original_file_size,
+        stored_file_size: photoIdentity.stored_file_size,
+        width: photoIdentity.width,
+        height: photoIdentity.height,
         photographer_id: photographerId,
         visitor_id,
         amount: photoSellingPrice,
@@ -417,6 +450,10 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         buyer_upi_id,
         buyer_upi_name
       };
+
+      if (!photoIdentity.photo_id) {
+        throw new Error("Photo ID missing. Please refresh gallery and try again.");
+      }
 
       const orderRes = await fetch(CREATE_ORDER_URL, {
         method: "POST",
@@ -428,6 +465,7 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         body: JSON.stringify({
           event_id: eventId,
           photographer_id: photographerId,
+          photo_id: photoIdentity.photo_id,
           image_url: imageUrl
         })
       });
@@ -614,5 +652,5 @@ window.handleDownload = async function (imageUrl, eventId, photographerId, event
     return;
   }
 
-  await showPaymentModal(imageUrl, eventId, photographerId, eventName);
+  await showPaymentModal(imageUrl, eventId, photographerId, eventName, options);
 };
