@@ -290,19 +290,40 @@ function showPaymentModal(imageUrl, eventId, photographerId, eventName) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": window.SUPABASE_ANON_KEY,
-          "Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`
+          "apikey": window.SUPABASE_ANON_KEY || "",
+          "Authorization": `Bearer ${window.SUPABASE_ANON_KEY || ""}`
         },
         body: JSON.stringify({ amount: 49 })
       });
 
-      const orderData = await orderRes.json();
+      let orderData = null;
+
+      try {
+        orderData = await orderRes.json();
+      } catch (parseErr) {
+        console.error("Create order response parse failed:", parseErr);
+        alert("Unable to start payment. Please try again.");
+        return;
+      }
+
+      if (!orderRes.ok || !orderData?.success || !orderData?.order?.id || !orderData?.order?.amount) {
+        console.error("Create order failed:", orderData);
+        alert(orderData?.error || "Unable to create payment order. Please try again.");
+        return;
+      }
+
+      if (typeof Razorpay !== "function") {
+        console.error("Razorpay checkout script missing");
+        alert("Payment system is not ready. Please refresh and try again.");
+        return;
+      }
+
       const order = orderData.order;
 
       const options = {
         key: RAZORPAY_KEY,
         amount: order.amount,
-        currency: "INR",
+        currency: order.currency || "INR",
         name: "StudioOS",
         description: "Photo Purchase",
         order_id: order.id,
