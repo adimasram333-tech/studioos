@@ -106,6 +106,88 @@ function extractObjectKeyFromUrl(url){
   }
 }
 
+function isPlainObject(value){
+  return value && typeof value === "object" && !Array.isArray(value)
+}
+
+function normalizeTemplateImagesData(currentData = {}){
+  if(!isPlainObject(currentData)){
+    return {}
+  }
+
+  if(isPlainObject(currentData.template_images)){
+    return { ...currentData.template_images }
+  }
+
+  return { ...currentData }
+}
+
+function normalizeTemplateImageKeysData(currentData = {}){
+  if(!isPlainObject(currentData)){
+    return {}
+  }
+
+  if(isPlainObject(currentData.template_image_keys)){
+    return { ...currentData.template_image_keys }
+  }
+
+  return {}
+}
+
+function isMissingColumnError(error, columnName){
+  const message = String(error?.message || error?.details || error?.hint || "").toLowerCase()
+  const safeColumn = String(columnName || "").toLowerCase()
+
+  return (
+    message.includes(safeColumn) &&
+    (
+      message.includes("schema cache") ||
+      message.includes("could not find") ||
+      message.includes("column") ||
+      message.includes("does not exist")
+    )
+  )
+}
+
+async function updateWebsiteTemplateImages({
+  supabase,
+  websiteId,
+  userId,
+  updatedImages,
+  updatedImageKeys
+}){
+  const fullUpdate = await supabase
+    .from("user_websites")
+    .update({
+      template_images: updatedImages,
+      template_image_keys: updatedImageKeys
+    })
+    .eq("id", websiteId)
+    .eq("user_id", userId)
+
+  if(!fullUpdate.error){
+    return { usedFallback: false }
+  }
+
+  if(!isMissingColumnError(fullUpdate.error, "template_image_keys")){
+    throw fullUpdate.error
+  }
+
+  console.warn("template_image_keys column not available. Falling back to template_images only.")
+
+  const fallbackUpdate = await supabase
+    .from("user_websites")
+    .update({ template_images: updatedImages })
+    .eq("id", websiteId)
+    .eq("user_id", userId)
+
+  if(fallbackUpdate.error){
+    throw fallbackUpdate.error
+  }
+
+  return { usedFallback: true }
+}
+
 async function callDeleteObjectFunction(payload){
   const session = await getCurrentSessionSafe()
 
@@ -248,10 +330,13 @@ export async function replaceTemplateImage({
   file,
   currentData = {}
 }){
+  if(!supabase) throw new Error("Supabase client is required.")
+  if(!userId) throw new Error("Authenticated user is required.")
+  if(!websiteId) throw new Error("Website id is required.")
   if(!slot) throw new Error("Image slot is required.")
 
-  const existingImages = currentData.template_images || {}
-  const oldUrl = existingImages[slot] || ""
+  const existingImages = normalizeTemplateImagesData(currentData)
+  const oldUrl = pickNonEmpty(existingImages[slot])
 
   const { newUrl, deleteResult, objectKey } = await replaceImageAsset({
     oldUrl,
@@ -264,37 +349,32 @@ export async function replaceTemplateImage({
     [slot]: newUrl
   }
 
-  const existingImageKeys =
-    currentData.template_image_keys && typeof currentData.template_image_keys === "object"
-      ? currentData.template_image_keys
-      : {}
+  const existingImageKeys = normalizeTemplateImageKeysData(currentData)
 
   const updatedImageKeys = {
     ...existingImageKeys,
     [slot]: objectKey || extractObjectKeyFromUrl(newUrl)
   }
 
-  const updatePayload = {
-    template_images: updatedImages
-  }
-
-  // Safe optional support for future schema
-  updatePayload.template_image_keys = updatedImageKeys
-
-  const { error } = await supabase
-    .from("user_websites")
-    .update(updatePayload)
-    .eq("id", websiteId)
-    .eq("user_id", userId)
-
-  if(error){
-    throw new Error("Failed to update template images.")
+  try{
+    await updateWebsiteTemplateImages({
+      supabase,
+      websiteId,
+      userId,
+      updatedImages,
+      updatedImageKeys
+    })
+  }catch(error){
+    throw new Error(error?.message || "Failed to update template images.")
   }
 
   return {
     slot,
     newUrl,
+    updatedUrl: newUrl,
     objectKey: updatedImageKeys[slot],
+    updatedImages,
+    updatedImageKeys,
     deleteResult
   }
 }
