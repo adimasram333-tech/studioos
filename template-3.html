@@ -274,6 +274,62 @@
 
     .editable-slot.uploading .image-loading{display:block}
 
+    .image-preview-modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background:rgba(0,0,0,0.88);
+      backdrop-filter:blur(14px);
+      z-index:140;
+    }
+
+    .image-preview-modal.show{
+      display:flex;
+    }
+
+    .image-preview-card{
+      position:relative;
+      width:min(1120px, 100%);
+      max-height:min(86vh, 860px);
+      border-radius:24px;
+      overflow:hidden;
+      background:#050505;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:0 34px 110px rgba(0,0,0,0.72);
+    }
+
+    .image-preview-card img{
+      width:100%;
+      max-height:min(86vh, 860px);
+      object-fit:contain;
+      background:#050505;
+    }
+
+    .image-preview-close{
+      position:absolute;
+      top:14px;
+      right:14px;
+      width:42px;
+      height:42px;
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:999px;
+      background:rgba(0,0,0,0.62);
+      color:#fff;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      z-index:2;
+      font-size:1.35rem;
+      line-height:1;
+    }
+
+    .image-preview-close:hover{
+      background:rgba(159,19,36,0.9);
+    }
+
     .hero{
       width:100%;
       min-height:72vh;
@@ -1015,6 +1071,13 @@
 
   <input id="imageFileInput" type="file" accept="image/*" class="hidden" />
 
+  <div id="imagePreviewModal" class="image-preview-modal" aria-hidden="true">
+    <div class="image-preview-card" role="dialog" aria-modal="true" aria-label="Image preview">
+      <button id="imagePreviewClose" type="button" class="image-preview-close" aria-label="Close image preview">×</button>
+      <img id="imagePreviewImg" alt="Template image preview" />
+    </div>
+  </div>
+
   <div id="templateRoot" class="hidden">
     <header class="site-header" id="top">
       <div class="container header-inner" id="headerInner">
@@ -1280,6 +1343,9 @@
     const editModeToggle = document.getElementById("editModeToggle");
     const editStatus = document.getElementById("editStatus");
     const imageFileInput = document.getElementById("imageFileInput");
+    const imagePreviewModal = document.getElementById("imagePreviewModal");
+    const imagePreviewImg = document.getElementById("imagePreviewImg");
+    const imagePreviewClose = document.getElementById("imagePreviewClose");
 
     const DEFAULT_IMAGES = {
       hero: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80",
@@ -1473,6 +1539,25 @@
     function buildImageBackground(url, overlay = true) {
       const safeUrl = String(url || "").replace(/"/g, '\\"');
       return `${overlay ? 'linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.22)), ' : ''}url("${safeUrl}")`;
+    }
+
+    function openImagePreview(slotName) {
+      if (!currentWebsite || !slotName) return;
+
+      const imageUrl = getImageUrl(currentWebsite, slotName);
+      if (!imageUrl) return;
+
+      imagePreviewImg.src = imageUrl;
+      imagePreviewModal.classList.add("show");
+      imagePreviewModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeImagePreview() {
+      imagePreviewModal.classList.remove("show");
+      imagePreviewModal.setAttribute("aria-hidden", "true");
+      imagePreviewImg.removeAttribute("src");
+      document.body.style.overflow = "";
     }
 
     function setEditStatus(message) {
@@ -1869,14 +1954,36 @@
     function registerEditableImageSlots() {
       document.querySelectorAll(".editable-slot").forEach(slot => {
         slot.addEventListener("click", event => {
-          if (!editModeEnabled) return;
+          const slotName = slot.dataset.imageSlot || "";
+          if (!slotName) return;
+
           event.preventDefault();
           event.stopPropagation();
-          pendingImageSlot = slot.dataset.imageSlot || "";
-          imageFileInput.click();
+
+          if (editModeEnabled) {
+            pendingImageSlot = slotName;
+            imageFileInput.click();
+            return;
+          }
+
+          openImagePreview(slotName);
         });
       });
     }
+
+    imagePreviewClose.addEventListener("click", closeImagePreview);
+
+    imagePreviewModal.addEventListener("click", event => {
+      if (event.target === imagePreviewModal) {
+        closeImagePreview();
+      }
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && imagePreviewModal.classList.contains("show")) {
+        closeImagePreview();
+      }
+    });
 
     imageFileInput.addEventListener("change", async e => {
       const file = e.target.files?.[0];
