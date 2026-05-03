@@ -280,6 +280,61 @@
 
     .editable-slot.uploading .image-loading{display:block}
 
+    .image-preview-modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background:rgba(0,0,0,.86);
+      backdrop-filter:blur(14px);
+      z-index:140;
+    }
+
+    .image-preview-modal.show{
+      display:flex;
+    }
+
+    .image-preview-card{
+      position:relative;
+      width:min(1120px, 100%);
+      max-height:min(86vh, 860px);
+      background:#090909;
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow:0 34px 110px rgba(0,0,0,.72);
+      overflow:hidden;
+    }
+
+    .image-preview-card img{
+      width:100%;
+      max-height:min(86vh, 860px);
+      object-fit:contain;
+      background:#090909;
+    }
+
+    .image-preview-close{
+      position:absolute;
+      top:14px;
+      right:14px;
+      width:42px;
+      height:42px;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:999px;
+      background:rgba(0,0,0,.62);
+      color:#fff;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      z-index:2;
+      font-size:1.35rem;
+      line-height:1;
+    }
+
+    .image-preview-close:hover{
+      background:#111;
+    }
+
     .hero{
       position:relative;
       min-height:620px;
@@ -1002,6 +1057,13 @@
 
   <input id="imageFileInput" type="file" accept="image/*" class="hidden" />
 
+  <div id="imagePreviewModal" class="image-preview-modal" aria-hidden="true">
+    <div class="image-preview-card" role="dialog" aria-modal="true" aria-label="Image preview">
+      <button id="imagePreviewClose" type="button" class="image-preview-close" aria-label="Close image preview">×</button>
+      <img id="imagePreviewImg" alt="Template image preview" />
+    </div>
+  </div>
+
   <div id="templateRoot" class="hidden">
     <header class="site-header" id="top">
       <div class="container header-inner" id="headerInner">
@@ -1265,6 +1327,9 @@
     const editModeToggle=document.getElementById("editModeToggle");
     const editStatus=document.getElementById("editStatus");
     const imageFileInput=document.getElementById("imageFileInput");
+    const imagePreviewModal=document.getElementById("imagePreviewModal");
+    const imagePreviewImg=document.getElementById("imagePreviewImg");
+    const imagePreviewClose=document.getElementById("imagePreviewClose");
 
     const DEFAULT_IMAGES={
       hero:"https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1600&q=80",
@@ -1495,6 +1560,29 @@
     function buildImageBackground(url){
       const safeUrl=String(url||"").replace(/"/g,'\\"');
       return `url("${safeUrl}")`;
+    }
+
+    function isNestedInteractiveClick(event, slot){
+      const interactive=event.target.closest("a, button, input, textarea, select, label");
+      return Boolean(interactive && interactive!==slot);
+    }
+
+    function openImagePreview(slotName){
+      if(!currentWebsite || !slotName) return;
+      const imageUrl=getImageUrl(currentWebsite,slotName);
+      if(!imageUrl) return;
+
+      imagePreviewImg.src=imageUrl;
+      imagePreviewModal.classList.add("show");
+      imagePreviewModal.setAttribute("aria-hidden","false");
+      document.body.style.overflow="hidden";
+    }
+
+    function closeImagePreview(){
+      imagePreviewModal.classList.remove("show");
+      imagePreviewModal.setAttribute("aria-hidden","true");
+      imagePreviewImg.removeAttribute("src");
+      document.body.style.overflow="";
     }
 
     function setText(id,value){
@@ -1787,15 +1875,40 @@ applyBWCondition(pricingBgSlotEl, "pricing_bg", website);
     function registerEditableImageSlots(){
       document.querySelectorAll(".editable-slot").forEach(slot=>{
         slot.addEventListener("click",event=>{
-          if(!editModeEnabled) return;
+          const slotName=slot.dataset.imageSlot||"";
+          if(!slotName) return;
+
+          if(!editModeEnabled && isNestedInteractiveClick(event,slot)){
+            return;
+          }
+
           event.preventDefault();
           event.stopPropagation();
-          pendingImageSlot=slot.dataset.imageSlot||"";
-          if(!pendingImageSlot) return;
-          imageFileInput.click();
+
+          if(editModeEnabled){
+            pendingImageSlot=slotName;
+            imageFileInput.click();
+            return;
+          }
+
+          openImagePreview(slotName);
         });
       });
     }
+
+    imagePreviewClose.addEventListener("click",closeImagePreview);
+
+    imagePreviewModal.addEventListener("click",event=>{
+      if(event.target===imagePreviewModal){
+        closeImagePreview();
+      }
+    });
+
+    document.addEventListener("keydown",event=>{
+      if(event.key==="Escape" && imagePreviewModal.classList.contains("show")){
+        closeImagePreview();
+      }
+    });
 
     imageFileInput.addEventListener("change",async e=>{
       const file=e.target.files?.[0];
