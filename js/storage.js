@@ -243,7 +243,10 @@ export async function uploadImage(file, options = {}){
   const originalFileSize = Number(file.size || 0)
 
   const signedUpload = await window.requestS3UploadUrl({
-    eventId: options.eventId || `website-${user.id}`,
+    eventId: options.eventId || "",
+    websiteId: options.websiteId || "",
+    slot: options.slot || "",
+    uploadContext: options.uploadContext || options.upload_context || "website_template",
     fileName: objectKey.split("/").pop() || file.name || "image.jpg",
     contentType: file.type || "image/jpeg",
 
@@ -292,8 +295,20 @@ export async function deleteImageByUrl(url){
   }
 }
 
-export async function replaceImageAsset({ oldUrl = "", file, folder = "" }){
-  const uploaded = await uploadImage(file, { folder })
+export async function replaceImageAsset({
+  oldUrl = "",
+  file,
+  folder = "",
+  websiteId = "",
+  slot = "",
+  uploadContext = "website_template"
+}){
+  const uploaded = await uploadImage(file, {
+    folder,
+    websiteId,
+    slot,
+    uploadContext
+  })
 
   let deleteResult = { skipped: true, reason: "No previous file." }
 
@@ -341,7 +356,10 @@ export async function replaceTemplateImage({
   const { newUrl, deleteResult, objectKey } = await replaceImageAsset({
     oldUrl,
     file,
-    folder: `websites/${userId}`
+    folder: `websites/${userId}`,
+    websiteId,
+    slot,
+    uploadContext: "website_template"
   })
 
   const updatedImages = {
