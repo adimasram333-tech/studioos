@@ -149,6 +149,28 @@ function isMissingColumnError(error, columnName){
   )
 }
 
+async function fetchLatestWebsiteImageState({
+  supabase,
+  websiteId,
+  userId
+}){
+  const { data, error } = await supabase
+    .from("user_websites")
+    .select("template_images, template_image_keys")
+    .eq("id", websiteId)
+    .eq("user_id", userId)
+    .maybeSingle()
+
+  if(error){
+    throw error
+  }
+
+  return {
+    template_images: normalizeTemplateImagesData(data || {}),
+    template_image_keys: normalizeTemplateImageKeysData(data || {})
+  }
+}
+
 async function updateWebsiteTemplateImages({
   supabase,
   websiteId,
@@ -350,7 +372,22 @@ export async function replaceTemplateImage({
   if(!websiteId) throw new Error("Website id is required.")
   if(!slot) throw new Error("Image slot is required.")
 
-  const existingImages = normalizeTemplateImagesData(currentData)
+  let latestState = {
+    template_images: normalizeTemplateImagesData(currentData),
+    template_image_keys: normalizeTemplateImageKeysData(currentData)
+  }
+
+  try{
+    latestState = await fetchLatestWebsiteImageState({
+      supabase,
+      websiteId,
+      userId
+    })
+  }catch(error){
+    console.warn("Latest template image state fetch failed. Falling back to current page state:", error)
+  }
+
+  const existingImages = normalizeTemplateImagesData(latestState)
   const oldUrl = pickNonEmpty(existingImages[slot])
 
   const { newUrl, deleteResult, objectKey } = await replaceImageAsset({
@@ -362,15 +399,24 @@ export async function replaceTemplateImage({
     uploadContext: "website_template"
   })
 
+  // Merge into latest DB state, not stale page state.
+  // This prevents previously replaced slots from disappearing after refresh.
+  const latestAfterUpload = await fetchLatestWebsiteImageState({
+    supabase,
+    websiteId,
+    userId
+  }).catch(() => latestState)
+
+  const dbImagesBeforeUpdate = normalizeTemplateImagesData(latestAfterUpload)
+  const dbImageKeysBeforeUpdate = normalizeTemplateImageKeysData(latestAfterUpload)
+
   const updatedImages = {
-    ...existingImages,
+    ...dbImagesBeforeUpdate,
     [slot]: newUrl
   }
 
-  const existingImageKeys = normalizeTemplateImageKeysData(currentData)
-
   const updatedImageKeys = {
-    ...existingImageKeys,
+    ...dbImageKeysBeforeUpdate,
     [slot]: objectKey || extractObjectKeyFromUrl(newUrl)
   }
 
