@@ -528,6 +528,51 @@
       line-height:1.6;
     }
 
+    .checkout-summary-box{
+      margin-top:0.85rem;
+      display:grid;
+      gap:0.65rem;
+    }
+
+    .checkout-summary-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      padding:0.7rem 0;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      color:rgba(255,255,255,0.82);
+    }
+
+    .checkout-summary-row:last-child{
+      border-bottom:0;
+    }
+
+    .checkout-summary-row strong{
+      color:white;
+      font-weight:800;
+    }
+
+    .checkout-summary-total{
+      margin-top:0.25rem;
+      padding:0.9rem 1rem;
+      border-radius:1rem;
+      background:rgba(99,102,241,0.16);
+      border:1px solid rgba(99,102,241,0.28);
+    }
+
+    .checkout-summary-total span,
+    .checkout-summary-total strong{
+      color:white;
+    }
+
+    .checkout-summary-hint{
+      margin-top:0.8rem;
+      font-size:0.78rem;
+      line-height:1.5;
+      color:rgba(255,255,255,0.58);
+    }
+
     .page-overlay-actions{
       display:flex;
       gap:0.75rem;
@@ -1066,6 +1111,88 @@
       pageOverlayPrimaryBtn.onclick = null;
     }
 
+    function formatCurrency(value){
+      const number = Number(value || 0);
+
+      if(!Number.isFinite(number)){
+        return "₹0";
+      }
+
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        minimumFractionDigits: number % 1 === 0 ? 0 : 2,
+        maximumFractionDigits: 2
+      }).format(number);
+    }
+
+    function getCheckoutPlanTitle(plan, mode){
+      const planName = String(plan || "").charAt(0).toUpperCase() + String(plan || "").slice(1);
+      const cycleName = mode === "monthly" ? "1 Month" : "Yearly";
+      return `${planName} ${cycleName} Plan`;
+    }
+
+    function openCheckoutSummaryOverlay({
+      plan,
+      mode,
+      pricing,
+      onContinue,
+      onCancel
+    }){
+      const safePricing = pricing || {};
+      const baseAmount = Number(safePricing.base_amount_rupees || 0);
+      const gstRate = Number(safePricing.gst_rate || 0.18);
+      const gstAmount = Number(safePricing.gst_amount_rupees || 0);
+      const totalAmount = Number(safePricing.total_amount_rupees || 0);
+
+      pageOverlayBadge.textContent = "Checkout";
+      pageOverlayTitle.textContent = getCheckoutPlanTitle(plan, mode);
+
+      pageOverlayText.innerHTML = `
+        <div class="checkout-summary-box">
+          <div class="checkout-summary-row">
+            <span>Plan amount</span>
+            <strong>${formatCurrency(baseAmount)}</strong>
+          </div>
+
+          <div class="checkout-summary-row">
+            <span>GST (${Math.round(gstRate * 100)}%)</span>
+            <strong>${formatCurrency(gstAmount)}</strong>
+          </div>
+
+          <div class="checkout-summary-row checkout-summary-total">
+            <span>Payable today</span>
+            <strong>${formatCurrency(totalAmount)}</strong>
+          </div>
+        </div>
+
+        <div class="checkout-summary-hint">
+          You will continue to Razorpay secure checkout after confirming this amount.
+        </div>
+      `;
+
+      pageOverlay.classList.add("show");
+      pageOverlay.setAttribute("aria-hidden", "false");
+
+      pageOverlayActions.classList.remove("hidden");
+      pageOverlayPrimaryBtn.classList.remove("hidden");
+
+      pageOverlaySecondaryBtn.textContent = "Cancel";
+      pageOverlayPrimaryBtn.textContent = "Continue to Payment";
+
+      pageOverlaySecondaryBtn.onclick = () => {
+        if(typeof onCancel === "function"){
+          onCancel();
+        }
+      };
+
+      pageOverlayPrimaryBtn.onclick = () => {
+        if(typeof onContinue === "function"){
+          onContinue();
+        }
+      };
+    }
+
     async function fetchJsonWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS){
       const controller = new AbortController();
       const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
@@ -1288,8 +1415,6 @@
           throw new Error("Razorpay checkout failed to load.");
         }
 
-        closeOverlay();
-
         const options = {
           key: orderData.razorpay_key_id,
           amount: orderData.order.amount,
@@ -1393,7 +1518,21 @@
           showToast("error", paymentFailedMessage);
         });
 
-        rzp.open();
+        openCheckoutSummaryOverlay({
+          plan: selectedPlan,
+          mode: billingMode,
+          pricing: orderData?.pricing,
+          onContinue: () => {
+            closeOverlay();
+            rzp.open();
+          },
+          onCancel: () => {
+            checkoutInProgress = false;
+            setButtonBusy(false);
+            closeOverlay();
+            showToast("info", "Payment cancelled. No changes were made.");
+          }
+        });
       }catch(error){
         console.error("Unable to start subscription checkout:", error);
         checkoutInProgress = false;
