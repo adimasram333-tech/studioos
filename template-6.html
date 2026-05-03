@@ -1187,7 +1187,7 @@
     </footer>
   </div>
 
-  <div id="previewModal" class="preview-modal">
+  <div id="previewModal" class="preview-modal" aria-hidden="true">
     <div class="preview-inner">
       <button id="previewClose" class="preview-close" type="button" aria-label="Close preview">✕</button>
       <img id="previewImage" class="preview-image" alt="Preview" />
@@ -1722,32 +1722,47 @@
     function registerEditableImageSlots(){
       document.querySelectorAll(".editable-slot").forEach(slot=>{
         slot.addEventListener("click",event=>{
-          if(!editModeEnabled) return;
-          if(slot.dataset.imageSlot==="hero") return;
+          const slotName=slot.dataset.imageSlot||"";
+          if(!slotName) return;
+
+          // Hero is controlled from the hero section because its background layer
+          // intentionally uses pointer-events:none for layout safety.
+          if(slotName==="hero") return;
+
           event.preventDefault();
           event.stopPropagation();
-          pendingImageSlot=slot.dataset.imageSlot||"";
-          if(!pendingImageSlot) return;
-          imageFileInput.click();
+
+          if(editModeEnabled){
+            pendingImageSlot=slotName;
+            imageFileInput.click();
+            return;
+          }
+
+          const previewUrl=slot.dataset.previewUrl || getImageUrl(currentWebsite,slotName) || "";
+          openPreview(previewUrl);
         });
       });
     }
 
     function openPreview(url){
-      if(!url) return;
-      previewImage.src=url;
+      const safeUrl=String(url||"").trim();
+      if(!safeUrl) return;
+      previewImage.src=safeUrl;
       previewModal.classList.add("open");
+      previewModal.setAttribute("aria-hidden","false");
+      document.body.style.overflow="hidden";
+    }
+
+    function closePreview(){
+      previewModal.classList.remove("open");
+      previewModal.setAttribute("aria-hidden","true");
+      previewImage.removeAttribute("src");
+      document.body.style.overflow="";
     }
 
     function registerPreviewTiles(){
-      document.querySelectorAll(".gallery-tile,.collection-media").forEach(el=>{
-        el.addEventListener("click",event=>{
-          if(editModeEnabled) return;
-          event.preventDefault();
-          const url=el.dataset.previewUrl || "";
-          openPreview(url);
-        });
-      });
+      // Unified preview/edit behavior is handled by registerEditableImageSlots().
+      // Kept as a safe no-op so existing init order remains stable.
     }
 
     function registerHeroImageInteraction(){
@@ -1778,6 +1793,7 @@
         const heroUrl=heroImageSlot.dataset.previewUrl || heroSection.dataset.previewUrl || "";
         if(heroUrl){
           event.preventDefault();
+          event.stopPropagation();
           openPreview(heroUrl);
         }
       });
@@ -1789,8 +1805,13 @@
     });
 
     editModeToggle.addEventListener("click",()=>setEditMode(!editModeEnabled));
-    previewClose.addEventListener("click",()=>previewModal.classList.remove("open"));
-    previewModal.addEventListener("click",e=>{ if(e.target===previewModal) previewModal.classList.remove("open"); });
+    previewClose.addEventListener("click",closePreview);
+    previewModal.addEventListener("click",e=>{ if(e.target===previewModal) closePreview(); });
+    document.addEventListener("keydown",event=>{
+      if(event.key==="Escape" && previewModal.classList.contains("open")){
+        closePreview();
+      }
+    });
 
     async function initTemplate(){
       showLoading();
