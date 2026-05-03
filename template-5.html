@@ -1173,7 +1173,7 @@
     </footer>
   </div>
 
-  <div id="previewModal" class="preview-modal">
+  <div id="previewModal" class="preview-modal" aria-hidden="true">
     <div class="preview-inner">
       <button id="previewClose" class="preview-close" type="button" aria-label="Close preview">✕</button>
       <img id="previewImage" class="preview-image" alt="Preview" />
@@ -1690,72 +1690,68 @@
     function registerEditableImageSlots(){
       document.querySelectorAll(".editable-slot").forEach(slot=>{
         slot.addEventListener("click",event=>{
-          if(!editModeEnabled) return;
-          if(slot.dataset.imageSlot==="hero"){
-            const clickedEditableText=event.target.closest(".editable-text");
-            const clickedAction=event.target.closest("a,button,input,textarea");
-            const clickedHeroPanel=event.target.closest(".hero-panel");
-            if(clickedEditableText || clickedAction || clickedHeroPanel){
+          const slotName=slot.dataset.imageSlot||"";
+          if(!slotName) return;
+
+          const clickedEditableText=event.target.closest(".editable-text");
+          const clickedAction=event.target.closest("a,button,input,textarea,select,label");
+          const clickedHeroPanel=event.target.closest(".hero-panel");
+
+          if(editModeEnabled){
+            if(slotName==="hero" && (clickedEditableText || clickedAction || clickedHeroPanel)){
               return;
             }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            pendingImageSlot=slotName;
+            imageFileInput.click();
+            return;
           }
+
+          if(isNestedInteractiveClick(event,slot)){
+            return;
+          }
+
           event.preventDefault();
           event.stopPropagation();
-          pendingImageSlot=slot.dataset.imageSlot||"";
-          if(!pendingImageSlot) return;
-          imageFileInput.click();
+
+          const previewUrl=slot.dataset.previewUrl || getImageUrl(currentWebsite,slotName) || "";
+          openPreview(previewUrl);
         });
       });
     }
 
     function openPreview(url){
-      if(!url) return;
-      previewImage.src=url;
+      const safeUrl=String(url||"").trim();
+      if(!safeUrl) return;
+      previewImage.src=safeUrl;
       previewModal.classList.add("open");
+      previewModal.setAttribute("aria-hidden","false");
+      document.body.style.overflow="hidden";
+    }
+
+    function closePreview(){
+      previewModal.classList.remove("open");
+      previewModal.setAttribute("aria-hidden","true");
+      previewImage.removeAttribute("src");
+      document.body.style.overflow="";
+    }
+
+    function isNestedInteractiveClick(event, slot){
+      const interactive=event.target.closest("a,button,input,textarea,select,label");
+      return Boolean(interactive && interactive!==slot);
     }
 
     function registerPreviewTiles(){
-      document.querySelectorAll(".grid-tile,.collection-media").forEach(el=>{
-        el.addEventListener("click",event=>{
-          if(editModeEnabled) return;
-          event.preventDefault();
-          const url=el.dataset.previewUrl || "";
-          openPreview(url);
-        });
-      });
+      // Unified preview/edit behavior is handled by registerEditableImageSlots().
+      // Kept as a safe no-op so existing init order remains stable.
     }
 
     function registerHeroImageInteraction(){
-      const heroBanner=document.querySelector(".hero-banner");
-      const heroMedia=document.getElementById("heroImageSlot");
-      if(!heroBanner || !heroMedia) return;
-
-      heroBanner.addEventListener("click",event=>{
-        const clickedEditableText=event.target.closest(".editable-text");
-        const clickedAction=event.target.closest("a,button,input,textarea");
-        const clickedHeroPanel=event.target.closest(".hero-panel");
-
-        if(editModeEnabled){
-          if(clickedEditableText || clickedAction || clickedHeroPanel){
-            return;
-          }
-          event.preventDefault();
-          event.stopPropagation();
-          pendingImageSlot="hero";
-          imageFileInput.click();
-          return;
-        }
-
-        if(clickedAction){
-          return;
-        }
-
-        const heroUrl=heroMedia.dataset.previewUrl || "";
-        if(heroUrl){
-          event.preventDefault();
-          openPreview(heroUrl);
-        }
-      });
+      // Unified hero preview/edit behavior is handled by registerEditableImageSlots().
+      // Kept as a safe no-op so existing init order remains stable.
     }
 
     imageFileInput.addEventListener("change",async e=>{
@@ -1764,8 +1760,13 @@
     });
 
     editModeToggle.addEventListener("click",()=>setEditMode(!editModeEnabled));
-    previewClose.addEventListener("click",()=>previewModal.classList.remove("open"));
-    previewModal.addEventListener("click",e=>{ if(e.target===previewModal) previewModal.classList.remove("open"); });
+    previewClose.addEventListener("click",closePreview);
+    previewModal.addEventListener("click",e=>{ if(e.target===previewModal) closePreview(); });
+    document.addEventListener("keydown",event=>{
+      if(event.key==="Escape" && previewModal.classList.contains("open")){
+        closePreview();
+      }
+    });
 
     async function initTemplate(){
       showLoading();
