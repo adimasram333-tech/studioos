@@ -149,25 +149,203 @@ function isMissingColumnError(error, columnName){
   )
 }
 
+function isManagedTenantObjectKey(objectKey, userId = ""){
+  const key = normalizePath(objectKey)
+  const safeUserId = normalizePath(userId)
+
+  if(!key || !safeUserId) return false
+
+  return (
+    key.startsWith(`tenant/${safeUserId}/`) ||
+    key.startsWith(`websites/${safeUserId}/`)
+  )
+}
+
+function collectStringValuesDeep(value, result = []){
+  if(typeof value === "string"){
+    const safe = pickNonEmpty(value)
+    if(safe) result.push(safe)
+    return result
+  }
+
+  if(Array.isArray(value)){
+    value.forEach(item => collectStringValuesDeep(item, result))
+    return result
+  }
+
+  if(isPlainObject(value)){
+    Object.values(value).forEach(item => collectStringValuesDeep(item, result))
+  }
+
+  return result
+}
+
+function doesValueReferenceObject({ value, oldUrl = "", oldObjectKey = "" }){
+  const url = pickNonEmpty(oldUrl)
+  const key = normalizePath(oldObjectKey)
+  const values = collectStringValuesDeep(value)
+
+  return values.some(item => {
+    const safeItem = pickNonEmpty(item)
+    if(!safeItem) return false
+
+    if(url && safeItem === url) return true
+
+    if(key){
+      if(normalizePath(safeItem) === key) return true
+      if(safeItem.includes(key)) return true
+    }
+
+    return false
+  })
+}
+
+async function selectUserWebsiteImageRows(supabase, userId){
+  const fullSelect = await supabase
+    .from("user_websites")
+    .select("id, template_images, template_image_keys")
+    .eq("user_id", userId)
+
+  if(!fullSelect.error){
+    return Array.isArray(fullSelect.data) ? fullSelect.data : []
+  }
+
+  if(!isMissingColumnError(fullSelect.error, "template_image_keys")){
+    throw fullSelect.error
+  }
+
+  const fallbackSelect = await supabase
+    .from("user_websites")
+    .select("id, template_images")
+    .eq("user_id", userId)
+
+  if(fallbackSelect.error){
+    throw fallbackSelect.error
+  }
+
+  return Array.isArray(fallbackSelect.data) ? fallbackSelect.data : []
+}
+
+async function isTemplateImageStillReferenced({
+  supabase,
+  userId,
+  oldUrl = "",
+  oldObjectKey = ""
+}){
+  const url = pickNonEmpty(oldUrl)
+  const key = normalizePath(oldObjectKey)
+
+  if(!url && !key) return false
+
+  const rows = await selectUserWebsiteImageRows(supabase, userId)
+
+  return rows.some(row => {
+    return (
+      doesValueReferenceObject({
+        value: row?.template_images,
+        oldUrl: url,
+        oldObjectKey: key
+      }) ||
+      doesValueReferenceObject({
+        value: row?.template_image_keys,
+        oldUrl: url,
+        oldObjectKey: key
+      })
+    )
+  })
+}
+
+async function cleanupTemplateOldImageIfSafe({
+  supabase,
+  userId,
+  oldUrl = "",
+  oldObjectKey = ""
+}){
+  const objectKey = normalizePath(oldObjectKey || extractObjectKeyFromUrl(oldUrl))
+
+  if(!objectKey){
+    return { skipped: true, reason: "No old object key found." }
+  }
+
+  if(!isManagedTenantObjectKey(objectKey, userId)){
+    return { skipped: true, reason: "Old image is not a managed user S3 object.", objectKey }
+  }
+
+  let stillReferenced = true
+
+  try{
+    stillReferenced = await isTemplateImageStillReferenced({
+      supabase,
+      userId,
+      oldUrl,
+      oldObjectKey: objectKey
+    })
+  }catch(error){
+    console.warn("Old S3 cleanup reference check failed. Delete skipped:", error)
+    return {
+      skipped: true,
+      reason: error?.message || "Reference check failed.",
+      objectKey
+    }
+  }
+
+  if(stillReferenced){
+    return {
+      skipped: true,
+      reason: "Old image is still referenced by another website/template.",
+      objectKey
+    }
+  }
+
+  try{
+    return await deleteImageByUrl(oldUrl || objectKey)
+  }catch(error){
+    console.warn("Old S3 file cleanup skipped:", error)
+    return {
+      skipped: true,
+      reason: error?.message || "Delete skipped.",
+      objectKey
+    }
+  }
+}
+
 async function fetchLatestWebsiteImageState({
   supabase,
   websiteId,
   userId
 }){
-  const { data, error } = await supabase
+  const fullSelect = await supabase
     .from("user_websites")
     .select("template_images, template_image_keys")
     .eq("id", websiteId)
     .eq("user_id", userId)
     .maybeSingle()
 
-  if(error){
-    throw error
+  if(!fullSelect.error){
+    return {
+      template_images: normalizeTemplateImagesData(fullSelect.data || {}),
+      template_image_keys: normalizeTemplateImageKeysData(fullSelect.data || {})
+    }
+  }
+
+  if(!isMissingColumnError(fullSelect.error, "template_image_keys")){
+    throw fullSelect.error
+  }
+
+  const fallbackSelect = await supabase
+    .from("user_websites")
+    .select("template_images")
+    .eq("id", websiteId)
+    .eq("user_id", userId)
+    .maybeSingle()
+
+  if(fallbackSelect.error){
+    throw fallbackSelect.error
   }
 
   return {
-    template_images: normalizeTemplateImagesData(data || {}),
-    template_image_keys: normalizeTemplateImageKeysData(data || {})
+    template_images: normalizeTemplateImagesData(fallbackSelect.data || {}),
+    template_image_keys: {}
   }
 }
 
@@ -323,7 +501,8 @@ export async function replaceImageAsset({
   folder = "",
   websiteId = "",
   slot = "",
-  uploadContext = "website_template"
+  uploadContext = "website_template",
+  cleanupOld = true
 }){
   const uploaded = await uploadImage(file, {
     folder,
@@ -332,9 +511,9 @@ export async function replaceImageAsset({
     uploadContext
   })
 
-  let deleteResult = { skipped: true, reason: "No previous file." }
+  let deleteResult = { skipped: true, reason: "Old cleanup deferred or not requested." }
 
-  if(oldUrl){
+  if(cleanupOld && oldUrl){
     try{
       deleteResult = await deleteImageByUrl(oldUrl)
     }catch(error){
@@ -388,15 +567,18 @@ export async function replaceTemplateImage({
   }
 
   const existingImages = normalizeTemplateImagesData(latestState)
+  const existingImageKeys = normalizeTemplateImageKeysData(latestState)
   const oldUrl = pickNonEmpty(existingImages[slot])
+  const oldObjectKey = normalizePath(existingImageKeys[slot] || extractObjectKeyFromUrl(oldUrl))
 
-  const { newUrl, deleteResult, objectKey } = await replaceImageAsset({
+  const { newUrl, objectKey } = await replaceImageAsset({
     oldUrl,
     file,
     folder: `websites/${userId}`,
     websiteId,
     slot,
-    uploadContext: "website_template"
+    uploadContext: "website_template",
+    cleanupOld: false
   })
 
   // Merge into latest DB state, not stale page state.
@@ -431,6 +613,13 @@ export async function replaceTemplateImage({
   }catch(error){
     throw new Error(error?.message || "Failed to update template images.")
   }
+
+  const deleteResult = await cleanupTemplateOldImageIfSafe({
+    supabase,
+    userId,
+    oldUrl,
+    oldObjectKey
+  })
 
   return {
     slot,
