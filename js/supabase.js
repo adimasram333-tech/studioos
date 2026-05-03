@@ -326,6 +326,17 @@ return result
 window.requestS3UploadUrl = async function(payload = {}){
 
 const eventId = payload.event_id ?? payload.eventId
+const websiteId = payload.website_id ?? payload.websiteId
+const slot = payload.slot ?? payload.image_slot ?? payload.imageSlot
+const uploadContextRaw = payload.upload_context ?? payload.uploadContext
+const uploadContext = String(uploadContextRaw || "").trim().toLowerCase()
+
+const isWebsiteTemplateUpload =
+uploadContext === "website_template" ||
+uploadContext === "website" ||
+uploadContext === "template" ||
+uploadContext === "builder"
+
 const fileName = payload.file_name ?? payload.fileName
 const contentType = payload.content_type ?? payload.contentType
 
@@ -339,7 +350,13 @@ const originalSizeRaw =
 payload.original_file_size ??
 payload.originalFileSize
 
+if(isWebsiteTemplateUpload){
+if(!websiteId) throw new Error("website_id is required.")
+if(!slot) throw new Error("slot is required.")
+}else{
 if(!eventId) throw new Error("event_id is required.")
+}
+
 if(!fileName) throw new Error("file_name is required.")
 if(!contentType) throw new Error("content_type is required.")
 
@@ -357,10 +374,7 @@ throw new Error("original_file_size is required.")
 const normalizedStoredSize = Math.floor(storedFileSize)
 const normalizedOriginalSize = Math.floor(originalFileSize)
 
-const result = await callProtectedEdgeFunction(
-GENERATE_S3_UPLOAD_URL,
-{
-event_id: String(eventId),
+const requestPayload = {
 file_name: String(fileName),
 content_type: String(contentType),
 
@@ -371,10 +385,29 @@ original_file_size: normalizedOriginalSize,
 stored_file_size: normalizedStoredSize,
 
 // Backward-compatible aliases for any future helper/edge compatibility.
+fileName: String(fileName),
+contentType: String(contentType),
 fileSize: normalizedStoredSize,
 originalFileSize: normalizedOriginalSize,
 storedFileSize: normalizedStoredSize
 }
+
+if(isWebsiteTemplateUpload){
+requestPayload.upload_context = "website_template"
+requestPayload.uploadContext = "website_template"
+requestPayload.website_id = String(websiteId)
+requestPayload.websiteId = String(websiteId)
+requestPayload.slot = String(slot)
+requestPayload.image_slot = String(slot)
+requestPayload.imageSlot = String(slot)
+}else{
+requestPayload.event_id = String(eventId)
+requestPayload.eventId = String(eventId)
+}
+
+const result = await callProtectedEdgeFunction(
+GENERATE_S3_UPLOAD_URL,
+requestPayload
 )
 
 if(!result?.success || !result?.upload_url || !result?.object_key){
