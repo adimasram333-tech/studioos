@@ -1534,10 +1534,29 @@
 
     function getTemplateImages(website){return safeObject(website?.template_images)}
 
+    function sanitizeImageUrl(value){
+      const raw=String(value ?? "").trim();
+      if(!raw) return "";
+      const lower=raw.toLowerCase();
+      if(lower==="null" || lower==="undefined" || lower==="false" || lower==="nan") return "";
+      return raw;
+    }
+
     function getImageUrl(website,slotName){
       const images=getTemplateImages(website);
       const legacyField=LEGACY_IMAGE_FIELD_MAP[slotName];
-      return images[slotName] || (legacyField?website?.[legacyField]:"") || DEFAULT_IMAGES[slotName] || "";
+
+      return (
+        sanitizeImageUrl(images[slotName]) ||
+        (legacyField ? sanitizeImageUrl(website?.[legacyField]) : "") ||
+        sanitizeImageUrl(DEFAULT_IMAGES[slotName]) ||
+        ""
+      );
+    }
+
+    function hasCustomTemplateImage(website,slotName){
+      const images=getTemplateImages(website);
+      return Boolean(sanitizeImageUrl(images[slotName]));
     }
 
     function composeContent(website){
@@ -1688,53 +1707,45 @@
     
 function applyBWCondition(el, slot, website){
   if(!el) return;
-  if(website?.template_images && website.template_images[slot]){
+
+  if(hasCustomTemplateImage(website,slot)){
     el.classList.remove("filter-bw");
   }else{
     el.classList.add("filter-bw");
   }
 }
 
+function applyImageToSlot(elementId, slotName, website){
+  const el=document.getElementById(elementId);
+  if(!el) return;
+
+  const imageUrl=getImageUrl(website,slotName);
+
+  if(imageUrl){
+    el.style.backgroundImage=buildImageBackground(imageUrl);
+    el.dataset.previewUrl=imageUrl;
+  }else{
+    el.style.backgroundImage="";
+    delete el.dataset.previewUrl;
+  }
+
+  applyBWCondition(el,slotName,website);
+}
+
 function applyImages(website){
-      const heroImageSlotEl = document.getElementById("heroImageSlot");
-heroImageSlotEl.style.backgroundImage = buildImageBackground(getImageUrl(website,"hero"));
-applyBWCondition(heroImageSlotEl, "hero", website);
-      const portfolioTile1El = document.getElementById("portfolioTile1");
-portfolioTile1El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_1"));
-applyBWCondition(portfolioTile1El, "portfolio_1", website);
-      const portfolioTile2El = document.getElementById("portfolioTile2");
-portfolioTile2El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_2"));
-applyBWCondition(portfolioTile2El, "portfolio_2", website);
-      const portfolioTile3El = document.getElementById("portfolioTile3");
-portfolioTile3El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_3"));
-applyBWCondition(portfolioTile3El, "portfolio_3", website);
-      const portfolioTile4El = document.getElementById("portfolioTile4");
-portfolioTile4El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_4"));
-applyBWCondition(portfolioTile4El, "portfolio_4", website);
-      const portfolioTile5El = document.getElementById("portfolioTile5");
-portfolioTile5El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_5"));
-applyBWCondition(portfolioTile5El, "portfolio_5", website);
-      const portfolioTile6El = document.getElementById("portfolioTile6");
-portfolioTile6El.style.backgroundImage = buildImageBackground(getImageUrl(website,"portfolio_6"));
-applyBWCondition(portfolioTile6El, "portfolio_6", website);
-      const featuredTile1El = document.getElementById("featuredTile1");
-featuredTile1El.style.backgroundImage = buildImageBackground(getImageUrl(website,"featured_1"));
-applyBWCondition(featuredTile1El, "featured_1", website);
-      const featuredTile2El = document.getElementById("featuredTile2");
-featuredTile2El.style.backgroundImage = buildImageBackground(getImageUrl(website,"featured_2"));
-applyBWCondition(featuredTile2El, "featured_2", website);
-      const portfolioTile7El = document.getElementById("portfolioTile7");
-portfolioTile7El.style.backgroundImage = buildImageBackground(getImageUrl(website,"gallery_1"));
-applyBWCondition(portfolioTile7El, "gallery_1", website);
-      const portfolioTile8El = document.getElementById("portfolioTile8");
-portfolioTile8El.style.backgroundImage = buildImageBackground(getImageUrl(website,"gallery_2"));
-applyBWCondition(portfolioTile8El, "gallery_2", website);
-      const portfolioTile9El = document.getElementById("portfolioTile9");
-portfolioTile9El.style.backgroundImage = buildImageBackground(getImageUrl(website,"gallery_3"));
-applyBWCondition(portfolioTile9El, "gallery_3", website);
-      const pricingBgSlotEl = document.getElementById("pricingBgSlot");
-pricingBgSlotEl.style.backgroundImage = buildImageBackground(getImageUrl(website,"pricing_bg"));
-applyBWCondition(pricingBgSlotEl, "pricing_bg", website);
+      applyImageToSlot("heroImageSlot","hero",website);
+      applyImageToSlot("portfolioTile1","portfolio_1",website);
+      applyImageToSlot("portfolioTile2","portfolio_2",website);
+      applyImageToSlot("portfolioTile3","portfolio_3",website);
+      applyImageToSlot("portfolioTile4","portfolio_4",website);
+      applyImageToSlot("portfolioTile5","portfolio_5",website);
+      applyImageToSlot("portfolioTile6","portfolio_6",website);
+      applyImageToSlot("featuredTile1","featured_1",website);
+      applyImageToSlot("featuredTile2","featured_2",website);
+      applyImageToSlot("portfolioTile7","gallery_1",website);
+      applyImageToSlot("portfolioTile8","gallery_2",website);
+      applyImageToSlot("portfolioTile9","gallery_3",website);
+      applyImageToSlot("pricingBgSlot","pricing_bg",website);
     }
 
     function applyWebsiteData(website){
