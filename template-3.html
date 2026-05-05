@@ -221,6 +221,7 @@
       cursor:pointer;
       border-radius:10px;
       transition:box-shadow .2s ease, background .2s ease;
+      z-index:5;
     }
 
     .editable-text.edit-active:hover{
@@ -244,6 +245,7 @@
       z-index:2;
       text-align:center;
       padding:16px;
+      pointer-events:none;
     }
 
     .editable-slot.edit-active .edit-overlay{display:flex}
@@ -1947,6 +1949,12 @@
         slot.addEventListener("click", event => {
           const slotName = slot.dataset.imageSlot || "";
           if (!slotName) return;
+
+          // Text inside image sections must remain editable in edit mode.
+          // Do not convert editable text clicks into image replacement clicks.
+          if (editModeEnabled && event.target.closest(".editable-text")) {
+            return;
+          }
 
           event.preventDefault();
           event.stopPropagation();
