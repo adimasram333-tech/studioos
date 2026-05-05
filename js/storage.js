@@ -614,12 +614,17 @@ export async function replaceTemplateImage({
     throw new Error(error?.message || "Failed to update template images.")
   }
 
-  const deleteResult = await cleanupTemplateOldImageIfSafe({
-    supabase,
-    userId,
+  // Production safety:
+  // Do NOT delete old website-template images from the user-facing replace flow.
+  // Even with reference checks, shared/cached/mismatched URL-key states can cause
+  // cross-template image loss. Template image cleanup must be handled by a
+  // backend/admin garbage-collection job after DB reference verification.
+  const deleteResult = {
+    skipped: true,
+    reason: "Template image cleanup deferred to backend garbage collection.",
     oldUrl,
     oldObjectKey
-  })
+  }
 
   return {
     slot,
