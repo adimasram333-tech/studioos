@@ -1580,7 +1580,7 @@
         return query.eq("is_published",true);
       }
 
-      let exactQuery=applyAccessScope(
+      const exactQuery=applyAccessScope(
         supabase
           .from("user_websites")
           .select("*")
@@ -1590,24 +1590,15 @@
           .limit(1)
       );
 
-      let {data:exactData,error:exactError}=await exactQuery.maybeSingle();
-      if(exactError) throw exactError;
-      if(exactData) return exactData;
+      const {data,error}=await exactQuery.maybeSingle();
 
-      let fallbackQuery=applyAccessScope(
-        supabase
-          .from("user_websites")
-          .select("*")
-          .eq("site_slug",slug)
-          .order("updated_at",{ascending:false})
-          .limit(1)
-      );
+      if(error) throw error;
 
-      let {data:fallbackData,error:fallbackError}=await fallbackQuery.maybeSingle();
-      if(fallbackError) throw fallbackError;
-      if(fallbackData) return {...fallbackData, template_id:6};
-
-      return null;
+      // Production safety:
+      // Never fallback to another template row. Each template page must load only
+      // its own template_id row, otherwise images/content from one template can
+      // appear missing or mixed after another template is updated.
+      return data || null;
     }
 
     function canCurrentUserEdit(website){
