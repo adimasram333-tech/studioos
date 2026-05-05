@@ -1445,6 +1445,7 @@ let selectedTemplateId = 1
 let existingWebsiteRowId = null
 let currentWebsiteData = null
 let currentPurchasedTemplates = []
+let websiteRowsByTemplate = new Map()
 let pendingLockedAction = null
 let pendingTemplateCheckout = null
 let purchaseFlowInProgress = false
@@ -1542,6 +1543,81 @@ purchaseModalFeedback.innerText = ""
 
 function normalizeInstagram(value){
 return String(value || "").trim()
+}
+
+function isPlainObject(value){
+return Boolean(value && typeof value === "object" && !Array.isArray(value))
+}
+
+function safeObject(value){
+return isPlainObject(value) ? value : {}
+}
+
+function getNormalizedTemplateId(templateId){
+const numericTemplateId = Number(templateId)
+return Number.isInteger(numericTemplateId) && numericTemplateId >= 1 && numericTemplateId <= 6 ? numericTemplateId : 1
+}
+
+function getTemplateRow(templateId = selectedTemplateId){
+return websiteRowsByTemplate.get(getNormalizedTemplateId(templateId)) || null
+}
+
+function setTemplateRow(row){
+if(!row) return
+const templateId = getNormalizedTemplateId(row.template_id || selectedTemplateId)
+websiteRowsByTemplate.set(templateId, row)
+}
+
+function mergePurchasedTemplatesFromRows(rows = []){
+const purchasedSet = new Set()
+
+for(const row of rows){
+normalizePurchasedTemplates(row?.purchased_templates).forEach(templateId => purchasedSet.add(templateId))
+}
+
+return Array.from(purchasedSet).sort((a,b)=>a-b)
+}
+
+function getCurrentSelectedTemplateRowOrDraft(){
+const selectedRow = getTemplateRow(selectedTemplateId)
+if(selectedRow) return selectedRow
+
+return {
+...(currentWebsiteData || {}),
+id: null,
+template_id: selectedTemplateId,
+template_images: {},
+template_image_keys: {},
+template_content: {},
+theme_settings: {},
+is_published: false
+}
+}
+
+function bindCurrentTemplateRow(){
+const selectedRow = getTemplateRow(selectedTemplateId)
+
+if(selectedRow){
+existingWebsiteRowId = selectedRow.id || null
+currentWebsiteData = selectedRow
+currentPurchasedTemplates = normalizePurchasedTemplates(selectedRow.purchased_templates || currentPurchasedTemplates)
+return
+}
+
+existingWebsiteRowId = null
+
+if(currentWebsiteData){
+currentWebsiteData = {
+...currentWebsiteData,
+id: null,
+template_id: selectedTemplateId,
+template_images: {},
+template_image_keys: {},
+template_content: {},
+theme_settings: {},
+is_published: false
+}
+}
 }
 
 function slugify(value){
@@ -1803,7 +1879,7 @@ return user
 
 function setSelectedTemplate(templateId){
 
-selectedTemplateId = Number(templateId)
+selectedTemplateId = getNormalizedTemplateId(templateId)
 
 templateCards.forEach(card=>{
 card.classList.toggle("active", Number(card.dataset.template) === selectedTemplateId)
@@ -1812,6 +1888,7 @@ card.classList.toggle("active", Number(card.dataset.template) === selectedTempla
 selectedTemplateText.innerText = `Selected: Template ${selectedTemplateId}`
 previewTemplateLabel.innerText = getTemplateLabel(selectedTemplateId)
 
+bindCurrentTemplateRow()
 updatePublishUiFromCurrentState()
 updateStaticPreview()
 
@@ -1875,8 +1952,6 @@ await supabase
 .select("*")
 .eq("user_id", user.id)
 .order("updated_at", { ascending:false })
-.limit(1)
-.maybeSingle()
 
 if(error){
 console.error("Website builder load failed:", error)
@@ -1885,10 +1960,21 @@ setSaveFeedback("error", "Unable to load saved website details.")
 return null
 }
 
-if(!data){
+const websiteRows = Array.isArray(data) ? data : []
+websiteRowsByTemplate = new Map()
+
+websiteRows.forEach(row=>{
+const templateId = getNormalizedTemplateId(row?.template_id)
+if(!websiteRowsByTemplate.has(templateId)){
+websiteRowsByTemplate.set(templateId, row)
+}
+})
+
+if(!websiteRows.length){
 existingWebsiteRowId = null
 currentWebsiteData = null
 currentPurchasedTemplates = []
+websiteRowsByTemplate = new Map()
 setPublishToggleState(false)
 builderStatus.innerText = "New website setup"
 setSaveFeedback("info", "Fill in your details and save your website builder.")
@@ -1896,27 +1982,36 @@ syncLivePreview()
 return null
 }
 
-existingWebsiteRowId = data.id || null
-currentWebsiteData = data || null
-currentPurchasedTemplates = normalizePurchasedTemplates(data.purchased_templates)
+currentPurchasedTemplates = mergePurchasedTemplatesFromRows(websiteRows)
 
-siteNameInput.value = data.name || ""
-siteTaglineInput.value = data.tagline || ""
-siteAboutInput.value = data.about || ""
-sitePhoneInput.value = data.phone || ""
-siteInstagramInput.value = data.instagram || ""
-siteCityInput.value = data.city || ""
-siteSlugInput.value = data.site_slug || ""
-siteSlugInput.dataset.userEdited = data.site_slug ? "true" : ""
+const latestWebsiteRow = websiteRows[0]
+const selectedRowForLoad = preserveSelectedTemplate
+? (getTemplateRow(activeTemplateBeforeLoad) || latestWebsiteRow)
+: latestWebsiteRow
 
-const nextTemplateId = preserveSelectedTemplate ? activeTemplateBeforeLoad : (data.template_id || 1)
+currentWebsiteData = selectedRowForLoad || null
+existingWebsiteRowId = selectedRowForLoad?.id || null
+
+siteNameInput.value = selectedRowForLoad?.name || ""
+siteTaglineInput.value = selectedRowForLoad?.tagline || ""
+siteAboutInput.value = selectedRowForLoad?.about || ""
+sitePhoneInput.value = selectedRowForLoad?.phone || ""
+siteInstagramInput.value = selectedRowForLoad?.instagram || ""
+siteCityInput.value = selectedRowForLoad?.city || ""
+siteSlugInput.value = selectedRowForLoad?.site_slug || ""
+siteSlugInput.dataset.userEdited = selectedRowForLoad?.site_slug ? "true" : ""
+
+const nextTemplateId = preserveSelectedTemplate
+? activeTemplateBeforeLoad
+: getNormalizedTemplateId(selectedRowForLoad?.template_id || 1)
+
 setSelectedTemplate(nextTemplateId)
 syncLivePreview()
 
 builderStatus.innerText = "Existing website loaded"
 setSaveFeedback("success", "Saved website details loaded successfully.")
 
-return data
+return currentWebsiteData
 
 }
 
@@ -1942,6 +2037,9 @@ setSaveFeedback("error", "User session not found. Please login again.")
 return { ok:false }
 }
 
+const selectedTemplateRow = getTemplateRow(selectedTemplateId)
+const rowSource = selectedTemplateRow || getCurrentSelectedTemplateRowOrDraft()
+
 const payload = {
 user_id: user.id,
 template_id: selectedTemplateId,
@@ -1952,14 +2050,15 @@ about: siteAboutInput.value.trim(),
 phone: sitePhoneInput.value.trim(),
 instagram: normalizeInstagram(siteInstagramInput.value),
 city: siteCityInput.value.trim(),
-email: currentWebsiteData?.email || null,
-youtube: currentWebsiteData?.youtube || null,
-whatsapp: currentWebsiteData?.whatsapp || null,
-template_content: currentWebsiteData?.template_content || {},
-template_images: currentWebsiteData?.template_images || {},
-theme_settings: currentWebsiteData?.theme_settings || {},
+email: rowSource?.email || currentWebsiteData?.email || null,
+youtube: rowSource?.youtube || currentWebsiteData?.youtube || null,
+whatsapp: rowSource?.whatsapp || currentWebsiteData?.whatsapp || null,
+template_content: safeObject(rowSource?.template_content),
+template_images: safeObject(rowSource?.template_images),
+template_image_keys: safeObject(rowSource?.template_image_keys),
+theme_settings: safeObject(rowSource?.theme_settings),
 purchased_templates: currentPurchasedTemplates,
-is_published: canPublishSelectedTemplate(selectedTemplateId) ? Boolean(currentWebsiteData?.is_published) : false
+is_published: canPublishSelectedTemplate(selectedTemplateId) ? Boolean(rowSource?.is_published) : false
 }
 
 if(!payload.name){
@@ -1990,11 +2089,11 @@ setSaveFeedback("info", "Saving website builder details...")
 
 let query
 
-if(existingWebsiteRowId){
+if(selectedTemplateRow?.id){
 query = supabase
 .from("user_websites")
 .update(payload)
-.eq("id", existingWebsiteRowId)
+.eq("id", selectedTemplateRow.id)
 .eq("user_id", user.id)
 .select("*")
 .single()
@@ -2030,7 +2129,8 @@ return { ok:false }
 
 existingWebsiteRowId = data?.id || existingWebsiteRowId
 currentWebsiteData = data || currentWebsiteData
-currentPurchasedTemplates = normalizePurchasedTemplates(currentWebsiteData?.purchased_templates)
+setTemplateRow(currentWebsiteData)
+currentPurchasedTemplates = normalizePurchasedTemplates(currentWebsiteData?.purchased_templates || currentPurchasedTemplates)
 updatePublishUiFromCurrentState()
 
 builderStatus.innerText = "Saved successfully"
