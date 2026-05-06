@@ -452,6 +452,127 @@ console.warn("Session token unavailable for face search:", err)
 return null
 }
 
+
+// =============================
+// FREE PLAN AI FACE SEARCH GATE
+// =============================
+
+const FACE_SEARCH_PLAN_CACHE_TTL_MS = 60000
+const faceSearchPlanCache = new Map()
+
+function normalizePlanValue(value){
+return String(value || "").trim().toLowerCase()
+}
+
+function isActivePaidFaceSearchPlan(settings){
+if(!settings) return false
+
+const plan = normalizePlanValue(settings.plan)
+const status = normalizePlanValue(settings.subscription_status)
+const isPaid = settings.is_paid === true
+const expiresAt = settings.plan_expires_at ? new Date(settings.plan_expires_at).getTime() : 0
+const hasValidExpiry = Number.isFinite(expiresAt) && expiresAt > Date.now()
+
+return isPaid && status === "active" && hasValidExpiry && (plan === "basic" || plan === "pro")
+}
+
+async function getFaceSearchEventOwnerId(eventId){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId) return ""
+
+try{
+const supabase = await window.getSupabase()
+if(!supabase) return ""
+
+const { data, error } = await supabase
+.from("events")
+.select("id,user_id")
+.eq("id", safeEventId)
+.maybeSingle()
+
+if(error){
+console.error("Face search event owner check failed:", error)
+return ""
+}
+
+return data?.user_id || ""
+}catch(err){
+console.error("Face search event owner check error:", err)
+return ""
+}
+}
+
+async function canUseFaceSearchForEvent(eventId){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId) return false
+
+const cached = faceSearchPlanCache.get(safeEventId)
+if(cached && cached.expiresAt > Date.now()){
+return cached.allowed
+}
+
+try{
+const supabase = await window.getSupabase()
+if(!supabase) return false
+
+const ownerId = await getFaceSearchEventOwnerId(safeEventId)
+if(!ownerId) return false
+
+const { data: settings, error: settingsError } = await supabase
+.from("photographer_settings")
+.select("plan, subscription_status, is_paid, plan_expires_at")
+.eq("user_id", ownerId)
+.maybeSingle()
+
+if(settingsError){
+console.error("Face search plan check failed:", settingsError)
+return false
+}
+
+let allowed = isActivePaidFaceSearchPlan(settings)
+
+if(!allowed){
+const { data: firstEvent, error: firstEventError } = await supabase
+.from("events")
+.select("id")
+.eq("user_id", ownerId)
+.order("id", { ascending:true })
+.limit(1)
+.maybeSingle()
+
+if(firstEventError){
+console.error("Free face search event limit check failed:", firstEventError)
+return false
+}
+
+allowed = String(firstEvent?.id || "") === safeEventId
+}
+
+faceSearchPlanCache.set(safeEventId, {
+allowed,
+expiresAt: Date.now() + FACE_SEARCH_PLAN_CACHE_TTL_MS
+})
+
+return allowed
+}catch(err){
+console.error("Face search access check error:", err)
+return false
+}
+}
+
+async function guardFaceSearchAccess(eventId){
+const allowed = await canUseFaceSearchForEvent(eventId)
+
+if(!allowed){
+setAIScanVisualState("ai-failed", "AI Face Search limit reached")
+setBusyState(false, "Limit Reached")
+alert("AI Face Search is limited to 1 event on the Free plan. Please upgrade to use AI Face Search on more events.")
+return false
+}
+
+return true
+}
+
 async function startCamera(){
 
 try{
@@ -459,6 +580,11 @@ try{
 const eventId = getEventId()
 if(!eventId){
 alert("Invalid event access")
+return
+}
+
+const faceSearchAllowed = await guardFaceSearchAccess(eventId)
+if(!faceSearchAllowed){
 return
 }
 
@@ -622,6 +748,11 @@ if(!eventId){
 setBusyState(false, "Invalid Event")
 alert("Invalid event access")
 window.location.href = "access.html"
+return
+}
+
+const faceSearchAllowed = await guardFaceSearchAccess(eventId)
+if(!faceSearchAllowed){
 return
 }
 
