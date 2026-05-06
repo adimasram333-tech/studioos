@@ -15,45 +15,20 @@ alert("Unable to verify gallery access. Please try again.")
 return
 }
 
-const allowed = await guardPublicGalleryFeature(eventId)
+const allowed = await guardPublicGalleryFeature(eventId, "sharing")
 if(!allowed) return
 
-const supabase = await window.getSupabase()
+if(typeof window.ensurePublicShareToken !== "function"){
+console.error("Public share token helper missing")
+alert("Unable to generate token. Please try again.")
+return
+}
 
-// =============================
-// ✅ STEP 1: GET EXISTING TOKEN (NO DUPLICATE)
-// =============================
+const token = await window.ensurePublicShareToken(eventId)
 
-let { data, error } = await supabase
-.from("event_tokens")
-.select("*")
-.eq("event_id", eventId)
-.limit(1)
-.single()
-
-let token = null
-
-// =============================
-// ✅ STEP 2: IF EXISTS → USE SAME TOKEN
-// =============================
-
-if(data && data.token){
-token = data.token
-}else{
-
-// =============================
-// 🔥 STEP 3: CREATE NEW TOKEN (ONLY ONCE)
-// =============================
-
-const newToken = Math.random().toString(36).substring(2,8).toUpperCase()
-
-const { data: inserted, error: insertError } = await supabase
-.from("event_tokens")
-.insert([{ event_id:eventId, token:newToken }])
-.select()
-.single()
-
-token = inserted?.token || newToken
+if(!token){
+alert("Unable to generate token. Please try again.")
+return
 }
 
 // =============================
