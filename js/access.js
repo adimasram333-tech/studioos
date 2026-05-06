@@ -113,19 +113,37 @@ async function initAccess() {
       ? new Date(settings.plan_expires_at).getTime()
       : 0;
 
-    const isAllowed =
+    const isPaidPlanAllowed =
       isPaid &&
       subscriptionStatus === "active" &&
       (plan === "basic" || plan === "pro") &&
       Number.isFinite(planExpiresAt) &&
       planExpiresAt > Date.now();
 
-    if (!isAllowed) {
-      alert("This gallery is not available for public access. Please contact the photographer.");
+    if (isPaidPlanAllowed) {
+      return true;
+    }
+
+    const { data: firstSharedToken, error: freeShareError } = await supabase
+      .from("event_tokens")
+      .select("event_id, created_at, events!inner(user_id)")
+      .eq("events.user_id", data.user_id)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (freeShareError) {
+      console.error("Free gallery share validation failed:", freeShareError);
+      alert("Unable to verify gallery access. Please try again.");
       return false;
     }
 
-    return true;
+    if (firstSharedToken?.event_id && String(firstSharedToken.event_id) === String(eventId)) {
+      return true;
+    }
+
+    alert("This gallery is not available for public access. Please contact the photographer.");
+    return false;
   }
 
   let currentPhone = null;
