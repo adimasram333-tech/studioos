@@ -31,6 +31,8 @@ return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
 
 const PUBLIC_GALLERY_PLAN_CACHE_TTL_MS = 60000
 const publicGalleryPlanCache = new Map()
+const PUBLIC_GALLERY_FREE_SHARE_LIMIT = 1
+const PUBLIC_GALLERY_ALLOWED_FEATURES_FOR_FREE = new Set(["sharing", "face_search"])
 const EVENT_PHOTO_PRICE_CACHE = new Map()
 const GALLERY_MIN_PHOTO_SELLING_PRICE = 49
 
@@ -50,6 +52,148 @@ const hasValidExpiry = Number.isFinite(expiresAt) && expiresAt > Date.now()
 return isPaid && status === "active" && hasValidExpiry && (plan === "basic" || plan === "pro")
 }
 
+
+function isFreeOrTrialPublicGalleryPlan(settings){
+if(!settings) return true
+
+const plan = normalizePlanValue(settings.plan)
+const status = normalizePlanValue(settings.subscription_status)
+const isPaid = settings.is_paid === true
+const expiresAt = settings.plan_expires_at ? new Date(settings.plan_expires_at).getTime() : 0
+const hasValidExpiry = Number.isFinite(expiresAt) && expiresAt > Date.now()
+
+if(isPaid && status === "active" && hasValidExpiry && (plan === "basic" || plan === "pro")){
+return false
+}
+
+return true
+}
+
+function generatePublicShareToken(){
+return Math.random().toString(36).substring(2,8).toUpperCase()
+}
+
+async function getExistingPublicShareToken(eventId){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId) return null
+
+try{
+const supabase = await window.getSupabase()
+if(!supabase) return null
+
+const { data, error } = await supabase
+.from("event_tokens")
+.select("token")
+.eq("event_id", safeEventId)
+.order("created_at", { ascending: true })
+.limit(1)
+.maybeSingle()
+
+if(error){
+console.error("Public share token lookup failed:", error)
+return null
+}
+
+return data?.token || null
+}catch(err){
+console.error("Public share token lookup error:", err)
+return null
+}
+}
+
+async function countOwnerPublicSharedEvents(ownerId){
+const safeOwnerId = String(ownerId || "").trim()
+if(!safeOwnerId) return 0
+
+try{
+const supabase = await window.getSupabase()
+if(!supabase) return PUBLIC_GALLERY_FREE_SHARE_LIMIT
+
+const { count, error } = await supabase
+.from("event_tokens")
+.select("event_id, events!inner(user_id)", { count: "exact", head: true })
+.eq("events.user_id", safeOwnerId)
+
+if(error){
+console.error("Free public share usage count failed:", error)
+return PUBLIC_GALLERY_FREE_SHARE_LIMIT
+}
+
+return Math.max(0, Number(count || 0))
+}catch(err){
+console.error("Free public share usage count error:", err)
+return PUBLIC_GALLERY_FREE_SHARE_LIMIT
+}
+}
+
+async function ensurePublicShareToken(eventId){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId) return null
+
+const existingToken = await getExistingPublicShareToken(safeEventId)
+if(existingToken) return existingToken
+
+try{
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!supabase || !user){
+return null
+}
+
+const { data: ev, error: eventError } = await supabase
+.from("events")
+.select("id,user_id")
+.eq("id", safeEventId)
+.eq("user_id", user.id)
+.maybeSingle()
+
+if(eventError || !ev){
+console.error("Public share token event validation failed:", eventError)
+return null
+}
+
+const newToken = generatePublicShareToken()
+const { data: inserted, error: insertError } = await supabase
+.from("event_tokens")
+.insert([{ event_id: safeEventId, token: newToken }])
+.select("token")
+.limit(1)
+.maybeSingle()
+
+if(insertError){
+const retryToken = await getExistingPublicShareToken(safeEventId)
+if(retryToken) return retryToken
+console.error("Public share token create failed:", insertError)
+return null
+}
+
+return inserted?.token || newToken
+}catch(err){
+console.error("Public share token create error:", err)
+return null
+}
+}
+
+async function canUseFreeLimitedGalleryFeature(eventId, ownerId){
+const safeEventId = String(eventId || "").trim()
+const safeOwnerId = String(ownerId || "").trim()
+
+if(!safeEventId || !safeOwnerId){
+return false
+}
+
+const currentEventToken = await getExistingPublicShareToken(safeEventId)
+if(currentEventToken){
+return true
+}
+
+const usedCount = await countOwnerPublicSharedEvents(safeOwnerId)
+return usedCount < PUBLIC_GALLERY_FREE_SHARE_LIMIT
+}
+
+window.ensurePublicShareToken = ensurePublicShareToken
+
 function closeFloatingMenu(){
 const existingMenu = document.getElementById("floatingMenu")
 if(existingMenu){
@@ -58,9 +202,9 @@ existingMenu.remove()
 activeMenu = null
 }
 
-function showPublicGalleryUpgradeMessage(){
+function showPublicGalleryUpgradeMessage(message = "Free plan includes limited Gallery Sharing and limited AI Face Search for 1 event. Upgrade to Basic or Pro for full access."){
 const shouldOpenSubscription = confirm(
-"Gallery sharing, QR, client tokens, guest access and guest free downloads are available only on Basic and Pro plans.\n\nDo you want to open the subscription page now?"
+`${message}\n\nDo you want to open the subscription page now?`
 )
 
 if(shouldOpenSubscription){
@@ -99,7 +243,8 @@ return ""
 }
 }
 
-async function canUsePublicGalleryFeatures(eventId){
+async function canUsePublicGalleryFeatures(eventId, feature = "sharing"){
+const safeFeature = String(feature || "sharing").trim().toLowerCase()
 const ownerId = await getEventOwnerIdForGate(eventId)
 
 if(!ownerId){
@@ -107,10 +252,11 @@ return false
 }
 
 const cached = publicGalleryPlanCache.get(ownerId)
-if(cached && cached.expiresAt > Date.now()){
-return cached.allowed
-}
+let settings = null
 
+if(cached && cached.expiresAt > Date.now()){
+settings = cached.settings || null
+}else{
 try{
 const supabase = await window.getSupabase()
 
@@ -129,26 +275,46 @@ console.error("Public gallery plan check failed:", error)
 return false
 }
 
-const allowed = isActivePaidPublicGalleryPlan(data)
+settings = data || null
 
 publicGalleryPlanCache.set(ownerId, {
-allowed,
+settings,
 expiresAt: Date.now() + PUBLIC_GALLERY_PLAN_CACHE_TTL_MS
 })
-
-return allowed
 }catch(err){
 console.error("Public gallery plan check error:", err)
 return false
 }
 }
 
-async function guardPublicGalleryFeature(eventId){
-const allowed = await canUsePublicGalleryFeatures(eventId)
+if(isActivePaidPublicGalleryPlan(settings)){
+return true
+}
+
+if(!PUBLIC_GALLERY_ALLOWED_FEATURES_FOR_FREE.has(safeFeature)){
+return false
+}
+
+if(!isFreeOrTrialPublicGalleryPlan(settings)){
+return false
+}
+
+return await canUseFreeLimitedGalleryFeature(eventId, ownerId)
+}
+
+async function guardPublicGalleryFeature(eventId, feature = "sharing"){
+const safeFeature = String(feature || "sharing").trim().toLowerCase()
+const allowed = await canUsePublicGalleryFeatures(eventId, safeFeature)
 
 if(!allowed){
 closeFloatingMenu()
-showPublicGalleryUpgradeMessage()
+
+if(PUBLIC_GALLERY_ALLOWED_FEATURES_FOR_FREE.has(safeFeature)){
+showPublicGalleryUpgradeMessage("Free plan allows this feature for only 1 event. Upgrade to Basic or Pro for full access.")
+}else{
+showPublicGalleryUpgradeMessage("This feature is available only on Basic and Pro plans.")
+}
+
 return false
 }
 
@@ -344,7 +510,7 @@ alert("Failed to save price")
 }
 
 window.openPhotoPriceModal = async function(eventId){
-const allowed = await guardPublicGalleryFeature(eventId)
+const allowed = await guardPublicGalleryFeature(eventId, "paid")
 if(!allowed) return
 
 closeFloatingMenu()
@@ -568,8 +734,14 @@ alert("Failed to open event")
 }
 
 window.shareEvent = async function(id){
-const allowed = await guardPublicGalleryFeature(id)
+const allowed = await guardPublicGalleryFeature(id, "sharing")
 if(!allowed) return
+
+const token = await ensurePublicShareToken(id)
+if(!token){
+alert("Unable to enable public sharing. Please try again.")
+return
+}
 
 const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
 navigator.clipboard.writeText(link)
@@ -582,33 +754,14 @@ alert("Link copied")
 
 window.showToken = async function(id){
 
-const allowed = await guardPublicGalleryFeature(id)
+const allowed = await guardPublicGalleryFeature(id, "sharing")
 if(!allowed) return
 
-const supabase = await window.getSupabase()
+const token = await ensurePublicShareToken(id)
 
-let { data } = await supabase
-.from("event_tokens")
-.select("*")
-.eq("event_id", id)
-.order("created_at",{ ascending:true })
-.limit(1)
-
-let token = null
-
-if(data && data.length > 0){
-token = data[0].token
-}else{
-
-const newToken = Math.random().toString(36).substring(2,8).toUpperCase()
-
-const { data: inserted } = await supabase
-.from("event_tokens")
-.insert([{ event_id:id, token:newToken }])
-.select()
-.limit(1)
-
-token = inserted?.[0]?.token || newToken
+if(!token){
+alert("Unable to generate token. Please try again.")
+return
 }
 
 alert("Token: " + token)
@@ -621,7 +774,7 @@ alert("Token: " + token)
 
 window.toggleGuestFreeDownload = async function(id, currentValue = false){
 
-const allowed = await guardPublicGalleryFeature(id)
+const allowed = await guardPublicGalleryFeature(id, "paid")
 if(!allowed) return
 
 const nextValue = !currentValue
@@ -751,8 +904,14 @@ alert("Delete failed")
 
 window.showQR = async function(id){
 
-const allowed = await guardPublicGalleryFeature(id)
+const allowed = await guardPublicGalleryFeature(id, "sharing")
 if(!allowed) return
+
+const token = await ensurePublicShareToken(id)
+if(!token){
+alert("Unable to enable public sharing. Please try again.")
+return
+}
 
 const existingMenu = document.getElementById("floatingMenu")
 if(existingMenu) existingMenu.remove()
@@ -1125,7 +1284,7 @@ return false
 }
 }
 
-if(effectiveRole === "client" && faceFilterActive){
+if((effectiveRole === "client" || effectiveRole === "photographer") && faceFilterActive){
 if(!isMatchedImage(cleanOriginalUrl, matchedImages)){
 return false
 }
@@ -1395,9 +1554,10 @@ return `
 `
 }
 
-function getClientFaceScanUrl(eventId){
+function getFaceScanUrl(eventId, role = "client"){
+const safeRole = role === "photographer" ? "photographer" : "client"
 const redirectUrl = `${window.location.origin}/studioos/gallery.html?event_id=${eventId}`
-return `face-capture.html?event_id=${encodeURIComponent(eventId)}&role=client&redirect=${encodeURIComponent(redirectUrl)}`
+return `face-capture.html?event_id=${encodeURIComponent(eventId)}&role=${encodeURIComponent(safeRole)}&redirect=${encodeURIComponent(redirectUrl)}`
 }
 
 function updateFaceActionButton(){
@@ -1406,8 +1566,9 @@ const btn = document.getElementById("faceActionBtn")
 if(!btn) return
 
 const { eventId, effectiveRole, matchedImages } = CURRENT_GALLERY_STATE
+const canShowFaceAction = effectiveRole === "client" || effectiveRole === "photographer"
 
-if(!eventId || effectiveRole !== "client"){
+if(!eventId || !canShowFaceAction){
 btn.classList.add("hidden")
 btn.onclick = null
 return
@@ -1424,8 +1585,17 @@ loadGallery()
 }else{
 FACE_FILTER_ACTIVE = false
 btn.innerText = "Face Scan"
-btn.onclick = function(){
-window.location.href = getClientFaceScanUrl(eventId)
+btn.onclick = async function(){
+const allowed = await guardPublicGalleryFeature(eventId, "face_search")
+if(!allowed) return
+
+const token = await ensurePublicShareToken(eventId)
+if(!token){
+alert("Unable to enable limited Face Search. Please try again.")
+return
+}
+
+window.location.href = getFaceScanUrl(eventId, effectiveRole)
 }
 }
 
@@ -1589,7 +1759,7 @@ matchedImages.add(url)
 })
 }
 
-if(effectiveRole === "client" && eventId){
+if((effectiveRole === "client" || effectiveRole === "photographer") && eventId){
 const sessionMatchedImages = getGuestMatchedImagesFromSession(eventId)
 sessionMatchedImages.forEach(url=>{
 matchedImages.add(url)
@@ -1995,7 +2165,7 @@ empty.innerText = "No photos found for your face"
 empty.classList.remove("hidden")
 }
 
-if(effectiveRole === "client" && FACE_FILTER_ACTIVE && grid.children.length === 0){
+if((effectiveRole === "client" || effectiveRole === "photographer") && FACE_FILTER_ACTIVE && grid.children.length === 0){
 empty.innerText = "No face matched photos"
 empty.classList.remove("hidden")
 }
