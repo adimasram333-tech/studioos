@@ -77,69 +77,25 @@ async function initAccess() {
   }
 
   async function validateEventAccess() {
-    const { data, error } = await supabase
-      .from("events")
-      .select("id, user_id")
-      .eq("id", eventId)
-      .maybeSingle();
+    const { data, error } = await supabase.rpc("validate_public_gallery_access", {
+      p_event_id: eventId
+    });
 
     if (error) {
-      console.error("Event access validation failed:", error);
-      alert("Unable to verify event access. Please try again.");
+      console.error("Public gallery access validation failed:", error);
+      alert("Unable to verify gallery access. Please try again.");
       return false;
     }
 
-    if (!data?.id) {
+    if (data?.allowed === true) {
+      return true;
+    }
+
+    const reason = String(data?.reason || "").trim();
+
+    if (reason === "event_not_found") {
       alert("This event no longer exists or the access link is invalid.");
       return false;
-    }
-
-    const { data: settings, error: settingsError } = await supabase
-      .from("photographer_settings")
-      .select("plan, subscription_status, is_paid, plan_expires_at")
-      .eq("user_id", data.user_id)
-      .maybeSingle();
-
-    if (settingsError) {
-      console.error("Subscription validation failed:", settingsError);
-      alert("Unable to verify gallery access. Please try again.");
-      return false;
-    }
-
-    const plan = String(settings?.plan || "").trim().toLowerCase();
-    const subscriptionStatus = String(settings?.subscription_status || "").trim().toLowerCase();
-    const isPaid = settings?.is_paid === true;
-    const planExpiresAt = settings?.plan_expires_at
-      ? new Date(settings.plan_expires_at).getTime()
-      : 0;
-
-    const isPaidPlanAllowed =
-      isPaid &&
-      subscriptionStatus === "active" &&
-      (plan === "basic" || plan === "pro") &&
-      Number.isFinite(planExpiresAt) &&
-      planExpiresAt > Date.now();
-
-    if (isPaidPlanAllowed) {
-      return true;
-    }
-
-    const { data: firstSharedToken, error: freeShareError } = await supabase
-      .from("event_tokens")
-      .select("event_id, created_at, events!inner(user_id)")
-      .eq("events.user_id", data.user_id)
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    if (freeShareError) {
-      console.error("Free gallery share validation failed:", freeShareError);
-      alert("Unable to verify gallery access. Please try again.");
-      return false;
-    }
-
-    if (firstSharedToken?.event_id && String(firstSharedToken.event_id) === String(eventId)) {
-      return true;
     }
 
     alert("This gallery is not available for public access. Please contact the photographer.");
