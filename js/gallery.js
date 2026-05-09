@@ -110,9 +110,10 @@ const supabase = await window.getSupabase()
 if(!supabase) return PUBLIC_GALLERY_FREE_SHARE_LIMIT
 
 const { count, error } = await supabase
-.from("event_tokens")
-.select("event_id, events!inner(user_id)", { count: "exact", head: true })
-.eq("events.user_id", safeOwnerId)
+.from("feature_usage_limits")
+.select("event_id", { count: "exact", head: true })
+.eq("user_id", safeOwnerId)
+.eq("feature_key", "gallery_sharing")
 
 if(error){
 console.error("Free public share usage count failed:", error)
@@ -126,12 +127,48 @@ return PUBLIC_GALLERY_FREE_SHARE_LIMIT
 }
 }
 
+async function claimPublicGalleryShareUsage(eventId){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId){
+return { allowed:false, reason:"invalid_event" }
+}
+
+try{
+const supabase = await window.getSupabase()
+if(!supabase){
+return { allowed:false, reason:"supabase_missing" }
+}
+
+const { data, error } = await supabase.rpc("claim_feature_usage_limit", {
+p_feature_key: "gallery_sharing",
+p_event_id: safeEventId
+})
+
+if(error){
+console.error("Public gallery share usage claim failed:", error)
+return { allowed:false, reason:"claim_failed" }
+}
+
+if(!data?.allowed){
+return {
+allowed:false,
+reason:data?.reason || "free_limit_reached"
+}
+}
+
+return {
+allowed:true,
+reason:data?.reason || "allowed"
+}
+}catch(err){
+console.error("Public gallery share usage claim error:", err)
+return { allowed:false, reason:"claim_error" }
+}
+}
+
 async function ensurePublicShareToken(eventId){
 const safeEventId = String(eventId || "").trim()
 if(!safeEventId) return null
-
-const existingToken = await getExistingPublicShareToken(safeEventId)
-if(existingToken) return existingToken
 
 try{
 const supabase = await window.getSupabase()
@@ -152,6 +189,15 @@ if(eventError || !ev){
 console.error("Public share token event validation failed:", eventError)
 return null
 }
+
+const claimResult = await claimPublicGalleryShareUsage(safeEventId)
+if(!claimResult.allowed){
+console.error("Public gallery share limit blocked:", claimResult.reason)
+return null
+}
+
+const existingToken = await getExistingPublicShareToken(safeEventId)
+if(existingToken) return existingToken
 
 const newToken = generatePublicShareToken()
 const { data: inserted, error: insertError } = await supabase
@@ -183,13 +229,34 @@ if(!safeEventId || !safeOwnerId){
 return false
 }
 
-const currentEventToken = await getExistingPublicShareToken(safeEventId)
-if(currentEventToken){
+try{
+const supabase = await window.getSupabase()
+if(!supabase) return false
+
+const { data: existingUsage, error: existingUsageError } = await supabase
+.from("feature_usage_limits")
+.select("id")
+.eq("user_id", safeOwnerId)
+.eq("event_id", safeEventId)
+.eq("feature_key", "gallery_sharing")
+.limit(1)
+.maybeSingle()
+
+if(existingUsageError){
+console.error("Free public share existing usage check failed:", existingUsageError)
+return false
+}
+
+if(existingUsage?.id){
 return true
 }
 
 const usedCount = await countOwnerPublicSharedEvents(safeOwnerId)
 return usedCount < PUBLIC_GALLERY_FREE_SHARE_LIMIT
+}catch(err){
+console.error("Free public share limit check error:", err)
+return false
+}
 }
 
 window.ensurePublicShareToken = ensurePublicShareToken
