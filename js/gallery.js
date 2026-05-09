@@ -270,12 +270,126 @@ activeMenu = null
 }
 
 function showPublicGalleryUpgradeMessage(message = "Free plan includes limited Gallery Sharing and limited AI Face Search for 1 event. Upgrade to Basic or Pro for full access."){
-const shouldOpenSubscription = confirm(
-`${message}\n\nDo you want to open the subscription page now?`
-)
 
-if(shouldOpenSubscription){
+const existingModal = document.getElementById("galleryUpgradeModal")
+if(existingModal){
+existingModal.remove()
+}
+
+const modal = document.createElement("div")
+modal.id = "galleryUpgradeModal"
+modal.style.position = "fixed"
+modal.style.inset = "0"
+modal.style.display = "flex"
+modal.style.alignItems = "center"
+modal.style.justifyContent = "center"
+modal.style.padding = "1rem"
+modal.style.background = "rgba(2,6,23,0.72)"
+modal.style.backdropFilter = "blur(10px)"
+modal.style.zIndex = "1200"
+
+modal.innerHTML = `
+<div style="
+  width:min(100%, 390px);
+  border-radius:1.35rem;
+  padding:1.15rem;
+  background:rgba(15,23,42,0.96);
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 24px 70px rgba(0,0,0,0.38);
+  color:white;
+">
+  <div style="
+    display:inline-flex;
+    align-items:center;
+    min-height:30px;
+    padding:0 0.78rem;
+    border-radius:999px;
+    background:rgba(99,102,241,0.16);
+    border:1px solid rgba(99,102,241,0.32);
+    color:rgb(199 210 254);
+    font-size:0.72rem;
+    font-weight:800;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  ">Upgrade Required</div>
+
+  <div style="
+    margin-top:0.9rem;
+    font-size:1.15rem;
+    line-height:1.25;
+    font-weight:850;
+  ">Unlock full gallery access</div>
+
+  <div style="
+    margin-top:0.6rem;
+    color:rgba(255,255,255,0.78);
+    font-size:0.9rem;
+    line-height:1.6;
+  ">${String(message || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+
+  <div style="
+    margin-top:0.85rem;
+    padding:0.85rem;
+    border-radius:1rem;
+    background:rgba(99,102,241,0.12);
+    border:1px solid rgba(99,102,241,0.22);
+    color:rgba(255,255,255,0.78);
+    font-size:0.82rem;
+    line-height:1.5;
+  ">Basic and Pro unlock full Gallery Sharing, QR, Tokens, AI Face Search, and premium workflow tools.</div>
+
+  <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+    <button id="galleryUpgradeCloseBtn" type="button" style="
+      flex:1;
+      min-height:46px;
+      border-radius:0.95rem;
+      background:rgba(255,255,255,0.06);
+      color:white;
+      border:1px solid rgba(255,255,255,0.1);
+      font-size:0.88rem;
+      font-weight:750;
+      cursor:pointer;
+    ">Close</button>
+
+    <button id="galleryUpgradeOpenBtn" type="button" style="
+      flex:1;
+      min-height:46px;
+      border-radius:0.95rem;
+      background:rgb(79 70 229);
+      color:white;
+      border:1px solid transparent;
+      font-size:0.88rem;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 14px 30px rgba(79,70,229,0.25);
+    ">Upgrade</button>
+  </div>
+</div>
+`
+
+document.body.appendChild(modal)
+
+const closeModal = ()=>{
+modal.remove()
+}
+
+modal.addEventListener("click", (event)=>{
+if(event.target === modal){
+closeModal()
+}
+})
+
+const closeBtn = document.getElementById("galleryUpgradeCloseBtn")
+const openBtn = document.getElementById("galleryUpgradeOpenBtn")
+
+if(closeBtn){
+closeBtn.onclick = closeModal
+}
+
+if(openBtn){
+openBtn.onclick = ()=>{
 window.location.href = "subscription.html"
+}
 }
 }
 
