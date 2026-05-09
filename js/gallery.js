@@ -270,108 +270,12 @@ activeMenu = null
 }
 
 function showPublicGalleryUpgradeMessage(message = "Free plan includes limited Gallery Sharing and limited AI Face Search for 1 event. Upgrade to Basic or Pro for full access."){
-let existingModal = document.getElementById("publicGalleryUpgradeModal")
-if(existingModal){
-existingModal.remove()
-}
+const shouldOpenSubscription = confirm(
+`${message}\n\nDo you want to open the subscription page now?`
+)
 
-const modal = document.createElement("div")
-modal.id = "publicGalleryUpgradeModal"
-modal.style.position = "fixed"
-modal.style.inset = "0"
-modal.style.zIndex = "1200"
-modal.style.display = "flex"
-modal.style.alignItems = "center"
-modal.style.justifyContent = "center"
-modal.style.padding = "1rem"
-modal.style.background = "rgba(2,6,23,0.72)"
-modal.style.backdropFilter = "blur(10px)"
-
-modal.innerHTML = `
-<div style="
-  width:min(100%, 390px);
-  border-radius:1.35rem;
-  padding:1.15rem;
-  background:rgba(15,23,42,0.96);
-  border:1px solid rgba(255,255,255,0.1);
-  box-shadow:0 24px 70px rgba(0,0,0,0.38);
-  color:white;
-">
-  <div style="
-    display:inline-flex;
-    align-items:center;
-    min-height:30px;
-    padding:0 0.78rem;
-    border-radius:999px;
-    background:rgba(99,102,241,0.16);
-    border:1px solid rgba(99,102,241,0.32);
-    color:rgb(199 210 254);
-    font-size:0.72rem;
-    font-weight:800;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-  ">Upgrade Required</div>
-
-  <div style="margin-top:0.9rem; font-size:1.18rem; font-weight:850; line-height:1.25;">
-    Free plan limit reached
-  </div>
-
-  <div style="margin-top:0.55rem; color:rgba(255,255,255,0.76); font-size:0.9rem; line-height:1.6;">
-    ${message}
-  </div>
-
-  <div style="display:flex; gap:0.75rem; margin-top:1rem;">
-    <button id="publicGalleryUpgradeCloseBtn" type="button" style="
-      flex:1;
-      min-height:46px;
-      border-radius:0.95rem;
-      background:rgba(255,255,255,0.06);
-      color:white;
-      border:1px solid rgba(255,255,255,0.1);
-      font-size:0.88rem;
-      font-weight:750;
-      cursor:pointer;
-    ">Close</button>
-
-    <button id="publicGalleryUpgradeOpenBtn" type="button" style="
-      flex:1;
-      min-height:46px;
-      border-radius:0.95rem;
-      background:#4f46e5;
-      color:white;
-      border:1px solid transparent;
-      font-size:0.88rem;
-      font-weight:800;
-      cursor:pointer;
-      box-shadow:0 14px 30px rgba(79,70,229,0.26);
-    ">Upgrade</button>
-  </div>
-</div>
-`
-
-document.body.appendChild(modal)
-
-const closeModal = ()=>{
-modal.remove()
-}
-
-modal.addEventListener("click", (event)=>{
-if(event.target === modal){
-closeModal()
-}
-})
-
-const closeBtn = document.getElementById("publicGalleryUpgradeCloseBtn")
-const openBtn = document.getElementById("publicGalleryUpgradeOpenBtn")
-
-if(closeBtn){
-closeBtn.onclick = closeModal
-}
-
-if(openBtn){
-openBtn.onclick = ()=>{
+if(shouldOpenSubscription){
 window.location.href = "subscription.html"
-}
 }
 }
 
@@ -1723,6 +1627,29 @@ const redirectUrl = `${window.location.origin}/studioos/gallery.html?event_id=${
 return `face-capture.html?event_id=${encodeURIComponent(eventId)}&role=${encodeURIComponent(safeRole)}&redirect=${encodeURIComponent(redirectUrl)}`
 }
 
+function getFaceFilterDisabledSessionKey(eventId){
+return `face_filter_disabled_${String(eventId || "").trim()}`
+}
+
+function isFaceFilterDisabledForEvent(eventId){
+try{
+return sessionStorage.getItem(getFaceFilterDisabledSessionKey(eventId)) === "true"
+}catch(e){
+return false
+}
+}
+
+function setFaceFilterDisabledForEvent(eventId, disabled){
+try{
+const key = getFaceFilterDisabledSessionKey(eventId)
+if(disabled){
+sessionStorage.setItem(key, "true")
+}else{
+sessionStorage.removeItem(key)
+}
+}catch(e){}
+}
+
 function updateFaceActionButton(){
 
 const btn = document.getElementById("faceActionBtn")
@@ -1739,17 +1666,16 @@ return
 
 btn.classList.remove("hidden")
 
-if(matchedImages && matchedImages.size > 0){
-if(effectiveRole === "photographer"){
-btn.innerText = FACE_FILTER_ACTIVE ? "All Photos" : "Matched Photos"
-}else{
-btn.innerText = FACE_FILTER_ACTIVE ? "Show Full Gallery" : "Show My Photos"
-}
+if(matchedImages && matchedImages.size > 0 && FACE_FILTER_ACTIVE){
+btn.innerText = "All Photos"
 btn.onclick = function(){
-FACE_FILTER_ACTIVE = !FACE_FILTER_ACTIVE
+setFaceFilterDisabledForEvent(eventId, true)
+FACE_FILTER_ACTIVE = false
 loadGallery()
 }
-}else{
+return
+}
+
 FACE_FILTER_ACTIVE = false
 btn.innerText = "Face Scan"
 btn.onclick = async function(){
@@ -1762,8 +1688,8 @@ alert("Unable to enable limited Face Search. Please try again.")
 return
 }
 
+setFaceFilterDisabledForEvent(eventId, false)
 window.location.href = getFaceScanUrl(eventId, effectiveRole)
-}
 }
 
 }
@@ -1931,6 +1857,10 @@ const sessionMatchedImages = getGuestMatchedImagesFromSession(eventId)
 sessionMatchedImages.forEach(url=>{
 matchedImages.add(url)
 })
+
+if(matchedImages.size > 0 && !isFaceFilterDisabledForEvent(eventId)){
+FACE_FILTER_ACTIVE = true
+}
 }
 
 CURRENT_GALLERY_STATE = {
