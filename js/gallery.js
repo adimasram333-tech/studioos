@@ -1306,7 +1306,68 @@ URL.revokeObjectURL(blobUrl)
 }, 3000)
 }
 
-async function directDownloadImage(url, filename = "photo.jpg"){
+function getDownloadLogFileSize(photo, fallbackBytes = 0){
+const candidates = [
+photo?.original_file_size,
+photo?.file_size,
+photo?.stored_file_size,
+fallbackBytes
+]
+
+for(const value of candidates){
+const size = Number(value || 0)
+if(Number.isFinite(size) && size > 0){
+return Math.round(size)
+}
+}
+
+return 0
+}
+
+async function logGalleryDownload(context = {}, downloadedBytes = 0){
+try{
+const supabase = await window.getSupabase()
+if(!supabase){
+return
+}
+
+const photo = context.photo || {}
+const safeEventId = String(context.eventId || photo.event_id || "").trim()
+const safePhotoId = String(photo.id || context.photoId || "").trim()
+const safeUserId = String(context.photographerId || photo.user_id || context.userId || "").trim()
+const safeObjectKey = String(photo.object_key || context.objectKey || "").trim()
+
+const downloadSize = Number(downloadedBytes || 0)
+const fileSize = getDownloadLogFileSize(photo, downloadSize)
+
+if(!safeEventId && !safePhotoId && !safeObjectKey){
+return
+}
+
+const payload = {
+user_id: safeUserId || null,
+event_id: safeEventId || null,
+photo_id: safePhotoId || null,
+download_type: String(context.downloadType || "gallery_download").trim(),
+object_key: safeObjectKey || null,
+file_size_bytes: fileSize,
+downloaded_bytes: Number.isFinite(downloadSize) && downloadSize > 0 ? Math.round(downloadSize) : fileSize,
+source: String(context.source || "gallery_modal").trim()
+}
+
+const { error } = await supabase
+.from("usage_download_logs")
+.insert(payload)
+
+if(error){
+console.warn("Download usage log skipped:", error)
+}
+}catch(err){
+console.warn("Download usage log failed:", err)
+}
+}
+
+async function directDownloadImage(url, filename = "photo.jpg", logContext = null){
 const cleanUrl = normalizeImageUrl(url)
 
 try{
@@ -1322,6 +1383,11 @@ throw new Error("Failed to fetch file for download")
 
 const blob = await response.blob()
 triggerBlobDownload(blob, filename)
+
+if(logContext){
+logGalleryDownload(logContext, blob.size).catch(()=>{})
+}
+
 return true
 }catch(err){
 console.error("Download fallback triggered:", err)
@@ -1334,6 +1400,15 @@ a.rel = "noopener"
 document.body.appendChild(a)
 a.click()
 a.remove()
+
+if(logContext){
+const fallbackSize = getDownloadLogFileSize(logContext.photo || {}, 0)
+logGalleryDownload({
+...logContext,
+source: `${String(logContext.source || "gallery_modal")}_link_fallback`
+}, fallbackSize).catch(()=>{})
+}
+
 return true
 }catch(linkErr){
 console.error("Direct link download failed:", linkErr)
@@ -1342,6 +1417,8 @@ return false
 }
 }
 }
+
+window.logGalleryDownloadUsage = logGalleryDownload
 
 function readJsonSessionArray(key){
 try{
@@ -2149,13 +2226,25 @@ btn.onclick = async function(){
 
 if(effectiveRole === "photographer" || effectiveRole === "client"){
 const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
-await directDownloadImage(cleanOriginalUrl, fileName)
+await directDownloadImage(cleanOriginalUrl, fileName, {
+eventId,
+photo,
+photographerId,
+downloadType: effectiveRole === "photographer" ? "photographer_original" : "client_original",
+source: "gallery_modal"
+})
 return
 }
 
 if(guestFreeDownload){
 const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
-await directDownloadImage(cleanOriginalUrl, fileName)
+await directDownloadImage(cleanOriginalUrl, fileName, {
+eventId,
+photo,
+photographerId,
+downloadType: "guest_free_original",
+source: "gallery_modal"
+})
 return
 }
 
@@ -2163,13 +2252,26 @@ if(typeof window.handleDownload === "function"){
 window.handleDownload(cleanOriginalUrl, eventId, photographerId, eventName, {
 guestFreeDownload: false,
 previewUrl: getGuestPreviewUrl(photo),
-photo
+photo,
+downloadLogContext: {
+eventId,
+photo,
+photographerId,
+downloadType: "guest_paid_original",
+source: "gallery_paid_download"
+}
 })
 return
 }
 
 const previewFileName = getSafeFileName(displayUrl, "photo.jpg")
-await directDownloadImage(displayUrl, previewFileName)
+await directDownloadImage(displayUrl, previewFileName, {
+eventId,
+photo,
+photographerId,
+downloadType: "guest_preview_fallback",
+source: "gallery_modal"
+})
 
 }
 
