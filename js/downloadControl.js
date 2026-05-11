@@ -128,6 +128,57 @@ async function trackDownloadUsage(imageUrl, eventId, options = {}) {
   }
 }
 
+async function logDownloadToUsageTable(imageUrl, eventId, options = {}, downloadedBytes = 0) {
+  try {
+    if (typeof window.getSupabase !== "function") {
+      return;
+    }
+
+    const supabase = await window.getSupabase();
+
+    if (!supabase) {
+      return;
+    }
+
+    const context = options.downloadLogContext || {};
+    const photo = context.photo || options.photo || {};
+    const safeDownloadedBytes = Number(downloadedBytes || options.fileSizeBytes || 0);
+    const fallbackFileSize = Number(
+      photo.original_file_size ||
+      photo.file_size ||
+      photo.stored_file_size ||
+      options.fileSizeBytes ||
+      safeDownloadedBytes ||
+      0
+    );
+
+    const payload = {
+      user_id: context.photographerId || options.photographerId || photo.user_id || null,
+      event_id: context.eventId || eventId || photo.event_id || null,
+      photo_id: photo.id || context.photoId || options.photoId || null,
+      download_type: context.downloadType || options.downloadType || options.fileType || "download",
+      object_key: photo.object_key || context.objectKey || null,
+      file_size_bytes: Number.isFinite(fallbackFileSize) && fallbackFileSize > 0 ? Math.round(fallbackFileSize) : 0,
+      downloaded_bytes: Number.isFinite(safeDownloadedBytes) && safeDownloadedBytes > 0 ? Math.round(safeDownloadedBytes) : 0,
+      source: context.source || "download_control"
+    };
+
+    if (!payload.event_id && !payload.photo_id && !payload.object_key) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from("usage_download_logs")
+      .insert(payload);
+
+    if (error) {
+      console.warn("Direct usage_download_logs insert skipped:", error);
+    }
+  } catch (err) {
+    console.warn("Direct usage_download_logs insert failed:", err);
+  }
+}
+
 // store last image
 window.lastDownloadedImage = null;
 
@@ -265,6 +316,8 @@ function triggerDownload(imageUrl, eventId = null, trackingOptions = {}) {
         ...trackingOptions,
         fileSizeBytes: downloadedBytes
       });
+
+      logDownloadToUsageTable(imageUrl, eventId, trackingOptions, downloadedBytes);
 
       if (typeof window.logGalleryDownloadUsage === "function") {
         const baseLogContext = trackingOptions.downloadLogContext || {};
