@@ -259,10 +259,26 @@ function triggerDownload(imageUrl, eventId = null, trackingOptions = {}) {
 
       URL.revokeObjectURL(blobUrl);
 
+      const downloadedBytes = blob.size || trackingOptions.fileSizeBytes || 0;
+
       trackDownloadUsage(imageUrl, eventId, {
         ...trackingOptions,
-        fileSizeBytes: blob.size || trackingOptions.fileSizeBytes || 0
+        fileSizeBytes: downloadedBytes
       });
+
+      if (typeof window.logGalleryDownloadUsage === "function") {
+        const baseLogContext = trackingOptions.downloadLogContext || {};
+        const photo = baseLogContext.photo || trackingOptions.photo || null;
+
+        window.logGalleryDownloadUsage({
+          ...baseLogContext,
+          eventId: baseLogContext.eventId || eventId,
+          photo,
+          photographerId: baseLogContext.photographerId || trackingOptions.photographerId || null,
+          downloadType: baseLogContext.downloadType || trackingOptions.downloadType || "paid_download_original",
+          source: baseLogContext.source || "download_control"
+        }, downloadedBytes).catch(() => {});
+      }
     })
     .catch((err) => {
       console.error(err);
@@ -548,7 +564,15 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName, op
 
             triggerDownload(imageUrl, eventId, {
               photographerId,
-              fileType: "original"
+              fileType: "original",
+              photo: options.photo || null,
+              downloadLogContext: options.downloadLogContext || {
+                eventId,
+                photo: options.photo || null,
+                photographerId,
+                downloadType: "guest_paid_original",
+                source: "download_control_payment_success"
+              }
             });
           } catch (verifyErr) {
             console.error("Verify payment failed:", verifyErr);
@@ -624,7 +648,15 @@ window.handleDownload = async function (imageUrl, eventId, photographerId, event
   if (role === "client") {
     triggerDownload(imageUrl, eventId, {
       photographerId,
-      fileType: "original"
+      fileType: "original",
+      photo: options.photo || null,
+      downloadLogContext: options.downloadLogContext || {
+        eventId,
+        photo: options.photo || null,
+        photographerId,
+        downloadType: "client_original",
+        source: "download_control_client"
+      }
     });
     return;
   }
@@ -632,7 +664,15 @@ window.handleDownload = async function (imageUrl, eventId, photographerId, event
   if (guestFreeDownload) {
     triggerDownload(imageUrl, eventId, {
       photographerId,
-      fileType: "preview"
+      fileType: "preview",
+      photo: options.photo || null,
+      downloadLogContext: options.downloadLogContext || {
+        eventId,
+        photo: options.photo || null,
+        photographerId,
+        downloadType: "guest_free_preview",
+        source: "download_control_guest_free"
+      }
     });
     return;
   }
@@ -640,7 +680,15 @@ window.handleDownload = async function (imageUrl, eventId, photographerId, event
   if (isPurchased(imageUrl)) {
     triggerDownload(imageUrl, eventId, {
       photographerId,
-      fileType: "original"
+      fileType: "original",
+      photo: options.photo || null,
+      downloadLogContext: options.downloadLogContext || {
+        eventId,
+        photo: options.photo || null,
+        photographerId,
+        downloadType: "guest_purchased_original",
+        source: "download_control_purchased"
+      }
     });
     return;
   }
