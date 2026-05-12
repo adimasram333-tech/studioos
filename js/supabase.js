@@ -37,12 +37,13 @@ let supabaseClient = null
 let supabaseInitPromise = null
 
 const BLOCKED_USER_CACHE_TTL_MS = 30000
+const STUDIOOS_BLOCKED_FLAG_KEY = "studioos_account_blocked"
 let blockedUserCache = {
 userId: null,
 isBlocked: false,
 checkedAt: 0
 }
-let blockedUserRedirecting = false
+let blockedAccountOverlayVisible = false
 
 
 // ================================
@@ -58,17 +59,146 @@ return ""
 }
 }
 
-function isBlockedRedirectSafePage(){
-const page = getCurrentPageName().toLowerCase()
-return page === "login.html" || page === "index.html" || page === ""
+function isAdminRoute(){
+try{
+return String(window.location.pathname || "").includes("/studioos-admin/")
+}catch(e){
+return false
+}
 }
 
-async function handleBlockedStudioOSUser(){
-if(blockedUserRedirecting){
+function isPublicGuestAccessPage(){
+const page = getCurrentPageName().toLowerCase()
+return page === "access.html"
+}
+
+function setStudioOSBlockedFlag(value){
+try{
+if(value){
+localStorage.setItem(STUDIOOS_BLOCKED_FLAG_KEY, "true")
+}else{
+localStorage.removeItem(STUDIOOS_BLOCKED_FLAG_KEY)
+}
+}catch(e){}
+}
+
+function hasStudioOSBlockedFlag(){
+try{
+return localStorage.getItem(STUDIOOS_BLOCKED_FLAG_KEY) === "true"
+}catch(e){
+return false
+}
+}
+
+function clearStudioOSAppSession(){
+try{
+sessionStorage.clear()
+}catch(e){}
+}
+
+function showBlockedAccountOverlay(){
+if(blockedAccountOverlayVisible){
 return
 }
 
-blockedUserRedirecting = true
+blockedAccountOverlayVisible = true
+
+try{
+document.body.style.overflow = "hidden"
+}catch(e){}
+
+const existing = document.getElementById("studioosBlockedAccountOverlay")
+if(existing){
+existing.remove()
+}
+
+const overlay = document.createElement("div")
+overlay.id = "studioosBlockedAccountOverlay"
+overlay.style.position = "fixed"
+overlay.style.inset = "0"
+overlay.style.zIndex = "2147483647"
+overlay.style.display = "flex"
+overlay.style.alignItems = "center"
+overlay.style.justifyContent = "center"
+overlay.style.padding = "1rem"
+overlay.style.background = "rgba(2,6,23,0.88)"
+overlay.style.backdropFilter = "blur(12px)"
+overlay.style.color = "#ffffff"
+
+overlay.innerHTML = `
+  <div style="
+    width:min(100%, 420px);
+    border-radius:1.4rem;
+    padding:1.25rem;
+    background:rgba(15,23,42,0.98);
+    border:1px solid rgba(255,255,255,0.10);
+    box-shadow:0 28px 90px rgba(0,0,0,0.45);
+    text-align:left;
+  ">
+    <div style="
+      display:inline-flex;
+      align-items:center;
+      padding:0.36rem 0.7rem;
+      border-radius:999px;
+      font-size:0.7rem;
+      font-weight:900;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      color:#fecaca;
+      background:rgba(239,68,68,0.14);
+      border:1px solid rgba(239,68,68,0.28);
+    ">Account Blocked</div>
+
+    <div style="
+      margin-top:0.9rem;
+      font-size:1.28rem;
+      line-height:1.55rem;
+      font-weight:900;
+      color:#ffffff;
+    ">Your StudioOS account is blocked</div>
+
+    <div style="
+      margin-top:0.55rem;
+      color:rgba(255,255,255,0.72);
+      font-size:0.9rem;
+      line-height:1.55;
+    ">You cannot access StudioOS pages or use app features right now. Please contact StudioOS support.</div>
+
+    <button id="studioosBlockedLogoutBtn" type="button" style="
+      margin-top:1rem;
+      width:100%;
+      min-height:46px;
+      border-radius:0.95rem;
+      border:1px solid rgba(255,255,255,0.10);
+      background:rgb(79,70,229);
+      color:#ffffff;
+      font-size:0.9rem;
+      font-weight:850;
+      cursor:pointer;
+    ">Go to Login</button>
+  </div>
+`
+
+document.body.appendChild(overlay)
+
+const button = document.getElementById("studioosBlockedLogoutBtn")
+if(button){
+button.onclick = async function(){
+try{
+const supabase = await window.getSupabase()
+if(supabase){
+await supabase.auth.signOut()
+}
+}catch(e){}
+clearStudioOSAppSession()
+window.location.href = "login.html"
+}
+}
+}
+
+async function handleBlockedStudioOSUser(){
+setStudioOSBlockedFlag(true)
+clearStudioOSAppSession()
 
 try{
 const supabase = await window.getSupabase()
@@ -79,17 +209,7 @@ await supabase.auth.signOut()
 console.warn("Blocked user sign out skipped:", e)
 }
 
-try{
-sessionStorage.clear()
-}catch(e){}
-
-try{
-alert("Your StudioOS account has been blocked. Please contact StudioOS support.")
-}catch(e){}
-
-if(!isBlockedRedirectSafePage()){
-window.location.href = "login.html"
-}
+showBlockedAccountOverlay()
 }
 
 async function isStudioOSUserBlocked(userId){
@@ -130,29 +250,15 @@ isBlocked,
 checkedAt: Date.now()
 }
 
+if(!isBlocked){
+setStudioOSBlockedFlag(false)
+}
+
 return isBlocked
 }catch(err){
 console.error("Blocked user check error:", err)
 return false
 }
-}
-
-window.ensureActiveStudioOSAccount = async function(user = null){
-const currentUser = user || await window.getCurrentUserWithoutBlockCheck()
-const userId = currentUser?.id || ""
-
-if(!userId){
-return null
-}
-
-const blocked = await isStudioOSUserBlocked(userId)
-
-if(blocked){
-await handleBlockedStudioOSUser()
-return null
-}
-
-return currentUser
 }
 
 window.getCurrentUserWithoutBlockCheck = async function(){
@@ -179,6 +285,48 @@ return null
 
 }
 
+}
+
+window.ensureActiveStudioOSAccount = async function(user = null){
+if(isAdminRoute()){
+return user || await window.getCurrentUserWithoutBlockCheck()
+}
+
+const currentUser = user || await window.getCurrentUserWithoutBlockCheck()
+const userId = currentUser?.id || ""
+
+if(!userId){
+if(hasStudioOSBlockedFlag() && !isPublicGuestAccessPage()){
+showBlockedAccountOverlay()
+}
+return null
+}
+
+const blocked = await isStudioOSUserBlocked(userId)
+
+if(blocked){
+await handleBlockedStudioOSUser()
+return null
+}
+
+return currentUser
+}
+
+window.runStudioOSBlockedUserGuard = async function(){
+if(isAdminRoute()){
+return
+}
+
+const user = await window.getCurrentUserWithoutBlockCheck()
+
+if(user?.id){
+await window.ensureActiveStudioOSAccount(user)
+return
+}
+
+if(hasStudioOSBlockedFlag() && !isPublicGuestAccessPage()){
+showBlockedAccountOverlay()
+}
 }
 
 
@@ -714,7 +862,21 @@ resolve({ width: null, height: null })
 // PRELOAD SUPABASE
 // ================================
 
-initializeSupabase().catch(err=>{
+initializeSupabase()
+.then(()=>{
+if(document.readyState === "loading"){
+document.addEventListener("DOMContentLoaded", ()=>{
+window.runStudioOSBlockedUserGuard().catch(err=>{
+console.error("Blocked user guard failed:", err)
+})
+})
+}else{
+window.runStudioOSBlockedUserGuard().catch(err=>{
+console.error("Blocked user guard failed:", err)
+})
+}
+})
+.catch(err=>{
 console.error("Supabase preload failed:", err)
 })
 
