@@ -72,6 +72,11 @@ const page = getCurrentPageName().toLowerCase()
 return page === "access.html"
 }
 
+function isBlockedGuardSafePage(){
+const page = getCurrentPageName().toLowerCase()
+return page === "" || page === "index.html" || page === "login.html" || page === "signup.html"
+}
+
 function setStudioOSBlockedFlag(value){
 try{
 if(value){
@@ -269,6 +274,17 @@ const supabase = await window.getSupabase()
 
 if(!supabase) return null
 
+const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+
+if(sessionError){
+console.error("Session fetch error:", sessionError)
+return null
+}
+
+if(!sessionData?.session?.access_token){
+return null
+}
+
 const { data, error } = await supabase.auth.getUser()
 
 if(error){
@@ -296,7 +312,7 @@ const currentUser = user || await window.getCurrentUserWithoutBlockCheck()
 const userId = currentUser?.id || ""
 
 if(!userId){
-if(hasStudioOSBlockedFlag() && !isPublicGuestAccessPage()){
+if(hasStudioOSBlockedFlag() && !isPublicGuestAccessPage() && !isBlockedGuardSafePage()){
 showBlockedAccountOverlay()
 }
 return null
@@ -324,7 +340,7 @@ await window.ensureActiveStudioOSAccount(user)
 return
 }
 
-if(hasStudioOSBlockedFlag() && !isPublicGuestAccessPage()){
+if(hasStudioOSBlockedFlag() && !isPublicGuestAccessPage() && !isBlockedGuardSafePage()){
 showBlockedAccountOverlay()
 }
 }
