@@ -36,6 +36,151 @@ window.SAVE_S3_GALLERY_PHOTO_URL = SAVE_S3_GALLERY_PHOTO_URL
 let supabaseClient = null
 let supabaseInitPromise = null
 
+const BLOCKED_USER_CACHE_TTL_MS = 30000
+let blockedUserCache = {
+userId: null,
+isBlocked: false,
+checkedAt: 0
+}
+let blockedUserRedirecting = false
+
+
+// ================================
+// BLOCKED USER PROTECTION
+// ================================
+
+function getCurrentPageName(){
+try{
+const path = window.location.pathname || ""
+return path.split("/").pop() || ""
+}catch(e){
+return ""
+}
+}
+
+function isBlockedRedirectSafePage(){
+const page = getCurrentPageName().toLowerCase()
+return page === "login.html" || page === "index.html" || page === ""
+}
+
+async function handleBlockedStudioOSUser(){
+if(blockedUserRedirecting){
+return
+}
+
+blockedUserRedirecting = true
+
+try{
+const supabase = await window.getSupabase()
+if(supabase){
+await supabase.auth.signOut()
+}
+}catch(e){
+console.warn("Blocked user sign out skipped:", e)
+}
+
+try{
+sessionStorage.clear()
+}catch(e){}
+
+try{
+alert("Your StudioOS account has been blocked. Please contact StudioOS support.")
+}catch(e){}
+
+if(!isBlockedRedirectSafePage()){
+window.location.href = "login.html"
+}
+}
+
+async function isStudioOSUserBlocked(userId){
+const safeUserId = String(userId || "").trim()
+if(!safeUserId){
+return false
+}
+
+if(
+blockedUserCache.userId === safeUserId &&
+Date.now() - blockedUserCache.checkedAt < BLOCKED_USER_CACHE_TTL_MS
+){
+return blockedUserCache.isBlocked === true
+}
+
+try{
+const supabase = await window.getSupabase()
+if(!supabase){
+return false
+}
+
+const { data, error } = await supabase
+.from("photographer_settings")
+.select("is_blocked")
+.eq("user_id", safeUserId)
+.maybeSingle()
+
+if(error){
+console.error("Blocked user check failed:", error)
+return false
+}
+
+const isBlocked = data?.is_blocked === true
+
+blockedUserCache = {
+userId: safeUserId,
+isBlocked,
+checkedAt: Date.now()
+}
+
+return isBlocked
+}catch(err){
+console.error("Blocked user check error:", err)
+return false
+}
+}
+
+window.ensureActiveStudioOSAccount = async function(user = null){
+const currentUser = user || await window.getCurrentUserWithoutBlockCheck()
+const userId = currentUser?.id || ""
+
+if(!userId){
+return null
+}
+
+const blocked = await isStudioOSUserBlocked(userId)
+
+if(blocked){
+await handleBlockedStudioOSUser()
+return null
+}
+
+return currentUser
+}
+
+window.getCurrentUserWithoutBlockCheck = async function(){
+
+try{
+
+const supabase = await window.getSupabase()
+
+if(!supabase) return null
+
+const { data, error } = await supabase.auth.getUser()
+
+if(error){
+console.error("User fetch error:", error)
+return null
+}
+
+return data?.user || null
+
+}catch(err){
+
+console.error("User fetch failed:",err)
+return null
+
+}
+
+}
+
 
 // ================================
 // WAIT FOR CDN (FIXED: NO INFINITE LOOP)
@@ -180,18 +325,13 @@ window.getCurrentUser = async function(){
 
 try{
 
-const supabase = await window.getSupabase()
+const user = await window.getCurrentUserWithoutBlockCheck()
 
-if(!supabase) return null
-
-const { data, error } = await supabase.auth.getUser()
-
-if(error){
-console.error("User fetch error:", error)
+if(!user){
 return null
 }
 
-return data?.user || null
+return await window.ensureActiveStudioOSAccount(user)
 
 }catch(err){
 
@@ -278,6 +418,12 @@ return ""
 // ================================
 
 async function callProtectedEdgeFunction(url, payload){
+
+const activeUser = await window.ensureActiveStudioOSAccount()
+
+if(!activeUser){
+throw new Error("Account access blocked or authentication required.")
+}
 
 const session = await window.getCurrentSession()
 
