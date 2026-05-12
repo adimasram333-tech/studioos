@@ -35,6 +35,7 @@ const PUBLIC_GALLERY_FREE_SHARE_LIMIT = 1
 const PUBLIC_GALLERY_ALLOWED_FEATURES_FOR_FREE = new Set(["sharing", "face_search"])
 const EVENT_PHOTO_PRICE_CACHE = new Map()
 const GALLERY_MIN_PHOTO_SELLING_PRICE = 49
+const GALLERY_TRACK_USAGE_URL = "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/track-usage"
 
 function normalizePlanValue(value){
 return String(value || "").trim().toLowerCase()
@@ -1326,11 +1327,6 @@ return 0
 
 async function logGalleryDownload(context = {}, downloadedBytes = 0){
 try{
-const supabase = await window.getSupabase()
-if(!supabase){
-return
-}
-
 const photo = context.photo || {}
 const safeEventId = String(context.eventId || photo.event_id || "").trim()
 const safePhotoId = String(photo.id || context.photoId || "").trim()
@@ -1345,23 +1341,32 @@ return
 }
 
 const payload = {
+type: "download",
 user_id: safeUserId || null,
 event_id: safeEventId || null,
 photo_id: safePhotoId || null,
-download_type: String(context.downloadType || "gallery_download").trim(),
-object_key: safeObjectKey || null,
+role: String(CURRENT_GALLERY_STATE?.effectiveRole || sessionStorage.getItem("role") || "guest").trim(),
+file_type: String(context.fileType || "original").trim(),
 file_size_bytes: fileSize,
 downloaded_bytes: Number.isFinite(downloadSize) && downloadSize > 0 ? Math.round(downloadSize) : fileSize,
+download_type: String(context.downloadType || "gallery_download").trim(),
+object_key: safeObjectKey || null,
 source: String(context.source || "gallery_modal").trim()
 }
 
-const { error } = await supabase
-.from("usage_download_logs")
-.insert(payload)
-
-if(error){
-console.warn("Download usage log skipped:", error)
+await fetch(GALLERY_TRACK_USAGE_URL, {
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+"apikey": window.SUPABASE_ANON_KEY || ""
+},
+body: JSON.stringify(payload)
+}).then(async response=>{
+if(!response.ok){
+const errorData = await response.json().catch(()=>null)
+throw new Error(errorData?.error || "Download usage tracking failed")
 }
+})
 }catch(err){
 console.warn("Download usage log failed:", err)
 }
