@@ -61,11 +61,16 @@ border:1px solid rgba(255,255,255,0.1);
 <!-- 📊 MONTHLY GRAPH -->
 <div class="glass rounded-2xl p-4 mb-6">
 <div class="flex items-center justify-between mb-3">
-  <h2 class="text-lg font-semibold text-white">📊 Monthly Earnings</h2>
-  <span class="text-[11px] text-white/70">Last 6 months</span>
+  <div>
+    <h2 class="text-lg font-semibold text-white">📊 Monthly Earnings</h2>
+    <p class="text-xs text-white/60 mt-1">Premium month-wise earning performance</p>
+  </div>
+  <span id="monthlyGrowthBadge" class="hidden px-3 py-1 rounded-full bg-white text-blue-700 text-xs font-black shadow-lg"></span>
 </div>
-<div class="rounded-2xl bg-white/95 p-3 border border-white/20">
-  <canvas id="monthlyChart" height="180"></canvas>
+<div class="rounded-2xl bg-white p-4 border border-white/20 shadow-2xl">
+  <div class="h-[230px]">
+    <canvas id="monthlyChart"></canvas>
+  </div>
 </div>
 </div>
 
