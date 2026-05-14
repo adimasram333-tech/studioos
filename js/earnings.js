@@ -598,7 +598,15 @@ function renderMonthlyAnalytics(data) {
   const ctx = document.getElementById("monthlyChart")
   if (!ctx || typeof Chart === "undefined") return
 
-  const months = {}
+  const monthMap = {}
+  const now = new Date()
+
+  // Always show last 6 months so chart never becomes one huge single bar.
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = `${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`
+    monthMap[key] = 0
+  }
 
   data.forEach(item => {
     if (!item) return
@@ -607,19 +615,16 @@ function renderMonthlyAnalytics(data) {
     if (entryType === "debit") return
 
     const d = new Date(item.created_at)
+    if (Number.isNaN(d.getTime())) return
+
     const key = `${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`
-    const amount = toSafeNumber(item.amount)
+    if (!Object.prototype.hasOwnProperty.call(monthMap, key)) return
 
-    months[key] = (months[key] || 0) + amount
+    monthMap[key] = (monthMap[key] || 0) + toSafeNumber(item.amount)
   })
 
-  const sortedLabels = Object.keys(months).sort((a, b) => {
-    const [am, ay] = a.split("/").map(Number)
-    const [bm, by] = b.split("/").map(Number)
-    return new Date(ay, am - 1, 1) - new Date(by, bm - 1, 1)
-  })
-
-  const sortedValues = sortedLabels.map(label => Math.round(months[label]))
+  const sortedLabels = Object.keys(monthMap)
+  const sortedValues = sortedLabels.map(label => Math.round(monthMap[label] || 0))
 
   if (chartInstance) chartInstance.destroy()
 
@@ -635,16 +640,15 @@ function renderMonthlyAnalytics(data) {
     growthBadge.innerText = growthPercent >= 0 ? `+${growthPercent}%` : `${growthPercent}%`
   }
 
-  const barColors = sortedValues.map((_, index) => {
+  const barColors = sortedValues.map((value, index) => {
+    if (value <= 0) return "rgba(125, 211, 252, 0.35)"
     const palette = [
-      "#0f5f99",
+      "#38bdf8",
       "#0ea5e9",
-      "#2563eb",
-      "#67c2d4",
-      "#075da8",
-      "#0891b2",
-      "#6cc9df",
-      "#172554"
+      "#0284c7",
+      "#7dd3fc",
+      "#0369a1",
+      "#38bdf8"
     ]
     return palette[index % palette.length]
   })
@@ -655,7 +659,7 @@ function renderMonthlyAnalytics(data) {
   const bestMonthCalloutPlugin = {
     id: "bestMonthCallout",
     afterDatasetsDraw(chart) {
-      if (bestIndex < 0 || !chart.data.datasets?.[0]) return
+      if (bestIndex < 0 || maxValue <= 0) return
 
       const meta = chart.getDatasetMeta(0)
       const bar = meta?.data?.[bestIndex]
@@ -665,30 +669,27 @@ function renderMonthlyAnalytics(data) {
       const value = Number(chart.data.datasets[0].data[bestIndex] || 0)
       const x = bar.x
       const y = bar.y
-      const boxWidth = 64
-      const boxHeight = 46
+      const boxWidth = 62
+      const boxHeight = 42
       const boxX = x - boxWidth / 2
-      const boxY = Math.max(6, y - boxHeight - 10)
+      const boxY = Math.max(8, y - boxHeight - 10)
 
       ctx.save()
-
-      ctx.shadowColor = "rgba(15, 23, 42, 0.30)"
+      ctx.shadowColor = "rgba(14, 165, 233, 0.30)"
       ctx.shadowBlur = 14
-      ctx.shadowOffsetX = 8
-      ctx.shadowOffsetY = 10
-
+      ctx.shadowOffsetX = 6
+      ctx.shadowOffsetY = 8
       ctx.fillStyle = "#ffffff"
       ctx.fillRect(boxX, boxY, boxWidth, boxHeight)
 
       ctx.shadowColor = "transparent"
-      ctx.fillStyle = "#075da8"
+      ctx.fillStyle = "#0284c7"
       ctx.textAlign = "center"
-      ctx.font = "900 16px system-ui"
-      ctx.fillText("BEST", x, boxY + 18)
+      ctx.font = "900 12px system-ui"
+      ctx.fillText("BEST", x, boxY + 16)
 
-      ctx.font = "900 15px system-ui"
-      ctx.fillText(`₹${Math.round(value)}`, x, boxY + 37)
-
+      ctx.font = "900 13px system-ui"
+      ctx.fillText(`₹${Math.round(value)}`, x, boxY + 33)
       ctx.restore()
     }
   }
@@ -701,16 +702,15 @@ function renderMonthlyAnalytics(data) {
         label: "Monthly Earnings",
         data: sortedValues,
         backgroundColor: barColors,
-        borderColor: "#ffffff",
-        borderWidth: 0,
         borderRadius: {
-          topLeft: 3,
-          topRight: 3,
+          topLeft: 5,
+          topRight: 5,
           bottomLeft: 0,
           bottomRight: 0
         },
-        barPercentage: 0.78,
-        categoryPercentage: 0.82
+        maxBarThickness: 32,
+        barPercentage: 0.54,
+        categoryPercentage: 0.72
       }]
     },
     plugins: [bestMonthCalloutPlugin],
@@ -719,9 +719,9 @@ function renderMonthlyAnalytics(data) {
       maintainAspectRatio: false,
       layout: {
         padding: {
-          top: 52,
+          top: 48,
           right: 12,
-          left: 6,
+          left: 4,
           bottom: 0
         }
       },
@@ -737,6 +737,8 @@ function renderMonthlyAnalytics(data) {
           backgroundColor: "#0f172a",
           titleColor: "#ffffff",
           bodyColor: "#ffffff",
+          borderColor: "rgba(14, 165, 233, 0.55)",
+          borderWidth: 1,
           padding: 12,
           callbacks: {
             label: function(context) {
@@ -748,25 +750,24 @@ function renderMonthlyAnalytics(data) {
       scales: {
         x: {
           ticks: {
-            color: "#64748b",
+            color: "#475569",
             font: {
               size: 10,
               weight: "800"
             },
             callback: function(value) {
-              const label = this.getLabelForValue(value)
-              return String(label || "").toUpperCase()
+              return String(this.getLabelForValue(value) || "").toUpperCase()
             }
           },
           grid: {
-            color: "rgba(15, 23, 42, 0.14)",
+            color: "rgba(14, 165, 233, 0.12)",
             drawTicks: false,
             drawBorder: false
           }
         },
         y: {
           beginAtZero: true,
-          suggestedMax: Math.ceil(maxValue * 1.25),
+          suggestedMax: Math.ceil(maxValue * 1.35),
           ticks: {
             color: "#64748b",
             font: {
@@ -786,6 +787,7 @@ function renderMonthlyAnalytics(data) {
     }
   })
 }
+
 
 // ===============================
 // CLIENT EARNINGS
