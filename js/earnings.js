@@ -316,8 +316,9 @@ async function processAndRender(purchases, ledgerEntries) {
     ...legacyLedgerEntries
   ]
 
-  let netTotal = 0
-  let monthlyNet = 0
+  let totalCreditEarnings = 0
+  let totalDebitWithdrawals = 0
+  let monthlyCreditEarnings = 0
   let photographerGross = 0
   let platformTotal = 0
   const totalSales = purchases.length
@@ -327,17 +328,22 @@ async function processAndRender(purchases, ledgerEntries) {
     if (!item) return
 
     const amount = toSafeNumber(item.amount)
-    const entryType = String(item.entry_type || "credit")
-    const signedAmount = entryType === "debit" ? -amount : amount
+    const entryType = String(item.entry_type || "credit").trim().toLowerCase()
+    const isDebit = entryType === "debit"
 
-    netTotal += signedAmount
+    if (isDebit) {
+      totalDebitWithdrawals += amount
+    } else {
+      totalCreditEarnings += amount
+    }
 
     const d = new Date(item.created_at)
     if (
+      !isDebit &&
       d.getMonth() === now.getMonth() &&
       d.getFullYear() === now.getFullYear()
     ) {
-      monthlyNet += signedAmount
+      monthlyCreditEarnings += amount
     }
   })
 
@@ -348,11 +354,19 @@ async function processAndRender(purchases, ledgerEntries) {
   })
 
   const pendingTotal = await getPendingAmount(currentUserId)
-  const availableBalance = Math.max(0, Math.round(netTotal) - Math.round(pendingTotal))
+
+  // Lifetime earnings must always show total earned from app sales.
+  // Withdrawals should reduce only available balance, not total earnings history.
+  const totalEarnings = Math.round(totalCreditEarnings)
+  const approvedWithdrawals = Math.round(totalDebitWithdrawals)
+  const availableBalance = Math.max(
+    0,
+    totalEarnings - approvedWithdrawals - Math.round(pendingTotal)
+  )
 
   dashboardState = {
-    totalEarnings: Math.round(netTotal),
-    monthlyEarnings: Math.round(monthlyNet),
+    totalEarnings,
+    monthlyEarnings: Math.round(monthlyCreditEarnings),
     totalSales,
     platformTotal: Math.round(platformTotal),
     pendingTotal: Math.round(pendingTotal),
@@ -375,6 +389,31 @@ async function processAndRender(purchases, ledgerEntries) {
   renderTopEvents(purchases)
   renderClientEarnings(purchases)
   renderProfitSplit(dashboardState.photographerGross, dashboardState.platformTotal)
+  updateWithdrawButtonState()
+}
+
+// ===============================
+// WITHDRAW BUTTON STATE
+// ===============================
+
+function updateWithdrawButtonState() {
+  const btn = document.getElementById("withdrawBtn")
+  if (!btn) return
+
+  const available = Math.max(0, toSafeNumber(dashboardState.availableBalance))
+
+  if (available < 500) {
+    btn.disabled = true
+    btn.style.opacity = "0.55"
+    btn.style.cursor = "not-allowed"
+    btn.innerText = available <= 0 ? "No Balance Available" : "Minimum ₹500 Required"
+    return
+  }
+
+  btn.disabled = false
+  btn.style.opacity = "1"
+  btn.style.cursor = "pointer"
+  btn.innerText = "Withdraw Earnings"
 }
 
 // ===============================
@@ -564,12 +603,14 @@ function renderMonthlyAnalytics(data) {
   data.forEach(item => {
     if (!item) return
 
+    const entryType = String(item.entry_type || "credit").trim().toLowerCase()
+    if (entryType === "debit") return
+
     const d = new Date(item.created_at)
     const key = `${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`
     const amount = toSafeNumber(item.amount)
-    const signedAmount = String(item.entry_type) === "debit" ? -amount : amount
 
-    months[key] = (months[key] || 0) + signedAmount
+    months[key] = (months[key] || 0) + amount
   })
 
   const sortedLabels = Object.keys(months).sort((a, b) => {
