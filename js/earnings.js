@@ -630,8 +630,74 @@ function renderMonthlyAnalytics(data) {
       datasets: [{
         label: "Earnings",
         data: sortedValues,
-        tension: 0.4
+        tension: 0.38,
+        borderWidth: 3,
+        borderColor: "#2563eb",
+        backgroundColor: "rgba(37, 99, 235, 0.14)",
+        pointBackgroundColor: "#2563eb",
+        pointBorderColor: "#ffffff",
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true
       }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: "index",
+        intersect: false
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: "#0f172a",
+            boxWidth: 14,
+            usePointStyle: true,
+            font: {
+              weight: "700"
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return ` Earnings: ₹${Math.round(toSafeNumber(context.parsed.y))}`
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: "#334155",
+            font: {
+              weight: "700"
+            }
+          },
+          grid: {
+            color: "rgba(15, 23, 42, 0.08)",
+            drawBorder: false
+          }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: "#334155",
+            font: {
+              weight: "700"
+            },
+            callback: function(value) {
+              return `₹${Math.round(toSafeNumber(value))}`
+            }
+          },
+          grid: {
+            color: "rgba(15, 23, 42, 0.10)",
+            drawBorder: false
+          }
+        }
+      }
     }
   })
 }
