@@ -60,14 +60,14 @@ border:1px solid rgba(255,255,255,0.1);
 
 <!-- 📊 MONTHLY GRAPH -->
 <div class="glass rounded-2xl p-4 mb-6">
-<div class="flex items-center justify-between mb-3">
+<div class="flex items-center justify-between gap-3 mb-3">
   <div>
     <h2 class="text-lg font-semibold text-white">📊 Monthly Earnings</h2>
-    <p class="text-xs text-white/60 mt-1">Premium month-wise earning performance</p>
+    <p class="text-xs text-sky-200/75 mt-1">Last 6 months earning trend</p>
   </div>
-  <span id="monthlyGrowthBadge" class="hidden px-3 py-1 rounded-full bg-white text-blue-700 text-xs font-black shadow-lg"></span>
+  <span id="monthlyGrowthBadge" class="hidden px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-black shadow-lg"></span>
 </div>
-<div class="rounded-2xl bg-white p-4 border border-white/20 shadow-2xl">
+<div class="rounded-2xl bg-white p-4 border border-sky-200/60 shadow-2xl">
   <div class="h-[230px]">
     <canvas id="monthlyChart"></canvas>
   </div>
@@ -121,42 +121,68 @@ Withdraw Earnings
 
 </div>
 
-<!-- ✅ FIXED WITHDRAW MODAL -->
+<!-- ✅ PREMIUM WITHDRAW MODAL -->
 <div id="withdrawModal"
-class="hidden fixed inset-0 flex items-center justify-center z-50 bg-black/60">
+class="hidden fixed inset-0 items-center justify-center z-50 bg-slate-950/75 backdrop-blur-md p-4">
 
-  <div class="bg-[#0f172a] p-5 rounded-2xl w-[90%] max-w-sm border border-white/10">
+  <div class="w-full max-w-sm rounded-3xl border border-white/10 bg-[#0f172a]/95 shadow-2xl overflow-hidden">
 
-    <h2 class="text-lg font-semibold mb-4">Confirm Withdrawal</h2>
-
-    <div class="text-sm space-y-2 mb-4 text-gray-300">
-
-      <p><span class="text-gray-400">Name:</span> <span id="modalName"></span></p>
-      <p><span class="text-gray-400">UPI:</span> <span id="modalUpi"></span></p>
-      <p><span class="text-gray-400">Amount:</span> ₹<span id="modalAmount"></span></p>
-
-      <p class="text-xs text-yellow-400 mt-2">
-        ⚠️ Payment will be sent to this UPI ID. Please verify carefully.
-      </p>
-
-    </div>
-
-    <div class="flex gap-2">
-
-      <button onclick="window.goToProfile()"
-      class="flex-1 bg-gray-600 p-2 rounded-xl text-sm">
-        Edit
-      </button>
+    <div class="flex items-start justify-between gap-3 p-5 border-b border-white/10">
+      <div>
+        <div class="inline-flex items-center px-3 py-1 rounded-full bg-sky-500/15 border border-sky-300/20 text-sky-200 text-[11px] font-black uppercase tracking-[0.16em]">
+          Payout Request
+        </div>
+        <h2 class="text-xl font-black mt-3">Confirm Withdrawal</h2>
+        <p class="text-sm text-slate-400 mt-1">Verify details before submitting payout request.</p>
+      </div>
 
       <button onclick="window.closeWithdrawModal()"
-      class="flex-1 bg-gray-500 p-2 rounded-xl text-sm">
-        Cancel
+      class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 text-white text-xl leading-none">
+        ×
       </button>
+    </div>
 
-      <button onclick="window.confirmWithdrawFinal()"
-      class="flex-1 bg-green-500 p-2 rounded-xl text-sm font-semibold">
-        Confirm
-      </button>
+    <div class="p-5 space-y-3 text-sm">
+
+      <div class="grid grid-cols-1 gap-3">
+        <div class="rounded-2xl bg-white/[0.045] border border-white/10 p-3">
+          <p class="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-black">Name</p>
+          <p id="modalName" class="mt-1 text-white font-bold break-words"></p>
+        </div>
+
+        <div class="rounded-2xl bg-white/[0.045] border border-white/10 p-3">
+          <p class="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-black">UPI ID</p>
+          <p id="modalUpi" class="mt-1 text-white font-bold break-words"></p>
+        </div>
+
+        <div class="rounded-2xl bg-sky-500/10 border border-sky-300/20 p-3">
+          <p class="text-[11px] uppercase tracking-[0.14em] text-sky-200 font-black">Amount</p>
+          <p class="mt-1 text-2xl text-white font-black">₹<span id="modalAmount"></span></p>
+        </div>
+      </div>
+
+      <div class="rounded-2xl bg-yellow-400/10 border border-yellow-300/20 p-3 text-yellow-200 text-xs leading-relaxed">
+        ⚠️ Payment will be sent to this UPI ID after admin verification. Please check carefully.
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 pt-1">
+
+        <button onclick="window.goToProfile()"
+        class="rounded-2xl bg-slate-600/80 hover:bg-slate-600 border border-white/10 p-3 text-sm font-black">
+          Edit
+        </button>
+
+        <button onclick="window.closeWithdrawModal()"
+        class="rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 p-3 text-sm font-black">
+          Cancel
+        </button>
+
+        <button onclick="window.confirmWithdrawFinal()"
+        class="rounded-2xl bg-sky-500 hover:bg-sky-400 border border-sky-300/30 p-3 text-sm font-black text-white shadow-lg shadow-sky-500/20">
+          Confirm
+        </button>
+
+      </div>
 
     </div>
 
