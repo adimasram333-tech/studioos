@@ -598,15 +598,7 @@ function renderMonthlyAnalytics(data) {
   const ctx = document.getElementById("monthlyChart")
   if (!ctx || typeof Chart === "undefined") return
 
-  const monthMap = {}
-  const now = new Date()
-
-  // Always show last 6 months so chart never becomes one huge single bar.
-  for (let i = 5; i >= 0; i--) {
-    const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const key = `${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`
-    monthMap[key] = 0
-  }
+  const months = {}
 
   data.forEach(item => {
     if (!item) return
@@ -618,13 +610,21 @@ function renderMonthlyAnalytics(data) {
     if (Number.isNaN(d.getTime())) return
 
     const key = `${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`
-    if (!Object.prototype.hasOwnProperty.call(monthMap, key)) return
-
-    monthMap[key] = (monthMap[key] || 0) + toSafeNumber(item.amount)
+    months[key] = (months[key] || 0) + toSafeNumber(item.amount)
   })
 
-  const sortedLabels = Object.keys(monthMap)
-  const sortedValues = sortedLabels.map(label => Math.round(monthMap[label] || 0))
+  let sortedLabels = Object.keys(months).sort((a, b) => {
+    const [am, ay] = a.split("/").map(Number)
+    const [bm, by] = b.split("/").map(Number)
+    return new Date(ay, am - 1, 1) - new Date(by, bm - 1, 1)
+  })
+
+  let sortedValues = sortedLabels.map(label => Math.round(months[label]))
+
+  if (sortedLabels.length === 0) {
+    sortedLabels = ["No Earnings"]
+    sortedValues = [0]
+  }
 
   if (chartInstance) chartInstance.destroy()
 
@@ -636,8 +636,12 @@ function renderMonthlyAnalytics(data) {
     : lastValue > 0 ? 100 : 0
 
   if (growthBadge) {
-    growthBadge.classList.remove("hidden")
-    growthBadge.innerText = growthPercent >= 0 ? `+${growthPercent}%` : `${growthPercent}%`
+    if (sortedLabels.length > 1 || lastValue > 0) {
+      growthBadge.classList.remove("hidden")
+      growthBadge.innerText = growthPercent >= 0 ? `+${growthPercent}%` : `${growthPercent}%`
+    } else {
+      growthBadge.classList.add("hidden")
+    }
   }
 
   const barColors = sortedValues.map((value, index) => {
@@ -648,7 +652,9 @@ function renderMonthlyAnalytics(data) {
       "#0284c7",
       "#7dd3fc",
       "#0369a1",
-      "#38bdf8"
+      "#38bdf8",
+      "#0ea5e9",
+      "#0284c7"
     ]
     return palette[index % palette.length]
   })
@@ -659,7 +665,7 @@ function renderMonthlyAnalytics(data) {
   const bestMonthCalloutPlugin = {
     id: "bestMonthCallout",
     afterDatasetsDraw(chart) {
-      if (bestIndex < 0 || maxValue <= 0) return
+      if (bestIndex < 0 || maxValue <= 0 || sortedLabels[0] === "No Earnings") return
 
       const meta = chart.getDatasetMeta(0)
       const bar = meta?.data?.[bestIndex]
@@ -708,9 +714,9 @@ function renderMonthlyAnalytics(data) {
           bottomLeft: 0,
           bottomRight: 0
         },
-        maxBarThickness: 32,
-        barPercentage: 0.54,
-        categoryPercentage: 0.72
+        maxBarThickness: 34,
+        barPercentage: 0.46,
+        categoryPercentage: 0.62
       }]
     },
     plugins: [bestMonthCalloutPlugin],
