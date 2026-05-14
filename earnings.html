@@ -60,8 +60,13 @@ border:1px solid rgba(255,255,255,0.1);
 
 <!-- 📊 MONTHLY GRAPH -->
 <div class="glass rounded-2xl p-4 mb-6">
-<h2 class="text-lg mb-3">📊 Monthly Earnings</h2>
-<canvas id="monthlyChart"></canvas>
+<div class="flex items-center justify-between mb-3">
+  <h2 class="text-lg font-semibold text-white">📊 Monthly Earnings</h2>
+  <span class="text-[11px] text-white/70">Last 6 months</span>
+</div>
+<div class="rounded-2xl bg-white/95 p-3 border border-white/20">
+  <canvas id="monthlyChart" height="180"></canvas>
+</div>
 </div>
 
 <!-- 💳 PAYOUT SYSTEM -->
