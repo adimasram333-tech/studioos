@@ -623,44 +623,121 @@ function renderMonthlyAnalytics(data) {
 
   if (chartInstance) chartInstance.destroy()
 
+  const growthBadge = document.getElementById("monthlyGrowthBadge")
+  const lastValue = sortedValues.length ? Number(sortedValues[sortedValues.length - 1] || 0) : 0
+  const previousValue = sortedValues.length > 1 ? Number(sortedValues[sortedValues.length - 2] || 0) : 0
+  const growthPercent = previousValue > 0
+    ? Math.round(((lastValue - previousValue) / previousValue) * 100)
+    : lastValue > 0 ? 100 : 0
+
+  if (growthBadge) {
+    growthBadge.classList.remove("hidden")
+    growthBadge.innerText = growthPercent >= 0 ? `+${growthPercent}%` : `${growthPercent}%`
+  }
+
+  const barColors = sortedValues.map((_, index) => {
+    const palette = [
+      "#0f5f99",
+      "#0ea5e9",
+      "#2563eb",
+      "#67c2d4",
+      "#075da8",
+      "#0891b2",
+      "#6cc9df",
+      "#172554"
+    ]
+    return palette[index % palette.length]
+  })
+
+  const maxValue = Math.max(...sortedValues, 1)
+  const bestIndex = sortedValues.indexOf(maxValue)
+
+  const bestMonthCalloutPlugin = {
+    id: "bestMonthCallout",
+    afterDatasetsDraw(chart) {
+      if (bestIndex < 0 || !chart.data.datasets?.[0]) return
+
+      const meta = chart.getDatasetMeta(0)
+      const bar = meta?.data?.[bestIndex]
+      if (!bar) return
+
+      const ctx = chart.ctx
+      const value = Number(chart.data.datasets[0].data[bestIndex] || 0)
+      const x = bar.x
+      const y = bar.y
+      const boxWidth = 64
+      const boxHeight = 46
+      const boxX = x - boxWidth / 2
+      const boxY = Math.max(6, y - boxHeight - 10)
+
+      ctx.save()
+
+      ctx.shadowColor = "rgba(15, 23, 42, 0.30)"
+      ctx.shadowBlur = 14
+      ctx.shadowOffsetX = 8
+      ctx.shadowOffsetY = 10
+
+      ctx.fillStyle = "#ffffff"
+      ctx.fillRect(boxX, boxY, boxWidth, boxHeight)
+
+      ctx.shadowColor = "transparent"
+      ctx.fillStyle = "#075da8"
+      ctx.textAlign = "center"
+      ctx.font = "900 16px system-ui"
+      ctx.fillText("BEST", x, boxY + 18)
+
+      ctx.font = "900 15px system-ui"
+      ctx.fillText(`₹${Math.round(value)}`, x, boxY + 37)
+
+      ctx.restore()
+    }
+  }
+
   chartInstance = new Chart(ctx, {
-    type: "line",
+    type: "bar",
     data: {
       labels: sortedLabels,
       datasets: [{
-        label: "Earnings",
+        label: "Monthly Earnings",
         data: sortedValues,
-        tension: 0.38,
-        borderWidth: 3,
-        borderColor: "#2563eb",
-        backgroundColor: "rgba(37, 99, 235, 0.14)",
-        pointBackgroundColor: "#2563eb",
-        pointBorderColor: "#ffffff",
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        fill: true
+        backgroundColor: barColors,
+        borderColor: "#ffffff",
+        borderWidth: 0,
+        borderRadius: {
+          topLeft: 3,
+          topRight: 3,
+          bottomLeft: 0,
+          bottomRight: 0
+        },
+        barPercentage: 0.78,
+        categoryPercentage: 0.82
       }]
     },
+    plugins: [bestMonthCalloutPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 52,
+          right: 12,
+          left: 6,
+          bottom: 0
+        }
+      },
       interaction: {
         mode: "index",
         intersect: false
       },
       plugins: {
         legend: {
-          labels: {
-            color: "#0f172a",
-            boxWidth: 14,
-            usePointStyle: true,
-            font: {
-              weight: "700"
-            }
-          }
+          display: false
         },
         tooltip: {
+          backgroundColor: "#0f172a",
+          titleColor: "#ffffff",
+          bodyColor: "#ffffff",
+          padding: 12,
           callbacks: {
             label: function(context) {
               return ` Earnings: ₹${Math.round(toSafeNumber(context.parsed.y))}`
@@ -671,21 +748,29 @@ function renderMonthlyAnalytics(data) {
       scales: {
         x: {
           ticks: {
-            color: "#334155",
+            color: "#64748b",
             font: {
-              weight: "700"
+              size: 10,
+              weight: "800"
+            },
+            callback: function(value) {
+              const label = this.getLabelForValue(value)
+              return String(label || "").toUpperCase()
             }
           },
           grid: {
-            color: "rgba(15, 23, 42, 0.08)",
+            color: "rgba(15, 23, 42, 0.14)",
+            drawTicks: false,
             drawBorder: false
           }
         },
         y: {
           beginAtZero: true,
+          suggestedMax: Math.ceil(maxValue * 1.25),
           ticks: {
-            color: "#334155",
+            color: "#64748b",
             font: {
+              size: 10,
               weight: "700"
             },
             callback: function(value) {
