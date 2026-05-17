@@ -37,6 +37,107 @@ const EVENT_PHOTO_PRICE_CACHE = new Map()
 const GALLERY_MIN_PHOTO_SELLING_PRICE = 49
 const GALLERY_TRACK_USAGE_URL = "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/track-usage"
 
+// =============================
+// PUBLIC WEB URL HELPERS (ANDROID-SAFE)
+// =============================
+//
+// Public client/guest links must never use Capacitor/local app origin.
+// In Android builds, set window.STUDIOOS_PUBLIC_WEB_APP_BASE_URL from a central config
+// before gallery.js loads, for example: https://your-domain/studioos
+// Web fallback preserves the current browser behavior.
+
+function normalizeStudioOSBaseUrl(value){
+const raw = String(value || "").trim().replace(/\/+$/, "")
+if(!raw) return ""
+if(!/^https?:\/\//i.test(raw)) return ""
+return raw
+}
+
+function isAppLocalOrigin(){
+try{
+const protocol = String(window.location.protocol || "").toLowerCase()
+const origin = String(window.location.origin || "").toLowerCase()
+return (
+protocol === "capacitor:" ||
+protocol === "ionic:" ||
+protocol === "file:" ||
+origin.startsWith("capacitor://") ||
+origin.startsWith("ionic://")
+)
+}catch(e){
+return false
+}
+}
+
+function resolveStudioOSWebBaseFromCurrentPage(){
+try{
+const origin = String(window.location.origin || "").replace(/\/+$/, "")
+if(!origin || !/^https?:\/\//i.test(origin) || isAppLocalOrigin()){
+return ""
+}
+
+const parts = String(window.location.pathname || "")
+.split("/")
+.filter(Boolean)
+
+const studioIndex = parts.findIndex(part => String(part || "").toLowerCase() === "studioos")
+
+if(studioIndex >= 0){
+return `${origin}/${parts.slice(0, studioIndex + 1).join("/")}`
+}
+
+return origin
+}catch(e){
+return ""
+}
+}
+
+function getStudioOSPublicWebBaseUrl(){
+const configured =
+normalizeStudioOSBaseUrl(window.STUDIOOS_PUBLIC_WEB_APP_BASE_URL) ||
+normalizeStudioOSBaseUrl(window.PUBLIC_WEB_APP_BASE_URL) ||
+normalizeStudioOSBaseUrl(window.STUDIOOS_WEB_BASE_URL)
+
+if(configured){
+return configured
+}
+
+return resolveStudioOSWebBaseFromCurrentPage()
+}
+
+function buildStudioOSPublicPageUrl(pageName, params = {}){
+const baseUrl = getStudioOSPublicWebBaseUrl()
+const safePage = String(pageName || "").replace(/^\/+/, "").trim()
+
+if(!baseUrl || !safePage){
+return ""
+}
+
+const query = new URLSearchParams()
+
+Object.entries(params || {}).forEach(([key, value])=>{
+if(value === undefined || value === null || value === ""){
+return
+}
+query.set(String(key), String(value))
+})
+
+const queryString = query.toString()
+return `${baseUrl}/${safePage}${queryString ? `?${queryString}` : ""}`
+}
+
+function requireStudioOSPublicPageUrl(pageName, params = {}){
+const url = buildStudioOSPublicPageUrl(pageName, params)
+
+if(url){
+return url
+}
+
+alert("Public web URL is not configured. Please open this feature from StudioOS Web or configure STUDIOOS_PUBLIC_WEB_APP_BASE_URL for Android.")
+throw new Error("StudioOS public web URL is not configured.")
+}
+
+
 function normalizePlanValue(value){
 return String(value || "").trim().toLowerCase()
 }
@@ -925,7 +1026,7 @@ alert("Unable to enable public sharing. Please try again.")
 return
 }
 
-const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
+const link = requireStudioOSPublicPageUrl("access.html", { event_id: id })
 navigator.clipboard.writeText(link)
 alert("Link copied")
 }
@@ -1098,7 +1199,7 @@ return
 const existingMenu = document.getElementById("floatingMenu")
 if(existingMenu) existingMenu.remove()
 
-const link = `${window.location.origin}/studioos/access.html?event_id=${id}`
+const link = requireStudioOSPublicPageUrl("access.html", { event_id: id })
 
 let modal = document.createElement("div")
 
@@ -1819,8 +1920,12 @@ return `
 
 function getFaceScanUrl(eventId, role = "client"){
 const safeRole = role === "photographer" ? "photographer" : "client"
-const redirectUrl = `${window.location.origin}/studioos/gallery.html?event_id=${eventId}`
-return `face-capture.html?event_id=${encodeURIComponent(eventId)}&role=${encodeURIComponent(safeRole)}&redirect=${encodeURIComponent(redirectUrl)}`
+const redirectUrl = requireStudioOSPublicPageUrl("gallery.html", { event_id: eventId })
+return requireStudioOSPublicPageUrl("face-capture.html", {
+event_id: eventId,
+role: safeRole,
+redirect: redirectUrl
+})
 }
 
 function getFaceFilterDisabledSessionKey(eventId){
