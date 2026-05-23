@@ -50,6 +50,73 @@ return text
 }
 
 
+function isStudioOSNativeApp(){
+
+try{
+
+if(
+window.Capacitor &&
+typeof window.Capacitor.isNativePlatform === "function" &&
+window.Capacitor.isNativePlatform()
+){
+return true
+}
+
+const protocol = String(window.location.protocol || "").toLowerCase()
+
+return protocol === "capacitor:" || protocol === "file:"
+
+}catch(error){
+
+return false
+
+}
+
+}
+
+function getStudioOSPublicBaseUrl(){
+
+const configuredUrl = String(window.STUDIOOS_PUBLIC_BASE_URL || "").trim()
+
+if(configuredUrl){
+return configuredUrl.replace(/\/+$/,"")
+}
+
+return "https://adimasram333-tech.github.io/studioos"
+
+}
+
+function buildProposalPreviewUrl(clientName, shortId, quotationId){
+
+const safeSlug = slugify(clientName || "proposal") || "proposal"
+const slugPart = safeSlug + "-" + shortId
+
+if(isStudioOSNativeApp()){
+return "proposal.html?id=" + encodeURIComponent(quotationId) + "&slug=" + encodeURIComponent(slugPart)
+}
+
+return getStudioOSPublicBaseUrl() + "/p/" + slugPart
+
+}
+
+function openProposalPreview(clientName, shortId, quotationId){
+
+const targetUrl = buildProposalPreviewUrl(clientName, shortId, quotationId)
+
+try{
+
+window.location.assign(targetUrl)
+
+}catch(error){
+
+window.location.href = targetUrl
+
+}
+
+}
+
+
+
 // =============================
 // EDIT MODE DETECTION
 // =============================
@@ -162,6 +229,247 @@ return null
 
 
 // =============================
+// ANDROID COVER IMAGE COMPATIBILITY
+// =============================
+
+function isStudioOSNativeQuotationApp(){
+try{
+const protocol = String(window.location.protocol || "").toLowerCase()
+
+if(
+window.Capacitor &&
+typeof window.Capacitor.isNativePlatform === "function" &&
+window.Capacitor.isNativePlatform()
+){
+return true
+}
+
+return protocol === "capacitor:" || protocol === "ionic:" || protocol === "file:"
+}catch(error){
+return false
+}
+}
+
+function inferQuotationCoverMimeType(fileName, fallback = "image/jpeg"){
+const name = String(fileName || "").toLowerCase()
+
+if(name.endsWith(".png")) return "image/png"
+if(name.endsWith(".webp")) return "image/webp"
+if(name.endsWith(".gif")) return "image/gif"
+if(name.endsWith(".heic")) return "image/heic"
+if(name.endsWith(".heif")) return "image/heif"
+if(name.endsWith(".jpg") || name.endsWith(".jpeg")) return "image/jpeg"
+
+return fallback
+}
+
+function isLikelyUnsupportedNativeCoverImage(file){
+const name = String(file?.name || "").toLowerCase()
+const type = String(file?.type || "").toLowerCase()
+
+return (
+name.endsWith(".heic") ||
+name.endsWith(".heif") ||
+type.includes("heic") ||
+type.includes("heif")
+)
+}
+
+async function normalizeProposalCoverFileForAndroid(file){
+if(!file || !isStudioOSNativeQuotationApp()){
+return file
+}
+
+try{
+const fileName = file.name || `proposal-cover-${Date.now()}.jpg`
+const inferredType = file.type || inferQuotationCoverMimeType(fileName)
+const buffer = await file.arrayBuffer()
+
+if(!buffer || !buffer.byteLength){
+return file
+}
+
+const blob = new Blob([buffer], {
+type: inferredType || "image/jpeg"
+})
+
+try{
+return new File([blob], fileName, {
+type: inferredType || blob.type || "image/jpeg",
+lastModified: file.lastModified || Date.now()
+})
+}catch(_fileError){
+blob.name = fileName
+blob.lastModified = file.lastModified || Date.now()
+return blob
+}
+}catch(error){
+console.warn("Android proposal cover normalization skipped", error)
+return file
+}
+}
+
+function buildProposalCoverPreviewUrl(file){
+try{
+return URL.createObjectURL(file)
+}catch(error){
+return ""
+}
+}
+
+function setQuotationPreviewButtonLoading(isLoading){
+const button = get("previewBtn")
+if(!button) return
+
+button.disabled = !!isLoading
+button.innerText = isLoading ? "Generating..." : "Preview Quote"
+}
+
+function setProposalCoverStatusText(message){
+const statusEl = get("proposalCoverStatus")
+if(statusEl && message){
+statusEl.innerText = message
+}
+}
+
+function syncQuotationDateFieldDisplay(){
+try{
+if(typeof window.syncStudioOSQuotationDateFields === "function"){
+window.syncStudioOSQuotationDateFields()
+return
+}
+
+const inputs = [
+get("startDate"),
+get("endDate")
+]
+
+inputs.forEach(function(input){
+if(!input) return
+const wrap = input.closest(".dateField")
+if(!wrap) return
+
+if(input.value){
+wrap.classList.add("hasValue")
+}else{
+wrap.classList.remove("hasValue")
+}
+})
+}catch(error){
+console.warn("Quotation date display sync skipped:", error)
+}
+}
+
+function injectQuotationAndroidDateLayoutFix(){
+if(document.getElementById("studioos-quotation-date-layout-fix")){
+return
+}
+
+const style = document.createElement("style")
+style.id = "studioos-quotation-date-layout-fix"
+style.textContent = `
+@media (max-width: 768px){
+  .dateRow{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    gap:8px !important;
+    width:100% !important;
+    align-items:start !important;
+  }
+
+  .dateField{
+    position:relative !important;
+    min-width:0 !important;
+    width:100% !important;
+  }
+
+  .dateFieldLabel{
+    display:block !important;
+    position:absolute !important;
+    left:12px !important;
+    top:50% !important;
+    transform:translateY(-50%) !important;
+    z-index:2 !important;
+    color:#d1d5db !important;
+    pointer-events:none !important;
+    max-width:calc(100% - 42px) !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+
+  .dateField:not(.hasValue) .dateFieldLabel{
+    opacity:1 !important;
+    visibility:visible !important;
+  }
+
+  .dateField.hasValue .dateFieldLabel,
+  .dateField:focus-within .dateFieldLabel{
+    opacity:0 !important;
+    visibility:hidden !important;
+  }
+
+  #startDate,
+  #endDate{
+    min-height:46px !important;
+    height:46px !important;
+    line-height:46px !important;
+    padding:0 34px 0 10px !important;
+    margin-bottom:8px !important;
+    font-size:15px !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    background:#374151 !important;
+  }
+
+  .dateField:not(.hasValue) #startDate,
+  .dateField:not(.hasValue) #endDate{
+    color:transparent !important;
+    -webkit-text-fill-color:transparent !important;
+  }
+
+  .dateField.hasValue #startDate,
+  .dateField.hasValue #endDate,
+  .dateField:focus-within #startDate,
+  .dateField:focus-within #endDate{
+    color:#ffffff !important;
+    -webkit-text-fill-color:#ffffff !important;
+  }
+
+  #startDate::-webkit-date-and-time-value,
+  #endDate::-webkit-date-and-time-value{
+    text-align:left !important;
+    min-height:46px !important;
+    line-height:46px !important;
+    padding:0 !important;
+  }
+
+  .dateField:not(.hasValue) #startDate::-webkit-date-and-time-value,
+  .dateField:not(.hasValue) #endDate::-webkit-date-and-time-value{
+    color:transparent !important;
+    -webkit-text-fill-color:transparent !important;
+  }
+
+  .dateField.hasValue #startDate::-webkit-date-and-time-value,
+  .dateField.hasValue #endDate::-webkit-date-and-time-value,
+  .dateField:focus-within #startDate::-webkit-date-and-time-value,
+  .dateField:focus-within #endDate::-webkit-date-and-time-value{
+    color:#ffffff !important;
+    -webkit-text-fill-color:#ffffff !important;
+  }
+
+  #startDate::-webkit-calendar-picker-indicator,
+  #endDate::-webkit-calendar-picker-indicator{
+    opacity:0.85 !important;
+  }
+}
+`
+document.head.appendChild(style)
+}
+
+
+// =============================
 // PROPOSAL COVER UI HELPERS
 // =============================
 
@@ -234,13 +542,14 @@ chooseBtn.addEventListener("click",function(){
 if(!proposalBrandingAllowed){
 return
 }
+input.value = ""
 input.click()
 })
 }
 
 if(input){
 
-input.addEventListener("change",function(e){
+input.addEventListener("change",async function(e){
 
 if(!proposalBrandingAllowed){
 input.value = ""
@@ -268,19 +577,74 @@ false
 return
 }
 
-selectedProposalCoverFile = file
+const normalizedFile = await normalizeProposalCoverFileForAndroid(file)
 
+if(isStudioOSNativeQuotationApp() && isLikelyUnsupportedNativeCoverImage(normalizedFile)){
+alert("Please select a JPG, JPEG, PNG, or WEBP image for proposal cover.")
+input.value = ""
+selectedProposalCoverFile = null
+
+if(existingProposalCoverImage){
+setProposalCoverPreviewState(
+existingProposalCoverImage,
+"Saved image",
+true
+)
+}else{
+setProposalCoverPreviewState(
+"",
+"Default image",
+false
+)
+}
+
+return
+}
+
+selectedProposalCoverFile = normalizedFile
+
+const previewUrl = buildProposalCoverPreviewUrl(normalizedFile)
+
+if(previewUrl){
+setProposalCoverPreviewState(
+previewUrl,
+"Uploading cover photo...",
+true
+)
+}else{
 const reader = new FileReader()
 
 reader.onload = function(evt){
 setProposalCoverPreviewState(
 evt.target?.result || "",
-"Custom image selected",
+"Uploading cover photo...",
 true
 )
 }
 
-reader.readAsDataURL(file)
+reader.readAsDataURL(normalizedFile)
+}
+
+try{
+await uploadSelectedProposalCoverImmediately()
+}catch(error){
+console.error("IMMEDIATE PROPOSAL COVER UPLOAD ERROR:", error)
+alert(error?.message || "Cover photo upload failed. Please try again.")
+
+if(existingProposalCoverImage){
+setProposalCoverPreviewState(
+existingProposalCoverImage,
+"Saved image",
+true
+)
+}else{
+setProposalCoverPreviewState(
+"",
+"Default image",
+false
+)
+}
+}
 
 })
 
@@ -622,38 +986,45 @@ proposal_title_color: existingProposalTitleColor || null
 
 }
 
-const compressedBlob = await compressImage(selectedProposalCoverFile)
-const titleColor = await extractTitleColor(selectedProposalCoverFile)
+setProposalCoverStatusText("Uploading cover photo...")
 
-if(existingProposalCoverImage){
+const normalizedCoverFile = await normalizeProposalCoverFileForAndroid(selectedProposalCoverFile)
 
-try{
-
-const oldPath = getStoragePathFromPublicUrl(existingProposalCoverImage)
-
-if(oldPath){
-await supabase.storage
-.from("proposal-covers")
-.remove([oldPath])
+if(isStudioOSNativeQuotationApp() && isLikelyUnsupportedNativeCoverImage(normalizedCoverFile)){
+throw new Error("Please select a JPG, JPEG, PNG, or WEBP image for proposal cover.")
 }
 
-}catch(err){
-console.error("OLD PROPOSAL COVER DELETE ERROR:", err)
+const compressedBlob = await compressImage(normalizedCoverFile)
+const titleColor = await extractTitleColor(normalizedCoverFile)
+
+if(!compressedBlob || !Number(compressedBlob.size || 0)){
+throw new Error("Proposal cover image could not be prepared.")
 }
 
-}
+// Production safety:
+// Upload new cover first, update DB after successful upload, then cleanup old file.
+// Never delete the old saved cover before the new upload succeeds.
+const previousCoverImage = existingProposalCoverImage || ""
+const previousCoverPath = getStoragePathFromPublicUrl(previousCoverImage)
 
-const filePath = `${userId}/proposal-cover.jpg`
+const filePath = `${userId}/proposal-cover-${Date.now()}.jpg`
+
+const uploadBody =
+compressedBlob instanceof Blob
+? compressedBlob
+: new Blob([compressedBlob], { type: "image/jpeg" })
 
 const { error: uploadError } =
 await supabase.storage
 .from("proposal-covers")
-.upload(filePath, compressedBlob, {
+.upload(filePath, uploadBody, {
 contentType: "image/jpeg",
+cacheControl: "3600",
 upsert: true
 })
 
 if(uploadError){
+setProposalCoverStatusText("Cover photo upload failed. Please try again.")
 throw uploadError
 }
 
@@ -662,7 +1033,12 @@ supabase.storage
 .from("proposal-covers")
 .getPublicUrl(filePath)
 
-const publicUrl = `${publicUrlData.publicUrl}?v=${Date.now()}`
+const publicUrl = publicUrlData?.publicUrl || ""
+
+if(!publicUrl){
+setProposalCoverStatusText("Cover photo upload failed. Please try again.")
+throw new Error("Proposal cover public URL not created.")
+}
 
 const { error: updateError } =
 await supabase
@@ -674,6 +1050,7 @@ proposal_title_color: titleColor
 .eq("user_id", userId)
 
 if(updateError){
+setProposalCoverStatusText("Cover photo upload failed. Please try again.")
 throw updateError
 }
 
@@ -688,13 +1065,62 @@ input.value = ""
 
 setProposalCoverPreviewState(
 existingProposalCoverImage,
-"Saved image",
+"Cover photo successfully changed",
 true
 )
+
+if(previousCoverPath && previousCoverPath !== filePath){
+try{
+await supabase.storage
+.from("proposal-covers")
+.remove([previousCoverPath])
+}catch(err){
+console.warn("OLD PROPOSAL COVER DELETE SKIPPED:", err)
+}
+}
 
 return {
 proposal_cover_image: existingProposalCoverImage,
 proposal_title_color: existingProposalTitleColor
+}
+
+}
+
+let proposalCoverImmediateUploadPromise = null
+
+async function uploadSelectedProposalCoverImmediately(){
+
+if(!proposalBrandingAllowed || !selectedProposalCoverFile){
+return null
+}
+
+if(proposalCoverImmediateUploadPromise){
+return await proposalCoverImmediateUploadPromise
+}
+
+proposalCoverImmediateUploadPromise = (async function(){
+
+const user = await getCurrentUser()
+
+if(!user?.id){
+throw new Error("Login required")
+}
+
+const savedBranding = await uploadProposalCoverAndSaveBranding(user.id)
+
+setProposalCoverStatusText("Cover photo successfully changed")
+
+return savedBranding
+
+})()
+
+try{
+return await proposalCoverImmediateUploadPromise
+}catch(error){
+setProposalCoverStatusText("Cover photo upload failed. Please try again.")
+throw error
+}finally{
+proposalCoverImmediateUploadPromise = null
 }
 
 }
@@ -728,6 +1154,7 @@ get("clientPhone").value = data.phone || ""
 
 get("startDate").value = data.event_date || ""
 get("endDate").value = data.end_date || ""
+syncQuotationDateFieldDisplay()
 
 get("packageSelect").value = data.package || ""
 
@@ -1050,6 +1477,24 @@ return null
 
 window.addEventListener("DOMContentLoaded", async function(){
 
+injectQuotationAndroidDateLayoutFix()
+syncQuotationDateFieldDisplay()
+
+const startDateInput = get("startDate")
+const endDateInput = get("endDate")
+
+if(startDateInput){
+startDateInput.addEventListener("input", syncQuotationDateFieldDisplay)
+startDateInput.addEventListener("change", syncQuotationDateFieldDisplay)
+startDateInput.addEventListener("blur", syncQuotationDateFieldDisplay)
+}
+
+if(endDateInput){
+endDateInput.addEventListener("input", syncQuotationDateFieldDisplay)
+endDateInput.addEventListener("change", syncQuotationDateFieldDisplay)
+endDateInput.addEventListener("blur", syncQuotationDateFieldDisplay)
+}
+
 initProposalCoverUI()
 setProposalBrandingSectionVisible(false)
 
@@ -1185,12 +1630,15 @@ proposal_title_color: null
 }
 
 try{
+if(proposalCoverImmediateUploadPromise){
+await proposalCoverImmediateUploadPromise
+}
+
 proposalBranding = await uploadProposalCoverAndSaveBranding(user.id)
 }catch(err){
 console.error("PROPOSAL BRANDING SAVE ERROR:", err)
-alert("Proposal cover upload failed")
-previewBtn.disabled = false
-previewBtn.innerText = "Preview Quote"
+alert(err?.message || "Cover photo upload failed. Please try again.")
+setQuotationPreviewButtonLoading(false)
 return
 }
 
@@ -1317,11 +1765,11 @@ await supabase
 
 
 // REDIRECT FIX
+// Web keeps public SEO proposal URL.
+// Android Capacitor app uses local proposal.html with id/slug query,
+// because absolute /studioos/p/... can open a blank WebView screen.
 
-const slug = slugify(clientName)
-
-window.location.href =
-"/studioos/p/" + slug + "-" + shortId
+openProposalPreview(clientName, shortId, saved.id)
 
 })
 
