@@ -6,6 +6,9 @@ let quotationData = null;
 let teamData = {};
 let isTeamSaved = false;
 let coverFile = null;
+let existingTeamSheetCoverImage = "";
+let existingTeamSheetTitleColor = "";
+let coverImmediateUploadPromise = null;
 
 
 // ===== GET QUOTATION ID =====
@@ -419,7 +422,8 @@ function applyCoverStatus(options = {}) {
   const {
     hasCustomImage = false,
     isSelected = false,
-    imageUrl = ""
+    imageUrl = "",
+    statusText = ""
   } = options;
 
   const coverStatus = document.getElementById("coverStatus");
@@ -439,8 +443,13 @@ function applyCoverStatus(options = {}) {
     removeCoverBtn.classList.add("hidden");
   }
 
+  if (statusText) {
+    coverStatus.innerText = statusText;
+    return;
+  }
+
   if (isSelected) {
-    coverStatus.innerText = "Custom image selected";
+    coverStatus.innerText = "Uploading cover photo...";
     return;
   }
 
@@ -452,49 +461,183 @@ function applyCoverStatus(options = {}) {
   coverStatus.innerText = "Default image";
 }
 
+function setTeamSheetCoverStatusText(message) {
+  const coverStatus = document.getElementById("coverStatus");
+  if (coverStatus && message) {
+    coverStatus.innerText = message;
+  }
+}
+
+function buildTeamCoverPreviewUrl(file) {
+  try {
+    return URL.createObjectURL(file);
+  } catch (error) {
+    return "";
+  }
+}
+
+async function getCurrentTeamUser() {
+  if (!db) {
+    throw new Error("Supabase not initialized");
+  }
+
+  const { data } = await db.auth.getUser();
+  return data?.user || null;
+}
 
 // ===== HANDLE COVER INPUT =====
 
 function initCoverHandlers() {
   const input = document.getElementById("coverInput");
+  const uploadBtn = document.getElementById("uploadCoverBtn");
   const removeBtn = document.getElementById("removeCoverBtn");
 
+  if (uploadBtn && input) {
+    uploadBtn.addEventListener("click", function() {
+      input.value = "";
+      input.click();
+    });
+  }
+
   if (input) {
-    input.addEventListener("change", function(e) {
-      const file = e.target.files[0];
+    input.addEventListener("change", async function(e) {
+      const file = e.target.files && e.target.files[0];
       if (!file) return;
 
       coverFile = file;
 
-      const reader = new FileReader();
-      reader.onload = function() {
+      const previewUrl = buildTeamCoverPreviewUrl(file);
+
+      if (previewUrl) {
         applyCoverStatus({
           hasCustomImage: false,
           isSelected: true,
-          imageUrl: reader.result
+          imageUrl: previewUrl,
+          statusText: "Uploading cover photo..."
         });
-      };
-      reader.readAsDataURL(file);
+      } else {
+        const reader = new FileReader();
+
+        reader.onload = function() {
+          applyCoverStatus({
+            hasCustomImage: false,
+            isSelected: true,
+            imageUrl: reader.result,
+            statusText: "Uploading cover photo..."
+          });
+        };
+
+        reader.readAsDataURL(file);
+      }
+
+      try {
+        await uploadTeamSheetCoverImmediately();
+      } catch (err) {
+        console.error("IMMEDIATE TEAM COVER UPLOAD ERROR:", err);
+
+        coverFile = null;
+        input.value = "";
+
+        if (existingTeamSheetCoverImage) {
+          applyCoverStatus({
+            hasCustomImage: true,
+            isSelected: false,
+            imageUrl: existingTeamSheetCoverImage,
+            statusText: "Cover photo upload failed. Please try again."
+          });
+        } else {
+          applyCoverStatus({
+            hasCustomImage: false,
+            isSelected: false,
+            imageUrl: "",
+            statusText: "Cover photo upload failed. Please try again."
+          });
+        }
+      }
     });
   }
 
   if (removeBtn) {
-    removeBtn.addEventListener("click", function() {
+    removeBtn.addEventListener("click", async function() {
       const inputEl = document.getElementById("coverInput");
       if (inputEl) {
         inputEl.value = "";
       }
 
       coverFile = null;
-      applyCoverStatus({
-        hasCustomImage: false,
-        isSelected: false,
-        imageUrl: ""
-      });
+
+      try {
+        await removeTeamSheetCoverImmediately();
+      } catch (err) {
+        console.error("REMOVE COVER ERROR:", err);
+        setTeamSheetCoverStatusText("Cover photo remove failed. Please try again.");
+      }
     });
   }
 }
 
+async function uploadTeamSheetCoverImmediately() {
+  if (!coverFile) return null;
+
+  if (coverImmediateUploadPromise) {
+    return await coverImmediateUploadPromise;
+  }
+
+  coverImmediateUploadPromise = (async function() {
+    const user = await getCurrentTeamUser();
+
+    if (!user?.id) {
+      throw new Error("Login required");
+    }
+
+    setTeamSheetCoverStatusText("Uploading cover photo...");
+    await uploadCoverIfNeeded(user.id);
+    setTeamSheetCoverStatusText("Cover photo successfully changed");
+
+    return true;
+  })();
+
+  try {
+    return await coverImmediateUploadPromise;
+  } catch (error) {
+    setTeamSheetCoverStatusText("Cover photo upload failed. Please try again.");
+    throw error;
+  } finally {
+    coverImmediateUploadPromise = null;
+  }
+}
+
+async function removeTeamSheetCoverImmediately() {
+  const user = await getCurrentTeamUser();
+
+  if (!user?.id) {
+    throw new Error("Login required");
+  }
+
+  await ensurePhotographerSettingsRow(user.id);
+
+  const { error } = await db
+    .from("photographer_settings")
+    .update({
+      team_sheet_cover_image: null,
+      team_sheet_title_color: null
+    })
+    .eq("user_id", user.id);
+
+  if (error) {
+    throw error;
+  }
+
+  existingTeamSheetCoverImage = "";
+  existingTeamSheetTitleColor = "";
+
+  applyCoverStatus({
+    hasCustomImage: false,
+    isSelected: false,
+    imageUrl: "",
+    statusText: "Default image"
+  });
+}
 
 // ===== LOAD EXISTING COVER SETTINGS =====
 
@@ -514,7 +657,7 @@ async function loadExistingCoverSettings() {
 
     const { data, error } = await db
       .from("photographer_settings")
-      .select("team_sheet_cover_image")
+      .select("team_sheet_cover_image, team_sheet_title_color")
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -523,6 +666,8 @@ async function loadExistingCoverSettings() {
     }
 
     const imageUrl = data?.team_sheet_cover_image || "";
+    existingTeamSheetCoverImage = imageUrl;
+    existingTeamSheetTitleColor = data?.team_sheet_title_color || "";
 
     applyCoverStatus({
       hasCustomImage: !!imageUrl,
@@ -608,15 +753,19 @@ async function uploadCoverIfNeeded(userId) {
   try {
     await ensurePhotographerSettingsRow(userId);
 
-    const compressedBlob = await compressImage(coverFile);
-    const titleColor = await extractColor(coverFile);
+    setTeamSheetCoverStatusText("Uploading cover photo...");
+
+    const fileToUpload = coverFile;
+    const compressedBlob = await compressImage(fileToUpload);
+    const titleColor = await extractColor(fileToUpload);
     const path = `${userId}/team-sheet.jpg`;
 
     const { error: uploadError } = await db.storage
       .from("team-sheet")
       .upload(path, compressedBlob, {
         upsert: true,
-        contentType: "image/jpeg"
+        contentType: "image/jpeg",
+        cacheControl: "3600"
       });
 
     if (uploadError) {
@@ -626,6 +775,10 @@ async function uploadCoverIfNeeded(userId) {
     const { data: publicUrlData } = db.storage
       .from("team-sheet")
       .getPublicUrl(path);
+
+    if (!publicUrlData?.publicUrl) {
+      throw new Error("Team Sheet cover public URL not created");
+    }
 
     const publicUrl = `${publicUrlData.publicUrl}?v=${Date.now()}`;
 
@@ -642,6 +795,8 @@ async function uploadCoverIfNeeded(userId) {
     }
 
     coverFile = null;
+    existingTeamSheetCoverImage = publicUrl;
+    existingTeamSheetTitleColor = titleColor;
 
     const inputEl = document.getElementById("coverInput");
     if (inputEl) {
@@ -651,15 +806,16 @@ async function uploadCoverIfNeeded(userId) {
     applyCoverStatus({
       hasCustomImage: true,
       isSelected: false,
-      imageUrl: publicUrl
+      imageUrl: publicUrl,
+      statusText: "Cover photo successfully changed"
     });
 
   } catch (err) {
     console.error("UPLOAD COVER ERROR:", err);
+    setTeamSheetCoverStatusText("Cover photo upload failed. Please try again.");
     throw err;
   }
 }
-
 
 // ===== LOAD SAVED TEAM FROM DB =====
 
