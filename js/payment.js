@@ -1,6 +1,66 @@
 // =============================
+// STUDIOOS APP MESSAGE HELPERS
+// =============================
+
+function showStudioOSToast(message, type = "success"){
+
+const existingToast = document.getElementById("studioosPaymentToast")
+if(existingToast){
+existingToast.remove()
+}
+
+const toast = document.createElement("div")
+toast.id = "studioosPaymentToast"
+toast.style.position = "fixed"
+toast.style.left = "50%"
+toast.style.bottom = "calc(84px + env(safe-area-inset-bottom, 0px))"
+toast.style.transform = "translateX(-50%)"
+toast.style.width = "min(calc(100% - 32px), 340px)"
+toast.style.zIndex = "2147482600"
+toast.style.padding = "0.82rem 1rem"
+toast.style.borderRadius = "1rem"
+toast.style.background = type === "error" ? "rgba(127,29,29,0.96)" : "rgba(15,23,42,0.96)"
+toast.style.border = type === "error" ? "1px solid rgba(248,113,113,0.35)" : "1px solid rgba(255,255,255,0.12)"
+toast.style.boxShadow = "0 18px 55px rgba(0,0,0,0.38)"
+toast.style.backdropFilter = "blur(16px)"
+toast.style.webkitBackdropFilter = "blur(16px)"
+toast.style.color = "#ffffff"
+toast.style.fontSize = "0.88rem"
+toast.style.fontWeight = "800"
+toast.style.textAlign = "center"
+toast.style.pointerEvents = "none"
+toast.textContent = message
+
+document.body.appendChild(toast)
+
+setTimeout(()=>{
+toast.style.transition = "opacity 180ms ease, transform 180ms ease"
+toast.style.opacity = "0"
+toast.style.transform = "translateX(-50%) translateY(8px)"
+setTimeout(()=>{
+toast.remove()
+}, 220)
+}, 1800)
+
+}
+
+function syncPaymentCustomSelects(){
+
+try{
+if(window.StudioOSPaymentSelect && typeof window.StudioOSPaymentSelect.syncAll === "function"){
+window.StudioOSPaymentSelect.syncAll()
+}
+}catch(e){
+console.warn("Payment select sync skipped:", e)
+}
+
+}
+
+
+// =============================
 // GET CURRENT USER
 // =============================
+
 
 async function getCurrentUser(){
 
@@ -198,7 +258,7 @@ if(!user) return
 const quotationId = getQuotationId()
 
 if(!quotationId){
-alert("Invalid quotation")
+showStudioOSToast("Invalid quotation", "error")
 return
 }
 
@@ -229,7 +289,7 @@ typeEl?.value
 
 if(!amount || !date || !method || !type){
 
-alert("Please fill all fields")
+showStudioOSToast("Please fill all fields", "error")
 return
 
 }
@@ -260,13 +320,13 @@ savingPayment = false
 if(error){
 
 console.error(error)
-alert("Error saving payment")
+showStudioOSToast("Error saving payment", "error")
 return
 
 }
 
 
-alert("Payment saved successfully")
+showStudioOSToast("Payment saved successfully")
 
 // reload history
 loadPayments()
@@ -275,8 +335,17 @@ loadPayments()
 
 if(amountEl) amountEl.value = ""
 if(dateEl) dateEl.value = ""
-if(methodEl) methodEl.value = ""
-if(typeEl) typeEl.value = ""
+if(methodEl){
+methodEl.value = ""
+methodEl.dispatchEvent(new Event("change", { bubbles:true }))
+}
+
+if(typeEl){
+typeEl.value = ""
+typeEl.dispatchEvent(new Event("change", { bubbles:true }))
+}
+
+syncPaymentCustomSelects()
 
 }
 
