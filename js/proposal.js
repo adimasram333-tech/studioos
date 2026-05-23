@@ -622,6 +622,47 @@ return null
 }
 }
 
+function getStudioOSFilesystemPlugin(){
+try{
+return window.Capacitor?.Plugins?.Filesystem || null
+}catch(error){
+return null
+}
+}
+
+function getStudioOSFilesystemDirectory(){
+try{
+const capacitorDirectory = window.Capacitor?.FilesystemDirectory
+if(capacitorDirectory?.Cache) return capacitorDirectory.Cache
+if(window.FilesystemDirectory?.Cache) return window.FilesystemDirectory.Cache
+return "CACHE"
+}catch(error){
+return "CACHE"
+}
+}
+
+function normalizeStudioOSFileUri(value){
+const raw = String(value || "").trim()
+
+if(!raw){
+return ""
+}
+
+if(raw.startsWith("file://")){
+return raw
+}
+
+if(raw.startsWith("/")){
+return "file://" + raw
+}
+
+return raw
+}
+
+function isStudioOSFileUri(value){
+return String(value || "").trim().startsWith("file://")
+}
+
 function blobToBase64ForProposal(blob){
 return new Promise((resolve,reject)=>{
 
@@ -686,6 +727,48 @@ target: "downloads"
 return {
 fileName,
 uri: result?.uri || ""
+}
+
+}
+
+async function saveProposalPdfBlobForNativeShare(blob, filename){
+
+const Filesystem = getStudioOSFilesystemPlugin()
+
+if(!Filesystem || typeof Filesystem.writeFile !== "function"){
+throw new Error("Native file system is not available")
+}
+
+const fileName = sanitizeProposalPdfFileName(filename)
+const base64Data = await blobToBase64ForProposal(blob)
+const directory = getStudioOSFilesystemDirectory()
+const path = "studioos-share/" + Date.now() + "-" + fileName
+
+await Filesystem.writeFile({
+path,
+data: base64Data,
+directory,
+recursive: true
+})
+
+let fileUri = ""
+
+if(typeof Filesystem.getUri === "function"){
+const uriResult = await Filesystem.getUri({
+path,
+directory
+})
+
+fileUri = normalizeStudioOSFileUri(uriResult?.uri || "")
+}
+
+if(!isStudioOSFileUri(fileUri)){
+throw new Error("PDF file URI could not be prepared for sharing")
+}
+
+return {
+fileName,
+uri: fileUri
 }
 
 }
@@ -796,17 +879,17 @@ filename = "premium-photography-proposal.pdf"
 }
 
 const pdfBlob = await generateProposalPdfBlob(filename)
-const saved = await saveProposalPdfBlobNatively(pdfBlob, filename)
+const saved = await saveProposalPdfBlobForNativeShare(pdfBlob, filename)
 
-if(!saved?.uri){
+if(!saved?.uri || !isStudioOSFileUri(saved.uri)){
 throw new Error("PDF file was created but cannot be shared")
 }
 
 // Android production-safe fix:
 // Do not send public proposal links and do not open whatsapp:// / wa.me from WebView.
-// Share the generated local PDF as a real attachment through the native share sheet.
-// Capacitor Share expects file attachments in the `files` array; using `url` for
-// a local PDF URI can trigger Android WebView/OS "Unsupported url" errors.
+// Share the generated local PDF as a real file:// attachment through the native share sheet.
+// Capacitor Share rejects non-file URIs in the `files` array with
+// "only file urls are supported", so the PDF is first written into app cache.
 await Share.share({
 title: "StudioOS Proposal",
 text: buildProposalShareMessage(data, profile),
