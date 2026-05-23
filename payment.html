@@ -31,6 +31,130 @@ border:1px solid rgba(255,255,255,0.1);
 margin-bottom:10px;
 }
 
+
+/* =============================
+   ANDROID SAFE CUSTOM SELECT
+   Keeps native select as source of truth
+   ============================= */
+
+.native-select-hidden{
+position:absolute !important;
+left:-9999px !important;
+width:1px !important;
+height:1px !important;
+opacity:0 !important;
+pointer-events:none !important;
+}
+
+.studioos-select-shell{
+position:relative;
+width:100%;
+margin-bottom:10px;
+}
+
+.studioos-select-trigger{
+width:100%;
+min-height:46px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+padding:10px;
+border-radius:10px;
+background:#374151;
+color:white;
+border:1px solid rgba(255,255,255,0.1);
+text-align:left;
+cursor:pointer;
+-webkit-tap-highlight-color:transparent;
+}
+
+.studioos-select-trigger span{
+display:block;
+min-width:0;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+}
+
+.studioos-select-trigger svg{
+width:18px;
+height:18px;
+flex-shrink:0;
+color:rgba(255,255,255,0.72);
+transition:transform 160ms ease;
+}
+
+.studioos-select-shell.is-open .studioos-select-trigger svg{
+transform:rotate(180deg);
+}
+
+.studioos-select-panel{
+position:absolute;
+left:0;
+right:0;
+top:calc(100% + 8px);
+z-index:5000;
+display:none;
+max-height:min(320px, 54vh);
+overflow:auto;
+border-radius:16px;
+background:rgba(15,23,42,0.98);
+border:1px solid rgba(255,255,255,0.12);
+box-shadow:0 24px 70px rgba(0,0,0,0.42);
+backdrop-filter:blur(18px);
+-webkit-backdrop-filter:blur(18px);
+padding:6px;
+}
+
+.studioos-select-shell.is-open .studioos-select-panel{
+display:block;
+}
+
+.studioos-select-option{
+width:100%;
+border:0;
+background:transparent;
+color:rgba(255,255,255,0.86);
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+padding:13px 12px;
+border-radius:13px;
+font-size:15px;
+text-align:left;
+cursor:pointer;
+-webkit-tap-highlight-color:transparent;
+}
+
+.studioos-select-option:hover,
+.studioos-select-option:active{
+background:rgba(255,255,255,0.07);
+}
+
+.studioos-select-option.is-active{
+background:rgba(99,102,241,0.24);
+color:white;
+}
+
+.studioos-select-option.is-placeholder{
+color:rgba(255,255,255,0.58);
+}
+
+.studioos-select-option-check{
+width:7px;
+height:7px;
+border-radius:999px;
+background:white;
+opacity:0;
+flex-shrink:0;
+}
+
+.studioos-select-option.is-active .studioos-select-option-check{
+opacity:1;
+}
+
 </style>
 
 </head>
@@ -61,7 +185,9 @@ class="input">
 
 <select
 id="paymentMethod"
-class="input">
+class="native-select-hidden"
+aria-hidden="true"
+tabindex="-1">
 
 <option value="">Select Method</option>
 <option>Cash</option>
@@ -70,15 +196,45 @@ class="input">
 
 </select>
 
+<div id="paymentMethodShell" class="studioos-select-shell">
+<button id="paymentMethodTrigger"
+type="button"
+class="studioos-select-trigger"
+aria-haspopup="listbox"
+aria-expanded="false">
+<span id="paymentMethodTriggerText">Select Method</span>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m6 9 6 6 6-6"></path>
+</svg>
+</button>
+<div id="paymentMethodPanel" class="studioos-select-panel" role="listbox"></div>
+</div>
+
 <select
 id="paymentType"
-class="input">
+class="native-select-hidden"
+aria-hidden="true"
+tabindex="-1">
 
 <option value="">Select Payment Type</option>
 <option value="advance">Advance</option>
 <option value="balance">Balance</option>
 
 </select>
+
+<div id="paymentTypeShell" class="studioos-select-shell">
+<button id="paymentTypeTrigger"
+type="button"
+class="studioos-select-trigger"
+aria-haspopup="listbox"
+aria-expanded="false">
+<span id="paymentTypeTriggerText">Select Payment Type</span>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m6 9 6 6 6-6"></path>
+</svg>
+</button>
+<div id="paymentTypePanel" class="studioos-select-panel" role="listbox"></div>
+</div>
 
 <button
 id="savePaymentBtn"
@@ -132,9 +288,157 @@ No payments yet
 </div>
 
 
+
+<script>
+(function(){
+
+const SELECT_CONFIGS = [
+{ selectId:"paymentMethod", shellId:"paymentMethodShell", triggerId:"paymentMethodTrigger", textId:"paymentMethodTriggerText", panelId:"paymentMethodPanel" },
+{ selectId:"paymentType", shellId:"paymentTypeShell", triggerId:"paymentTypeTrigger", textId:"paymentTypeTriggerText", panelId:"paymentTypePanel" }
+]
+
+function getSelectedLabel(select){
+if(!select) return ""
+const option = select.options[select.selectedIndex]
+return option?.textContent?.trim() || ""
+}
+
+function closeSelect(shellId, triggerId){
+const shell = document.getElementById(shellId)
+const trigger = document.getElementById(triggerId)
+
+if(shell){
+shell.classList.remove("is-open")
+}
+
+if(trigger){
+trigger.setAttribute("aria-expanded","false")
+}
+}
+
+function closeAllSelects(){
+SELECT_CONFIGS.forEach(config=>{
+closeSelect(config.shellId, config.triggerId)
+})
+}
+
+function syncSelect(config){
+const select = document.getElementById(config.selectId)
+const panel = document.getElementById(config.panelId)
+const triggerText = document.getElementById(config.textId)
+
+if(!select || !panel || !triggerText) return
+
+triggerText.innerText = getSelectedLabel(select)
+
+panel.innerHTML = ""
+
+Array.from(select.options).forEach(option=>{
+const btn = document.createElement("button")
+btn.type = "button"
+btn.className = "studioos-select-option"
+btn.dataset.value = option.value
+btn.setAttribute("role","option")
+
+if(!option.value){
+btn.classList.add("is-placeholder")
+}
+
+if(option.value === select.value){
+btn.classList.add("is-active")
+btn.setAttribute("aria-selected","true")
+}else{
+btn.setAttribute("aria-selected","false")
+}
+
+btn.innerHTML = `
+<span>${option.textContent || ""}</span>
+<span class="studioos-select-option-check"></span>
+`
+
+btn.addEventListener("click", function(){
+select.value = option.value
+select.dispatchEvent(new Event("change", { bubbles:true }))
+syncSelect(config)
+closeSelect(config.shellId, config.triggerId)
+})
+
+panel.appendChild(btn)
+})
+}
+
+function initSelect(config){
+const select = document.getElementById(config.selectId)
+const shell = document.getElementById(config.shellId)
+const trigger = document.getElementById(config.triggerId)
+
+if(!select || !shell || !trigger) return
+
+syncSelect(config)
+
+trigger.addEventListener("click", function(event){
+event.preventDefault()
+event.stopPropagation()
+
+const isOpen = shell.classList.contains("is-open")
+closeAllSelects()
+
+if(!isOpen){
+shell.classList.add("is-open")
+trigger.setAttribute("aria-expanded","true")
+syncSelect(config)
+}
+})
+
+select.addEventListener("change", function(){
+syncSelect(config)
+})
+}
+
+function syncAll(){
+SELECT_CONFIGS.forEach(syncSelect)
+}
+
+function initPaymentSelects(){
+SELECT_CONFIGS.forEach(initSelect)
+
+document.addEventListener("click", function(event){
+const clickedInside = SELECT_CONFIGS.some(config=>{
+const shell = document.getElementById(config.shellId)
+return shell && shell.contains(event.target)
+})
+
+if(!clickedInside){
+closeAllSelects()
+}
+})
+
+document.addEventListener("keydown", function(event){
+if(event.key === "Escape"){
+closeAllSelects()
+}
+})
+}
+
+window.StudioOSPaymentSelect = {
+syncAll,
+closeAll: closeAllSelects
+}
+
+if(document.readyState === "loading"){
+document.addEventListener("DOMContentLoaded", initPaymentSelects)
+}else{
+initPaymentSelects()
+}
+
+})()
+</script>
+
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/payment.js"></script>
+<script src="js/app-bottom-nav.js"></script>
 
 </body>
 </html>
