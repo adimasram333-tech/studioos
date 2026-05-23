@@ -36,11 +36,105 @@ return user
 
 
 // =============================
+// ANDROID SAFE PROPOSAL ROUTING
+// =============================
+
+function isStudioOSNativeApp(){
+
+try{
+
+if(
+window.Capacitor &&
+typeof window.Capacitor.isNativePlatform === "function" &&
+window.Capacitor.isNativePlatform()
+){
+return true
+}
+
+const protocol = String(window.location.protocol || "").toLowerCase()
+return protocol === "capacitor:" || protocol === "file:"
+
+}catch(error){
+
+return false
+
+}
+
+}
+
+function getStudioOSPublicBaseUrl(){
+
+const configuredUrl = String(window.STUDIOOS_PUBLIC_BASE_URL || "").trim()
+
+if(configuredUrl){
+return configuredUrl.replace(/\/+$/,"")
+}
+
+return "https://adimasram333-tech.github.io/studioos"
+
+}
+
+function slugifyQuotationClientName(value){
+
+return String(value || "client")
+.toLowerCase()
+.trim()
+.replace(/[^a-z0-9 ]/g,"")
+.replace(/\s+/g,"-")
+.replace(/-+/g,"-")
+.replace(/^-|-$/g,"") || "client"
+
+}
+
+function buildQuotationProposalSlug(quotation){
+
+const slug = slugifyQuotationClientName(quotation?.client_name || "client")
+const shortId = quotation?.short_id || String(quotation?.id || "").substring(0,8)
+
+return slug + "-" + shortId
+
+}
+
+function buildQuotationProposalViewUrl(quotation){
+
+const proposalSlug = buildQuotationProposalSlug(quotation)
+
+if(isStudioOSNativeApp()){
+return "proposal.html?id=" + encodeURIComponent(quotation.id) + "&slug=" + encodeURIComponent(proposalSlug)
+}
+
+return getStudioOSPublicBaseUrl() + "/p/" + proposalSlug
+
+}
+
+function openProposalFromQuotation(quotation){
+
+if(!quotation || !quotation.id){
+console.error("Invalid quotation for proposal view:", quotation)
+return
+}
+
+try{
+if(window.StudioOSAppShell && typeof window.StudioOSAppShell.rememberCurrentInternalPage === "function"){
+window.StudioOSAppShell.rememberCurrentInternalPage()
+}
+}catch(error){
+console.warn("Navigation history remember skipped:", error)
+}
+
+window.location.href = buildQuotationProposalViewUrl(quotation)
+
+}
+
+
+
+// =============================
 // MENU STATE
 // =============================
 
 let activeQuotationMenuId = null
 let quotationMenuListenersInitialized = false
+let loadedQuotationMap = new Map()
 
 function closeAllMenus(exceptId = null){
 
@@ -153,6 +247,13 @@ listContainer.innerHTML =
 
 const quotations = await getAllQuotations()
 
+loadedQuotationMap = new Map()
+;(quotations || []).forEach((quotation)=>{
+if(quotation?.id){
+loadedQuotationMap.set(String(quotation.id), quotation)
+}
+})
+
 if(!quotations || quotations.length === 0){
 
 listContainer.innerHTML =
@@ -165,19 +266,6 @@ return
 listContainer.innerHTML = ""
 
 quotations.forEach((q)=>{
-
-// ===== BUILD SEO LINK =====
-
-const slug =
-(q.client_name || "client")
-.toLowerCase()
-.replace(/\s+/g,"-")
-
-const shortId =
-q.short_id || q.id.substring(0,8)
-
-const proposalLink =
-"p/" + slug + "-" + shortId
 
 const card = document.createElement("div")
 
@@ -243,7 +331,7 @@ class="text-xl px-2">
 
 <div class="mt-3 flex gap-2">
 
-<button onclick="openProposal('${proposalLink}')"
+<button onclick="openProposal('${q.id}')"
 class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs">
 View
 </button>
@@ -483,9 +571,16 @@ window.location.href =
 // OPEN PROPOSAL
 // =============================
 
-function openProposal(link){
+function openProposal(id){
 
-window.location.href = link
+const quotation = loadedQuotationMap.get(String(id))
+
+if(!quotation){
+console.error("Quotation not found for proposal view:", id)
+return
+}
+
+openProposalFromQuotation(quotation)
 
 }
 
