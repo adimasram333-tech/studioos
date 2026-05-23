@@ -51,6 +51,162 @@ year:"numeric"
 
 
 // =============================
+// ANDROID SAFE SHARE HELPERS
+// =============================
+
+function isStudioOSNativeApp(){
+
+try{
+
+const cap = window.Capacitor
+const protocol = String(window.location.protocol || "").toLowerCase()
+
+if(cap && typeof cap.isNativePlatform === "function" && cap.isNativePlatform()){
+return true
+}
+
+if(protocol === "capacitor:" || protocol === "ionic:" || protocol === "file:"){
+return true
+}
+
+const plugins = cap?.Plugins || {}
+return !!(plugins.Share)
+
+}catch(error){
+
+return false
+
+}
+
+}
+
+function getClientCapacitorPlugins(){
+
+try{
+return window.Capacitor?.Plugins || {}
+}catch(error){
+return {}
+}
+
+}
+
+function getStudioOSPublicWebBaseUrl(){
+
+const configured = String(
+window.STUDIOOS_PUBLIC_WEB_APP_BASE_URL ||
+window.PUBLIC_WEB_APP_BASE_URL ||
+window.STUDIOOS_WEB_BASE_URL ||
+""
+).trim().replace(/\/+$/,"")
+
+if(configured && /^https?:\/\//i.test(configured)){
+return configured
+}
+
+return "https://adimasram333-tech.github.io/studioos"
+
+}
+
+function buildPublicTeamSheetShareUrl(quotationId){
+
+const safeQuotationId = String(quotationId || "").trim()
+const query = new URLSearchParams()
+
+if(safeQuotationId){
+query.set("quotation", safeQuotationId)
+}
+
+return `${getStudioOSPublicWebBaseUrl()}/team-sheet.html${query.toString() ? `?${query.toString()}` : ""}`
+
+}
+
+function showClientToast(message, type = "success"){
+
+const existing = document.getElementById("clientPageToast")
+if(existing){
+existing.remove()
+}
+
+const toast = document.createElement("div")
+toast.id = "clientPageToast"
+toast.style.position = "fixed"
+toast.style.left = "50%"
+toast.style.bottom = "calc(86px + env(safe-area-inset-bottom, 0px))"
+toast.style.transform = "translateX(-50%)"
+toast.style.width = "min(calc(100% - 32px), 360px)"
+toast.style.zIndex = "2147482600"
+toast.style.padding = "0.85rem 1rem"
+toast.style.borderRadius = "1rem"
+toast.style.background = type === "error" ? "rgba(127,29,29,0.96)" : "rgba(15,23,42,0.96)"
+toast.style.border = type === "error" ? "1px solid rgba(248,113,113,0.35)" : "1px solid rgba(255,255,255,0.12)"
+toast.style.boxShadow = "0 18px 55px rgba(0,0,0,0.38)"
+toast.style.backdropFilter = "blur(16px)"
+toast.style.webkitBackdropFilter = "blur(16px)"
+toast.style.color = "#ffffff"
+toast.style.fontSize = "0.9rem"
+toast.style.fontWeight = "750"
+toast.style.textAlign = "center"
+toast.style.pointerEvents = "none"
+toast.textContent = message
+
+document.body.appendChild(toast)
+
+setTimeout(()=>{
+toast.style.transition = "opacity 180ms ease, transform 180ms ease"
+toast.style.opacity = "0"
+toast.style.transform = "translateX(-50%) translateY(8px)"
+setTimeout(()=>{
+toast.remove()
+}, 220)
+}, 1850)
+
+}
+
+async function shareClientTeamSheet(url){
+
+const plugins = getClientCapacitorPlugins()
+const Share = plugins.Share
+
+if(isStudioOSNativeApp() && Share && typeof Share.share === "function"){
+
+await Share.share({
+title: "Team Sheet",
+text: "Event Team Sheet",
+url,
+dialogTitle: "Share Team Sheet"
+})
+
+return true
+
+}
+
+if(navigator.share){
+
+await navigator.share({
+title: "Team Sheet",
+text: "Event Team Sheet",
+url
+})
+
+return true
+
+}
+
+if(navigator.clipboard && navigator.clipboard.writeText){
+
+await navigator.clipboard.writeText(url)
+showClientToast("Team Sheet link copied")
+return true
+
+}
+
+return false
+
+}
+
+
+
+// =============================
 // TEAM SHARE PLAN GATE
 // =============================
 
@@ -446,6 +602,8 @@ if(shareTeamBtn){
 shareTeamBtn.onclick = async ()=>{
 try{
 
+menuDropdown.classList.add("hidden")
+
 const canShareTeam =
 await canCurrentUserShareTeam(supabase, quotationOwnerId)
 
@@ -454,24 +612,17 @@ showTeamShareUpgradeModal()
 return
 }
 
-const url =
-window.location.origin +
-"/studioos/team-sheet.html?quotation=" +
-quotationId
+const url = buildPublicTeamSheetShareUrl(quotationId)
 
-if(navigator.share){
-await navigator.share({
-title:"Team Sheet",
-url:url
-})
-}else if(navigator.clipboard && navigator.clipboard.writeText){
-await navigator.clipboard.writeText(url)
-console.log("Team sheet link copied")
-}else{
-console.warn("Clipboard API not supported")
+const shared = await shareClientTeamSheet(url)
+
+if(!shared){
+showClientToast("Unable to share. Please copy the link manually.", "error")
 }
+
 }catch(err){
 console.error("SHARE TEAM ERROR:", err)
+showClientToast("Team share failed", "error")
 }
 }
 }
