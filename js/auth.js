@@ -19,6 +19,36 @@ throw new Error("Supabase client not initialized")
 
 
 // =============================
+// STUDIOOS AUTH URL HELPERS
+// =============================
+
+function getStudioOSPublicBaseUrl(){
+
+const configuredUrl = String(window.STUDIOOS_PUBLIC_BASE_URL || "").trim()
+
+if(configuredUrl){
+return configuredUrl.replace(/\/+$/,"")
+}
+
+return "https://adimasram333-tech.github.io/studioos"
+
+}
+
+
+function getStudioOSGoogleRedirectUrl(){
+
+// Production-safe OAuth callback:
+// Never derive this from window.location.origin/pathname because Android
+// WebView / external browser flows can produce capacitor://, file://,
+// localhost, or an old GitHub Pages origin. Supabase + Google must always
+// return to the real published StudioOS URL.
+return getStudioOSPublicBaseUrl() + "/dashboard.html"
+
+}
+
+
+
+// =============================
 // LOGIN
 // =============================
 
@@ -89,7 +119,10 @@ await supabase.auth.signInWithOAuth({
 
 provider: "google",
 options: {
-redirectTo: `${window.location.origin}${window.location.pathname}`
+redirectTo: getStudioOSGoogleRedirectUrl(),
+queryParams: {
+prompt: "select_account"
+}
 }
 
 })
