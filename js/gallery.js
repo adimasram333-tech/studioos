@@ -102,7 +102,13 @@ if(configured){
 return configured
 }
 
-return resolveStudioOSWebBaseFromCurrentPage()
+const currentPageBase = resolveStudioOSWebBaseFromCurrentPage()
+
+if(currentPageBase){
+return currentPageBase
+}
+
+return "https://adimasram333-tech.github.io/studioos"
 }
 
 function buildStudioOSPublicPageUrl(pageName, params = {}){
@@ -370,6 +376,403 @@ existingMenu.remove()
 }
 activeMenu = null
 }
+
+
+function escapeStudioOSHtml(value){
+return String(value ?? "")
+.replace(/&/g, "&amp;")
+.replace(/</g, "&lt;")
+.replace(/>/g, "&gt;")
+.replace(/"/g, "&quot;")
+.replace(/'/g, "&#039;")
+}
+
+function showStudioOSToast(message, type = "success"){
+const existingToast = document.getElementById("studioosGalleryToast")
+if(existingToast){
+existingToast.remove()
+}
+
+const toast = document.createElement("div")
+toast.id = "studioosGalleryToast"
+toast.style.position = "fixed"
+toast.style.left = "50%"
+toast.style.bottom = "calc(86px + env(safe-area-inset-bottom, 0px))"
+toast.style.transform = "translateX(-50%)"
+toast.style.width = "min(calc(100% - 32px), 360px)"
+toast.style.zIndex = "2147482500"
+toast.style.padding = "0.85rem 1rem"
+toast.style.borderRadius = "1rem"
+toast.style.background = type === "error" ? "rgba(127,29,29,0.96)" : "rgba(15,23,42,0.96)"
+toast.style.border = type === "error" ? "1px solid rgba(248,113,113,0.35)" : "1px solid rgba(255,255,255,0.12)"
+toast.style.boxShadow = "0 18px 55px rgba(0,0,0,0.38)"
+toast.style.backdropFilter = "blur(16px)"
+toast.style.color = "#ffffff"
+toast.style.fontSize = "0.9rem"
+toast.style.fontWeight = "700"
+toast.style.textAlign = "center"
+toast.style.pointerEvents = "none"
+toast.textContent = message
+
+document.body.appendChild(toast)
+
+setTimeout(()=>{
+toast.style.transition = "opacity 180ms ease, transform 180ms ease"
+toast.style.opacity = "0"
+toast.style.transform = "translateX(-50%) translateY(8px)"
+setTimeout(()=>{
+toast.remove()
+}, 220)
+}, 1850)
+}
+
+function showStudioOSInfo(message, title = "StudioOS"){
+return new Promise(resolve=>{
+const existingModal = document.getElementById("studioosGalleryInfoModal")
+if(existingModal){
+existingModal.remove()
+}
+
+const modal = document.createElement("div")
+modal.id = "studioosGalleryInfoModal"
+modal.style.position = "fixed"
+modal.style.inset = "0"
+modal.style.display = "flex"
+modal.style.alignItems = "center"
+modal.style.justifyContent = "center"
+modal.style.padding = "1rem"
+modal.style.background = "rgba(2,6,23,0.72)"
+modal.style.backdropFilter = "blur(10px)"
+modal.style.zIndex = "2147482400"
+
+modal.innerHTML = `
+<div style="
+  width:min(100%, 360px);
+  border-radius:1.35rem;
+  padding:1.15rem;
+  background:rgba(15,23,42,0.97);
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 24px 70px rgba(0,0,0,0.4);
+  color:white;
+">
+  <div style="
+    display:inline-flex;
+    align-items:center;
+    min-height:30px;
+    padding:0 0.78rem;
+    border-radius:999px;
+    background:rgba(99,102,241,0.16);
+    border:1px solid rgba(99,102,241,0.32);
+    color:rgb(199 210 254);
+    font-size:0.72rem;
+    font-weight:850;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  ">${escapeStudioOSHtml(title)}</div>
+
+  <div style="
+    margin-top:0.95rem;
+    color:rgba(255,255,255,0.84);
+    font-size:0.96rem;
+    line-height:1.55;
+    white-space:pre-line;
+  ">${escapeStudioOSHtml(message)}</div>
+
+  <button id="studioosGalleryInfoOkBtn" type="button" style="
+    margin-top:1rem;
+    width:100%;
+    min-height:46px;
+    border-radius:0.95rem;
+    background:rgb(79 70 229);
+    color:white;
+    border:1px solid transparent;
+    font-size:0.9rem;
+    font-weight:850;
+    cursor:pointer;
+    box-shadow:0 14px 30px rgba(79,70,229,0.25);
+  ">OK</button>
+</div>
+`
+
+document.body.appendChild(modal)
+
+const closeModal = ()=>{
+modal.remove()
+resolve(true)
+}
+
+modal.addEventListener("click", event=>{
+if(event.target === modal){
+closeModal()
+}
+})
+
+const okBtn = document.getElementById("studioosGalleryInfoOkBtn")
+if(okBtn){
+okBtn.onclick = closeModal
+}
+})
+}
+
+function showStudioOSConfirm(options = {}){
+return new Promise(resolve=>{
+const existingModal = document.getElementById("studioosGalleryConfirmModal")
+if(existingModal){
+existingModal.remove()
+}
+
+const title = options.title || "Confirm"
+const message = options.message || ""
+const confirmText = options.confirmText || "Confirm"
+const cancelText = options.cancelText || "Cancel"
+const danger = options.danger === true
+
+const modal = document.createElement("div")
+modal.id = "studioosGalleryConfirmModal"
+modal.style.position = "fixed"
+modal.style.inset = "0"
+modal.style.display = "flex"
+modal.style.alignItems = "center"
+modal.style.justifyContent = "center"
+modal.style.padding = "1rem"
+modal.style.background = "rgba(2,6,23,0.72)"
+modal.style.backdropFilter = "blur(10px)"
+modal.style.zIndex = "2147482400"
+
+modal.innerHTML = `
+<div style="
+  width:min(100%, 390px);
+  border-radius:1.35rem;
+  padding:1.15rem;
+  background:rgba(15,23,42,0.97);
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 24px 70px rgba(0,0,0,0.4);
+  color:white;
+">
+  <div style="
+    display:inline-flex;
+    align-items:center;
+    min-height:30px;
+    padding:0 0.78rem;
+    border-radius:999px;
+    background:${danger ? "rgba(239,68,68,0.16)" : "rgba(99,102,241,0.16)"};
+    border:1px solid ${danger ? "rgba(248,113,113,0.32)" : "rgba(99,102,241,0.32)"};
+    color:${danger ? "rgb(254 202 202)" : "rgb(199 210 254)"};
+    font-size:0.72rem;
+    font-weight:850;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  ">${danger ? "Important" : "StudioOS"}</div>
+
+  <div style="
+    margin-top:0.9rem;
+    font-size:1.15rem;
+    line-height:1.25;
+    font-weight:900;
+  ">${escapeStudioOSHtml(title)}</div>
+
+  <div style="
+    margin-top:0.65rem;
+    color:rgba(255,255,255,0.78);
+    font-size:0.92rem;
+    line-height:1.58;
+    white-space:pre-line;
+  ">${escapeStudioOSHtml(message)}</div>
+
+  <div style="display:flex; gap:0.75rem; margin-top:1.05rem;">
+    <button id="studioosGalleryConfirmCancelBtn" type="button" style="
+      flex:1;
+      min-height:46px;
+      border-radius:0.95rem;
+      background:rgba(255,255,255,0.06);
+      color:white;
+      border:1px solid rgba(255,255,255,0.1);
+      font-size:0.88rem;
+      font-weight:800;
+      cursor:pointer;
+    ">${escapeStudioOSHtml(cancelText)}</button>
+
+    <button id="studioosGalleryConfirmOkBtn" type="button" style="
+      flex:1;
+      min-height:46px;
+      border-radius:0.95rem;
+      background:${danger ? "rgb(220 38 38)" : "rgb(79 70 229)"};
+      color:white;
+      border:1px solid transparent;
+      font-size:0.88rem;
+      font-weight:850;
+      cursor:pointer;
+      box-shadow:0 14px 30px ${danger ? "rgba(220,38,38,0.22)" : "rgba(79,70,229,0.25)"};
+    ">${escapeStudioOSHtml(confirmText)}</button>
+  </div>
+</div>
+`
+
+document.body.appendChild(modal)
+
+const closeModal = value=>{
+modal.remove()
+resolve(value)
+}
+
+modal.addEventListener("click", event=>{
+if(event.target === modal){
+closeModal(false)
+}
+})
+
+const cancelBtn = document.getElementById("studioosGalleryConfirmCancelBtn")
+const okBtn = document.getElementById("studioosGalleryConfirmOkBtn")
+
+if(cancelBtn){
+cancelBtn.onclick = ()=> closeModal(false)
+}
+
+if(okBtn){
+okBtn.onclick = ()=> closeModal(true)
+}
+})
+}
+
+function isCapacitorNativeApp(){
+try{
+const cap = window.Capacitor
+const protocol = String(window.location.protocol || "").toLowerCase()
+
+if(cap && typeof cap.isNativePlatform === "function" && cap.isNativePlatform()){
+return true
+}
+
+if(protocol === "capacitor:" || protocol === "ionic:" || protocol === "file:"){
+return true
+}
+
+const plugins = cap?.Plugins || {}
+return !!(plugins.Filesystem || plugins.Share)
+
+}catch(error){
+return false
+}
+}
+
+function getCapacitorPlugins(){
+try{
+return window.Capacitor?.Plugins || {}
+}catch(error){
+return {}
+}
+}
+
+function blobToBase64(blob){
+return new Promise((resolve,reject)=>{
+const reader = new FileReader()
+
+reader.onloadend = function(){
+try{
+const result = String(reader.result || "")
+const base64 = result.includes(",") ? result.split(",")[1] : result
+if(!base64){
+reject(new Error("Base64 conversion failed"))
+return
+}
+resolve(base64)
+}catch(error){
+reject(error)
+}
+}
+
+reader.onerror = function(){
+reject(new Error("Blob read failed"))
+}
+
+reader.readAsDataURL(blob)
+})
+}
+
+async function saveBlobWithCapacitor(blob, fileName, shareTitle = "StudioOS File"){
+const saver = getStudioOSFileSaverPlugin()
+
+if(!saver || typeof saver.saveFile !== "function"){
+throw new Error("StudioOS native file saver is not available")
+}
+
+const safeFileName =
+String(fileName || "studioos-file")
+.replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+.replace(/\s+/g, "_")
+.trim() || "studioos-file"
+
+const base64Data = await blobToBase64(blob)
+const mimeType = blob?.type || guessMimeTypeFromFileName(safeFileName)
+
+await saver.saveFile({
+base64Data,
+fileName: safeFileName,
+mimeType,
+target: mimeType.startsWith("image/") ? "images" : "downloads"
+})
+
+return true
+}
+
+function getStudioOSFileSaverPlugin(){
+try{
+return window.Capacitor?.Plugins?.StudioOSFileSaver || null
+}catch(error){
+return null
+}
+}
+
+function guessMimeTypeFromFileName(fileName){
+const value = String(fileName || "").toLowerCase()
+
+if(value.endsWith(".png")) return "image/png"
+if(value.endsWith(".webp")) return "image/webp"
+if(value.endsWith(".gif")) return "image/gif"
+if(value.endsWith(".pdf")) return "application/pdf"
+if(value.endsWith(".jpg") || value.endsWith(".jpeg")) return "image/jpeg"
+
+return "application/octet-stream"
+}
+
+async function saveStudioOSBlob(blob, filename){
+if(isCapacitorNativeApp()){
+return await saveBlobWithCapacitor(blob, filename, "StudioOS File")
+}
+
+triggerBlobDownload(blob, filename)
+return true
+}
+
+async function copyTextToClipboard(text){
+const value = String(text || "")
+
+try{
+if(navigator.clipboard && typeof navigator.clipboard.writeText === "function"){
+await navigator.clipboard.writeText(value)
+return true
+}
+}catch(error){
+console.warn("Navigator clipboard failed:", error)
+}
+
+try{
+const input = document.createElement("textarea")
+input.value = value
+input.setAttribute("readonly", "")
+input.style.position = "fixed"
+input.style.left = "-9999px"
+document.body.appendChild(input)
+input.select()
+document.execCommand("copy")
+input.remove()
+return true
+}catch(error){
+console.error("Clipboard fallback failed:", error)
+return false
+}
+}
+
 
 function showPublicGalleryUpgradeMessage(message = "Free plan includes limited Gallery Sharing and limited AI Face Search for 1 event. Upgrade to Basic or Pro for full access."){
 
@@ -1022,13 +1425,18 @@ if(!allowed) return
 
 const token = await ensurePublicShareToken(id)
 if(!token){
-alert("Unable to enable public sharing. Please try again.")
+await showStudioOSInfo("Unable to enable public sharing. Please try again.", "Sharing")
 return
 }
 
 const link = requireStudioOSPublicPageUrl("access.html", { event_id: id })
-navigator.clipboard.writeText(link)
-alert("Link copied")
+const copied = await copyTextToClipboard(link)
+
+if(copied){
+showStudioOSToast("Link copied")
+}else{
+await showStudioOSInfo(link, "Copy gallery link")
+}
 }
 
 // =============================
@@ -1043,11 +1451,11 @@ if(!allowed) return
 const token = await ensurePublicShareToken(id)
 
 if(!token){
-alert("Unable to generate token. Please try again.")
+await showStudioOSInfo("Unable to generate token. Please try again.", "Token")
 return
 }
 
-alert("Token: " + token)
+await showStudioOSInfo(token, "Gallery Token")
 
 }
 
@@ -1061,11 +1469,16 @@ const allowed = await guardPublicGalleryFeature(id, "paid")
 if(!allowed) return
 
 const nextValue = !currentValue
-const confirmMessage = nextValue
-? "Enable FREE guest downloads for this event?\n\nGuests will be able to preview and download matched photos without payment."
-: "Disable FREE guest downloads for this event?\n\nGuests will need to pay before downloading matched photos."
 
-const confirmed = confirm(confirmMessage)
+const confirmed = await showStudioOSConfirm({
+title: nextValue ? "Enable free guest downloads?" : "Disable free guest downloads?",
+message: nextValue
+? "Guests will be able to preview and download matched photos without payment."
+: "Guests will need to pay before downloading matched photos.",
+confirmText: nextValue ? "Enable" : "Disable",
+cancelText: "Cancel"
+})
+
 if(!confirmed) return
 
 const existingMenu = document.getElementById("floatingMenu")
@@ -1078,7 +1491,7 @@ const supabase = await window.getSupabase()
 const user = await window.getCurrentUser()
 
 if(!supabase || !user){
-alert("Please login again and try.")
+await showStudioOSInfo("Please login again and try.", "Session expired")
 return
 }
 
@@ -1092,16 +1505,18 @@ guest_free_download: nextValue
 
 if(error){
 console.error("Guest download mode update failed:", error)
-alert("Failed to update guest download mode")
+showStudioOSToast("Failed to update guest download mode", "error")
 return
 }
 
-alert(nextValue ? "Guest free download enabled" : "Guest free download disabled")
+showStudioOSToast(nextValue ? "Guest free download enabled" : "Guest free download disabled")
+setTimeout(()=>{
 location.reload()
+}, 650)
 
 }catch(err){
 console.error(err)
-alert("Failed to update guest download mode")
+showStudioOSToast("Failed to update guest download mode", "error")
 }
 
 }
@@ -1112,7 +1527,14 @@ alert("Failed to update guest download mode")
 
 window.deleteEvent = async function(id){
 
-const confirmDelete = confirm("Delete gallery permanently?\n\nThis will remove all event photos and related gallery data.")
+const confirmDelete = await showStudioOSConfirm({
+title: "Delete gallery permanently?",
+message: "This will remove all event photos and related gallery data.",
+confirmText: "Delete",
+cancelText: "Cancel",
+danger: true
+})
+
 if(!confirmDelete) return
 
 const existingMenu = document.getElementById("floatingMenu")
@@ -1124,14 +1546,14 @@ try{
 const supabase = await window.getSupabase()
 
 if(!supabase){
-alert("Supabase not initialized")
+showStudioOSToast("Supabase not initialized", "error")
 return
 }
 
 const { data: { session } } = await supabase.auth.getSession()
 
 if(!session){
-alert("Please login again")
+await showStudioOSInfo("Please login again.", "Session expired")
 return
 }
 
@@ -1158,25 +1580,27 @@ result = null
 
 if(!response.ok || !result?.success){
 console.error("Delete failed:", result)
-alert(result?.error || "Delete failed")
+showStudioOSToast(result?.error || "Delete failed", "error")
 return
 }
 
 clearDeletedEventSession(id)
 removeEventCardFromDom(id)
 
-alert("Gallery deleted successfully")
+showStudioOSToast("Gallery deleted successfully")
 
 const params = new URLSearchParams(window.location.search)
 const activeEventId = params.get("event_id") || params.get("event") || ""
 
 if(activeEventId && String(activeEventId) === String(id)){
+setTimeout(()=>{
 window.location.href = "gallery.html"
+}, 650)
 }
 
 }catch(err){
 console.error(err)
-alert("Delete failed")
+showStudioOSToast("Delete failed", "error")
 }
 
 }
@@ -1246,16 +1670,42 @@ canvas.height = 200
 ctx.drawImage(qr,0,0)
 }
 
-document.getElementById("downloadQR").onclick = function(){
+document.getElementById("downloadQR").onclick = async function(){
 
 const canvas = document.getElementById("qrCanvas")
 
-canvas.toBlob(function(blob){
-const a = document.createElement("a")
-a.href = URL.createObjectURL(blob)
-a.download = "event-qr.png"
-a.click()
-})
+if(!canvas){
+showStudioOSToast("QR not ready yet", "error")
+return
+}
+
+canvas.toBlob(async function(blob){
+
+if(!blob){
+showStudioOSToast("QR download failed", "error")
+return
+}
+
+try{
+
+const fileName = `event-qr-${String(id || "gallery").replace(/[^a-zA-Z0-9-_]/g, "")}.png`
+
+await triggerBlobDownload(blob, fileName)
+showStudioOSToast("QR downloaded")
+
+}catch(error){
+console.error("QR download failed:", error)
+
+try{
+await triggerBlobDownload(blob, "event-qr.png")
+showStudioOSToast("QR downloaded")
+}catch(fallbackError){
+console.error("QR fallback download failed:", fallbackError)
+showStudioOSToast("QR download failed", "error")
+}
+}
+
+}, "image/png")
 
 }
 
@@ -1394,7 +1844,12 @@ return naturalCompareText(a?.id, b?.id)
 })
 }
 
-function triggerBlobDownload(blob, filename){
+async function triggerBlobDownload(blob, filename){
+if(isCapacitorNativeApp()){
+await saveBlobWithCapacitor(blob, filename, "StudioOS File")
+return true
+}
+
 const blobUrl = URL.createObjectURL(blob)
 const a = document.createElement("a")
 a.href = blobUrl
@@ -1406,6 +1861,8 @@ a.remove()
 setTimeout(()=>{
 URL.revokeObjectURL(blobUrl)
 }, 3000)
+
+return true
 }
 
 function getDownloadLogFileSize(photo, fallbackBytes = 0){
@@ -1488,7 +1945,8 @@ throw new Error("Failed to fetch file for download")
 }
 
 const blob = await response.blob()
-triggerBlobDownload(blob, filename)
+await triggerBlobDownload(blob, filename)
+showStudioOSToast("Photo downloaded")
 
 if(logContext){
 logGalleryDownload(logContext, blob.size).catch(()=>{})
@@ -1497,6 +1955,11 @@ logGalleryDownload(logContext, blob.size).catch(()=>{})
 return true
 }catch(err){
 console.error("Download fallback triggered:", err)
+
+if(isCapacitorNativeApp()){
+showStudioOSToast("Download failed. Please try again.", "error")
+return false
+}
 
 try{
 const a = document.createElement("a")
@@ -1518,7 +1981,7 @@ source: `${String(logContext.source || "gallery_modal")}_link_fallback`
 return true
 }catch(linkErr){
 console.error("Direct link download failed:", linkErr)
-alert("Download failed. Please try again.")
+showStudioOSToast("Download failed. Please try again.", "error")
 return false
 }
 }
@@ -2333,6 +2796,17 @@ modalImg.setAttribute("draggable", "false")
 }
 
 btn.onclick = async function(){
+if(btn.dataset.loading === "true"){
+return
+}
+
+const originalText = btn.innerText
+btn.dataset.loading = "true"
+btn.innerText = isCapacitorNativeApp() ? "Preparing..." : "Downloading..."
+btn.style.opacity = "0.75"
+btn.disabled = true
+
+try{
 
 if(effectiveRole === "photographer" || effectiveRole === "client"){
 const fileName = getSafeFileName(cleanOriginalUrl, "photo.jpg")
@@ -2383,6 +2857,16 @@ downloadType: "guest_preview_fallback",
 source: "gallery_modal"
 })
 
+}catch(downloadError){
+console.error("Gallery modal download failed:", downloadError)
+showStudioOSToast("Download failed. Please try again.", "error")
+}finally{
+btn.dataset.loading = "false"
+btn.innerText = originalText
+btn.style.opacity = "1"
+btn.disabled = false
+}
+
 }
 
 preloadModalAroundIndex(modalPhotos, currentModalIndex, effectiveRole, guestFreeDownload)
@@ -2430,13 +2914,13 @@ modal.innerHTML = `
 <button id="prevImageBtn"
 style="position:absolute; left:max(10px, env(safe-area-inset-left)); top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.9); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center; z-index:10002; pointer-events:auto; box-shadow:0 12px 32px rgba(0,0,0,0.35);">‹</button>
 
-<img id="modalImg" src="" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:14px; transition:opacity 180ms ease, transform 180ms ease; will-change:opacity, transform; box-shadow:0 24px 80px rgba(0,0,0,0.45); position:relative; z-index:10000;" />
+<img id="modalImg" src="" style="max-width:90%; max-height:70vh; object-fit:contain; border-radius:14px; transition:opacity 180ms ease, transform 180ms ease; will-change:opacity, transform; box-shadow:0 24px 80px rgba(0,0,0,0.45); position:relative; z-index:10000;" />
 
 <button id="nextImageBtn"
 style="position:absolute; right:max(10px, env(safe-area-inset-right)); top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.9); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center; z-index:10002; pointer-events:auto; box-shadow:0 12px 32px rgba(0,0,0,0.35);">›</button>
 
 <button id="downloadBtn"
-style="position:absolute; bottom:30px; background:#4f46e5; color:white; padding:8px 16px; border-radius:8px;">
+style="position:absolute; left:50%; transform:translateX(-50%); bottom:calc(112px + env(safe-area-inset-bottom, 0px)); background:#4f46e5; color:white; padding:10px 18px; border-radius:999px; font-size:14px; font-weight:800; z-index:10003; box-shadow:0 16px 42px rgba(79,70,229,0.38);">
 Download
 </button>
 `
