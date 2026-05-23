@@ -237,6 +237,88 @@ return { success: false, reason: "rollback_crashed" }
 
 
 // =============================
+// ANDROID WEBVIEW UPLOAD COMPATIBILITY
+// =============================
+
+function isStudioOSNativeUploadApp(){
+try{
+const protocol = String(window.location.protocol || "").toLowerCase()
+
+if(
+window.Capacitor &&
+typeof window.Capacitor.isNativePlatform === "function" &&
+window.Capacitor.isNativePlatform()
+){
+return true
+}
+
+return protocol === "capacitor:" || protocol === "ionic:" || protocol === "file:"
+}catch(error){
+return false
+}
+}
+
+function inferImageMimeType(fileName, fallback = "image/jpeg"){
+const name = String(fileName || "").toLowerCase()
+
+if(name.endsWith(".png")) return "image/png"
+if(name.endsWith(".webp")) return "image/webp"
+if(name.endsWith(".gif")) return "image/gif"
+if(name.endsWith(".heic")) return "image/heic"
+if(name.endsWith(".heif")) return "image/heif"
+if(name.endsWith(".jpg") || name.endsWith(".jpeg")) return "image/jpeg"
+
+return fallback
+}
+
+async function normalizeAndroidUploadFile(file){
+if(!file || !isStudioOSNativeUploadApp()){
+return file
+}
+
+try{
+const fileName = file.name || `studioos-upload-${Date.now()}.jpg`
+const inferredType = file.type || inferImageMimeType(fileName)
+const buffer = await file.arrayBuffer()
+
+if(!buffer || !buffer.byteLength){
+return file
+}
+
+const blob = new Blob([buffer], {
+type: inferredType || "image/jpeg"
+})
+
+try{
+return new File([blob], fileName, {
+type: inferredType || blob.type || "image/jpeg",
+lastModified: file.lastModified || Date.now()
+})
+}catch(_fileError){
+blob.name = fileName
+blob.lastModified = file.lastModified || Date.now()
+return blob
+}
+}catch(error){
+console.warn("Android upload file normalization skipped", error)
+return file
+}
+}
+
+function isLikelyAndroidHeicFile(file){
+const name = String(file?.name || "").toLowerCase()
+const type = String(file?.type || "").toLowerCase()
+
+return (
+name.endsWith(".heic") ||
+name.endsWith(".heif") ||
+type.includes("heic") ||
+type.includes("heif")
+)
+}
+
+
+// =============================
 // IMAGE HELPERS
 // =============================
 
@@ -263,6 +345,10 @@ return false
 const type = String(file.type || "").toLowerCase()
 
 if(type.includes("gif") || type.includes("svg")){
+return false
+}
+
+if(isStudioOSNativeUploadApp() && isLikelyAndroidHeicFile(file)){
 return false
 }
 
@@ -788,7 +874,7 @@ return isMobile ? 2 : 3
 }
 
 if(isMobile){
-return 3
+return isStudioOSNativeUploadApp() ? 2 : 3
 }
 
 if(list.length >= 50){
@@ -827,6 +913,8 @@ storedFileSize: storedSize
 
 async function uploadSingleImageToS3(file, eventId, user){
 
+const sourceFile = await normalizeAndroidUploadFile(file)
+
 if(typeof window.requestS3UploadUrl !== "function"){
 throw new Error("S3 upload signer not loaded")
 }
@@ -841,12 +929,12 @@ throw new Error("S3 gallery saver not loaded")
 
 // Billing must use the original selected file size.
 // S3 storage uses the compressed upload file size.
-const originalFileSize = Number(file.size || 0)
+const originalFileSize = Number(sourceFile.size || file.size || 0)
 
-const uploadFile = await compressImageForUpload(file)
+const uploadFile = await compressImageForUpload(sourceFile)
 const storedFileSize = Number(uploadFile.size || 0)
 
-const safeFileName = sanitizeFileName(uploadFile.name || file.name || "image.jpg")
+const safeFileName = sanitizeFileName(uploadFile.name || sourceFile.name || file.name || "image.jpg")
 const dimensionsPromise = readImageDimensionsLocal(uploadFile)
 
 if(!user || !user.id){
