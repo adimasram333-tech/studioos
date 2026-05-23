@@ -75,6 +75,439 @@ tries++
 }
 
 
+function isStudioOSNativeApp(){
+
+try{
+
+if(
+window.Capacitor &&
+typeof window.Capacitor.isNativePlatform === "function" &&
+window.Capacitor.isNativePlatform()
+){
+return true
+}
+
+const protocol = String(window.location.protocol || "").toLowerCase()
+return protocol === "capacitor:" || protocol === "file:"
+
+}catch(error){
+
+return false
+
+}
+
+}
+
+
+function getStudioOSPublicBaseUrl(){
+
+const configuredUrl = String(window.STUDIOOS_PUBLIC_BASE_URL || "").trim()
+
+if(configuredUrl){
+return configuredUrl.replace(/\/+$/,"")
+}
+
+return "https://adimasram333-tech.github.io/studioos"
+
+}
+
+function buildPremiumProposalShortLink(data){
+
+if(!data) return getStudioOSPublicBaseUrl() + "/proposal-premium.html"
+
+if(data.id){
+return getStudioOSPublicBaseUrl() + "/proposal-premium.html?id=" + encodeURIComponent(data.id)
+}
+
+if(data.short_id){
+const clientSlug = String(data.client_name || "proposal")
+.toLowerCase()
+.replace(/[^a-z0-9 ]/g,"")
+.replace(/\s+/g,"-")
+.replace(/-+/g,"-")
+.replace(/^-|-$/g,"") || "proposal"
+
+return getStudioOSPublicBaseUrl() + "/p/" + clientSlug + "-" + data.short_id
+}
+
+return getStudioOSPublicBaseUrl() + "/proposal-premium.html"
+
+}
+
+function setPremiumPdfButtonState(isLoading){
+
+const btn = document.querySelector(".premium-btn-pdf")
+if(!btn) return
+
+if(isLoading){
+btn.disabled = true
+btn.dataset.originalText = btn.dataset.originalText || btn.innerText
+btn.innerText = "Preparing PDF..."
+btn.style.opacity = "0.75"
+btn.style.cursor = "not-allowed"
+}else{
+btn.disabled = false
+btn.innerText = btn.dataset.originalText || "Download Proposal PDF"
+btn.style.opacity = "1"
+btn.style.cursor = "pointer"
+}
+
+}
+
+
+
+// ======================
+// PDF / ANDROID SHARE HELPERS
+// ======================
+
+function showPremiumProposalToast(message, type = "error"){
+
+const existingToast = document.getElementById("studioosPremiumProposalToast")
+if(existingToast){
+existingToast.remove()
+}
+
+const toast = document.createElement("div")
+toast.id = "studioosPremiumProposalToast"
+toast.style.position = "fixed"
+toast.style.left = "50%"
+toast.style.bottom = "calc(24px + env(safe-area-inset-bottom, 0px))"
+toast.style.transform = "translateX(-50%)"
+toast.style.width = "min(calc(100% - 32px), 360px)"
+toast.style.zIndex = "2147482700"
+toast.style.padding = "0.9rem 1rem"
+toast.style.borderRadius = "1rem"
+toast.style.background = type === "success" ? "rgba(15,23,42,0.96)" : "rgba(127,29,29,0.96)"
+toast.style.border = type === "success" ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(248,113,113,0.35)"
+toast.style.boxShadow = "0 18px 55px rgba(0,0,0,0.38)"
+toast.style.backdropFilter = "blur(16px)"
+toast.style.webkitBackdropFilter = "blur(16px)"
+toast.style.color = "#ffffff"
+toast.style.fontSize = "0.88rem"
+toast.style.fontWeight = "800"
+toast.style.textAlign = "center"
+toast.style.pointerEvents = "none"
+toast.textContent = message
+
+document.body.appendChild(toast)
+
+setTimeout(()=>{
+toast.style.transition = "opacity 180ms ease, transform 180ms ease"
+toast.style.opacity = "0"
+toast.style.transform = "translateX(-50%) translateY(8px)"
+setTimeout(()=>{
+toast.remove()
+}, 220)
+}, 2200)
+
+}
+
+function loadScriptOnce(src, globalCheck){
+
+return new Promise((resolve,reject)=>{
+
+try{
+
+if(typeof globalCheck === "function" && globalCheck()){
+resolve()
+return
+}
+
+const existing = Array.from(document.scripts || []).find(script => script.src === src)
+
+if(existing){
+
+if(existing.dataset.loaded === "true" || (typeof globalCheck === "function" && globalCheck())){
+resolve()
+return
+}
+
+existing.addEventListener("load", ()=>resolve(), { once:true })
+existing.addEventListener("error", ()=>reject(new Error("Unable to load PDF library")), { once:true })
+return
+
+}
+
+const script = document.createElement("script")
+script.src = src
+script.async = true
+script.dataset.studioosLazy = "true"
+
+script.onload = ()=>{
+script.dataset.loaded = "true"
+resolve()
+}
+
+script.onerror = ()=>{
+reject(new Error("Unable to load PDF library"))
+}
+
+document.head.appendChild(script)
+
+}catch(error){
+reject(error)
+}
+
+})
+
+}
+
+async function ensureHtml2PdfLoaded(){
+
+if(typeof window.html2pdf === "function"){
+return
+}
+
+await loadScriptOnce(
+"https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js",
+()=>typeof window.html2pdf === "function"
+)
+
+if(typeof window.html2pdf !== "function"){
+throw new Error("PDF library not loaded")
+}
+
+}
+
+async function waitForDocumentFonts(doc = document){
+try{
+if(doc?.fonts?.ready){
+await doc.fonts.ready
+}
+}catch(e){
+console.log("Document font readiness skipped", e)
+}
+}
+
+async function waitForImagesInElement(root){
+
+if(!root) return
+
+const images = Array.from(root.querySelectorAll("img") || [])
+
+if(!images.length) return
+
+await Promise.all(images.map((img)=>{
+if(img.complete && img.naturalWidth > 0){
+return Promise.resolve()
+}
+
+return new Promise((resolve)=>{
+let done = false
+
+const finish = ()=>{
+if(done) return
+done = true
+resolve()
+}
+
+img.addEventListener("load", finish, { once:true })
+img.addEventListener("error", finish, { once:true })
+setTimeout(finish, 12000)
+})
+}))
+
+}
+
+function waitForNextPaint(){
+return new Promise(resolve=>{
+requestAnimationFrame(()=>{
+requestAnimationFrame(resolve)
+})
+})
+}
+
+function getStudioOSFileSaverPlugin(){
+try{
+return window.Capacitor?.Plugins?.StudioOSFileSaver || null
+}catch(error){
+return null
+}
+}
+
+function getStudioOSSharePlugin(){
+try{
+return window.Capacitor?.Plugins?.Share || null
+}catch(error){
+return null
+}
+}
+
+function blobToBase64ForPremiumProposal(blob){
+
+return new Promise((resolve,reject)=>{
+
+const reader = new FileReader()
+
+reader.onloadend = function(){
+try{
+const result = String(reader.result || "")
+const base64 = result.includes(",") ? result.split(",")[1] : result
+
+if(!base64){
+reject(new Error("PDF preparation failed"))
+return
+}
+
+resolve(base64)
+}catch(error){
+reject(error)
+}
+}
+
+reader.onerror = function(){
+reject(new Error("Unable to read PDF file"))
+}
+
+reader.readAsDataURL(blob)
+
+})
+
+}
+
+function sanitizePremiumProposalPdfFileName(value){
+
+const safe = String(value || "premium-proposal.pdf")
+.replace(/[<>:"/\\|?*\x00-\x1F]/g, "-")
+.replace(/\s+/g, "-")
+.replace(/-+/g, "-")
+.replace(/^-|-$/g, "")
+.toLowerCase()
+
+return safe.endsWith(".pdf") ? safe : safe + ".pdf"
+
+}
+
+async function savePremiumProposalPdfBlobNatively(blob, filename){
+
+const saver = getStudioOSFileSaverPlugin()
+
+if(!saver || typeof saver.saveFile !== "function"){
+throw new Error("StudioOS native file saver is not available")
+}
+
+const fileName = sanitizePremiumProposalPdfFileName(filename)
+const base64Data = await blobToBase64ForPremiumProposal(blob)
+
+const result = await saver.saveFile({
+base64Data,
+fileName,
+mimeType: "application/pdf",
+target: "downloads"
+})
+
+return {
+fileName,
+uri: result?.uri || ""
+}
+
+}
+
+function buildPremiumProposalShareMessage(data, profile){
+
+return `Hello ${data?.client_name || ""},
+
+Your premium photography proposal is attached as PDF.
+
+${profile?.studio_name || ""}
+${profile?.phone || ""}
+
+Powered by StudioOS`
+
+}
+
+function buildPremiumProposalTextShareMessage(data, profile){
+
+return `Hello ${data?.client_name || ""},
+
+Your premium photography proposal is attached as PDF.
+
+${profile?.studio_name || ""}
+${profile?.phone || ""}
+
+Powered by StudioOS`
+
+}
+
+async function sharePremiumProposalTextNatively(data, profile){
+
+const Share = getStudioOSSharePlugin()
+
+if(!Share || typeof Share.share !== "function"){
+throw new Error("Native Share plugin is not available")
+}
+
+await Share.share({
+title: "StudioOS Premium Proposal",
+text: buildPremiumProposalTextShareMessage(data, profile),
+dialogTitle: "Share Premium Proposal"
+})
+
+return true
+
+}
+
+async function generatePremiumProposalPdfBlob(){
+
+await ensureHtml2PdfLoaded()
+await waitForDocumentFonts(document)
+
+const element = document.getElementById("proposalPage") || document.body
+
+await waitForImagesInElement(element)
+await waitForNextPaint()
+
+const opt = {
+margin:0,
+filename:"premium-proposal.pdf",
+image:{ type:"jpeg", quality:1 },
+html2canvas:{
+scale:2,
+useCORS:true,
+allowTaint:false,
+backgroundColor:"#0f172a",
+scrollX:0,
+scrollY:0,
+logging:false
+},
+jsPDF:{ unit:"mm", format:[210,297], orientation:"portrait" }
+}
+
+return await html2pdf()
+.set(opt)
+.from(element)
+.outputPdf("blob")
+
+}
+
+async function sharePremiumProposalPdfNatively(data, profile){
+
+const Share = getStudioOSSharePlugin()
+
+if(!Share || typeof Share.share !== "function"){
+throw new Error("Native Share plugin is not available")
+}
+
+const pdfBlob = await generatePremiumProposalPdfBlob()
+const saved = await savePremiumProposalPdfBlobNatively(pdfBlob, "premium-proposal.pdf")
+
+if(!saved?.uri){
+throw new Error("PDF file was created but cannot be shared")
+}
+
+await Share.share({
+title: "StudioOS Premium Proposal",
+text: buildPremiumProposalShareMessage(data, profile),
+files: [saved.uri],
+dialogTitle: "Share Premium Proposal PDF"
+})
+
+return true
+
+}
+
+
+
 // ======================
 // PREMIUM PLAN GATE
 // ======================
@@ -255,8 +688,14 @@ return
 
 const cover = document.getElementById("coverImage")
 
-if(profile?.team_sheet_cover_image){
-cover.src = profile.team_sheet_cover_image
+const proposalCoverImage =
+data?.proposal_cover_image ||
+profile?.proposal_cover_image ||
+profile?.team_sheet_cover_image ||
+""
+
+if(proposalCoverImage){
+cover.src = proposalCoverImage
 }
 
 
@@ -266,8 +705,14 @@ cover.src = profile.team_sheet_cover_image
 
 const title = document.getElementById("proposalTitle")
 
-if(profile?.team_sheet_title_color){
-title.style.color = profile.team_sheet_title_color
+const proposalTitleColor =
+data?.proposal_title_color ||
+profile?.proposal_title_color ||
+profile?.team_sheet_title_color ||
+""
+
+if(proposalTitleColor){
+title.style.color = proposalTitleColor
 }
 
 
@@ -414,50 +859,99 @@ formatMoney(data.balance)
 // WHATSAPP
 // ======================
 
-window.sendWhatsApp = function(){
+window.sendWhatsApp = async function(){
 
-const phone = data.phone || ""
+setPremiumPdfButtonState(true)
 
-const link =
-window.location.href
+try{
 
-const msg =
-`Hello ${data.client_name},
-
-Your premium photography proposal is ready:
-
-${link}
-
-${profile?.studio_name || ""}
-${profile?.phone || ""}`
-
-window.open(
-"https://wa.me/91" + phone + "?text=" + encodeURIComponent(msg),
-"_blank"
-)
-
+if(isStudioOSNativeApp()){
+await sharePremiumProposalPdfNatively(data, profile)
+showPremiumProposalToast("Share sheet opened", "success")
+return
 }
 
+showPremiumProposalToast("PDF is being prepared. Please attach the downloaded PDF in WhatsApp.", "success")
+
+const pdfBlob = await generatePremiumProposalPdfBlob()
+const url = URL.createObjectURL(pdfBlob)
+const link = document.createElement("a")
+link.href = url
+link.download = "premium-proposal.pdf"
+document.body.appendChild(link)
+link.click()
+link.remove()
+
+setTimeout(function(){
+URL.revokeObjectURL(url)
+}, 30000)
+
+}catch(error){
+console.error("PREMIUM PROPOSAL SHARE ERROR:", error)
+showPremiumProposalToast(error?.message || "Premium proposal share failed", "error")
+}finally{
+setPremiumPdfButtonState(false)
+}
+
+}
 
 // ======================
 // PDF
 // ======================
 
-window.downloadPDF = function(){
+window.downloadPDF = async function(){
 
-window.scrollTo(0,0)
+setPremiumPdfButtonState(true)
 
-const element = document.body
+try{
+
+await ensureHtml2PdfLoaded()
+await waitForDocumentFonts(document)
+
+const element = document.getElementById("proposalPage") || document.body
+
+await waitForImagesInElement(element)
+await waitForNextPaint()
 
 const opt = {
 margin:0,
 filename:"premium-proposal.pdf",
 image:{ type:"jpeg", quality:1 },
-html2canvas:{ scale:2 },
-jsPDF:{ unit:"mm", format:[210,297] }
+html2canvas:{
+scale:2,
+useCORS:true,
+allowTaint:false,
+backgroundColor:"#0f172a",
+scrollX:0,
+scrollY:0,
+logging:false
+},
+jsPDF:{ unit:"mm", format:[210,297], orientation:"portrait" }
 }
 
-html2pdf().set(opt).from(element).save()
+if(isStudioOSNativeApp()){
+const pdfBlob = await html2pdf()
+.set(opt)
+.from(element)
+.outputPdf("blob")
+
+await savePremiumProposalPdfBlobNatively(pdfBlob, "premium-proposal.pdf")
+showPremiumProposalToast("PDF saved to Downloads", "success")
+return
+}
+
+await html2pdf().set(opt).from(element).save()
+
+}catch(error){
+
+console.error("PREMIUM PDF DOWNLOAD ERROR:", error)
+showPremiumProposalToast(error?.message || "PDF download failed", "error")
+
+}finally{
+
+setPremiumPdfButtonState(false)
+
+}
 
 }
 
