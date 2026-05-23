@@ -333,6 +333,75 @@ return null
 }
 }
 
+
+function getStudioOSFilesystemPlugin(){
+try{
+return window.Capacitor?.Plugins?.Filesystem || null
+}catch(error){
+return null
+}
+}
+
+function normalizeStudioOSShareFileUri(uri){
+const value = String(uri || "").trim()
+
+if(!value){
+return ""
+}
+
+if(value.startsWith("file://")){
+return value
+}
+
+if(value.startsWith("/")){
+return "file://" + value
+}
+
+return ""
+}
+
+async function savePremiumProposalPdfBlobForNativeShare(blob, filename){
+
+const fileName = sanitizePremiumProposalPdfFileName(filename)
+const base64Data = await blobToBase64ForPremiumProposal(blob)
+const Filesystem = getStudioOSFilesystemPlugin()
+
+if(Filesystem && typeof Filesystem.writeFile === "function"){
+try{
+const result = await Filesystem.writeFile({
+path: `studioos-${Date.now()}-${fileName}`,
+data: base64Data,
+directory: "CACHE",
+recursive: true
+})
+
+const fileUri = normalizeStudioOSShareFileUri(result?.uri || result?.fileUri || result?.path)
+
+if(fileUri){
+return {
+fileName,
+uri: fileUri
+}
+}
+}catch(error){
+console.warn("Filesystem cache premium PDF save failed, trying StudioOSFileSaver fallback:", error)
+}
+}
+
+const saved = await savePremiumProposalPdfBlobNatively(blob, fileName)
+const fileUri = normalizeStudioOSShareFileUri(saved?.uri || saved?.fileUri || saved?.path)
+
+if(!fileUri){
+throw new Error("PDF file was created, but Android did not return a shareable file URL.")
+}
+
+return {
+fileName,
+uri: fileUri
+}
+
+}
+
 function blobToBase64ForPremiumProposal(blob){
 
 return new Promise((resolve,reject)=>{
@@ -489,9 +558,9 @@ throw new Error("Native Share plugin is not available")
 }
 
 const pdfBlob = await generatePremiumProposalPdfBlob()
-const saved = await savePremiumProposalPdfBlobNatively(pdfBlob, "premium-proposal.pdf")
+const saved = await savePremiumProposalPdfBlobForNativeShare(pdfBlob, "premium-proposal.pdf")
 
-if(!saved?.uri){
+if(!saved?.uri || !String(saved.uri).startsWith("file://")){
 throw new Error("PDF file was created but cannot be shared")
 }
 
