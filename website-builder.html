@@ -1827,6 +1827,28 @@ openPurchaseModal(selectedTemplateId)
 return false
 }
 
+function isStudioOSNativeBuilderApp(){
+try{
+const protocol = String(window.location.protocol || "").toLowerCase()
+
+if(
+window.Capacitor &&
+typeof window.Capacitor.isNativePlatform === "function" &&
+window.Capacitor.isNativePlatform()
+){
+return true
+}
+
+return protocol === "capacitor:" || protocol === "ionic:" || protocol === "file:"
+}catch(error){
+return false
+}
+}
+
+function getStudioOSPublicBaseUrl(){
+return "https://adimasram333-tech.github.io/studioos"
+}
+
 function getWebsiteUrl({ publicView = false } = {}){
 
 const slug = currentWebsiteData?.site_slug
@@ -1835,16 +1857,23 @@ if(!slug) return ""
 const previewPath = getTemplatePreviewPath(selectedTemplateId)
 if(!previewPath) return ""
 
-const path = window.location.pathname
-const basePath = path.substring(0, path.lastIndexOf("/") + 1)
+const normalizedPreviewPath = String(previewPath).replace(/^\/+/, "")
 
-const url = new URL(`${basePath}${previewPath}`, window.location.origin)
+// Public website actions must always share/open the real web URL.
+// Never share capacitor://localhost, file://, or a local Android WebView URL.
+if(publicView){
+const url = new URL(`${getStudioOSPublicBaseUrl()}/${normalizedPreviewPath}`)
+url.searchParams.set("slug", slug)
+return url.toString()
+}
+
+// Edit preview can stay inside the app/browser because it is an internal owner preview.
+const path = window.location.pathname || ""
+const basePath = path.substring(0, path.lastIndexOf("/") + 1) || "/"
+const url = new URL(`${basePath}${normalizedPreviewPath}`, window.location.origin)
 
 url.searchParams.set("slug", slug)
-
-if(!publicView){
 url.searchParams.set("edit", "true")
-}
 
 return url.toString()
 }
@@ -2483,12 +2512,28 @@ return
 }
 
 try{
+if(isStudioOSNativeBuilderApp() && navigator.share){
+await navigator.share({
+title: "My StudioOS Website",
+text: "View my photography website",
+url: shareUrl
+})
+setSaveFeedback("success", "Website link share sheet opened.")
+return
+}
+
 await navigator.clipboard.writeText(shareUrl)
 setSaveFeedback("success", "Website link copied successfully.")
 }
 catch(error){
-console.error("Copy link failed:", error)
+console.error("Copy/share link failed:", error)
+
+try{
+await navigator.clipboard.writeText(shareUrl)
+setSaveFeedback("success", "Website link copied successfully.")
+}catch(_clipboardError){
 setSaveFeedback("error", "Unable to copy website link right now.")
+}
 }
 })
 })
@@ -2526,6 +2571,11 @@ const publicUrl = getWebsiteUrl({ publicView: true })
 
 if(!publicUrl){
 setSaveFeedback("error", "This public website link is not available yet.")
+return
+}
+
+if(isStudioOSNativeBuilderApp()){
+window.location.href = publicUrl
 return
 }
 
@@ -2587,6 +2637,8 @@ window.location.href = `${previewPath}?slug=${encodeURIComponent(slug)}&edit=tru
 })
 
 </script>
+
+<script src="js/app-bottom-nav.js"></script>
 
 </body>
 </html>
