@@ -422,6 +422,20 @@ visibility:hidden;
   }
 }
 
+/* StudioOS desktop-only date input cleanup
+   Desktop browsers already render native date placeholders.
+   Keep Android/mobile custom labels untouched; hide overlay labels only on desktop
+   to prevent the double mm/dd/yyyy + custom label layer. */
+@media (min-width:769px){
+  .dateFieldLabel{
+    display:none !important;
+  }
+
+  .dateField .input{
+    padding-right:10px !important;
+  }
+}
+
 </style>
 
 </head>
