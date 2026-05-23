@@ -306,53 +306,210 @@ function getLowQualityUrl(url) {
   }
 }
 
+
+
+// =============================
+// ANDROID NATIVE FILE SAVE BRIDGE
+// =============================
+
+function isStudioOSAndroidApp() {
+  try {
+    const protocol = String(window.location.protocol || "").toLowerCase();
+
+    if (
+      window.Capacitor &&
+      typeof window.Capacitor.isNativePlatform === "function" &&
+      window.Capacitor.isNativePlatform()
+    ) {
+      return true;
+    }
+
+    return protocol === "capacitor:" || protocol === "file:" || protocol === "ionic:";
+  } catch (error) {
+    return false;
+  }
+}
+
+function getStudioOSFileSaverPlugin() {
+  try {
+    return window.Capacitor?.Plugins?.StudioOSFileSaver || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function getFileExtensionFromMime(mimeType) {
+  const safeMime = String(mimeType || "").toLowerCase();
+
+  if (safeMime.includes("png")) return "png";
+  if (safeMime.includes("webp")) return "webp";
+  if (safeMime.includes("gif")) return "gif";
+  if (safeMime.includes("pdf")) return "pdf";
+  if (safeMime.includes("jpeg") || safeMime.includes("jpg")) return "jpg";
+
+  return "jpg";
+}
+
+function sanitizeStudioOSDownloadFileName(value, fallbackExtension = "jpg") {
+  const safeValue = safeString(value)
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+  const fallback = `studioos-photo-${Date.now()}.${fallbackExtension}`;
+  const fileName = safeValue || fallback;
+
+  if (/\.[a-z0-9]{2,6}$/i.test(fileName)) {
+    return fileName;
+  }
+
+  return `${fileName}.${fallbackExtension}`;
+}
+
+function getStudioOSDownloadFileName(imageUrl, blob, trackingOptions = {}) {
+  const context = trackingOptions.downloadLogContext || {};
+  const photo = context.photo || trackingOptions.photo || {};
+  const mimeType = blob?.type || "image/jpeg";
+  const extension = getFileExtensionFromMime(mimeType);
+
+  const objectKey =
+    safeString(photo.object_key) ||
+    safeString(context.objectKey) ||
+    safeString(photo.preview_key) ||
+    safeString(photo.thumbnail_key);
+
+  if (objectKey) {
+    const objectName = objectKey.split("/").filter(Boolean).pop();
+    if (objectName) {
+      return sanitizeStudioOSDownloadFileName(objectName, extension);
+    }
+  }
+
+  try {
+    const url = new URL(imageUrl, window.location.href);
+    const pathName = decodeURIComponent(url.pathname || "");
+    const urlName = pathName.split("/").filter(Boolean).pop();
+
+    if (urlName) {
+      return sanitizeStudioOSDownloadFileName(urlName.split("?")[0], extension);
+    }
+  } catch (error) {
+    // ignore and use fallback
+  }
+
+  return sanitizeStudioOSDownloadFileName(`studioos-photo-${Date.now()}`, extension);
+}
+
+function blobToBase64ForStudioOSNativeSave(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onloadend = function () {
+      try {
+        const result = String(reader.result || "");
+        const base64 = result.includes(",") ? result.split(",")[1] : result;
+
+        if (!base64) {
+          reject(new Error("File preparation failed"));
+          return;
+        }
+
+        resolve(base64);
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    reader.onerror = function () {
+      reject(new Error("Unable to read file"));
+    };
+
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function savePhotoBlobInStudioOSAndroidApp(blob, imageUrl, trackingOptions = {}) {
+  const saver = getStudioOSFileSaverPlugin();
+
+  if (!saver || typeof saver.saveFile !== "function") {
+    throw new Error("StudioOS native file saver is not available");
+  }
+
+  const mimeType = blob?.type || "image/jpeg";
+  const base64Data = await blobToBase64ForStudioOSNativeSave(blob);
+  const fileName = getStudioOSDownloadFileName(imageUrl, blob, trackingOptions);
+
+  await saver.saveFile({
+    base64Data,
+    fileName,
+    mimeType,
+    target: "images"
+  });
+
+  return fileName;
+}
+
+
 // =============================
 // FORCE DOWNLOAD
 // =============================
 
-function triggerDownload(imageUrl, eventId = null, trackingOptions = {}) {
-  fetch(imageUrl)
-    .then((res) => res.blob())
-    .then((blob) => {
+async function triggerDownload(imageUrl, eventId = null, trackingOptions = {}) {
+  try {
+    const response = await fetch(imageUrl, {
+      method: "GET",
+      mode: "cors",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error("Unable to fetch image for download");
+    }
+
+    const blob = await response.blob();
+
+    if (isStudioOSAndroidApp()) {
+      await savePhotoBlobInStudioOSAndroidApp(blob, imageUrl, trackingOptions);
+    } else {
       const blobUrl = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = blobUrl;
-      a.download = "photo.jpg";
+      a.download = getStudioOSDownloadFileName(imageUrl, blob, trackingOptions);
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
 
       URL.revokeObjectURL(blobUrl);
+    }
 
-      const downloadedBytes = blob.size || trackingOptions.fileSizeBytes || 0;
+    const downloadedBytes = blob.size || trackingOptions.fileSizeBytes || 0;
 
-      trackDownloadUsage(imageUrl, eventId, {
-        ...trackingOptions,
-        fileSizeBytes: downloadedBytes,
-        downloadedBytes
-      });
-
-      if (typeof window.logGalleryDownloadUsage === "function") {
-        const baseLogContext = trackingOptions.downloadLogContext || {};
-        const photo = baseLogContext.photo || trackingOptions.photo || null;
-
-        window.logGalleryDownloadUsage({
-          ...baseLogContext,
-          eventId: baseLogContext.eventId || eventId,
-          photo,
-          photographerId: baseLogContext.photographerId || trackingOptions.photographerId || null,
-          downloadType: baseLogContext.downloadType || trackingOptions.downloadType || "paid_download_original",
-          source: baseLogContext.source || "download_control"
-        }, downloadedBytes).catch(() => {});
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      alert("Download failed");
+    trackDownloadUsage(imageUrl, eventId, {
+      ...trackingOptions,
+      fileSizeBytes: downloadedBytes,
+      downloadedBytes
     });
-}
 
+    if (typeof window.logGalleryDownloadUsage === "function") {
+      const baseLogContext = trackingOptions.downloadLogContext || {};
+      const photo = baseLogContext.photo || trackingOptions.photo || null;
+
+      window.logGalleryDownloadUsage({
+        ...baseLogContext,
+        eventId: baseLogContext.eventId || eventId,
+        photo,
+        photographerId: baseLogContext.photographerId || trackingOptions.photographerId || null,
+        downloadType: baseLogContext.downloadType || trackingOptions.downloadType || "paid_download_original",
+        source: baseLogContext.source || "download_control"
+      }, downloadedBytes).catch(() => {});
+    }
+  } catch (err) {
+    console.error("Download failed:", err);
+    alert("Download failed");
+  }
+}
 // =============================
 // PAYMENT MODAL
 // =============================
