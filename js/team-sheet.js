@@ -75,6 +75,46 @@ function setLoadingText(text) {
   }
 }
 
+function showTeamSheetToast(message, type = "error") {
+  const existingToast = document.getElementById("studioosTeamSheetToast");
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  const toast = document.createElement("div");
+  toast.id = "studioosTeamSheetToast";
+  toast.style.position = "fixed";
+  toast.style.left = "50%";
+  toast.style.bottom = "calc(24px + env(safe-area-inset-bottom, 0px))";
+  toast.style.transform = "translateX(-50%)";
+  toast.style.width = "min(calc(100% - 32px), 360px)";
+  toast.style.zIndex = "2147482700";
+  toast.style.padding = "0.9rem 1rem";
+  toast.style.borderRadius = "1rem";
+  toast.style.background = type === "success" ? "rgba(15,23,42,0.96)" : "rgba(127,29,29,0.96)";
+  toast.style.border = type === "success" ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(248,113,113,0.35)";
+  toast.style.boxShadow = "0 18px 55px rgba(0,0,0,0.38)";
+  toast.style.backdropFilter = "blur(16px)";
+  toast.style.webkitBackdropFilter = "blur(16px)";
+  toast.style.color = "#ffffff";
+  toast.style.fontSize = "0.88rem";
+  toast.style.fontWeight = "800";
+  toast.style.textAlign = "center";
+  toast.style.pointerEvents = "none";
+  toast.textContent = message || "Something went wrong";
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.transition = "opacity 180ms ease, transform 180ms ease";
+    toast.style.opacity = "0";
+    toast.style.transform = "translateX(-50%) translateY(8px)";
+    setTimeout(() => {
+      toast.remove();
+    }, 220);
+  }, 2200);
+}
+
 
 // =============================
 // GET CURRENT USER
@@ -586,6 +626,287 @@ function renderTeam(grouped) {
 }
 
 
+
+
+// =============================
+// ANDROID NATIVE FILE SAVE BRIDGE
+// =============================
+
+function isStudioOSNativeApp() {
+  try {
+    const protocol = String(window.location.protocol || "").toLowerCase();
+
+    if (
+      window.Capacitor &&
+      typeof window.Capacitor.isNativePlatform === "function" &&
+      window.Capacitor.isNativePlatform()
+    ) {
+      return true;
+    }
+
+    return protocol === "capacitor:" || protocol === "ionic:" || protocol === "file:";
+  } catch (error) {
+    return false;
+  }
+}
+
+function getStudioOSFileSaverPlugin() {
+  try {
+    return window.Capacitor?.Plugins?.StudioOSFileSaver || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function blobToBase64ForTeamSheet(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onloadend = function() {
+      try {
+        const result = String(reader.result || "");
+        const base64 = result.includes(",") ? result.split(",")[1] : result;
+
+        if (!base64) {
+          reject(new Error("PDF preparation failed"));
+          return;
+        }
+
+        resolve(base64);
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    reader.onerror = function() {
+      reject(new Error("Unable to read PDF file"));
+    };
+
+    reader.readAsDataURL(blob);
+  });
+}
+
+function sanitizeTeamSheetFileName(value) {
+  const safe = String(value || "team-sheet.pdf")
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+  if (!safe) return "team-sheet.pdf";
+  return safe.toLowerCase().endsWith(".pdf") ? safe : `${safe}.pdf`;
+}
+
+async function saveTeamSheetPdfBlob(blob, fileName) {
+  const saver = getStudioOSFileSaverPlugin();
+
+  if (!saver || typeof saver.saveFile !== "function") {
+    throw new Error("StudioOS native file saver is not available");
+  }
+
+  const safeFileName = sanitizeTeamSheetFileName(fileName);
+  const base64Data = await blobToBase64ForTeamSheet(blob);
+
+  const result = await saver.saveFile({
+    base64Data,
+    fileName: safeFileName,
+    mimeType: "application/pdf",
+    target: "downloads"
+  });
+
+  return {
+    fileName: safeFileName,
+    uri: result?.uri || ""
+  };
+}
+
+// =============================
+// PDF LIBRARY / EXPORT READINESS
+// =============================
+
+const STUDIOOS_TEAM_SHEET_HTML2PDF_SRC =
+  "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+
+let studioOSTeamSheetHtml2PdfLoadPromise = null;
+
+async function ensureTeamSheetHtml2PdfLoaded() {
+  if (typeof window.html2pdf === "function") {
+    return true;
+  }
+
+  if (studioOSTeamSheetHtml2PdfLoadPromise) {
+    return await studioOSTeamSheetHtml2PdfLoadPromise;
+  }
+
+  studioOSTeamSheetHtml2PdfLoadPromise = new Promise((resolve, reject) => {
+    const existingScript =
+      document.querySelector('script[data-studioos-team-sheet-html2pdf="true"]') ||
+      Array.from(document.scripts || []).find(script =>
+        String(script.src || "").includes("html2pdf")
+      );
+
+    if (existingScript) {
+      if (typeof window.html2pdf === "function") {
+        resolve(true);
+        return;
+      }
+
+      existingScript.addEventListener("load", function() {
+        if (typeof window.html2pdf === "function") {
+          resolve(true);
+        } else {
+          reject(new Error("PDF library loaded but not initialized"));
+        }
+      }, { once: true });
+
+      existingScript.addEventListener("error", function() {
+        reject(new Error("PDF library failed to load"));
+      }, { once: true });
+
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = STUDIOOS_TEAM_SHEET_HTML2PDF_SRC;
+    script.async = true;
+    script.defer = true;
+    script.dataset.studioosTeamSheetHtml2pdf = "true";
+
+    script.onload = function() {
+      if (typeof window.html2pdf === "function") {
+        resolve(true);
+        return;
+      }
+
+      reject(new Error("PDF library loaded but not initialized"));
+    };
+
+    script.onerror = function() {
+      reject(new Error("PDF library failed to load. Please check internet connection and try again."));
+    };
+
+    document.head.appendChild(script);
+  });
+
+  try {
+    return await studioOSTeamSheetHtml2PdfLoadPromise;
+  } catch (error) {
+    studioOSTeamSheetHtml2PdfLoadPromise = null;
+    throw error;
+  }
+}
+
+async function waitForTeamSheetFonts(doc = document) {
+  try {
+    if (doc?.fonts?.ready) {
+      await doc.fonts.ready;
+    }
+  } catch (error) {
+    console.warn("Team Sheet font readiness skipped:", error);
+  }
+}
+
+async function waitForTeamSheetImages(root) {
+  if (!root) return;
+
+  const images = Array.from(root.querySelectorAll("img") || []);
+
+  if (!images.length) return;
+
+  await Promise.all(images.map((img) => {
+    if (img.complete && img.naturalWidth > 0) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      let done = false;
+
+      const finish = () => {
+        if (done) return;
+        done = true;
+        resolve();
+      };
+
+      img.addEventListener("load", finish, { once: true });
+      img.addEventListener("error", finish, { once: true });
+
+      setTimeout(finish, 12000);
+    });
+  }));
+}
+
+function waitForTeamSheetNextPaint() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resolve);
+    });
+  });
+}
+
+function getStudioOSSharePlugin() {
+  try {
+    return window.Capacitor?.Plugins?.Share || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function getTeamSheetPdfElement() {
+  const element = document.querySelector(".print-shell");
+
+  if (!element) {
+    throw new Error("Printable sheet container not found");
+  }
+
+  return element;
+}
+
+function getTeamSheetPdfOptions(fileName = "team-sheet.pdf") {
+  return {
+    margin: 0,
+    filename: fileName,
+    image: { type: "jpeg", quality: 1 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#f4f1ed",
+      scrollX: 0,
+      scrollY: 0,
+      logging: false
+    },
+    jsPDF: {
+      unit: "mm",
+      format: "a4",
+      orientation: "portrait"
+    },
+    pagebreak: {
+      mode: ["css", "legacy"]
+    }
+  };
+}
+
+async function createTeamSheetPdfBlob(fileName = "team-sheet.pdf") {
+  await ensureTeamSheetHtml2PdfLoaded();
+
+  const element = getTeamSheetPdfElement();
+
+  applyTeamSheetPdfExportMode();
+
+  try {
+    await waitForTeamSheetFonts(document);
+    await waitForTeamSheetImages(element);
+    await waitForTeamSheetNextPaint();
+
+    return await window.html2pdf()
+      .set(getTeamSheetPdfOptions(fileName))
+      .from(element)
+      .outputPdf("blob");
+  } finally {
+    removeTeamSheetPdfExportMode();
+  }
+}
+
+
 // =============================
 // PDF EXPORT HELPERS
 // =============================
@@ -613,86 +934,206 @@ function removeTeamSheetPdfExportMode() {
 // =============================
 
 async function downloadPDF() {
+  teamSheetPdfScrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+
   try {
     if (!teamSheetAccess.paidSharingAllowed) {
       showTeamSheetUpgradeModal();
       return;
     }
 
-    if (typeof window.html2pdf === "undefined") {
-      console.error("PDF library not loaded");
+    const fileName = "team-sheet.pdf";
+
+    if (isStudioOSNativeApp()) {
+      const pdfBlob = await createTeamSheetPdfBlob(fileName);
+      await saveTeamSheetPdfBlob(pdfBlob, fileName);
+      showTeamSheetToast("Team Sheet saved to Downloads", "success");
       return;
     }
 
-    const element = document.querySelector(".print-shell");
+    await ensureTeamSheetHtml2PdfLoaded();
 
-    if (!element) {
-      console.error("Printable sheet container not found");
-      return;
-    }
-
-    teamSheetPdfScrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const element = getTeamSheetPdfElement();
 
     applyTeamSheetPdfExportMode();
 
-    const opt = {
-      margin: 0,
-      filename: "team-sheet.pdf",
-      image: { type: "jpeg", quality: 1 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#f4f1ed",
-        scrollX: 0,
-        scrollY: 0,
-        logging: false
-      },
-      jsPDF: {
-        unit: "mm",
-        format: "a4",
-        orientation: "portrait"
-      },
-      pagebreak: {
-        mode: ["css", "legacy"]
-      }
-    };
-
-    await window.html2pdf().set(opt).from(element).save();
+    try {
+      await waitForTeamSheetFonts(document);
+      await waitForTeamSheetImages(element);
+      await waitForTeamSheetNextPaint();
+      await window.html2pdf().set(getTeamSheetPdfOptions(fileName)).from(element).save();
+    } finally {
+      removeTeamSheetPdfExportMode();
+    }
   } catch (err) {
     console.error("DOWNLOAD PDF ERROR:", err);
+    showTeamSheetToast(err?.message || "Team Sheet PDF download failed", "error");
   } finally {
     removeTeamSheetPdfExportMode();
-    window.scrollTo(0, teamSheetPdfScrollTop);
+    window.scrollTo(0, teamSheetPdfScrollTop || 0);
   }
 }
 
+function buildTeamSheetWhatsAppMessage() {
+  return `Hello Team,
+
+Your event team sheet is attached as PDF.
+
+Please check the assignment details, reporting time, and team notes carefully.
+
+Generated by StudioOS`;
+}
+
+function getTeamSheetShareButtons() {
+  return Array.from(document.querySelectorAll("button, a")).filter((el) => {
+    const onclickValue = String(el.getAttribute("onclick") || "");
+    const idValue = String(el.id || "");
+    const textValue = String(el.textContent || "").trim().toLowerCase();
+
+    return (
+      onclickValue.includes("shareTeam") ||
+      idValue.toLowerCase().includes("shareteam") ||
+      textValue === "share" ||
+      textValue === "send on whatsapp"
+    );
+  });
+}
+
+function updateTeamSheetShareButtonText() {
+  getTeamSheetShareButtons().forEach((el) => {
+    if (String(el.textContent || "").trim().toLowerCase() === "share") {
+      el.textContent = "Send on WhatsApp";
+    }
+  });
+}
+
+function setTeamSheetShareButtonState(isLoading) {
+  getTeamSheetShareButtons().forEach((el) => {
+    el.disabled = !!isLoading;
+
+    if (isLoading) {
+      el.dataset.originalText = el.dataset.originalText || el.textContent || "Send on WhatsApp";
+      el.textContent = "Preparing PDF...";
+      el.style.opacity = "0.75";
+      el.style.cursor = "not-allowed";
+    } else {
+      el.textContent = el.dataset.originalText || "Send on WhatsApp";
+      el.style.opacity = "1";
+      el.style.cursor = "pointer";
+    }
+  });
+}
+
+function createTeamSheetPdfFileFromBlob(blob, fileName) {
+  try {
+    return new File([blob], sanitizeTeamSheetFileName(fileName), {
+      type: "application/pdf",
+      lastModified: Date.now()
+    });
+  } catch (error) {
+    return null;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", updateTeamSheetShareButtonText);
+window.addEventListener("load", updateTeamSheetShareButtonText);
+
 
 // =============================
-// SHARE TEAM
+// SHARE TEAM / SEND ON WHATSAPP
 // =============================
 
 async function shareTeam() {
+  teamSheetPdfScrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+
   try {
     if (!teamSheetAccess.paidSharingAllowed) {
       showTeamSheetUpgradeModal();
       return;
     }
 
-    const url = window.location.href;
+    setTeamSheetShareButtonState(true);
 
-    if (navigator.share) {
+    const fileName = "team-sheet.pdf";
+    const shareMessage = buildTeamSheetWhatsAppMessage();
+    const pdfBlob = await createTeamSheetPdfBlob(fileName);
+
+    if (isStudioOSNativeApp()) {
+      const Share = getStudioOSSharePlugin();
+
+      if (!Share || typeof Share.share !== "function") {
+        throw new Error("Native Share plugin is not available");
+      }
+
+      const saved = await saveTeamSheetPdfBlob(pdfBlob, fileName);
+
+      if (!saved?.uri) {
+        throw new Error("Team Sheet PDF was created but cannot be shared");
+      }
+
+      // Production Android fix:
+      // Do not open whatsapp://, wa.me, file://, capacitor://, or public links here.
+      // Share the generated PDF as an attachment using Capacitor Share files[].
+      // This avoids WebView "Unsupported URL" and keeps the message link-free.
+      await Share.share({
+        title: "Team Sheet",
+        text: shareMessage,
+        files: [saved.uri],
+        dialogTitle: "Send Team Sheet on WhatsApp"
+      });
+
+      showTeamSheetToast("Share sheet opened", "success");
+      return;
+    }
+
+    const pdfFile = createTeamSheetPdfFileFromBlob(pdfBlob, fileName);
+
+    if (
+      pdfFile &&
+      navigator.share &&
+      typeof navigator.canShare === "function" &&
+      navigator.canShare({ files: [pdfFile] })
+    ) {
       await navigator.share({
-        title: "Team Assignment",
-        text: "Event Team Details",
-        url: url
+        title: "Team Sheet",
+        text: shareMessage,
+        files: [pdfFile]
+      });
+      showTeamSheetToast("Share sheet opened", "success");
+      return;
+    }
+
+    if (navigator.share && !pdfFile) {
+      await navigator.share({
+        title: "Team Sheet",
+        text: shareMessage
       });
       return;
     }
 
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(url);
+    await ensureTeamSheetHtml2PdfLoaded();
+
+    const element = getTeamSheetPdfElement();
+
+    applyTeamSheetPdfExportMode();
+
+    try {
+      await waitForTeamSheetFonts(document);
+      await waitForTeamSheetImages(element);
+      await waitForTeamSheetNextPaint();
+      await window.html2pdf().set(getTeamSheetPdfOptions(fileName)).from(element).save();
+    } finally {
+      removeTeamSheetPdfExportMode();
     }
+
+    showTeamSheetToast("Team Sheet PDF downloaded. Attach it in WhatsApp.", "success");
   } catch (err) {
     console.error("SHARE ERROR:", err);
+    showTeamSheetToast(err?.message || "Team Sheet share failed", "error");
+  } finally {
+    removeTeamSheetPdfExportMode();
+    window.scrollTo(0, teamSheetPdfScrollTop || 0);
+    setTeamSheetShareButtonState(false);
+    updateTeamSheetShareButtonText();
   }
 }
