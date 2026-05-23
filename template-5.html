@@ -876,7 +876,115 @@
       .edit-toolbar{left:10px; right:10px; bottom:6px}
       .edit-status{font-size:.72rem; padding:10px 12px}
     }
-  </style>
+  
+/* =============================
+   ANDROID SAFE TEXT EDIT MODAL
+   Replaces native prompt() in app WebView
+   ============================= */
+.text-edit-modal{
+position:fixed;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+padding:1rem;
+background:rgba(15,23,42,0.72);
+backdrop-filter:blur(12px);
+-webkit-backdrop-filter:blur(12px);
+z-index:2147482600;
+}
+
+.text-edit-modal.show{
+display:flex;
+}
+
+.text-edit-card{
+width:min(100%, 420px);
+border-radius:1.35rem;
+padding:1.1rem;
+background:rgba(255,255,255,0.97);
+border:1px solid rgba(0,0,0,0.08);
+box-shadow:0 24px 80px rgba(0,0,0,0.32);
+color:#111827;
+}
+
+.text-edit-label{
+display:inline-flex;
+align-items:center;
+min-height:30px;
+padding:0 0.78rem;
+border-radius:999px;
+background:rgba(99,102,241,0.12);
+border:1px solid rgba(99,102,241,0.22);
+color:#4f46e5;
+font-size:0.72rem;
+font-weight:800;
+letter-spacing:0.08em;
+text-transform:uppercase;
+}
+
+.text-edit-title{
+margin-top:0.85rem;
+font-size:1.12rem;
+line-height:1.25;
+font-weight:850;
+color:#111827;
+}
+
+.text-edit-input{
+width:100%;
+min-height:116px;
+margin-top:0.85rem;
+resize:vertical;
+border-radius:1rem;
+border:1px solid rgba(15,23,42,0.14);
+background:#ffffff;
+color:#111827 !important;
+padding:0.9rem;
+font-size:0.95rem;
+line-height:1.5;
+outline:none;
+}
+
+.text-edit-input:focus{
+border-color:rgba(79,70,229,0.65);
+box-shadow:0 0 0 3px rgba(79,70,229,0.12);
+}
+
+.text-edit-actions{
+display:flex;
+gap:0.75rem;
+margin-top:1rem;
+}
+
+.text-edit-btn{
+flex:1;
+min-height:46px;
+border-radius:0.95rem;
+border:1px solid rgba(15,23,42,0.12);
+font-size:0.88rem;
+font-weight:800;
+cursor:pointer;
+}
+
+.text-edit-btn.cancel{
+background:#f8fafc;
+color:#334155;
+}
+
+.text-edit-btn.save{
+background:#4f46e5;
+color:white;
+border-color:#4f46e5;
+box-shadow:0 14px 30px rgba(79,70,229,0.22);
+}
+
+.text-edit-btn:disabled{
+opacity:0.6;
+cursor:not-allowed;
+}
+
+</style>
 </head>
 <body>
   <div id="pageLoading" class="page-state">
@@ -903,6 +1011,20 @@
   </div>
 
   <input id="imageFileInput" type="file" accept="image/*" class="hidden" />
+
+
+<div id="textEditModal" class="text-edit-modal" aria-hidden="true">
+<div class="text-edit-card" role="dialog" aria-modal="true" aria-label="Edit text">
+<div class="text-edit-label">Edit Content</div>
+<div class="text-edit-title">Update text</div>
+<textarea id="textEditInput" class="text-edit-input" placeholder="Enter text"></textarea>
+<div class="text-edit-actions">
+<button id="textEditCancelBtn" type="button" class="text-edit-btn cancel">Cancel</button>
+<button id="textEditSaveBtn" type="button" class="text-edit-btn save">Save</button>
+</div>
+</div>
+</div>
+
 
   <div id="templateRoot" class="hidden">
     <header class="site-header">
@@ -1599,11 +1721,98 @@
       return updateWebsiteColumn(fieldPath,value);
     }
 
-    async function handleImageSelection(file){
+    
+function isStudioOSNativeTemplateApp(){
+  try{
+    const protocol = String(window.location.protocol || "").toLowerCase();
+
+    if(
+      window.Capacitor &&
+      typeof window.Capacitor.isNativePlatform === "function" &&
+      window.Capacitor.isNativePlatform()
+    ){
+      return true;
+    }
+
+    return protocol === "capacitor:" || protocol === "ionic:" || protocol === "file:";
+  }catch(error){
+    return false;
+  }
+}
+
+function inferTemplateImageMimeType(fileName, fallback = "image/jpeg"){
+  const name = String(fileName || "").toLowerCase();
+
+  if(name.endsWith(".png")) return "image/png";
+  if(name.endsWith(".webp")) return "image/webp";
+  if(name.endsWith(".gif")) return "image/gif";
+  if(name.endsWith(".heic")) return "image/heic";
+  if(name.endsWith(".heif")) return "image/heif";
+  if(name.endsWith(".jpg") || name.endsWith(".jpeg")) return "image/jpeg";
+
+  return fallback;
+}
+
+function isUnsupportedNativeTemplateImage(file){
+  const name = String(file?.name || "").toLowerCase();
+  const type = String(file?.type || "").toLowerCase();
+
+  return (
+    name.endsWith(".heic") ||
+    name.endsWith(".heif") ||
+    type.includes("heic") ||
+    type.includes("heif")
+  );
+}
+
+async function normalizeTemplateImageFileForAndroid(file){
+  if(!file || !isStudioOSNativeTemplateApp()){
+    return file;
+  }
+
+  try{
+    const fileName = file.name || `template-image-${Date.now()}.jpg`;
+    const inferredType = file.type || inferTemplateImageMimeType(fileName);
+    const buffer = await file.arrayBuffer();
+
+    if(!buffer || !buffer.byteLength){
+      return file;
+    }
+
+    const blob = new Blob([buffer], {
+      type: inferredType || "image/jpeg"
+    });
+
+    try{
+      return new File([blob], fileName, {
+        type: inferredType || blob.type || "image/jpeg",
+        lastModified: file.lastModified || Date.now()
+      });
+    }catch(_fileError){
+      blob.name = fileName;
+      blob.lastModified = file.lastModified || Date.now();
+      return blob;
+    }
+  }catch(error){
+    console.warn("Android template image normalization skipped", error);
+    return file;
+  }
+}
+
+
+async function handleImageSelection(file){
       if(!pendingImageSlot||!currentWebsite||!currentUserId) return;
       const slotName=pendingImageSlot;
       try{
         setSlotUploading(slotName,true);
+        setEditStatus("Preparing selected image...");
+
+        const normalizedFile = await normalizeTemplateImageFileForAndroid(file);
+
+        if(isStudioOSNativeTemplateApp() && isUnsupportedNativeTemplateImage(normalizedFile)){
+          throw new Error("Please select a JPG, JPEG, PNG, or WEBP image. HEIC/HEIF is not supported inside the Android app.");
+        }
+
         setEditStatus("Uploading and replacing image...");
         const supabase=await window.getSupabase();
         const currentImages={...getTemplateImages(currentWebsite)};
@@ -1613,7 +1822,7 @@
           userId:currentUserId,
           websiteId:currentWebsite.id,
           slot:slotName,
-          file,
+          file:normalizedFile,
           currentData:currentImages
         });
 
@@ -1648,6 +1857,87 @@
       return map[fieldPath] || "Content";
     }
 
+    
+function ensureTextEditModal(){
+      const modal=document.getElementById("textEditModal");
+      const input=document.getElementById("textEditInput");
+      const cancelBtn=document.getElementById("textEditCancelBtn");
+      const saveBtn=document.getElementById("textEditSaveBtn");
+
+      if(!modal||!input||!cancelBtn||!saveBtn){
+        throw new Error("Text edit modal is missing");
+      }
+
+      return {modal,input,cancelBtn,saveBtn};
+    }
+
+    function openTextEditModal(currentValue){
+      return new Promise(resolve=>{
+        const {modal,input,cancelBtn,saveBtn}=ensureTextEditModal();
+
+        input.value=String(currentValue||"");
+        modal.classList.add("show");
+        modal.setAttribute("aria-hidden","false");
+        document.body.style.overflow="hidden";
+
+        const cleanup=value=>{
+          modal.classList.remove("show");
+          modal.setAttribute("aria-hidden","true");
+          document.body.style.overflow="";
+          cancelBtn.onclick=null;
+          saveBtn.onclick=null;
+          modal.onclick=null;
+          document.removeEventListener("keydown",keyHandler);
+          resolve(value);
+        };
+
+        const keyHandler=event=>{
+          if(event.key==="Escape"){
+            cleanup(null);
+          }
+        };
+
+        cancelBtn.onclick=()=>cleanup(null);
+        saveBtn.onclick=()=>cleanup(input.value);
+
+        modal.onclick=event=>{
+          if(event.target===modal){
+            cleanup(null);
+          }
+        };
+
+        document.addEventListener("keydown",keyHandler);
+
+        setTimeout(()=>{
+          input.focus();
+          input.setSelectionRange(input.value.length,input.value.length);
+        },40);
+      });
+    }
+
+    function captureEditableTextVisualState(el){
+      if(!el) return null;
+
+      const computed=window.getComputedStyle(el);
+      return {
+        color:computed.color,
+        inlineColor:el.style.color||""
+      };
+    }
+
+    function restoreEditableTextVisualState(el,state){
+      if(!el||!state) return;
+
+      if(state.inlineColor){
+        el.style.color=state.inlineColor;
+        return;
+      }
+
+      if(state.color&&state.color!=="rgba(0, 0, 0, 0)"&&state.color!=="transparent"){
+        el.style.color=state.color;
+      }
+    }
+
     function registerEditableText(){
       document.querySelectorAll(".editable-text").forEach(el=>{
         el.addEventListener("click",async event=>{
@@ -1658,21 +1948,30 @@
           const fieldPath=el.dataset.field||"";
           if(!fieldPath) return;
 
+          const visualState=captureEditableTextVisualState(el);
           const currentValue=el.innerText.trim();
-          const nextValue=window.prompt(`Edit ${getFriendlyFieldLabel(fieldPath)}`,currentValue);
-          if(nextValue===null) return;
-
-          const cleanedValue=String(nextValue).trim();
-          if(!cleanedValue) return;
+          el.classList.add("editing");
 
           try{
+            const nextValue=await openTextEditModal(currentValue);
+            if(nextValue===null) return;
+
+            const cleanedValue=String(nextValue).trim();
+            if(!cleanedValue) return;
+
             setEditStatus("Saving text update...");
             await updateWebsiteField(fieldPath,cleanedValue);
             scheduleRender(currentWebsite);
+
+            const refreshedEl=document.querySelector(`[data-field="${CSS.escape(fieldPath)}"]`);
+            restoreEditableTextVisualState(refreshedEl || el,visualState);
+
             setEditStatus("Text updated successfully.");
           }catch(error){
             console.error("Text update failed:",error);
             setEditStatus(error?.message || "Unable to update text.");
+          }finally{
+            el.classList.remove("editing");
           }
         });
       });
@@ -1697,6 +1996,7 @@
             event.stopPropagation();
 
             pendingImageSlot=slotName;
+            imageFileInput.value="";
             imageFileInput.click();
             return;
           }
@@ -1747,7 +2047,14 @@
 
     imageFileInput.addEventListener("change",async e=>{
       const file=e.target.files?.[0];
-      if(file) await handleImageSelection(file);
+
+      if(!file){
+        pendingImageSlot="";
+        imageFileInput.value="";
+        return;
+      }
+
+      await handleImageSelection(file);
     });
 
     editModeToggle.addEventListener("click",()=>setEditMode(!editModeEnabled));
