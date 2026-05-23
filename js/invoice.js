@@ -380,6 +380,162 @@ return /iPhone|iPad|iPod/i.test(navigator.userAgent)
 }
 
 
+function isAndroidDevice(){
+
+return /Android/i.test(navigator.userAgent)
+
+}
+
+function isCapacitorNativeApp(){
+
+try{
+
+return !!(
+window.Capacitor &&
+typeof window.Capacitor.isNativePlatform === "function" &&
+window.Capacitor.isNativePlatform()
+)
+
+}catch(error){
+
+return false
+
+}
+
+}
+
+function getCapacitorPlugins(){
+
+try{
+
+return window.Capacitor?.Plugins || {}
+
+}catch(error){
+
+return {}
+
+}
+
+}
+
+function blobToBase64(blob){
+
+return new Promise((resolve,reject)=>{
+
+const reader = new FileReader()
+
+reader.onloadend = function(){
+
+try{
+
+const result = String(reader.result || "")
+const base64 = result.includes(",") ? result.split(",")[1] : result
+
+if(!base64){
+reject(new Error("Base64 conversion failed"))
+return
+}
+
+resolve(base64)
+
+}catch(error){
+reject(error)
+}
+
+}
+
+reader.onerror = function(){
+reject(new Error("Blob read failed"))
+}
+
+reader.readAsDataURL(blob)
+
+})
+
+}
+
+async function savePdfWithCapacitor(blob, fileName){
+
+const safeFileName =
+String(fileName || "invoice.pdf")
+.replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+.trim() || "invoice.pdf"
+
+const base64Data = await blobToBase64(blob)
+
+// StudioOS native saver is the production path inside Android app.
+// It saves the invoice PDF to Downloads/StudioOS through MediaStore.
+const studioOSSaver = getStudioOSFileSaverPlugin()
+
+if(studioOSSaver && typeof studioOSSaver.saveFile === "function"){
+
+await studioOSSaver.saveFile({
+base64Data,
+fileName: safeFileName,
+mimeType: "application/pdf",
+target: "downloads"
+})
+
+return true
+
+}
+
+// Legacy fallback kept only for older builds that still include Capacitor Filesystem.
+const plugins = getCapacitorPlugins()
+const Filesystem = plugins.Filesystem
+
+if(!Filesystem || typeof Filesystem.writeFile !== "function"){
+throw new Error("StudioOS file saver is not available")
+}
+
+const directory =
+Filesystem.Directory?.Documents ||
+Filesystem.Directory?.Data ||
+"DOCUMENTS"
+
+await Filesystem.writeFile({
+path: safeFileName,
+data: base64Data,
+directory,
+recursive: true
+})
+
+return true
+
+}
+
+async function openPdfPreviewFallback(blob, fileName){
+
+const blobUrl = URL.createObjectURL(blob)
+
+try{
+
+const opened = window.open(blobUrl, "_blank", "noopener")
+
+if(!opened){
+triggerObjectUrlDownload(blob, fileName)
+}
+
+setTimeout(()=>{
+URL.revokeObjectURL(blobUrl)
+}, 30000)
+
+return true
+
+}catch(error){
+
+setTimeout(()=>{
+URL.revokeObjectURL(blobUrl)
+}, 30000)
+
+throw error
+
+}
+
+}
+
+
+
 // =============================
 // DIRECT DOWNLOAD HELPERS
 // =============================
@@ -444,6 +600,16 @@ reader.readAsDataURL(blob)
 
 async function triggerBestDownload(blob, fileName){
 
+if(isCapacitorNativeApp()){
+try{
+await savePdfWithCapacitor(blob, fileName)
+return
+}catch(error){
+console.error("StudioOS native invoice save failed:", error)
+throw error
+}
+}
+
 if(window.navigator && typeof window.navigator.msSaveOrOpenBlob === "function"){
 window.navigator.msSaveOrOpenBlob(blob, fileName)
 return
@@ -460,12 +626,117 @@ await triggerDataUrlDownload(blob, fileName)
 
 
 // =============================
+// PDF LIBRARY LOADER
+// =============================
+
+const STUDIOOS_HTML2PDF_SRC =
+"https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+
+let studioOSInvoiceHtml2PdfLoadPromise = null
+
+async function ensureInvoiceHtml2PdfLoaded(){
+
+if(typeof window.html2pdf === "function"){
+return true
+}
+
+if(studioOSInvoiceHtml2PdfLoadPromise){
+return await studioOSInvoiceHtml2PdfLoadPromise
+}
+
+studioOSInvoiceHtml2PdfLoadPromise = new Promise((resolve,reject)=>{
+
+const existingScript =
+document.querySelector('script[data-studioos-invoice-html2pdf="true"]') ||
+Array.from(document.scripts || []).find(script =>
+String(script.src || "").includes("html2pdf")
+)
+
+if(existingScript){
+
+existingScript.addEventListener("load", function(){
+if(typeof window.html2pdf === "function"){
+resolve(true)
+}else{
+reject(new Error("PDF library loaded but not initialized"))
+}
+}, { once:true })
+
+existingScript.addEventListener("error", function(){
+reject(new Error("PDF library failed to load"))
+}, { once:true })
+
+if(typeof window.html2pdf === "function"){
+resolve(true)
+}
+
+return
+
+}
+
+const script = document.createElement("script")
+script.src = STUDIOOS_HTML2PDF_SRC
+script.async = true
+script.defer = true
+script.dataset.studioosInvoiceHtml2pdf = "true"
+
+script.onload = function(){
+if(typeof window.html2pdf === "function"){
+resolve(true)
+return
+}
+
+reject(new Error("PDF library loaded but not initialized"))
+}
+
+script.onerror = function(){
+reject(new Error("PDF library failed to load. Please check internet connection and try again."))
+}
+
+document.head.appendChild(script)
+
+})
+
+try{
+return await studioOSInvoiceHtml2PdfLoadPromise
+}catch(error){
+studioOSInvoiceHtml2PdfLoadPromise = null
+throw error
+}
+
+}
+
+function getStudioOSFileSaverPlugin(){
+
+try{
+return window.Capacitor?.Plugins?.StudioOSFileSaver || null
+}catch(error){
+return null
+}
+
+}
+
+function showInvoiceStatus(message){
+
+try{
+const downloadBtn = document.getElementById("downloadInvoice")
+
+if(downloadBtn && message){
+downloadBtn.dataset.statusText = message
+}
+
+}catch(error){}
+
+}
+
+
+// =============================
 // BUILD PDF BLOB
 // =============================
 
 async function buildInvoicePdfBlob(){
 
-window.scrollTo(0,0)
+await ensureInvoiceHtml2PdfLoaded()
 
 const element =
 document.getElementById("invoiceContainer")
@@ -496,7 +767,7 @@ orientation:"portrait"
 }
 
 const worker =
-html2pdf().set(opt).from(element)
+window.html2pdf().set(opt).from(element)
 
 const pdfBlob =
 await worker.outputPdf("blob")
@@ -529,16 +800,27 @@ const { blob, fileName } = await buildInvoicePdfBlob()
 
 await triggerBestDownload(blob, fileName)
 
+if(isCapacitorNativeApp()){
+alert("Invoice saved to Downloads/StudioOS")
+return
+}
+
 if(isIOSDevice()){
 setTimeout(()=>{
 alert("Agar iPhone/iPad browser preview khole, to browser menu se Save to Files ya Download option use karein.")
 }, 500)
 }
 
+if(isAndroidDevice() && !isCapacitorNativeApp()){
+setTimeout(()=>{
+alert("Agar Android browser preview khole, to browser menu se Download/Save option use karein.")
+}, 500)
+}
+
 }catch(error){
 
 console.error("Invoice download error:", error)
-alert("Invoice PDF download failed")
+alert(error?.message || "Invoice PDF download failed")
 
 }finally{
 
