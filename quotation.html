@@ -66,7 +66,7 @@ padding-right:34px;
 }
 
 .dateFieldLabel{
-display:none;
+display:block;
 position:absolute;
 left:12px;
 top:50%;
@@ -75,6 +75,7 @@ font-size:14px;
 line-height:1;
 color:#d1d5db;
 pointer-events:none;
+z-index:2;
 transition:0.15s ease;
 max-width:calc(100% - 42px);
 white-space:nowrap;
@@ -90,6 +91,29 @@ visibility:hidden;
 .dateField .input:focus + .dateFieldLabel{
 opacity:0;
 visibility:hidden;
+}
+
+/* Android/WebView-safe native date input rendering */
+input[type="date"].input{
+appearance:auto;
+-webkit-appearance:auto;
+min-height:46px;
+height:46px;
+line-height:46px;
+color:white;
+-webkit-text-fill-color:white;
+background:#374151;
+}
+
+input[type="date"].input::-webkit-date-and-time-value{
+text-align:left;
+min-height:46px;
+line-height:46px;
+padding:0;
+}
+
+input[type="date"].input::-webkit-calendar-picker-indicator{
+opacity:0.85;
 }
 
 .deliverable{
@@ -295,6 +319,8 @@ height:34px;
 
 .dateFieldLabel{
 display:block;
+font-size:14px;
+color:#d1d5db;
 }
 
 .brandingActions{
@@ -320,9 +346,13 @@ gap:8px;
 }
 
 .dateRow .input{
-font-size:13px;
-padding:10px 8px;
-padding-right:30px;
+font-size:15px;
+padding:0 34px 0 10px;
+min-height:46px;
+height:46px;
+line-height:46px;
+margin-bottom:8px;
+background:#374151;
 }
 
 .quotationCard{
@@ -356,6 +386,42 @@ font-size:14px;
 
 }
 
+/* StudioOS Android-safe date placeholder */
+.dateField:not(.hasValue) .dateFieldLabel{
+opacity:1;
+visibility:visible;
+}
+
+.dateField.hasValue .dateFieldLabel,
+.dateField:focus-within .dateFieldLabel{
+opacity:0;
+visibility:hidden;
+}
+
+@media (max-width:768px){
+  .dateField:not(.hasValue) input[type="date"].input{
+    color:transparent !important;
+    -webkit-text-fill-color:transparent !important;
+  }
+
+  .dateField:not(.hasValue) input[type="date"].input::-webkit-date-and-time-value{
+    color:transparent !important;
+    -webkit-text-fill-color:transparent !important;
+  }
+
+  .dateField.hasValue input[type="date"].input,
+  .dateField:focus-within input[type="date"].input{
+    color:#ffffff !important;
+    -webkit-text-fill-color:#ffffff !important;
+  }
+
+  .dateField.hasValue input[type="date"].input::-webkit-date-and-time-value,
+  .dateField:focus-within input[type="date"].input::-webkit-date-and-time-value{
+    color:#ffffff !important;
+    -webkit-text-fill-color:#ffffff !important;
+  }
+}
+
 </style>
 
 </head>
@@ -364,7 +430,7 @@ font-size:14px;
 
 <div class="glass p-6 rounded-2xl w-[460px] quotationCard">
 
-<a href="index.html" class="text-sm text-gray-400">← Back</a>
+<a href="dashboard.html" class="text-sm text-gray-400">← Back</a>
 
 <h1 id="pageTitle" class="text-xl font-bold mt-2 mb-6">
 Create Quotation
@@ -393,7 +459,7 @@ required>
 <option>Other</option>
 </select>
 
-<div class="dateRow flex gap-2">
+<div class="dateRow">
 <div class="dateField">
 <input id="startDate" type="date" class="input" required>
 <span class="dateFieldLabel">Start Date</span>
@@ -581,60 +647,9 @@ Preview Quote
 <!-- QUOTATION ENGINE -->
 <script src="js/quotation.js"></script>
 
-<script>
-(function(){
-
-const input = document.getElementById("proposalCoverInput")
-const chooseBtn = document.getElementById("proposalCoverChooseBtn")
-const removeBtn = document.getElementById("proposalCoverRemoveBtn")
-const previewWrap = document.getElementById("proposalCoverPreviewWrap")
-const previewImg = document.getElementById("proposalCoverPreview")
-const statusEl = document.getElementById("proposalCoverStatus")
-
-function setDefaultState(){
-previewImg.src = ""
-previewWrap.classList.remove("show")
-removeBtn.classList.add("hidden")
-statusEl.innerText = "Default image"
-}
-
-function setSelectedState(src){
-previewImg.src = src
-previewWrap.classList.add("show")
-removeBtn.classList.remove("hidden")
-statusEl.innerText = "Custom image selected"
-}
-
-if(chooseBtn && input){
-chooseBtn.addEventListener("click", function(){
-input.click()
-})
-}
-
-if(input){
-input.addEventListener("change", function(e){
-const file = e.target.files[0]
-if(!file) return
-
-const reader = new FileReader()
-reader.onload = function(evt){
-setSelectedState(evt.target.result)
-}
-reader.readAsDataURL(file)
-})
-}
-
-if(removeBtn && input){
-removeBtn.addEventListener("click", function(){
-input.value = ""
-setDefaultState()
-})
-}
-
-setDefaultState()
-
-})()
-</script>
+<!-- Proposal cover UI is controlled by js/quotation.js.
+     Do not add a second inline file-input handler here, because it bypasses
+     Android normalization and paid-plan branding state. -->
 
 
 <script>
@@ -651,6 +666,15 @@ wrap.classList.add("hasValue")
 }else{
 wrap.classList.remove("hasValue")
 }
+}
+
+window.syncStudioOSQuotationDateFields = function(){
+const inputs = [
+document.getElementById("startDate"),
+document.getElementById("endDate")
+]
+
+inputs.forEach(syncDateFieldState)
 }
 
 function bindDateFieldLabels(){
@@ -686,6 +710,8 @@ bindDateFieldLabels()
 
 })()
 </script>
+
+<script src="js/app-bottom-nav.js"></script>
 
 </body>
 </html>
