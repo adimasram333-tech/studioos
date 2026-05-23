@@ -19,12 +19,7 @@ let shortId = null
 
 if(params.get("slug")){
 
-const slug = params.get("slug")
-
-if(slug && slug.includes("-")){
-const slugParts = slug.split("-")
-shortId = slugParts[slugParts.length - 1]
-}
+shortId = getShortIdFromSlug(params.get("slug"))
 
 }
 
@@ -41,8 +36,7 @@ const lastPart = pathParts[pathParts.length - 1]
 
 if(lastPart && lastPart.includes("-")){
 
-const slugParts = lastPart.split("-")
-shortId = slugParts[slugParts.length - 1]
+shortId = getShortIdFromSlug(lastPart)
 
 }
 
@@ -53,9 +47,115 @@ shortId = slugParts[slugParts.length - 1]
 // SHARED PROPOSAL STATE
 // ======================
 
-let activeProposalData = null
-let activeProposalProfile = null
-let pdfExportScrollTop = 0
+let studioOSBackButtonInjected = false
+
+function isStudioOSNativeApp(){
+
+try{
+
+if(
+window.Capacitor &&
+typeof window.Capacitor.isNativePlatform === "function" &&
+window.Capacitor.isNativePlatform()
+){
+return true
+}
+
+const protocol = String(window.location.protocol || "").toLowerCase()
+
+return protocol === "capacitor:" || protocol === "file:"
+
+}catch(error){
+
+return false
+
+}
+
+}
+
+function getStudioOSPublicBaseUrl(){
+
+const configuredUrl = String(window.STUDIOOS_PUBLIC_BASE_URL || "").trim()
+
+if(configuredUrl){
+return configuredUrl.replace(/\/+$/,"")
+}
+
+return "https://adimasram333-tech.github.io/studioos"
+
+}
+
+function ensureStudioOSProposalBackButton(){
+
+if(studioOSBackButtonInjected || !isStudioOSNativeApp()){
+return
+}
+
+studioOSBackButtonInjected = true
+
+const style = document.createElement("style")
+style.id = "studioos-proposal-native-back-style"
+style.textContent = `
+#studioOSProposalNativeBackBtn{
+position:fixed;
+top:calc(12px + env(safe-area-inset-top, 0px));
+left:12px;
+z-index:2147482500;
+min-height:42px;
+padding:0 14px;
+border-radius:999px;
+border:1px solid rgba(255,255,255,0.14);
+background:rgba(15,23,42,0.92);
+color:#ffffff;
+font-size:13px;
+font-weight:800;
+letter-spacing:0.02em;
+box-shadow:0 14px 40px rgba(0,0,0,0.28);
+backdrop-filter:blur(14px);
+-webkit-backdrop-filter:blur(14px);
+}
+`
+document.head.appendChild(style)
+
+const btn = document.createElement("button")
+btn.id = "studioOSProposalNativeBackBtn"
+btn.type = "button"
+btn.textContent = "← Back"
+
+btn.addEventListener("click", function(){
+
+try{
+
+if(window.history.length > 1){
+window.history.back()
+return
+}
+
+}catch(error){
+console.warn("Native proposal back failed:", error)
+}
+
+window.location.href = "quotation.html"
+
+})
+
+document.body.appendChild(btn)
+
+}
+
+function getShortIdFromSlug(value){
+
+const slug = String(value || "").trim()
+
+if(!slug || !slug.includes("-")){
+return null
+}
+
+const slugParts = slug.split("-").filter(Boolean)
+
+return slugParts.length ? slugParts[slugParts.length - 1] : null
+
+}
 
 
 // ======================
@@ -341,6 +441,73 @@ btn.style.cursor = "pointer"
 
 }
 
+const STUDIOOS_HTML2PDF_SRC =
+"https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+
+let studioOSHtml2PdfLoadPromise = null
+
+async function ensureHtml2PdfLoaded(){
+
+if(typeof window.html2pdf === "function"){
+return true
+}
+
+if(studioOSHtml2PdfLoadPromise){
+return await studioOSHtml2PdfLoadPromise
+}
+
+studioOSHtml2PdfLoadPromise = new Promise((resolve,reject)=>{
+
+const existingScript = document.querySelector('script[data-studioos-html2pdf="true"]')
+
+if(existingScript){
+existingScript.addEventListener("load", function(){
+if(typeof window.html2pdf === "function"){
+resolve(true)
+}else{
+reject(new Error("PDF library loaded but not initialized"))
+}
+}, { once:true })
+
+existingScript.addEventListener("error", function(){
+reject(new Error("PDF library failed to load"))
+}, { once:true })
+
+return
+}
+
+const script = document.createElement("script")
+script.src = STUDIOOS_HTML2PDF_SRC
+script.async = true
+script.defer = true
+script.dataset.studioosHtml2pdf = "true"
+
+script.onload = function(){
+if(typeof window.html2pdf === "function"){
+resolve(true)
+return
+}
+
+reject(new Error("PDF library loaded but not initialized"))
+}
+
+script.onerror = function(){
+reject(new Error("PDF library failed to load. Please check internet connection and try again."))
+}
+
+document.head.appendChild(script)
+
+})
+
+try{
+return await studioOSHtml2PdfLoadPromise
+}catch(error){
+studioOSHtml2PdfLoadPromise = null
+throw error
+}
+
+}
+
 function ensurePdfLibraryReady(){
 if(typeof window.html2pdf !== "function"){
 throw new Error("PDF library not loaded")
@@ -395,6 +562,262 @@ requestAnimationFrame(resolve)
 })
 })
 }
+
+
+function showProposalToast(message, type = "error"){
+
+const existingToast = document.getElementById("studioosProposalToast")
+if(existingToast){
+existingToast.remove()
+}
+
+const toast = document.createElement("div")
+toast.id = "studioosProposalToast"
+toast.style.position = "fixed"
+toast.style.left = "50%"
+toast.style.bottom = "calc(24px + env(safe-area-inset-bottom, 0px))"
+toast.style.transform = "translateX(-50%)"
+toast.style.width = "min(calc(100% - 32px), 360px)"
+toast.style.zIndex = "2147482700"
+toast.style.padding = "0.9rem 1rem"
+toast.style.borderRadius = "1rem"
+toast.style.background = type === "success" ? "rgba(15,23,42,0.96)" : "rgba(127,29,29,0.96)"
+toast.style.border = type === "success" ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(248,113,113,0.35)"
+toast.style.boxShadow = "0 18px 55px rgba(0,0,0,0.38)"
+toast.style.backdropFilter = "blur(16px)"
+toast.style.webkitBackdropFilter = "blur(16px)"
+toast.style.color = "#ffffff"
+toast.style.fontSize = "0.88rem"
+toast.style.fontWeight = "800"
+toast.style.textAlign = "center"
+toast.style.pointerEvents = "none"
+toast.textContent = message
+
+document.body.appendChild(toast)
+
+setTimeout(()=>{
+toast.style.transition = "opacity 180ms ease, transform 180ms ease"
+toast.style.opacity = "0"
+toast.style.transform = "translateX(-50%) translateY(8px)"
+setTimeout(()=>{
+toast.remove()
+}, 220)
+}, 2200)
+
+}
+
+function getStudioOSFileSaverPlugin(){
+try{
+return window.Capacitor?.Plugins?.StudioOSFileSaver || null
+}catch(error){
+return null
+}
+}
+
+function getStudioOSSharePlugin(){
+try{
+return window.Capacitor?.Plugins?.Share || null
+}catch(error){
+return null
+}
+}
+
+function blobToBase64ForProposal(blob){
+return new Promise((resolve,reject)=>{
+
+const reader = new FileReader()
+
+reader.onloadend = function(){
+try{
+const result = String(reader.result || "")
+const base64 = result.includes(",") ? result.split(",")[1] : result
+
+if(!base64){
+reject(new Error("PDF preparation failed"))
+return
+}
+
+resolve(base64)
+}catch(error){
+reject(error)
+}
+}
+
+reader.onerror = function(){
+reject(new Error("Unable to read PDF file"))
+}
+
+reader.readAsDataURL(blob)
+
+})
+}
+
+function sanitizeProposalPdfFileName(value){
+
+const safe = String(value || "photography-proposal.pdf")
+.replace(/[<>:"/\\|?*\x00-\x1F]/g, "-")
+.replace(/\s+/g, "-")
+.replace(/-+/g, "-")
+.replace(/^-|-$/g, "")
+.toLowerCase()
+
+return safe.endsWith(".pdf") ? safe : safe + ".pdf"
+
+}
+
+async function saveProposalPdfBlobNatively(blob, filename){
+
+const saver = getStudioOSFileSaverPlugin()
+
+if(!saver || typeof saver.saveFile !== "function"){
+throw new Error("StudioOS native file saver is not available")
+}
+
+const fileName = sanitizeProposalPdfFileName(filename)
+const base64Data = await blobToBase64ForProposal(blob)
+
+const result = await saver.saveFile({
+base64Data,
+fileName,
+mimeType: "application/pdf",
+target: "downloads"
+})
+
+return {
+fileName,
+uri: result?.uri || ""
+}
+
+}
+
+function buildProposalShareMessage(data, profile){
+
+return `Hello ${data?.client_name || ""},
+
+Your photography proposal is attached as PDF.
+
+For booking contact:
+
+${profile?.studio_name || ""}
+Phone: ${profile?.phone || ""}
+
+Powered by StudioOS`
+
+}
+
+function buildProposalTextShareMessage(data, profile){
+
+return `Hello ${data?.client_name || ""},
+
+Your photography proposal is ready.
+
+PDF is attached with this message.
+
+For booking contact:
+
+${profile?.studio_name || ""}
+Phone: ${profile?.phone || ""}
+
+Powered by StudioOS`
+
+}
+
+async function shareProposalTextNatively(data, profile){
+
+const Share = getStudioOSSharePlugin()
+
+if(!Share || typeof Share.share !== "function"){
+throw new Error("Native Share plugin is not available")
+}
+
+await Share.share({
+title: "StudioOS Proposal",
+text: buildProposalTextShareMessage(data, profile),
+dialogTitle: "Share Proposal"
+})
+
+return true
+
+}
+
+async function generateProposalPdfBlob(filename){
+
+const target = applyPdfExportMode()
+
+await ensureHtml2PdfLoaded()
+ensurePdfLibraryReady()
+
+await waitForDocumentFonts(document)
+await waitForImagesInElement(target)
+await waitForNextPaint()
+
+const opt = {
+margin: 0,
+filename: filename,
+image: { type: "jpeg", quality: 1 },
+html2canvas: {
+scale: 2,
+useCORS: true,
+allowTaint: false,
+backgroundColor: "#ffffff",
+scrollX: 0,
+scrollY: 0,
+logging: false
+},
+jsPDF: {
+unit: "mm",
+format: "a4",
+orientation: "portrait"
+},
+pagebreak: {
+mode: ["css", "legacy"]
+}
+}
+
+return await window.html2pdf()
+.set(opt)
+.from(target)
+.outputPdf("blob")
+
+}
+
+async function shareProposalPdfNatively(data, profile){
+
+const Share = getStudioOSSharePlugin()
+
+if(!Share || typeof Share.share !== "function"){
+throw new Error("Native Share plugin is not available")
+}
+
+let filename = "photography-proposal.pdf"
+
+if(isPremiumUser(profile)){
+filename = "premium-photography-proposal.pdf"
+}
+
+const pdfBlob = await generateProposalPdfBlob(filename)
+const saved = await saveProposalPdfBlobNatively(pdfBlob, filename)
+
+if(!saved?.uri){
+throw new Error("PDF file was created but cannot be shared")
+}
+
+// Android production-safe fix:
+// Do not send public proposal links and do not open whatsapp:// / wa.me from WebView.
+// Share the generated local PDF as a real attachment through the native share sheet.
+// Capacitor Share expects file attachments in the `files` array; using `url` for
+// a local PDF URI can trigger Android WebView/OS "Unsupported url" errors.
+await Share.share({
+title: "StudioOS Proposal",
+text: buildProposalShareMessage(data, profile),
+files: [saved.uri],
+dialogTitle: "Share Proposal PDF"
+})
+
+return true
+
+}
+
 
 function isDesktopPdfExport(){
 return window.innerWidth > 768
@@ -639,6 +1062,7 @@ page.classList.remove("proposal-pdf-export-target")
 
 async function downloadElementAsPdf(element, filename){
 
+await ensureHtml2PdfLoaded()
 ensurePdfLibraryReady()
 
 await waitForDocumentFonts(document)
@@ -668,10 +1092,20 @@ mode: ["css", "legacy"]
 }
 }
 
+if(isStudioOSNativeApp()){
+const pdfBlob = await window.html2pdf()
+.set(opt)
+.from(element)
+.outputPdf("blob")
+
+await saveProposalPdfBlobNatively(pdfBlob, filename)
+showProposalToast("PDF saved to Downloads", "success")
+return
+}
+
 await window.html2pdf().set(opt).from(element).save()
 
 }
-
 async function downloadProposalPdf(){
 
 setDownloadButtonState(true)
@@ -691,7 +1125,7 @@ await downloadElementAsPdf(target, filename)
 
 }catch(err){
 console.error("PDF DOWNLOAD ERROR:", err)
-alert(err?.message || "PDF download failed")
+showProposalToast(err?.message || "PDF download failed", "error")
 }finally{
 removePdfExportMode()
 window.scrollTo(0, pdfExportScrollTop)
@@ -721,15 +1155,15 @@ if(!clientSlug){
 clientSlug = "proposal"
 }
 
-if(data.short_id){
-return window.location.origin + "/studioos/p/" + clientSlug + "-" + data.short_id
-}
-
 if(data.id){
-return window.location.origin + "/studioos/proposal.html?id=" + data.id
+return getStudioOSPublicBaseUrl() + "/proposal.html?id=" + encodeURIComponent(data.id)
 }
 
-return window.location.href
+if(data.short_id){
+return getStudioOSPublicBaseUrl() + "/p/" + clientSlug + "-" + data.short_id
+}
+
+return getStudioOSPublicBaseUrl() + "/proposal.html"
 
 }
 
@@ -743,15 +1177,12 @@ return null
 
 const normalizedPhone = phone.length === 10 ? "91" + phone : phone
 
-const shortLink = buildProposalShortLink(data)
-
 const message =
 `Hello ${data.client_name || ""},
 
 Your photography proposal is ready.
 
-View your proposal:
-${shortLink}
+PDF is attached with this message.
 
 For booking contact:
 
@@ -769,24 +1200,39 @@ return "https://wa.me/" + normalizedPhone + "?text=" + encodeURIComponent(messag
 // GLOBAL BUTTON ACTIONS
 // ======================
 
-window.sendWhatsApp = function(){
+window.sendWhatsApp = async function(){
 
 if(!activeProposalData){
 alert("Proposal data not available")
 return
 }
 
-const url = buildWhatsAppLink(activeProposalData, activeProposalProfile)
+if(isStudioOSNativeApp()){
+setDownloadButtonState(true)
 
-if(!url){
-alert("Client phone number not available")
+try{
+await shareProposalPdfNatively(activeProposalData, activeProposalProfile)
+showProposalToast("Proposal PDF share sheet opened", "success")
+}catch(error){
+console.error("PROPOSAL PDF SHARE ERROR:", error)
+showProposalToast(error?.message || "Proposal PDF share failed", "error")
+}finally{
+setDownloadButtonState(false)
+}
+
 return
 }
 
-window.open(url,"_blank")
+const whatsappLink = buildWhatsAppLink(activeProposalData, activeProposalProfile)
 
+if(!whatsappLink){
+showProposalToast("Client phone number is missing", "error")
+return
 }
 
+window.open(whatsappLink, "_blank", "noopener,noreferrer")
+
+}
 window.sendProposalOnWhatsApp = window.sendWhatsApp
 
 window.downloadPDF = async function(){
@@ -1616,5 +2062,6 @@ showProposalUnavailable("Something went wrong while loading this proposal.")
 }
 
 window.addEventListener("load", function(){
+ensureStudioOSProposalBackButton()
 loadProposal()
 })
