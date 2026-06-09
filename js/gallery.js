@@ -36,6 +36,7 @@ const PUBLIC_GALLERY_ALLOWED_FEATURES_FOR_FREE = new Set(["sharing", "face_searc
 const EVENT_PHOTO_PRICE_CACHE = new Map()
 const GALLERY_MIN_PHOTO_SELLING_PRICE = 49
 const GALLERY_TRACK_USAGE_URL = "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/track-usage"
+const STUDIOOS_PRODUCTION_PUBLIC_WEB_BASE_URL = "https://adimasram333-tech.github.io/studioos"
 
 // =============================
 // PUBLIC WEB URL HELPERS (ANDROID-SAFE)
@@ -46,11 +47,37 @@ const GALLERY_TRACK_USAGE_URL = "https://gnnaaagvlrmdveqxicob.supabase.co/functi
 // before gallery.js loads, for example: https://your-domain/studioos
 // Web fallback preserves the current browser behavior.
 
+function isStudioOSLocalOrPrivateHost(hostname){
+const host = String(hostname || "").trim().toLowerCase()
+
+return (
+host === "localhost" ||
+host === "127.0.0.1" ||
+host === "0.0.0.0" ||
+host === "::1" ||
+host.endsWith(".localhost") ||
+host.startsWith("192.168.") ||
+host.startsWith("10.") ||
+/^172\.(1[6-9]|2\d|3[0-1])\./.test(host)
+)
+}
+
 function normalizeStudioOSBaseUrl(value){
 const raw = String(value || "").trim().replace(/\/+$/, "")
 if(!raw) return ""
-if(!/^https?:\/\//i.test(raw)) return ""
-return raw
+if(!/^https:\/\//i.test(raw)) return ""
+
+try{
+const parsed = new URL(raw)
+
+if(isStudioOSLocalOrPrivateHost(parsed.hostname)){
+return ""
+}
+
+return parsed.href.replace(/\/+$/, "")
+}catch(e){
+return ""
+}
 }
 
 function isAppLocalOrigin(){
@@ -72,7 +99,12 @@ return false
 function resolveStudioOSWebBaseFromCurrentPage(){
 try{
 const origin = String(window.location.origin || "").replace(/\/+$/, "")
-if(!origin || !/^https?:\/\//i.test(origin) || isAppLocalOrigin()){
+if(!origin || !/^https:\/\//i.test(origin) || isAppLocalOrigin()){
+return ""
+}
+
+const parsedOrigin = new URL(origin)
+if(isStudioOSLocalOrPrivateHost(parsedOrigin.hostname)){
 return ""
 }
 
@@ -83,16 +115,22 @@ const parts = String(window.location.pathname || "")
 const studioIndex = parts.findIndex(part => String(part || "").toLowerCase() === "studioos")
 
 if(studioIndex >= 0){
-return `${origin}/${parts.slice(0, studioIndex + 1).join("/")}`
+return normalizeStudioOSBaseUrl(`${origin}/${parts.slice(0, studioIndex + 1).join("/")}`)
 }
 
-return origin
+return normalizeStudioOSBaseUrl(origin)
 }catch(e){
 return ""
 }
 }
 
 function getStudioOSPublicWebBaseUrl(){
+const productionBase = normalizeStudioOSBaseUrl(STUDIOOS_PRODUCTION_PUBLIC_WEB_BASE_URL) || "https://adimasram333-tech.github.io/studioos"
+
+if(isAppLocalOrigin()){
+return productionBase
+}
+
 const configured =
 normalizeStudioOSBaseUrl(window.STUDIOOS_PUBLIC_WEB_APP_BASE_URL) ||
 normalizeStudioOSBaseUrl(window.PUBLIC_WEB_APP_BASE_URL) ||
@@ -108,7 +146,7 @@ if(currentPageBase){
 return currentPageBase
 }
 
-return "https://adimasram333-tech.github.io/studioos"
+return productionBase
 }
 
 function buildStudioOSPublicPageUrl(pageName, params = {}){
@@ -2472,11 +2510,103 @@ uploadBtn.disabled = true
 }
 }
 
+
+// =============================
+// FACE MATCH COUNT BANNER
+// =============================
+
+function removeFaceMatchCountBanner(){
+const existing = document.getElementById("studioosFaceMatchCountBanner")
+if(existing){
+existing.remove()
+}
+}
+
+function getFaceMatchCountText(count){
+const safeCount = Math.max(0, Number(count || 0))
+return safeCount === 1 ? "1 photo matched for you" : `${safeCount} photos matched for you`
+}
+
+function showFaceMatchCountBanner(eventId, effectiveRole, matchedImages, displayCount = null){
+removeFaceMatchCountBanner()
+
+const safeEventId = String(eventId || "").trim()
+const sessionCount = matchedImages && typeof matchedImages.size === "number" ? matchedImages.size : 0
+const count = displayCount !== null && displayCount !== undefined
+? Math.max(0, Number(displayCount || 0))
+: sessionCount
+
+if(!safeEventId || count <= 0){
+return
+}
+
+const grid = document.getElementById("galleryGrid")
+if(!grid || !grid.parentNode){
+return
+}
+
+const banner = document.createElement("div")
+banner.id = "studioosFaceMatchCountBanner"
+banner.dataset.eventId = safeEventId
+banner.dataset.role = String(effectiveRole || "guest")
+banner.style.width = "100%"
+banner.style.margin = "0 0 14px 0"
+banner.style.padding = "12px 14px"
+banner.style.borderRadius = "16px"
+banner.style.border = "1px solid rgba(34,211,238,0.28)"
+banner.style.background = "linear-gradient(135deg, rgba(8,47,73,0.78), rgba(15,23,42,0.92))"
+banner.style.boxShadow = "0 18px 45px rgba(2,6,23,0.28), inset 0 0 18px rgba(34,211,238,0.06)"
+banner.style.color = "#ffffff"
+banner.style.boxSizing = "border-box"
+banner.style.display = "flex"
+banner.style.alignItems = "center"
+banner.style.justifyContent = "space-between"
+banner.style.gap = "12px"
+
+const roleLabel = effectiveRole === "photographer"
+? "Face filter active"
+: effectiveRole === "client"
+? "Client face match"
+: "Guest face match"
+
+banner.innerHTML = `
+  <div style="min-width:0;">
+    <div style="font-size:12px; font-weight:850; letter-spacing:0.08em; text-transform:uppercase; color:#67e8f9;">
+      AI Face Match Result
+    </div>
+    <div style="margin-top:3px; font-size:14px; font-weight:850; color:#f8fafc;">
+      ${escapeStudioOSHtml(getFaceMatchCountText(count))}
+    </div>
+    <div style="margin-top:3px; font-size:11px; line-height:1.4; color:rgba(203,213,225,0.82);">
+      ${escapeStudioOSHtml(roleLabel)}
+    </div>
+  </div>
+  <div style="
+    flex:0 0 auto;
+    min-width:48px;
+    min-height:48px;
+    border-radius:999px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(34,211,238,0.12);
+    border:1px solid rgba(34,211,238,0.26);
+    color:#67e8f9;
+    font-size:20px;
+    font-weight:950;
+  ">${count}</div>
+`
+
+grid.parentNode.insertBefore(banner, grid)
+}
+
 // =============================
 // LOAD GALLERY
 // =============================
 
 async function loadGallery(){
+
+removeFaceMatchCountBanner()
 
 const params = new URLSearchParams(window.location.search)
 
@@ -2761,6 +2891,22 @@ return
 const visiblePhotos = sortPhotosByFileSequence(
 getVisibleGalleryPhotos(data, effectiveRole, matchedImages, FACE_FILTER_ACTIVE)
 )
+
+const hasFaceScanMatches = matchedImages && matchedImages.size > 0
+const shouldShowFaceMatchCount =
+eventId &&
+hasFaceScanMatches &&
+(
+effectiveRole === "guest" ||
+effectiveRole === "client" ||
+effectiveRole === "photographer"
+)
+
+if(shouldShowFaceMatchCount){
+const displayedMatchCount = visiblePhotos.length > 0 ? visiblePhotos.length : matchedImages.size
+showFaceMatchCountBanner(eventId, effectiveRole, matchedImages, displayedMatchCount)
+}
+
 const modalPhotos = visiblePhotos
 let currentModalIndex = -1
 
