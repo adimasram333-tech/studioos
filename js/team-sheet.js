@@ -697,7 +697,29 @@ function sanitizeTeamSheetFileName(value) {
   return safe.toLowerCase().endsWith(".pdf") ? safe : `${safe}.pdf`;
 }
 
-async function saveTeamSheetPdfBlob(blob, fileName) {
+function normalizeTeamSheetNativeFileUri(uri) {
+  const value = String(uri || "").trim();
+
+  if (!value) return "";
+
+  if (value.startsWith("file://")) {
+    return value;
+  }
+
+  // Some native bridges return a raw absolute filesystem path for cache files.
+  // Capacitor Share requires a file:// URL in files[]. Convert only safe local paths.
+  if (value.startsWith("/")) {
+    return "file://" + value;
+  }
+
+  return value;
+}
+
+function isTeamSheetShareableFileUri(uri) {
+  return String(uri || "").trim().toLowerCase().startsWith("file://");
+}
+
+async function saveTeamSheetPdfBlob(blob, fileName, options = {}) {
   const saver = getStudioOSFileSaverPlugin();
 
   if (!saver || typeof saver.saveFile !== "function") {
@@ -706,18 +728,48 @@ async function saveTeamSheetPdfBlob(blob, fileName) {
 
   const safeFileName = sanitizeTeamSheetFileName(fileName);
   const base64Data = await blobToBase64ForTeamSheet(blob);
+  const target = options.target || "downloads";
 
   const result = await saver.saveFile({
     base64Data,
     fileName: safeFileName,
     mimeType: "application/pdf",
-    target: "downloads"
+    target
   });
+
+  const rawUri = result?.uri || result?.fileUri || result?.path || "";
+  const uri = normalizeTeamSheetNativeFileUri(rawUri);
+
+  if (options.requireFileUri && !isTeamSheetShareableFileUri(uri)) {
+    throw new Error("Team Sheet PDF could not be prepared as a shareable file. Please try again.");
+  }
 
   return {
     fileName: safeFileName,
-    uri: result?.uri || ""
+    uri
   };
+}
+
+
+async function shareTeamSheetPdfBlobNatively(blob, fileName, message) {
+  const saver = getStudioOSFileSaverPlugin();
+
+  if (!saver || typeof saver.shareFile !== "function") {
+    throw new Error("StudioOS native file share is not available");
+  }
+
+  const safeFileName = sanitizeTeamSheetFileName(fileName);
+  const base64Data = await blobToBase64ForTeamSheet(blob);
+
+  await saver.shareFile({
+    base64Data,
+    fileName: safeFileName,
+    mimeType: "application/pdf",
+    text: message || buildTeamSheetWhatsAppMessage(),
+    title: "Send Team Sheet on WhatsApp"
+  });
+
+  return true;
 }
 
 // =============================
@@ -1059,28 +1111,12 @@ async function shareTeam() {
     const pdfBlob = await createTeamSheetPdfBlob(fileName);
 
     if (isStudioOSNativeApp()) {
-      const Share = getStudioOSSharePlugin();
-
-      if (!Share || typeof Share.share !== "function") {
-        throw new Error("Native Share plugin is not available");
-      }
-
-      const saved = await saveTeamSheetPdfBlob(pdfBlob, fileName);
-
-      if (!saved?.uri) {
-        throw new Error("Team Sheet PDF was created but cannot be shared");
-      }
-
-      // Production Android fix:
-      // Do not open whatsapp://, wa.me, file://, capacitor://, or public links here.
-      // Share the generated PDF as an attachment using Capacitor Share files[].
-      // This avoids WebView "Unsupported URL" and keeps the message link-free.
-      await Share.share({
-        title: "Team Sheet",
-        text: shareMessage,
-        files: [saved.uri],
-        dialogTitle: "Send Team Sheet on WhatsApp"
-      });
+      // Production root fix:
+      // Do not use Capacitor Share files[] here. On Android it rejects content://
+      // and non-file URIs with "only file urls are supported".
+      // Use StudioOSFileSaver.shareFile(), which shares through native
+      // ACTION_SEND + FileProvider and sends the PDF + message without a public link.
+      await shareTeamSheetPdfBlobNatively(pdfBlob, fileName, shareMessage);
 
       showTeamSheetToast("Share sheet opened", "success");
       return;
