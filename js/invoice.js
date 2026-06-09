@@ -729,6 +729,48 @@ downloadBtn.dataset.statusText = message
 
 }
 
+function showInvoiceToast(message, type = "success"){
+
+const existingToast = document.getElementById("studioosInvoiceToast")
+if(existingToast){
+existingToast.remove()
+}
+
+const toast = document.createElement("div")
+toast.id = "studioosInvoiceToast"
+toast.style.position = "fixed"
+toast.style.left = "50%"
+toast.style.bottom = "calc(24px + env(safe-area-inset-bottom, 0px))"
+toast.style.transform = "translateX(-50%)"
+toast.style.width = "min(calc(100% - 32px), 360px)"
+toast.style.zIndex = "2147482700"
+toast.style.padding = "0.9rem 1rem"
+toast.style.borderRadius = "1rem"
+toast.style.background = type === "success" ? "rgba(15,23,42,0.96)" : "rgba(127,29,29,0.96)"
+toast.style.border = type === "success" ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(248,113,113,0.35)"
+toast.style.boxShadow = "0 18px 55px rgba(0,0,0,0.38)"
+toast.style.backdropFilter = "blur(16px)"
+toast.style.webkitBackdropFilter = "blur(16px)"
+toast.style.color = "#ffffff"
+toast.style.fontSize = "0.88rem"
+toast.style.fontWeight = "800"
+toast.style.textAlign = "center"
+toast.style.pointerEvents = "none"
+toast.textContent = message || "Done"
+
+document.body.appendChild(toast)
+
+setTimeout(()=>{
+toast.style.transition = "opacity 180ms ease, transform 180ms ease"
+toast.style.opacity = "0"
+toast.style.transform = "translateX(-50%) translateY(8px)"
+setTimeout(()=>{
+toast.remove()
+}, 220)
+}, 2200)
+
+}
+
 
 // =============================
 // BUILD PDF BLOB
@@ -801,26 +843,26 @@ const { blob, fileName } = await buildInvoicePdfBlob()
 await triggerBestDownload(blob, fileName)
 
 if(isCapacitorNativeApp()){
-alert("Invoice saved to Downloads/StudioOS")
+showInvoiceToast("Invoice saved to Downloads/StudioOS", "success")
 return
 }
 
 if(isIOSDevice()){
 setTimeout(()=>{
-alert("Agar iPhone/iPad browser preview khole, to browser menu se Save to Files ya Download option use karein.")
+showInvoiceToast("PDF ready. Use browser menu to Save to Files or Download.", "success")
 }, 500)
 }
 
 if(isAndroidDevice() && !isCapacitorNativeApp()){
 setTimeout(()=>{
-alert("Agar Android browser preview khole, to browser menu se Download/Save option use karein.")
+showInvoiceToast("PDF ready. Use browser menu to Download or Save.", "success")
 }, 500)
 }
 
 }catch(error){
 
 console.error("Invoice download error:", error)
-alert(error?.message || "Invoice PDF download failed")
+showInvoiceToast(error?.message || "Invoice PDF download failed", "error")
 
 }finally{
 
