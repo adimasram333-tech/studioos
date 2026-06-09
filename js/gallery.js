@@ -2481,6 +2481,12 @@ return
 FACE_FILTER_ACTIVE = false
 btn.innerText = "Face Scan"
 btn.onclick = async function(){
+
+// Photographer-side action remains protected by the subscription/feature gate.
+// Client/public viewers should not see photographer upgrade or limit popups here;
+// they already reached this page through a valid public access flow, and the
+// actual face-search permission is validated again on face-capture.html.
+if(effectiveRole === "photographer"){
 const allowed = await guardPublicGalleryFeature(eventId, "face_search")
 if(!allowed) return
 
@@ -2488,6 +2494,7 @@ const token = await ensurePublicShareToken(eventId)
 if(!token){
 alert("Unable to enable limited Face Search. Please try again.")
 return
+}
 }
 
 setFaceFilterDisabledForEvent(eventId, false)
