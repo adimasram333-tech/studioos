@@ -551,24 +551,28 @@ return await html2pdf()
 
 async function sharePremiumProposalPdfNatively(data, profile){
 
-const Share = getStudioOSSharePlugin()
+const saver = getStudioOSFileSaverPlugin()
 
-if(!Share || typeof Share.share !== "function"){
-throw new Error("Native Share plugin is not available")
+if(!saver || typeof saver.shareFile !== "function"){
+throw new Error("Native PDF share is not available")
 }
 
+const fileName = sanitizePremiumProposalPdfFileName("premium-proposal.pdf")
 const pdfBlob = await generatePremiumProposalPdfBlob()
-const saved = await savePremiumProposalPdfBlobForNativeShare(pdfBlob, "premium-proposal.pdf")
+const base64Data = await blobToBase64ForPremiumProposal(pdfBlob)
 
-if(!saved?.uri || !String(saved.uri).startsWith("file://")){
-throw new Error("PDF file was created but cannot be shared")
-}
-
-await Share.share({
-title: "StudioOS Premium Proposal",
+// Android production root fix:
+// Do not use Capacitor Share files[] here. Capacitor Share rejects
+// content:// URIs with "only file urls are supported". The native
+// StudioOSFileSaverPlugin.shareFile() writes the PDF into app cache
+// and opens Android ACTION_SEND using FileProvider, which is the correct
+// WhatsApp attachment flow for Android.
+await saver.shareFile({
+base64Data,
+fileName,
+mimeType: "application/pdf",
 text: buildPremiumProposalShareMessage(data, profile),
-files: [saved.uri],
-dialogTitle: "Share Premium Proposal PDF"
+title: "Send Premium Proposal on WhatsApp"
 })
 
 return true
