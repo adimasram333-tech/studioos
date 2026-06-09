@@ -23,6 +23,69 @@ backdrop-filter: blur(15px);
 border:1px solid rgba(255,255,255,0.1);
 }
 
+
+.face-match-banner{
+display:none;
+margin:0 0 14px 0;
+padding:12px 14px;
+border-radius:18px;
+background:rgba(14,165,233,0.10);
+border:1px solid rgba(56,189,248,0.28);
+box-shadow:0 16px 38px rgba(2,6,23,0.24), inset 0 0 18px rgba(56,189,248,0.06);
+backdrop-filter:blur(14px);
+-webkit-backdrop-filter:blur(14px);
+}
+
+.face-match-banner.show{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+}
+
+.face-match-title{
+font-size:13px;
+font-weight:800;
+color:#e0f2fe;
+line-height:1.25;
+}
+
+.face-match-subtitle{
+margin-top:3px;
+font-size:12px;
+font-weight:600;
+color:#7dd3fc;
+line-height:1.35;
+}
+
+.face-match-count{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+min-width:42px;
+height:42px;
+padding:0 10px;
+border-radius:14px;
+background:rgba(15,23,42,0.72);
+border:1px solid rgba(125,211,252,0.26);
+color:#67e8f9;
+font-size:18px;
+font-weight:900;
+box-shadow:inset 0 0 18px rgba(56,189,248,0.08);
+}
+
+@media (max-width: 380px){
+.face-match-banner.show{
+align-items:flex-start;
+}
+
+.face-match-count{
+min-width:38px;
+height:38px;
+font-size:16px;
+}
+}
+
 </style>
 
 </head>
@@ -47,6 +110,15 @@ Upload
 </button>
 </div>
 
+</div>
+
+
+<div id="faceMatchBanner" class="face-match-banner" aria-live="polite">
+  <div>
+    <div class="face-match-title">AI Face Match Result</div>
+    <div id="faceMatchSubtitle" class="face-match-subtitle">0 photos matched for you</div>
+  </div>
+  <div id="faceMatchCount" class="face-match-count">0</div>
 </div>
 
 <div id="galleryGrid" class="grid grid-cols-2 gap-3"></div>
@@ -78,7 +150,86 @@ No photos uploaded
 
 <script>
 
+
+function getFaceMatchedImagesForGallery(eventId){
+
+try{
+
+if(!eventId){
+return []
+}
+
+const scanEventId =
+String(sessionStorage.getItem("face_scan_event_id") || "").trim()
+
+const faceScanDone =
+sessionStorage.getItem("face_scan_done") === "true"
+
+if(!faceScanDone || scanEventId !== String(eventId)){
+return []
+}
+
+let mapped = {}
+
+try{
+mapped = JSON.parse(sessionStorage.getItem("matched_images_by_event") || "{}")
+}catch(_err){
+mapped = {}
+}
+
+const mappedImages = Array.isArray(mapped?.[eventId]) ? mapped[eventId] : []
+
+if(mappedImages.length > 0){
+return mappedImages.filter(Boolean)
+}
+
+const fallbackImages = JSON.parse(sessionStorage.getItem("matched_images") || "[]")
+
+return Array.isArray(fallbackImages) ? fallbackImages.filter(Boolean) : []
+
+}catch(error){
+
+console.error("FACE MATCH COUNT READ ERROR:", error)
+return []
+
+}
+
+}
+
+function renderFaceMatchCountBanner(){
+
+const params = new URLSearchParams(window.location.search)
+const eventId = (params.get("event_id") || "").trim()
+const banner = document.getElementById("faceMatchBanner")
+const countEl = document.getElementById("faceMatchCount")
+const subtitleEl = document.getElementById("faceMatchSubtitle")
+
+if(!banner || !countEl || !subtitleEl){
+return
+}
+
+const matchedImages = getFaceMatchedImagesForGallery(eventId)
+const count = matchedImages.length
+
+if(count <= 0){
+banner.classList.remove("show")
+countEl.innerText = "0"
+subtitleEl.innerText = "0 photos matched for you"
+return
+}
+
+countEl.innerText = String(count)
+subtitleEl.innerText =
+`${count} ${count === 1 ? "photo matched" : "photos matched"} for you`
+
+banner.classList.add("show")
+
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
+
+renderFaceMatchCountBanner()
 
 const btn = document.getElementById("uploadBtn")
 
