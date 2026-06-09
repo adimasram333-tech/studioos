@@ -46,9 +46,9 @@ font-size:12px;
 /* ============================= */
 .circle{
 box-shadow:
-0 0 34px rgba(99,102,241,0.22),
+0 0 34px rgba(56,189,248,0.20),
 inset 0 0 18px rgba(255,255,255,0.08);
-border-color:rgba(99,102,241,0.42);
+border-color:rgba(56,189,248,0.36);
 }
 
 .ai-face-overlay{
@@ -63,10 +63,10 @@ z-index:2;
 position:absolute;
 inset:0;
 border-radius:50%;
-border:2px solid rgba(99,102,241,0.45);
+border:2px solid rgba(56,189,248,0.42);
 box-shadow:
-0 0 18px rgba(99,102,241,0.24),
-inset 0 0 18px rgba(99,102,241,0.12);
+0 0 18px rgba(56,189,248,0.22),
+inset 0 0 18px rgba(56,189,248,0.10);
 animation: aiPulse 2.4s ease-in-out infinite;
 }
 
@@ -74,9 +74,9 @@ animation: aiPulse 2.4s ease-in-out infinite;
 position:absolute;
 width:38px;
 height:38px;
-border-color:#c4b5fd;
+border-color:#bfdbfe;
 opacity:0.95;
-filter:drop-shadow(0 0 7px rgba(139,92,246,0.6));
+filter:drop-shadow(0 0 7px rgba(56,189,248,0.48));
 }
 
 .ai-face-corner.tl{
@@ -124,14 +124,79 @@ box-shadow:0 0 14px rgba(255,255,255,0.6);
 opacity:0.75;
 }
 
+.ai-frame-hud{
+position:absolute;
+inset:28px;
+border-radius:50%;
+pointer-events:none;
+z-index:4;
+opacity:0;
+transition:opacity 180ms ease;
+}
+
+.ai-frame-hud::before,
+.ai-frame-hud::after{
+content:"";
+position:absolute;
+left:12%;
+right:12%;
+height:1px;
+background:linear-gradient(90deg, transparent, rgba(56,189,248,0.85), transparent);
+box-shadow:0 0 10px rgba(56,189,248,0.5);
+}
+
+.ai-frame-hud::before{
+top:28%;
+}
+
+.ai-frame-hud::after{
+bottom:28%;
+}
+
+.ai-orbit-dot{
+position:absolute;
+width:5px;
+height:5px;
+border-radius:999px;
+background:#67e8f9;
+box-shadow:0 0 12px rgba(103,232,249,0.9);
+opacity:0.85;
+}
+
+.ai-orbit-dot.one{
+top:19%;
+left:27%;
+}
+
+.ai-orbit-dot.two{
+top:34%;
+right:18%;
+}
+
+.ai-orbit-dot.three{
+bottom:22%;
+left:31%;
+}
+
+.ai-orbit-dot.four{
+bottom:36%;
+right:27%;
+}
+
+.circle.ai-ready .ai-frame-hud,
+.circle.ai-scanning .ai-frame-hud,
+.circle.ai-success .ai-frame-hud{
+opacity:0.82;
+}
+
 .ai-scan-line{
 position:absolute;
 left:10%;
 width:80%;
 height:3px;
 border-radius:999px;
-background:linear-gradient(90deg, transparent, #8b5cf6, transparent);
-box-shadow:0 0 16px rgba(139,92,246,0.75);
+background:linear-gradient(90deg, transparent, #38bdf8, transparent);
+box-shadow:0 0 16px rgba(56,189,248,0.72);
 opacity:0;
 animation: aiScanMove 1.8s linear infinite;
 z-index:3;
@@ -183,6 +248,150 @@ position:relative;
 z-index:1;
 }
 
+
+
+.ai-scan-meta{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:10px;
+flex-wrap:wrap;
+margin:0 auto 14px;
+max-width:340px;
+}
+
+.ai-chip{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+min-height:34px;
+padding:7px 12px;
+border-radius:999px;
+border:1px solid rgba(56,189,248,0.36);
+background:rgba(15,23,42,0.54);
+box-shadow:0 12px 34px rgba(15,23,42,0.24), inset 0 0 18px rgba(56,189,248,0.08);
+backdrop-filter:blur(14px);
+-webkit-backdrop-filter:blur(14px);
+color:#e0e7ff;
+font-size:12px;
+font-weight:700;
+line-height:1;
+}
+
+.ai-chip-dot{
+width:9px;
+height:9px;
+border-radius:999px;
+background:#38bdf8;
+box-shadow:0 0 14px rgba(56,189,248,0.82);
+flex:0 0 auto;
+}
+
+.ai-chip-count{
+font-size:18px;
+font-weight:900;
+color:#93c5fd;
+letter-spacing:0.02em;
+}
+
+.ai-chip[data-state="ready"]{
+border-color:rgba(34,197,94,0.34);
+background:rgba(15,23,42,0.58);
+color:#dcfce7;
+}
+
+.ai-chip[data-state="ready"] .ai-chip-dot{
+background:#22c55e;
+box-shadow:0 0 14px rgba(34,197,94,0.75);
+}
+
+.ai-chip[data-state="scanning"]{
+border-color:rgba(56,189,248,0.44);
+color:#e0f2fe;
+}
+
+.ai-chip[data-state="success"]{
+border-color:rgba(34,197,94,0.44);
+color:#dcfce7;
+}
+
+.ai-chip[data-state="failed"]{
+border-color:rgba(245,158,11,0.5);
+color:#fef3c7;
+}
+
+.ai-chip-icon{
+font-size:14px;
+line-height:1;
+opacity:0.95;
+}
+
+/* Face-attached mesh intentionally removed: current production flow uses AWS Rekognition after capture, not live landmark tracking. */
+
+.ai-result-summary{
+width:min(100%,340px);
+margin:14px auto 0;
+padding:12px 14px;
+border-radius:18px;
+border:1px solid rgba(56,189,248,0.28);
+background:rgba(15,23,42,0.56);
+box-shadow:0 16px 42px rgba(2,6,23,0.24), inset 0 0 18px rgba(56,189,248,0.08);
+backdrop-filter:blur(14px);
+-webkit-backdrop-filter:blur(14px);
+}
+
+.ai-result-title{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+font-size:14px;
+font-weight:800;
+color:#86efac;
+}
+
+.ai-result-subtitle{
+margin-top:5px;
+font-size:12px;
+line-height:1.45;
+color:#c7d2fe;
+}
+
+.ai-result-summary.hidden{
+display:none;
+}
+
+.ai-result-summary.failed .ai-result-title{
+color:#fbbf24;
+}
+
+.ai-result-summary.scanning .ai-result-title{
+color:#67e8f9;
+}
+
+@media (min-width: 380px){
+.circle{
+width:286px;
+height:286px;
+}
+}
+
+@media (max-width: 360px){
+.ai-scan-meta{
+gap:8px;
+}
+
+.ai-chip{
+font-size:11px;
+padding:7px 10px;
+}
+
+.ai-chip-count{
+font-size:16px;
+}
+}
+
 @keyframes aiPulse{
 0%,100%{ transform:scale(1); opacity:0.78; }
 50%{ transform:scale(1.025); opacity:1; }
@@ -206,6 +415,18 @@ z-index:1;
 <h2 class="text-xl mb-2 font-semibold tracking-wide">AI Face Scan</h2>
 <p class="text-xs text-gray-400 mb-4">Align your face inside the circle for best results</p>
 
+<div class="ai-scan-meta" aria-live="polite">
+  <div id="aiScanChip" class="ai-chip">
+    <span id="aiScanDot" class="ai-chip-dot"></span>
+    <span id="aiScanChipText">AI Scan Ready</span>
+  </div>
+  <div class="ai-chip">
+    <span class="ai-chip-icon">👥</span>
+    <span id="aiMatchCount" class="ai-chip-count">0</span>
+    <span id="aiMatchCountLabel">photos matched</span>
+  </div>
+</div>
+
 <div class="circle mx-auto">
 <video id="video" autoplay muted playsinline></video>
 <div class="ai-face-overlay" aria-hidden="true">
@@ -214,6 +435,13 @@ z-index:1;
   <div class="ai-face-corner tr"></div>
   <div class="ai-face-corner bl"></div>
   <div class="ai-face-corner br"></div>
+  <!-- No fixed face mesh here: scan HUD stays frame-level so it does not fake live tracking. -->
+  <div class="ai-frame-hud">
+    <span class="ai-orbit-dot one"></span>
+    <span class="ai-orbit-dot two"></span>
+    <span class="ai-orbit-dot three"></span>
+    <span class="ai-orbit-dot four"></span>
+  </div>
   <div class="ai-center-dot"></div>
   <div class="ai-scan-line"></div>
 </div>
@@ -221,6 +449,11 @@ z-index:1;
 </div>
 
 <div id="aiGuideText" class="ai-guide-text">Click Start to begin AI scan</div>
+
+<div id="aiMatchSummary" class="ai-result-summary hidden" aria-live="polite">
+  <div id="aiMatchSummaryTitle" class="ai-result-title">✓ Face matched successfully</div>
+  <div id="aiMatchSummarySubtitle" class="ai-result-subtitle">0 photo matches found in StudioOS</div>
+</div>
 
 <button id="startBtn"
 class="mt-6 bg-indigo-600 px-6 py-2 rounded-lg">
@@ -260,6 +493,13 @@ const startBtn = document.getElementById("startBtn")
 const captureBtn = document.getElementById("captureBtn")
 const retryBtn = document.getElementById("retryBtn")
 const helpText = document.getElementById("helpText")
+const aiScanChip = document.getElementById("aiScanChip")
+const aiScanChipText = document.getElementById("aiScanChipText")
+const aiMatchCount = document.getElementById("aiMatchCount")
+const aiMatchCountLabel = document.getElementById("aiMatchCountLabel")
+const aiMatchSummary = document.getElementById("aiMatchSummary")
+const aiMatchSummaryTitle = document.getElementById("aiMatchSummaryTitle")
+const aiMatchSummarySubtitle = document.getElementById("aiMatchSummarySubtitle")
 
 function getEventId(){
 const params = new URLSearchParams(window.location.search)
@@ -322,6 +562,79 @@ circle.classList.add(state)
 if(guideText && message){
 guideText.innerText = message
 }
+
+updateAIScanChip(state)
+}
+
+function updateAIScanChip(state){
+if(aiScanChip){
+aiScanChip.removeAttribute("data-state")
+}
+
+if(!aiScanChipText) return
+
+if(state === "ai-ready"){
+if(aiScanChip) aiScanChip.dataset.state = "ready"
+aiScanChipText.innerText = "AI Scan Active"
+return
+}
+
+if(state === "ai-scanning"){
+if(aiScanChip) aiScanChip.dataset.state = "scanning"
+aiScanChipText.innerText = "AI Scanning"
+return
+}
+
+if(state === "ai-success"){
+if(aiScanChip) aiScanChip.dataset.state = "success"
+aiScanChipText.innerText = "Face Matched"
+return
+}
+
+if(state === "ai-failed"){
+if(aiScanChip) aiScanChip.dataset.state = "failed"
+aiScanChipText.innerText = "Scan Needs Retry"
+return
+}
+
+aiScanChipText.innerText = "AI Scan Ready"
+}
+
+function updateAIMatchCounter(count){
+const safeCount = Math.max(0, Number(count || 0))
+
+if(aiMatchCount){
+aiMatchCount.innerText = String(safeCount)
+}
+
+if(aiMatchCountLabel){
+aiMatchCountLabel.innerText = safeCount === 1 ? "photo matched" : "photos matched"
+}
+}
+
+function showAIMatchSummary(type, title, subtitle){
+if(!aiMatchSummary) return
+
+aiMatchSummary.classList.remove("hidden", "failed", "scanning")
+
+if(type){
+aiMatchSummary.classList.add(type)
+}
+
+if(aiMatchSummaryTitle){
+aiMatchSummaryTitle.innerText = title || "AI scan status"
+}
+
+if(aiMatchSummarySubtitle){
+aiMatchSummarySubtitle.innerText = subtitle || ""
+}
+}
+
+function hideAIMatchSummary(){
+if(aiMatchSummary){
+aiMatchSummary.classList.add("hidden")
+aiMatchSummary.classList.remove("failed", "scanning")
+}
 }
 
 function stopCamera(){
@@ -357,6 +670,8 @@ status.innerText = text
 }
 
 function showRetryUI(message){
+updateAIMatchCounter(0)
+showAIMatchSummary("failed", "No face match found", "Try again with front face, eyes open, and better lighting.")
 setAIScanVisualState("ai-failed", "Try front face with better light")
 setBusyState(false, message || "No Match Found ❌")
 retryBtn.classList.remove("hidden")
@@ -590,6 +905,8 @@ return
 
 clearFaceSession()
 hideRetryUI()
+hideAIMatchSummary()
+updateAIMatchCounter(0)
 setAIScanVisualState("", "Opening camera...")
 setBusyState(true, "Opening Camera...")
 
@@ -758,7 +1075,8 @@ return
 
 try{
 
-setAIScanVisualState("ai-scanning", "AI analyzing your face...")
+setAIScanVisualState("ai-scanning", "Scanning face sample and matching photos...")
+showAIMatchSummary("scanning", "AI scan in progress", "Searching matching photos from this event gallery...")
 setBusyState(true, "AI Analyzing...")
 
 const imageBase64 = captureVideoFrameBase64()
@@ -779,6 +1097,7 @@ const matchedImages = mergedResults
 .filter(Boolean)
 
 saveMatchedImagesToSession(eventId, matchedImages)
+updateAIMatchCounter(matchedImages.length)
 
 if(matchedImages.length === 0){
 clearFaceSession()
@@ -788,8 +1107,9 @@ return
 
 hideRetryUI()
 stopCamera()
-setAIScanVisualState("ai-success", "Match found successfully")
-setBusyState(false, "Match Found ✅")
+showAIMatchSummary("", "✓ Face matched successfully", `${matchedImages.length} ${matchedImages.length === 1 ? "photo match" : "photo matches"} found in StudioOS`)
+setAIScanVisualState("ai-success", `${matchedImages.length} ${matchedImages.length === 1 ? "photo matched" : "photos matched"}`)
+setBusyState(false, `${matchedImages.length} Match${matchedImages.length === 1 ? "" : "es"} Found ✅`)
 
 setTimeout(()=>{
 window.location.href = getRedirectUrl(eventId)
