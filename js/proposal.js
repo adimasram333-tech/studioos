@@ -866,10 +866,10 @@ return await window.html2pdf()
 
 async function shareProposalPdfNatively(data, profile){
 
-const Share = getStudioOSSharePlugin()
+const saver = getStudioOSFileSaverPlugin()
 
-if(!Share || typeof Share.share !== "function"){
-throw new Error("Native Share plugin is not available")
+if(!saver || typeof saver.shareFile !== "function"){
+throw new Error("StudioOS native file share is not available")
 }
 
 let filename = "photography-proposal.pdf"
@@ -878,23 +878,21 @@ if(isPremiumUser(profile)){
 filename = "premium-photography-proposal.pdf"
 }
 
-const pdfBlob = await generateProposalPdfBlob(filename)
-const saved = await saveProposalPdfBlobForNativeShare(pdfBlob, filename)
+const safeFileName = sanitizeProposalPdfFileName(filename)
+const pdfBlob = await generateProposalPdfBlob(safeFileName)
+const base64Data = await blobToBase64ForProposal(pdfBlob)
 
-if(!saved?.uri || !isStudioOSFileUri(saved.uri)){
-throw new Error("PDF file was created but cannot be shared")
-}
-
-// Android production-safe fix:
-// Do not send public proposal links and do not open whatsapp:// / wa.me from WebView.
-// Share the generated local PDF as a real file:// attachment through the native share sheet.
-// Capacitor Share rejects non-file URIs in the `files` array with
-// "only file urls are supported", so the PDF is first written into app cache.
-await Share.share({
-title: "StudioOS Proposal",
+// Android root fix:
+// Capacitor Share files[] accepts only file:// URLs and rejects content:// URLs.
+// StudioOSFileSaverPlugin.shareFile writes the PDF to app cache through FileProvider
+// and opens the native Android share chooser directly, so no public link, wa.me,
+// whatsapp://, content://, or invalid WebView URL is passed from JavaScript.
+await saver.shareFile({
+base64Data,
+fileName: safeFileName,
+mimeType: "application/pdf",
 text: buildProposalShareMessage(data, profile),
-files: [saved.uri],
-dialogTitle: "Share Proposal PDF"
+title: "Share Proposal PDF"
 })
 
 return true
