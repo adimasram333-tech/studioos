@@ -99,7 +99,41 @@ window.STUDIOOS_WEB_BASE_URL ||
 ""
 ).trim().replace(/\/+$/,"")
 
-if(configured && /^https?:\/\//i.test(configured)){
+function isUnsafePublicBaseUrl(value){
+try{
+const url = new URL(String(value || "").trim())
+const protocol = String(url.protocol || "").toLowerCase()
+const host = String(url.hostname || "").trim().toLowerCase()
+
+if(protocol !== "https:"){
+return true
+}
+
+if(
+host === "localhost" ||
+host === "127.0.0.1" ||
+host === "0.0.0.0" ||
+host === "::1" ||
+host.endsWith(".localhost")
+){
+return true
+}
+
+if(
+host.startsWith("192.168.") ||
+host.startsWith("10.") ||
+/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)
+){
+return true
+}
+
+return false
+}catch(error){
+return true
+}
+}
+
+if(configured && !isUnsafePublicBaseUrl(configured)){
 return configured
 }
 
