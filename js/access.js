@@ -38,6 +38,33 @@ async function initAccess() {
     return;
   }
 
+  function showAccessBlockedState(title, message) {
+    const card = form.closest(".bg-gray-800") || form.parentElement || document.body;
+    if (!card) return;
+
+    card.innerHTML = `
+      <div style="text-align:center; color:white;">
+        <div style="
+          display:inline-flex;
+          align-items:center;
+          min-height:30px;
+          padding:0 0.78rem;
+          border-radius:999px;
+          background:rgba(251,191,36,0.14);
+          border:1px solid rgba(251,191,36,0.28);
+          color:rgb(253 230 138);
+          font-size:0.72rem;
+          font-weight:850;
+          letter-spacing:0.08em;
+          text-transform:uppercase;
+        ">Gallery Closed</div>
+        <h2 style="margin-top:0.95rem; font-size:1.25rem; line-height:1.3; font-weight:900;">${title}</h2>
+        <p style="margin-top:0.65rem; color:rgba(255,255,255,0.7); font-size:0.95rem; line-height:1.55;">${message}</p>
+      </div>
+    `;
+  }
+
+
   const eventIsValid = await validateEventAccess();
 
   if (!eventIsValid) {
@@ -99,7 +126,10 @@ async function initAccess() {
     }
 
     if (reason === "gallery_stopped") {
-      alert("This gallery is currently closed by the photographer.");
+      showAccessBlockedState(
+        "Gallery is closed",
+        "This gallery is currently closed by the photographer. Please contact the photographer if you need access again."
+      );
       return false;
     }
 
