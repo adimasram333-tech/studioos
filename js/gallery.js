@@ -25,6 +25,19 @@ function buildGuestDownloadLabel(isFree){
 return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
 }
 
+function normalizeGallerySharingStatus(value){
+const status = String(value || "active").trim().toLowerCase()
+return status || "active"
+}
+
+function isGallerySharingStopped(status){
+return normalizeGallerySharingStatus(status) === "stopped"
+}
+
+function buildGallerySharingActionLabel(status){
+return isGallerySharingStopped(status) ? "Resume Gallery Sharing" : "Stop Gallery Sharing"
+}
+
 // =============================
 // SUBSCRIPTION GATE FOR PUBLIC GALLERY ACCESS
 // =============================
@@ -1327,8 +1340,12 @@ closeFloatingMenu()
 showPhotoPriceModal(eventId, getSafePhotoSellingPriceFromMenu(eventId))
 }
 
-function buildMenuHtml(id, guestFreeDownload){
+function buildMenuHtml(id, guestFreeDownload, galleryStatus = "active"){
 const safeMode = guestFreeDownload ? "true" : "false"
+const safeStatus = normalizeGallerySharingStatus(galleryStatus)
+const sharingActionClass = isGallerySharingStopped(safeStatus)
+? "px-3 py-2 hover:bg-emerald-500/20 text-emerald-300 cursor-pointer"
+: "px-3 py-2 hover:bg-amber-500/20 text-amber-300 cursor-pointer"
 
 return `
 <div onclick="openEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Open</div>
@@ -1336,6 +1353,7 @@ return `
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
 <div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
 <div onclick="regenerateToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Regenerate Token</div>
+<div onclick="toggleGallerySharingStatus('${id}', '${safeStatus}')" class="${sharingActionClass}">${buildGallerySharingActionLabel(safeStatus)}</div>
 <div onclick="openPhotoPriceModal('${id}', this)" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Price ₹${getSafePhotoSellingPriceFromMenu(id)}</div>
 <div onclick="toggleGuestFreeDownload('${id}', ${safeMode})" class="px-3 py-2 hover:bg-white/10 cursor-pointer">
 ${buildGuestDownloadLabel(guestFreeDownload)}
@@ -1432,7 +1450,7 @@ menu.style.left = `${Math.max(safeMargin, left)}px`
 menu.style.top = `${Math.max(safeMargin, top)}px`
 }
 
-window.toggleMenu = function(id, btn, guestFreeDownload = false){
+window.toggleMenu = function(id, btn, guestFreeDownload = false, galleryStatus = "active"){
 
 const existing = document.getElementById("floatingMenu")
 
@@ -1448,6 +1466,7 @@ const menu = document.createElement("div")
 menu.id = "floatingMenu"
 menu.dataset.id = id
 menu.dataset.guestFreeDownload = guestFreeDownload ? "true" : "false"
+menu.dataset.galleryStatus = normalizeGallerySharingStatus(galleryStatus)
 
 menu.style.position = "fixed"
 menu.style.top = "0px"
@@ -1463,7 +1482,7 @@ menu.style.minWidth = "180px"
 menu.style.maxWidth = "calc(100vw - 16px)"
 menu.style.boxSizing = "border-box"
 
-menu.innerHTML = buildMenuHtml(id, !!guestFreeDownload)
+menu.innerHTML = buildMenuHtml(id, !!guestFreeDownload, galleryStatus)
 
 document.body.appendChild(menu)
 activeMenu = menu
@@ -1686,6 +1705,72 @@ location.reload()
 }catch(err){
 console.error(err)
 showStudioOSToast("Failed to update guest download mode", "error")
+}
+
+}
+
+// =============================
+// GALLERY SHARING STATUS
+// =============================
+
+window.toggleGallerySharingStatus = async function(id, currentStatus = "active"){
+
+const safeEventId = String(id || "").trim()
+if(!safeEventId){
+showStudioOSToast("Invalid event", "error")
+return
+}
+
+const isStopped = isGallerySharingStopped(currentStatus)
+const nextStatus = isStopped ? "active" : "stopped"
+
+const confirmed = await showStudioOSConfirm({
+title: isStopped ? "Resume gallery sharing?" : "Stop gallery sharing?",
+message: isStopped
+? "Clients and guests will be able to access this gallery again using the existing link, QR, or valid token."
+: "Clients and guests will no longer be able to open this gallery from link, QR, token, or saved session until you resume sharing. Photographer access will remain available.",
+confirmText: isStopped ? "Resume" : "Stop Sharing",
+cancelText: "Cancel",
+danger: !isStopped
+})
+
+if(!confirmed) return
+
+closeFloatingMenu()
+
+try{
+
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!supabase || !user){
+await showStudioOSInfo("Please login again and try.", "Session expired")
+return
+}
+
+const { data: updatedEvent, error } = await supabase
+.from("events")
+.update({ status: nextStatus })
+.eq("id", safeEventId)
+.eq("user_id", user.id)
+.select("id,status")
+.maybeSingle()
+
+if(error || !updatedEvent){
+console.error("Gallery sharing status update failed:", error)
+showStudioOSToast("Failed to update gallery sharing", "error")
+return
+}
+
+showStudioOSToast(nextStatus === "stopped" ? "Gallery sharing stopped" : "Gallery sharing resumed")
+
+setTimeout(()=>{
+location.reload()
+}, 650)
+
+}catch(err){
+console.error("Gallery sharing status update error:", err)
+showStudioOSToast("Failed to update gallery sharing", "error")
 }
 
 }
@@ -2692,11 +2777,12 @@ const visitorId = sessionStorage.getItem("visitor_id")
 let eventName = "Event"
 let eventOwnerId = null
 let guestFreeDownload = false
+let eventStatus = "active"
 
 if(eventId){
 const { data: ev, error: eventFetchError } = await supabase
 .from("events")
-.select("event_name, client_name, user_id, guest_free_download")
+.select("event_name, client_name, user_id, guest_free_download, status")
 .eq("id", eventId)
 .maybeSingle()
 
@@ -2708,6 +2794,7 @@ if(ev){
 eventName = ev.event_name || ev.client_name || "Event"
 eventOwnerId = ev.user_id || null
 guestFreeDownload = !!ev.guest_free_download
+eventStatus = normalizeGallerySharingStatus(ev.status)
 }else{
 clearDeletedEventSession(eventId)
 
@@ -2746,6 +2833,27 @@ eventOwnerId
 )
 
 updateUploadButton(effectiveRole)
+
+if(eventId && effectiveRole !== "photographer" && isGallerySharingStopped(eventStatus)){
+clearDeletedEventSession(eventId)
+
+if(grid){
+grid.innerHTML = ""
+}
+
+if(empty){
+empty.innerText = "This gallery is currently closed by the photographer."
+empty.classList.remove("hidden")
+}
+
+updateUploadButton(effectiveRole)
+
+setTimeout(()=>{
+window.location.href = `access.html?event_id=${eventId}`
+}, 900)
+
+return
+}
 
 if(effectiveRole === "photographer"){
 console.log("👤 Photographer access (owner verified)")
@@ -2876,6 +2984,8 @@ displayName = e.client_name || "Booking Event"
 }
 
 const isGuestFree = !!e.guest_free_download
+const galleryStatus = normalizeGallerySharingStatus(e.status)
+const isSharingStopped = isGallerySharingStopped(galleryStatus)
 setEventPhotoPriceCache(e.id, e.photo_selling_price)
 
 div.innerHTML = `
@@ -2883,11 +2993,12 @@ div.innerHTML = `
   <div class="min-w-0 flex-1">
     <div class="text-sm font-semibold truncate">${displayName}</div>
     <div class="text-xs text-gray-400">${date}</div>
+    ${isSharingStopped ? `<div class="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-400/20">Sharing Stopped</div>` : ""}
   </div>
 
   <div class="flex items-center gap-2 shrink-0">
     ${buildToggleMarkup(e.id, isGuestFree)}
-    <button onclick="toggleMenu('${e.id}', this, ${isGuestFree ? "true" : "false"})" class="text-xl px-1 leading-none">⋮</button>
+    <button onclick="toggleMenu('${e.id}', this, ${isGuestFree ? "true" : "false"}, '${galleryStatus}')" class="text-xl px-1 leading-none">⋮</button>
   </div>
 </div>
 `
