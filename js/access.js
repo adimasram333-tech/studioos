@@ -98,6 +98,11 @@ async function initAccess() {
       return false;
     }
 
+    if (reason === "gallery_stopped") {
+      alert("This gallery is currently closed by the photographer.");
+      return false;
+    }
+
     alert("This gallery is not available for public access. Please contact the photographer.");
     return false;
   }
