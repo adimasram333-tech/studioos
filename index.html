@@ -1,322 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChitraBook AI — Complete AI Studio Workflow for Photographers</title>
+  <meta name="description" content="ChitraBook AI helps photographers manage quotations, proposals, bookings, payments, private galleries, AI face scan, photo delivery, website builder and earnings from one mobile-first platform." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#08111f;--card:#101b2d;--card2:#121f34;--line:rgba(255,255,255,.10);--text:#eef5ff;--muted:#9fb0ca;--accent:#6d5dfc;--cyan:#38d5ff;--green:#55f0b4;}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 20% 0%,rgba(91,83,255,.22),transparent 34%),radial-gradient(circle at 82% 12%,rgba(56,213,255,.14),transparent 28%),linear-gradient(180deg,#07101e 0%,#0b1424 44%,#07101d 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+    .wrap{width:min(1120px,calc(100% - 32px));margin-inline:auto}.glass{background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.035));border:1px solid var(--line);box-shadow:0 24px 70px rgba(0,0,0,.28);backdrop-filter:blur(18px)}.soft{background:linear-gradient(180deg,rgba(16,27,45,.94),rgba(10,18,32,.92));border:1px solid var(--line)}.pill{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06)}
+    .btn-primary{background:linear-gradient(135deg,#7467ff,#4f46e5);box-shadow:0 18px 42px rgba(79,70,229,.34)}.btn-secondary{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}.gradient-text{background:linear-gradient(90deg,#fff,#c9d4ff 42%,#78e4ff 78%);-webkit-background-clip:text;background-clip:text;color:transparent}.section{padding:92px 0}.grid-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:18px}.iconbox{width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,rgba(109,93,252,.22),rgba(56,213,255,.12));border:1px solid rgba(132,147,255,.24);display:grid;place-items:center;color:#bcd6ff}.iconbox svg{width:24px;height:24px;stroke-width:1.9}.feature-card{transition:.22s ease}.feature-card:hover{transform:translateY(-4px);border-color:rgba(125,144,255,.30)}
+    .phone{width:min(260px,100%);aspect-ratio:9/19.5;border-radius:34px;padding:10px;background:linear-gradient(180deg,#273346,#0a101b);border:1px solid rgba(255,255,255,.16);box-shadow:0 28px 80px rgba(0,0,0,.35);position:relative}.phone:before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:70px;height:7px;border-radius:999px;background:rgba(255,255,255,.18);z-index:2}.phone-screen{width:100%;height:100%;border-radius:26px;overflow:hidden;background:#0c1524;display:flex;align-items:center;justify-content:center}.phone-screen img{width:100%;height:100%;object-fit:contain;background:#0c1524}.screen-label{position:absolute;left:16px;right:16px;bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;border-radius:999px;background:rgba(2,8,23,.72);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(12px);font-size:12px;font-weight:800;color:#dbe8ff}.ai-visual{min-height:430px;position:relative;overflow:hidden}.face-card{position:absolute;inset:50px 42px 54px;border-radius:32px;background:radial-gradient(circle at 50% 35%,rgba(56,213,255,.16),transparent 32%),linear-gradient(145deg,#111b2d,#0b1424);border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 0 70px rgba(56,213,255,.06)}.face-ring{position:absolute;width:210px;height:210px;border:2px solid rgba(56,213,255,.36);border-radius:50%;left:50%;top:45%;transform:translate(-50%,-50%);box-shadow:0 0 70px rgba(56,213,255,.11),inset 0 0 50px rgba(56,213,255,.06)}.face-frame{position:absolute;width:170px;height:116px;left:50%;top:45%;transform:translate(-50%,-50%);border:3px solid rgba(255,255,255,.86);border-radius:24px;clip-path:polygon(0 0,25% 0,25% 10%,10% 10%,10% 28%,0 28%,0 0,75% 0,100% 0,100% 28%,90% 28%,90% 10%,75% 10%,75% 0,100% 72%,100% 100%,75% 100%,75% 90%,90% 90%,90% 72%,100% 72%,25% 100%,0 100%,0 72%,10% 72%,10% 90%,25% 90%,25% 100%)}.scan-line{position:absolute;left:25%;right:25%;top:54%;height:3px;border-radius:999px;background:linear-gradient(90deg,transparent,#38d5ff,transparent);box-shadow:0 0 24px #38d5ff}.floating{position:absolute;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(8,17,31,.74);backdrop-filter:blur(14px);padding:10px 14px;font-size:13px;font-weight:800;color:#dce9ff}.faq details{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.045);border-radius:18px;padding:18px 20px}.faq summary{cursor:pointer;font-weight:850;list-style:none;display:flex;justify-content:space-between;gap:14px}.faq summary:after{content:"+";width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);flex:0 0 auto}.faq details[open] summary:after{content:"–"}.faq p{color:var(--muted);line-height:1.75;margin:14px 0 0}.nav-blur{background:rgba(7,16,30,.75);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.08)}
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    /* Subscription-page matched pricing */
+    .pricing-shell{background:rgba(255,255,255,.05);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 70px rgba(0,0,0,.22)}
+    .pricing-stack-app{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:1.15rem}
+    .plan-card-app{position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:1.7rem;background:#fff;border:1px solid rgba(79,70,229,.12);box-shadow:0 24px 60px rgba(15,23,42,.18);min-height:640px;color:#0f172a;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+    .plan-card-app:hover{transform:translateY(-4px);box-shadow:0 30px 70px rgba(15,23,42,.22)}
+    .plan-card-app.popular{transform:translateY(-18px);border-color:rgba(79,70,229,.38);box-shadow:0 36px 84px rgba(79,70,229,.22)}
+    .plan-card-app.popular:hover{transform:translateY(-22px)}
+    .plan-top-app{padding:1.2rem 1.2rem 1rem;background:linear-gradient(180deg,#6366f1 0%,#4f46e5 100%);color:#fff}
+    .plan-card-app.free .plan-top-app{background:linear-gradient(180deg,#64748b 0%,#475569 100%)}
+    .plan-card-app.pro .plan-top-app{background:linear-gradient(180deg,#312e81 0%,#4338ca 100%)}
+    .plan-badge-app{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 .8rem;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.2);font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    .plan-price-app{margin-top:1rem;display:flex;align-items:flex-end;gap:.25rem;line-height:1}.plan-price-app strong{font-size:3rem;font-weight:850;letter-spacing:-.04em}.plan-price-app span{font-size:.9rem;font-weight:700;opacity:.92;padding-bottom:.35rem}
+    .plan-subtitle-app{margin-top:.65rem;font-size:.92rem;line-height:1.55;color:rgba(255,255,255,.88)}.plan-billing-note-app{margin-top:.55rem;font-size:.78rem;line-height:1.45;color:rgba(255,255,255,.82);font-weight:700}
+    .plan-body-app{display:flex;flex-direction:column;flex:1;padding:1.25rem 1.25rem 1.3rem;color:#0f172a}.storage-pill-app{display:inline-flex;align-items:center;gap:.4rem;align-self:flex-start;min-height:34px;padding:0 .85rem;border-radius:999px;background:#e0e7ff;color:#3730a3;font-size:.8rem;font-weight:800;margin-bottom:1rem}
+    .feature-list-app{display:grid;gap:.9rem;margin:0;padding:0;list-style:none}.feature-list-app li{display:flex;align-items:flex-start;gap:.72rem;color:#475569;font-size:.94rem;line-height:1.55}.feature-list-app li::before{content:'✓';width:1.35rem;height:1.35rem;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:#e0e7ff;color:#3730a3;font-size:.78rem;font-weight:900;margin-top:.08rem}
+    .plan-note-app{margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(15,23,42,.08);color:#64748b;font-size:.82rem;line-height:1.55}.plan-actions-app{margin-top:auto;padding-top:1.2rem}.plan-btn-app{width:100%;min-height:50px;border-radius:1rem;display:inline-flex;align-items:center;justify-content:center;font-size:.92rem;font-weight:800;border:1px solid transparent}.plan-btn-app.primary{background:#4f46e5;color:#fff;box-shadow:0 12px 24px rgba(79,70,229,.22)}.plan-btn-app.secondary{background:#fff;color:#4f46e5;border-color:rgba(79,70,229,.22)}.plan-btn-app.disabled{background:#e2e8f0;color:#475569;border-color:#e2e8f0}
+    @media(max-width:960px){.pricing-stack-app{grid-template-columns:1fr}.plan-card-app,.plan-card-app.popular{transform:none;min-height:auto}.plan-card-app.popular:hover{transform:translateY(-4px)}}
 
-<title>StudioOS Login</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<style>
-
-body{
-background: radial-gradient(circle at top,#1e293b,#0f172a);
-}
-
-.glass{
-background: rgba(255,255,255,0.05);
-backdrop-filter: blur(15px);
-border:1px solid rgba(255,255,255,0.1);
-}
-
-.link{
-color:#818cf8;
-cursor:pointer;
-}
-
-.link:hover{
-text-decoration:underline;
-}
-
-.helper-row{
-display:flex;
-align-items:center;
-justify-content:flex-end;
-margin-top:-0.5rem;
-margin-bottom:1rem;
-}
-
-.feedback{
-display:none;
-margin-top:1rem;
-padding:0.85rem 1rem;
-border-radius:0.85rem;
-font-size:0.9rem;
-line-height:1.5;
-border:1px solid rgba(255,255,255,0.08);
-}
-
-.feedback.show{
-display:block;
-}
-
-.feedback.info{
-background:rgba(99,102,241,0.12);
-border-color:rgba(99,102,241,0.3);
-color:#c7d2fe;
-}
-
-.feedback.success{
-background:rgba(34,197,94,0.12);
-border-color:rgba(34,197,94,0.28);
-color:#bbf7d0;
-}
-
-.feedback.error{
-background:rgba(239,68,68,0.12);
-border-color:rgba(239,68,68,0.28);
-color:#fecaca;
-}
-
-</style>
-
+    @media(max-width:900px){.section{padding:70px 0}.hero-grid{grid-template-columns:1fr!important}.hide-sm{display:none!important}.screens-row{display:flex!important;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:12px}.screens-row>div{min-width:78%;scroll-snap-align:center}.ai-visual{min-height:360px}.face-card{inset:36px 18px}.phone{width:100%}}
+  </style>
 </head>
+<body>
+  <header class="fixed top-0 left-0 right-0 z-50 nav-blur">
+    <div class="wrap h-16 flex items-center justify-between gap-4">
+      <a href="#top" class="flex items-center gap-3 font-black tracking-tight"><span class="w-10 h-10 rounded-2xl grid place-items-center bg-gradient-to-br from-sky-400 to-indigo-600 shadow-lg shadow-indigo-900/30">C</span><span>ChitraBook AI</span></a>
+      <nav class="hidden md:flex items-center gap-7 text-sm text-slate-300 font-semibold"><a href="#features">Modules</a><a href="#workflow">Workflow</a><a href="#screens">Screens</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav>
+      <div class="flex items-center gap-3"><a href="#screens" class="hide-sm px-4 py-2 rounded-full btn-secondary text-sm font-bold">View screens</a><a href="login.html" class="px-5 py-2.5 rounded-full btn-primary text-sm font-black">Launch App</a></div>
+    </div>
+  </header>
 
-<body class="text-white min-h-screen flex items-center justify-center px-4">
+  <main id="top" class="pt-24">
+    <section class="section pt-16">
+      <div class="wrap grid hero-grid grid-cols-[1.04fr_.96fr] gap-10 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 pill rounded-full px-4 py-2 text-xs font-black text-sky-200 mb-6"><span class="w-2 h-2 rounded-full bg-cyan-300 shadow-[0_0_18px_#38d5ff]"></span> AI studio workflow for photographers</div>
+          <h1 class="text-5xl md:text-7xl leading-[1.02] font-black tracking-tight gradient-text">Complete AI Studio Workflow for Photographers</h1>
+          <p class="mt-6 text-lg md:text-xl leading-8 text-slate-300 max-w-2xl">Manage quotations, proposals, bookings, payments, photo uploads, private galleries, AI face scan, client delivery, website builder and earnings — all from one mobile-first platform.</p>
+          <div class="mt-8 flex flex-wrap gap-3"><a href="login.html" class="px-6 py-4 rounded-2xl btn-primary font-black">Launch App</a><a href="#features" class="px-6 py-4 rounded-2xl btn-secondary font-black">View Features</a></div>
+          <div class="mt-8 flex flex-wrap gap-3 text-sm font-bold text-slate-300"><span class="pill rounded-full px-4 py-2">AI Face Scan</span><span class="pill rounded-full px-4 py-2">Private Gallery</span><span class="pill rounded-full px-4 py-2">Token Protected</span><span class="pill rounded-full px-4 py-2">Android Ready</span></div>
+        </div>
+        <div class="glass rounded-[36px] p-5 relative overflow-hidden">
+          <div class="absolute -top-24 -right-20 w-72 h-72 rounded-full bg-indigo-500/25 blur-3xl"></div>
+          <div class="grid grid-cols-2 gap-4 relative">
+            <div class="phone mx-auto"><div class="phone-screen"><img src="assets/dashboard.jpg" alt="ChitraBook AI studio dashboard"></div><div class="screen-label"><span>Dashboard</span><span>Live</span></div></div>
+            <div class="phone mx-auto mt-10"><div class="phone-screen"><img src="assets/gallery.jpg" alt="ChitraBook AI gallery list"></div><div class="screen-label"><span>Gallery</span><span>Private</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<div id="loginBox" class="glass p-8 rounded-2xl w-80 hidden">
+    <section class="py-10 border-y border-white/10 bg-white/[.025]">
+      <div class="wrap grid grid-cols-2 md:grid-cols-6 gap-3 text-center">
+        <div class="soft rounded-3xl p-5"><div class="text-2xl font-black">10+</div><div class="text-xs text-slate-400 mt-1">Studio Modules</div></div>
+        <div class="soft rounded-3xl p-5"><div class="text-2xl font-black">2</div><div class="text-xs text-slate-400 mt-1">Device Token</div></div>
+        <div class="soft rounded-3xl p-5"><div class="text-2xl font-black">AI</div><div class="text-xs text-slate-400 mt-1">Face Search</div></div>
+        <div class="soft rounded-3xl p-5"><div class="text-2xl font-black">QR</div><div class="text-xs text-slate-400 mt-1">Gallery Share</div></div>
+        <div class="soft rounded-3xl p-5"><div class="text-2xl font-black">₹</div><div class="text-xs text-slate-400 mt-1">Payments</div></div>
+        <div class="soft rounded-3xl p-5"><div class="text-2xl font-black">Web</div><div class="text-xs text-slate-400 mt-1">Builder</div></div>
+      </div>
+    </section>
 
-<h2 id="title" class="text-xl font-bold mb-6 text-center">
-StudioOS Login
-</h2>
+    <section class="section" id="ai-sharing">
+      <div class="wrap grid hero-grid grid-cols-2 gap-10 items-center">
+        <div>
+          <p class="text-cyan-200 text-sm font-black tracking-[.22em] uppercase">Private AI delivery</p>
+          <h2 class="mt-4 text-4xl md:text-6xl font-black tracking-tight">AI-powered photo sharing</h2>
+          <p class="mt-5 text-lg leading-8 text-slate-300">Guests scan their face and instantly view only their matched photos. Clients can access the full event gallery using a secure link, QR code or private client token.</p>
+          <div class="mt-7 grid gap-3 text-slate-200 font-semibold">
+            <div class="flex gap-3"><span class="text-cyan-300">✓</span> Private gallery link and QR sharing</div>
+            <div class="flex gap-3"><span class="text-cyan-300">✓</span> Secure client token with 2-device limit</div>
+            <div class="flex gap-3"><span class="text-cyan-300">✓</span> Regenerate token anytime</div>
+            <div class="flex gap-3"><span class="text-cyan-300">✓</span> Stop or resume gallery sharing after delivery</div>
+            <div class="flex gap-3"><span class="text-cyan-300">✓</span> Guest face scan shows only matched photos</div>
+          </div>
+        </div>
+        <div class="glass rounded-[38px] ai-visual">
+          <div class="face-card"><div class="face-ring"></div><div class="face-frame"></div><div class="scan-line"></div></div>
+          <div class="floating" style="top:30px;left:30px;">Private Gallery</div>
+          <div class="floating" style="top:30px;right:30px;">Token Protected</div>
+          <div class="floating" style="left:50%;bottom:36px;transform:translateX(-50%);background:linear-gradient(135deg,rgba(79,70,229,.92),rgba(8,17,31,.84));">24 photos matched</div>
+        </div>
+      </div>
+    </section>
 
-<form id="authForm">
+    <section class="section pt-0" id="workflow">
+      <div class="wrap">
+        <div class="text-center max-w-3xl mx-auto"><p class="text-indigo-200 text-sm font-black tracking-[.22em] uppercase">Connected workflow</p><h2 class="mt-4 text-4xl md:text-5xl font-black">From enquiry to delivery — one connected system</h2></div>
+        <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="soft rounded-3xl p-5"><span class="text-cyan-300 font-black">01</span><h3 class="font-black mt-3">Create Quotation</h3></div>
+          <div class="soft rounded-3xl p-5"><span class="text-cyan-300 font-black">02</span><h3 class="font-black mt-3">Send Proposal</h3></div>
+          <div class="soft rounded-3xl p-5"><span class="text-cyan-300 font-black">03</span><h3 class="font-black mt-3">Confirm Booking</h3></div>
+          <div class="soft rounded-3xl p-5"><span class="text-cyan-300 font-black">04</span><h3 class="font-black mt-3">Track Event</h3></div>
+          <div class="soft rounded-3xl p-5"><span class="text-cyan-300 font-black">05</span><h3 class="font-black mt-3">Upload Photos</h3></div>
+          <div class="soft rounded-3xl p-5"><span class="text-cyan-300 font-black">06</span><h3 class="font-black mt-3">Share Gallery</h3></div>
+          <div class="soft rounded-3xl p-5"><span class="text-cyan-300 font-black">07</span><h3 class="font-black mt-3">AI Face Scan</h3></div>
+          <div class="soft rounded-3xl p-5"><span class="text-cyan-300 font-black">08</span><h3 class="font-black mt-3">Collect Payments</h3></div>
+        </div>
+      </div>
+    </section>
 
-<input
-id="email"
-type="email"
-placeholder="Email"
-class="w-full mb-4 p-3 rounded-lg bg-black/40"
-required>
+    <section class="section bg-white/[.025]" id="features">
+      <div class="wrap">
+        <div class="max-w-3xl"><p class="text-cyan-200 text-sm font-black tracking-[.22em] uppercase">Complete app modules</p><h2 class="mt-4 text-4xl md:text-5xl font-black">Everything your photography studio needs</h2><p class="mt-4 text-slate-300 leading-8">No cheap emoji icons — every module uses clean vector icons and one consistent premium visual language.</p></div>
+        <div class="grid-auto mt-10">
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 19V5m0 14h16M8 16V9m4 7V5m4 11v-4"/></svg></div><h3 class="mt-5 text-xl font-black">Studio Dashboard</h3><p class="mt-3 text-slate-300 leading-7">Track bookings, pending payments, revenue, reminders and recent quotations from one mobile-first dashboard.</p></article>
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></div><h3 class="mt-5 text-xl font-black">Quotation Builder</h3><p class="mt-3 text-slate-300 leading-7">Create detailed event quotations with client details, dates, packages, services, deliverables, advance and balance.</p></article>
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 3l8 6-8 12L4 9z"/><path d="M4 9h16"/></svg></div><h3 class="mt-5 text-xl font-black">Proposal System</h3><p class="mt-3 text-slate-300 leading-7">Send professional proposal pages and downloadable PDFs with branding and event details.</p></article>
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 3v4M17 3v4M4 8h16M5 5h14v16H5z"/></svg></div><h3 class="mt-5 text-xl font-black">Bookings & Events</h3><p class="mt-3 text-slate-300 leading-7">Convert quotations into bookings and manage event dates, notes and calendar highlights.</p></article>
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M4 10h16M8 15h4"/></svg></div><h3 class="mt-5 text-xl font-black">Payments & Invoices</h3><p class="mt-3 text-slate-300 leading-7">Track advance, balance, pending payments, monthly revenue and invoices.</p></article>
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0M4 21a8 8 0 0 1 16 0"/></svg></div><h3 class="mt-5 text-xl font-black">Clients & Team</h3><p class="mt-3 text-slate-300 leading-7">Manage client records, payments, invoices, team planning and event assignments.</p></article>
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 17l5-5 4 4 2-2 5 5"/><path d="M4 5h16v14H4z"/></svg></div><h3 class="mt-5 text-xl font-black">Photo Upload</h3><p class="mt-3 text-slate-300 leading-7">Upload event photos to cloud storage and keep every event gallery organized.</p></article>
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/><path d="M18 17l2 2 3-4"/></svg></div><h3 class="mt-5 text-xl font-black">Client Gallery Delivery</h3><p class="mt-3 text-slate-300 leading-7">Share galleries using public links, QR codes and secure client tokens.</p></article>
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-5"/></svg></div><h3 class="mt-5 text-xl font-black">Gallery Control</h3><p class="mt-3 text-slate-300 leading-7">Stop or resume gallery sharing anytime. Regenerate tokens when client access needs reset.</p></article>
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 3h10M7 21h10M4 7v10M20 7v10"/><path d="M9 12h6M12 9v6"/></svg></div><h3 class="mt-5 text-xl font-black">AI Face Scan</h3><p class="mt-3 text-slate-300 leading-7">Guests scan their face and view only matched photos. Clients and photographers can filter gallery photos.</p></article>
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 3v18M8 7h6a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h6"/></svg></div><h3 class="mt-5 text-xl font-black">Photo Sales & Earnings</h3><p class="mt-3 text-slate-300 leading-7">Sell guest photo downloads, track earnings and manage withdrawal flow.</p></article>
+          <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M4 9h16M8 13h4M8 16h8"/></svg></div><h3 class="mt-5 text-xl font-black">Website Builder</h3><p class="mt-3 text-slate-300 leading-7">Create personal photography websites using ready-made premium templates.</p></article>
+        </div>
+      </div>
+    </section>
 
-<input
-id="password"
-type="password"
-placeholder="Password"
-class="w-full mb-3 p-3 rounded-lg bg-black/40"
-required>
+    <section class="section" id="screens">
+      <div class="wrap">
+        <div class="text-center max-w-3xl mx-auto"><p class="text-indigo-200 text-sm font-black tracking-[.22em] uppercase">Real product screens</p><h2 class="mt-4 text-4xl md:text-5xl font-black">Actual mobile screens from the app</h2><p class="mt-4 text-slate-300 leading-8">Screens are placed inside phone frames with object-fit contain, so the full app UI stays visible and readable.</p></div>
+        <div class="screens-row mt-12 grid grid-cols-2 md:grid-cols-3 gap-8 justify-items-center">
+          <div class="phone"><div class="phone-screen"><img src="assets/dashboard.jpg" alt="Dashboard screen"></div><div class="screen-label"><span>Dashboard</span><span>Overview</span></div></div>
+          <div class="phone"><div class="phone-screen"><img src="assets/gallery.jpg" alt="Gallery screen"></div><div class="screen-label"><span>Gallery</span><span>Share control</span></div></div>
+          <div class="phone"><div class="phone-screen"><img src="assets/face-scan.jpg" alt="Face scan screen"></div><div class="screen-label"><span>AI Face Scan</span><span>Match</span></div></div>
+          <div class="phone"><div class="phone-screen"><img src="assets/quotation.jpg" alt="Quotation screen"></div><div class="screen-label"><span>Quotation</span><span>Booking</span></div></div>
+          <div class="phone"><div class="phone-screen"><img src="assets/website-builder.jpg" alt="Website builder screen"></div><div class="screen-label"><span>Website Builder</span><span>Templates</span></div></div>
+          <div class="phone"><div class="phone-screen"><img src="assets/dashboard-modules.jpg" alt="Dashboard modules screen"></div><div class="screen-label"><span>Modules</span><span>Quick actions</span></div></div>
+        </div>
+      </div>
+    </section>
 
-<div id="forgotPasswordRow" class="helper-row">
-<span id="forgotPasswordBtn" class="link text-sm">Forgot Password?</span>
-</div>
+    <section class="section bg-white/[.025]" id="roles">
+      <div class="wrap grid-auto">
+        <div class="glass rounded-[32px] p-8"><h3 class="text-2xl font-black">Photographer</h3><p class="mt-4 text-slate-300 leading-8">Full control of studio workflow, gallery sharing, payments, website templates and client delivery.</p></div>
+        <div class="glass rounded-[32px] p-8"><h3 class="text-2xl font-black">Client</h3><p class="mt-4 text-slate-300 leading-8">Access full private gallery using secure token, link or QR code.</p></div>
+        <div class="glass rounded-[32px] p-8"><h3 class="text-2xl font-black">Guest</h3><p class="mt-4 text-slate-300 leading-8">Scan face and view only matched photos from the event gallery.</p></div>
+      </div>
+    </section>
 
-<button
-id="submitBtn"
-type="submit"
-class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-lg">
-Login
-</button>
+    <section class="section" id="testimonials">
+      <div class="wrap">
+        <div class="text-center max-w-3xl mx-auto"><p class="text-cyan-200 text-sm font-black tracking-[.22em] uppercase">What our customers say</p><h2 class="mt-4 text-4xl md:text-5xl font-black">Built around real studio problems</h2></div>
+        <div class="grid-auto mt-12">
+          <div class="soft rounded-3xl p-7"><div class="text-yellow-300">★★★★★</div><p class="mt-5 text-slate-200 leading-8">“ChitraBook AI helps me manage quotations, bookings and gallery delivery from one place. It saves time after every event.”</p><div class="mt-6 font-black">Wedding Photographer</div></div>
+          <div class="soft rounded-3xl p-7"><div class="text-yellow-300">★★★★★</div><p class="mt-5 text-slate-200 leading-8">“The face scan flow is useful for guests because they do not need to search through the full gallery.”</p><div class="mt-6 font-black">Event Photographer</div></div>
+          <div class="soft rounded-3xl p-7"><div class="text-yellow-300">★★★★★</div><p class="mt-5 text-slate-200 leading-8">“Client token and stop sharing controls give me more confidence when delivering private galleries.”</p><div class="mt-6 font-black">Studio Owner</div></div>
+        </div>
+      </div>
+    </section>
 
-</form>
+    <section class="section bg-white/[.025]" id="pricing">
+      <div class="wrap">
+        <div class="pricing-shell rounded-[28px] p-5 md:p-8 mb-5 text-center max-w-4xl mx-auto">
+          <p class="text-xs md:text-sm uppercase tracking-[0.3em] text-white/60">ChitraBook AI Subscription</p>
+          <h2 class="mt-3 text-3xl md:text-5xl font-extrabold leading-tight">Flexible pricing for photographers</h2>
+          <p class="mt-4 text-sm md:text-base text-white/70 leading-7 max-w-3xl mx-auto">Choose a plan based on your storage, gallery workflow and premium feature access. Premium website templates are purchased separately.</p>
+          <div class="mt-6 inline-flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/10 border border-white/10 text-sm font-black"><span class="px-4 py-2 rounded-xl text-white/70">1 Month</span><span class="px-4 py-2 rounded-xl bg-gradient-to-b from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-900/25">Yearly</span></div>
+          <p class="mt-3 text-xs text-white/60">Yearly plans are billed once for 12 months. One-month plans are available at higher pricing inside the app.</p>
+        </div>
 
-<div id="authFeedback" class="feedback info"></div>
+        <div class="pricing-stack-app mt-10">
+          <article class="plan-card-app free">
+            <div class="plan-top-app">
+              <span class="plan-badge-app">Free</span>
+              <div class="plan-price-app"><strong>₹0</strong><span>/ mo</span></div>
+              <p class="plan-subtitle-app">Best to start with ChitraBook AI and set up your first workflow.</p>
+            </div>
+            <div class="plan-body-app">
+              <div class="storage-pill-app">Storage • 5GB billable</div>
+              <ul class="feature-list-app">
+                <li>Template 1 access</li><li>Basic quotation workflow</li><li>Limited AI Face Search</li><li>Core dashboard usage</li><li>Gallery viewing</li><li>Limited Gallery Sharing</li><li>No photo selling</li><li>No team sheet sharing or PDF</li>
+              </ul>
+              <div class="plan-note-app">Ideal for testing ChitraBook AI before upgrading. Limited AI Face Search and Limited Gallery Sharing are included for trial usage.</div>
+              <div class="plan-actions-app"><a href="subscription.html" class="plan-btn-app disabled">Free Plan</a></div>
+            </div>
+          </article>
 
-<button
-id="googleBtn"
-type="button"
-class="w-full mt-4 bg-white text-black p-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">
-<path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/>
-<path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 18.9 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4c-7.7 0-14.3 4.3-17.7 10.7z"/>
-<path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.5-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.8-3.3-11.5-8l-6.5 5C9.3 39.5 16.1 44 24 44z"/>
-<path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.1-3.3 5.6-6 7.1l.1-.1 6.2 5.2C35.2 40.6 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/>
-</svg>
-Continue with Google
-</button>
+          <article class="plan-card-app popular">
+            <div class="plan-top-app">
+              <span class="plan-badge-app">Most Popular</span>
+              <div class="mt-3"><span class="plan-badge-app">Basic</span></div>
+              <div class="plan-price-app"><strong>₹499</strong><span>/ mo</span></div>
+              <p class="plan-billing-note-app">Billed yearly • ₹5,988 charged once for 12 months</p>
+              <p class="plan-subtitle-app">For working photographers who need client delivery, sharing and premium workflow tools.</p>
+            </div>
+            <div class="plan-body-app">
+              <div class="storage-pill-app">Storage • 50GB billable</div>
+              <ul class="feature-list-app">
+                <li>Everything in Free core plan</li><li>Premium quotation access</li><li>Team sheet sharing + PDF access</li><li>Gallery sharing enabled</li><li>AI Face Search</li><li>Photo Selling</li><li>Client workflow upgrade</li><li>Higher upload capacity</li><li>Premium templates sold separately</li><li>Priority feature access</li>
+              </ul>
+              <div class="plan-note-app">Best for photographers who actively manage bookings, quotations and delivery inside ChitraBook AI.</div>
+              <div class="plan-actions-app"><a href="subscription.html" class="plan-btn-app primary">Choose Basic Yearly</a></div>
+            </div>
+          </article>
 
-<p class="text-center text-sm mt-4">
-<span id="toggleText">
-Don't have an account?
-</span>
-<span id="toggleBtn" class="link">
-Signup
-</span>
-</p>
+          <article class="plan-card-app pro">
+            <div class="plan-top-app">
+              <span class="plan-badge-app">Pro</span>
+              <div class="plan-price-app"><strong>₹999</strong><span>/ mo</span></div>
+              <p class="plan-billing-note-app">Billed yearly • ₹11,988 charged once for 12 months</p>
+              <p class="plan-subtitle-app">For studios that need stronger delivery capacity, selling and scale-ready workflow control.</p>
+            </div>
+            <div class="plan-body-app">
+              <div class="storage-pill-app">Storage • 100GB billable</div>
+              <ul class="feature-list-app">
+                <li>Everything in Basic plan</li><li>Premium quotation access</li><li>Team sheet sharing + PDF access</li><li>Gallery sharing enabled</li><li>AI Face Search</li><li>Photo Selling</li><li>Client workflow upgrade</li><li>Higher upload capacity</li><li>Premium templates sold separately</li><li>Priority feature access</li>
+              </ul>
+              <div class="plan-note-app">Built for photographers and studios who want to monetize galleries and scale image-heavy workflows.</div>
+              <div class="plan-actions-app"><a href="subscription.html" class="plan-btn-app secondary">Choose Pro Yearly</a></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
 
-</div>
+    <section class="section faq" id="faq"><div class="wrap"><div class="text-center max-w-3xl mx-auto"><p class="text-cyan-200 text-sm font-black tracking-[.22em] uppercase">FAQ</p><h2 class="mt-4 text-4xl md:text-5xl font-black">Frequently Asked Questions</h2></div>
+      <div class="mt-12 grid md:grid-cols-2 gap-4">
+        <details><summary>What is ChitraBook AI?</summary><p>ChitraBook AI is a complete studio workflow platform for photographers. It helps manage quotations, proposals, bookings, payments, photo uploads, gallery delivery, AI face scan, website builder and earnings.</p></details>
+        <details><summary>Who can use ChitraBook AI?</summary><p>It is built for wedding photographers, event photographers, studios, freelancers and photography teams.</p></details>
+        <details><summary>How does AI Face Scan work?</summary><p>Guests scan their face and ChitraBook AI shows only the photos where their face matches. Clients and photographers can also use face scan to filter gallery photos.</p></details>
+        <details><summary>Can clients access the full gallery?</summary><p>Yes. Clients can access the full event gallery using a secure token, public link or QR code.</p></details>
+        <details><summary>Can guests see the full gallery?</summary><p>No. Guest access is designed for face scan based matched-photo access.</p></details>
+        <details><summary>Can I stop gallery sharing?</summary><p>Yes. The photographer can stop or resume gallery sharing anytime.</p></details>
+        <details><summary>Can I regenerate a client token?</summary><p>Yes. Regenerating a token replaces the old token and resets the 2-device access limit.</p></details>
+        <details><summary>Is there an Android app?</summary><p>Yes. ChitraBook AI is mobile-first and Android-ready through the app workflow.</p></details>
+        <details><summary>Can I create quotations and proposals?</summary><p>Yes. You can create quotations, convert them into proposals, and continue the workflow toward booking and payments.</p></details>
+        <details><summary>Can I track payments?</summary><p>Yes. You can track advance, balance, pending payments, monthly revenue and invoices.</p></details>
+        <details><summary>Can I sell photos?</summary><p>Yes. Guest photo purchases and photographer earnings flow are part of the platform.</p></details>
+        <details><summary>Is my gallery private?</summary><p>Gallery access is controlled through link, QR, token, role and face scan based access.</p></details>
+      </div></div>
+    </section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
+    <section class="section pt-0"><div class="wrap glass rounded-[40px] p-10 md:p-14 text-center"><h2 class="text-4xl md:text-5xl font-black">Run your photography studio with ChitraBook AI</h2><p class="mt-5 text-slate-300 leading-8 max-w-2xl mx-auto">From enquiry to gallery delivery, ChitraBook AI keeps your studio workflow organized, private and mobile-ready.</p><div class="mt-8 flex justify-center flex-wrap gap-3"><a href="login.html" class="px-6 py-4 rounded-2xl btn-primary font-black">Launch App</a><a href="subscription.html" class="px-6 py-4 rounded-2xl btn-secondary font-black">Start Free</a></div></div></section>
+  </main>
 
-<script type="module">
-
-import { login, signup, googleLogin } from "./js/auth.js"
-
-function waitForSupabase(){
-return new Promise(resolve=>{
-const check = setInterval(()=>{
-if(window.supabaseClient){
-clearInterval(check)
-resolve(window.supabaseClient)
-}
-},50)
-})
-}
-
-function setFeedback(type, message){
-const box = document.getElementById("authFeedback")
-box.className = "feedback show"
-
-if(type === "success"){
-box.classList.add("success")
-}else if(type === "error"){
-box.classList.add("error")
-}else{
-box.classList.add("info")
-}
-
-box.innerText = message
-}
-
-function clearFeedback(){
-const box = document.getElementById("authFeedback")
-box.className = "feedback info"
-box.innerText = ""
-}
-
-function getResetRedirectUrl(){
-const current = window.location.href
-const base = current.substring(0, current.lastIndexOf("/") + 1)
-return `${base}reset-password.html`
-}
-
-const supabase = await waitForSupabase()
-
-const { data:{ session } } =
-await supabase.auth.getSession()
-
-if(session){
-window.location.replace("dashboard.html")
-}else{
-document.getElementById("loginBox").classList.remove("hidden")
-}
-
-let mode = "login"
-
-const form = document.getElementById("authForm")
-const title = document.getElementById("title")
-const btn = document.getElementById("submitBtn")
-const toggle = document.getElementById("toggleBtn")
-const text = document.getElementById("toggleText")
-const googleBtn = document.getElementById("googleBtn")
-const passwordInput = document.getElementById("password")
-const forgotPasswordRow = document.getElementById("forgotPasswordRow")
-const forgotPasswordBtn = document.getElementById("forgotPasswordBtn")
-
-function syncModeUi(){
-clearFeedback()
-
-if(mode==="login"){
-title.innerText="StudioOS Login"
-btn.innerText="Login"
-text.innerText="Don't have an account?"
-toggle.innerText="Signup"
-passwordInput.required = true
-passwordInput.disabled = false
-passwordInput.placeholder = "Password"
-forgotPasswordRow.style.display = "flex"
-}else{
-title.innerText="Create Account"
-btn.innerText="Signup"
-text.innerText="Already have an account?"
-toggle.innerText="Login"
-passwordInput.required = true
-passwordInput.disabled = false
-passwordInput.placeholder = "Password"
-forgotPasswordRow.style.display = "none"
-}
-}
-
-syncModeUi()
-
-toggle.addEventListener("click",()=>{
-mode = mode === "login" ? "signup" : "login"
-syncModeUi()
-})
-
-forgotPasswordBtn.addEventListener("click", async ()=>{
-clearFeedback()
-
-const email = document.getElementById("email").value.trim()
-
-if(!email){
-setFeedback("error", "Please enter your email first to receive a password reset link.")
-document.getElementById("email").focus()
-return
-}
-
-try{
-forgotPasswordBtn.style.pointerEvents = "none"
-forgotPasswordBtn.style.opacity = "0.7"
-
-const { error } = await supabase.auth.resetPasswordForEmail(email, {
-redirectTo: getResetRedirectUrl()
-})
-
-forgotPasswordBtn.style.pointerEvents = ""
-forgotPasswordBtn.style.opacity = ""
-
-if(error){
-console.error("Reset password request failed:", error)
-setFeedback("error", error.message || "Unable to send password reset email right now.")
-return
-}
-
-setFeedback("success", "Password reset link sent. Check your email and open the link to create a new password.")
-}catch(err){
-console.error("Reset password request crashed:", err)
-forgotPasswordBtn.style.pointerEvents = ""
-forgotPasswordBtn.style.opacity = ""
-setFeedback("error", "Unexpected error while sending reset email.")
-}
-})
-
-form.addEventListener("submit", async (e)=>{
-e.preventDefault()
-clearFeedback()
-
-const email = document.getElementById("email").value.trim()
-const password = document.getElementById("password").value
-
-try{
-btn.disabled = true
-googleBtn.disabled = true
-
-if(mode==="login"){
-await login(email,password)
-}else{
-await signup(email,password)
-setFeedback("success", "Signup request submitted. Please check your email if confirmation is required.")
-}
-}catch(err){
-console.error("Auth submit crashed:", err)
-setFeedback("error", "Authentication failed. Please try again.")
-}finally{
-btn.disabled = false
-googleBtn.disabled = false
-}
-})
-
-googleBtn.addEventListener("click", async ()=>{
-clearFeedback()
-
-try{
-googleBtn.disabled = true
-btn.disabled = true
-await googleLogin()
-}catch(err){
-console.error("Google login crashed:", err)
-setFeedback("error", "Google login failed. Please try again.")
-}finally{
-googleBtn.disabled = false
-btn.disabled = false
-}
-})
-
-</script>
-
+  <footer class="border-t border-white/10 py-12 bg-[#060d18]">
+    <div class="wrap grid md:grid-cols-4 gap-8">
+      <div>
+        <div class="font-black text-xl">ChitraBook AI</div>
+        <p class="mt-4 text-slate-400 leading-7">Complete AI studio workflow for photographers.</p>
+      </div>
+      <div>
+        <h4 class="font-black mb-4">Product</h4>
+        <div class="grid gap-2 text-slate-400"><a href="#features">Dashboard</a><a href="#features">Quotations</a><a href="#ai-sharing">Gallery</a><a href="#ai-sharing">AI Face Scan</a><a href="#pricing">Pricing</a></div>
+      </div>
+      <div>
+        <h4 class="font-black mb-4">Company</h4>
+        <div class="grid gap-2 text-slate-400"><a href="contact.html">Contact Us</a><a href="help.html">Help</a><a href="feature-request.html">Feature Request</a><a href="login.html">Login</a></div>
+      </div>
+      <div>
+        <h4 class="font-black mb-4">Legal</h4>
+        <div class="grid gap-2 text-slate-400"><a href="privacy-policy.html">Privacy Policy</a><a href="terms.html">Terms</a><a href="cookie-policy.html">Cookie Policy</a></div>
+      </div>
+    </div>
+    <div class="wrap mt-10 pt-8 border-t border-white/10 text-center text-slate-500 text-sm">© 2026 ChitraBook AI. All rights reserved.</div>
+  </footer>
 </body>
 </html>
