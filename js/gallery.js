@@ -2837,20 +2837,57 @@ updateUploadButton(effectiveRole)
 if(eventId && effectiveRole !== "photographer" && isGallerySharingStopped(eventStatus)){
 clearDeletedEventSession(eventId)
 
-if(grid){
-grid.innerHTML = ""
+const stoppedGrid = document.getElementById("galleryGrid")
+const stoppedEmpty = document.getElementById("emptyState")
+const stoppedFaceBanner = document.getElementById("faceMatchBanner")
+
+if(stoppedGrid){
+stoppedGrid.innerHTML = ""
+stoppedGrid.classList.add("hidden")
 }
 
-if(empty){
-empty.innerText = "This gallery is currently closed by the photographer."
-empty.classList.remove("hidden")
+if(stoppedFaceBanner){
+stoppedFaceBanner.classList.remove("show")
+}
+
+if(stoppedEmpty){
+stoppedEmpty.className = "mt-6"
+stoppedEmpty.innerHTML = `
+  <div style="
+    border-radius:1.35rem;
+    padding:1.2rem;
+    background:rgba(15,23,42,0.92);
+    border:1px solid rgba(251,191,36,0.28);
+    box-shadow:0 24px 60px rgba(0,0,0,0.32), inset 0 0 20px rgba(251,191,36,0.06);
+    text-align:center;
+  ">
+    <div style="
+      display:inline-flex;
+      align-items:center;
+      min-height:30px;
+      padding:0 0.78rem;
+      border-radius:999px;
+      background:rgba(251,191,36,0.14);
+      border:1px solid rgba(251,191,36,0.28);
+      color:rgb(253 230 138);
+      font-size:0.72rem;
+      font-weight:850;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    ">Gallery Closed</div>
+    <div style="margin-top:0.95rem; font-size:1.12rem; font-weight:900; color:white; line-height:1.3;">
+      This gallery is currently closed by the photographer.
+    </div>
+    <div style="margin-top:0.55rem; color:rgba(255,255,255,0.68); font-size:0.9rem; line-height:1.55;">
+      Please contact the photographer if you need access again.
+    </div>
+  </div>
+`
+stoppedEmpty.classList.remove("hidden")
 }
 
 updateUploadButton(effectiveRole)
-
-setTimeout(()=>{
-window.location.href = `access.html?event_id=${eventId}`
-}, 900)
+updateFaceActionButton()
 
 return
 }
