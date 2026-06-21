@@ -367,6 +367,92 @@ return null
 }
 }
 
+
+async function regeneratePublicShareToken(eventId){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId) return null
+
+try{
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!supabase || !user){
+return null
+}
+
+const { data: ev, error: eventError } = await supabase
+.from("events")
+.select("id,user_id")
+.eq("id", safeEventId)
+.eq("user_id", user.id)
+.maybeSingle()
+
+if(eventError || !ev){
+console.error("Token regenerate event ownership validation failed:", eventError)
+return null
+}
+
+const newToken = generatePublicShareToken()
+
+const resetPayload = {
+token: newToken,
+used: false,
+used_by: null,
+device_id: null,
+device_id_2: null
+}
+
+const { data: existingTokenRow, error: existingError } = await supabase
+.from("event_tokens")
+.select("id")
+.eq("event_id", safeEventId)
+.order("created_at", { ascending: true })
+.limit(1)
+.maybeSingle()
+
+if(existingError){
+console.error("Token regenerate lookup failed:", existingError)
+return null
+}
+
+if(existingTokenRow?.id){
+const { data: updated, error: updateError } = await supabase
+.from("event_tokens")
+.update(resetPayload)
+.eq("id", existingTokenRow.id)
+.select("token")
+.limit(1)
+.maybeSingle()
+
+if(updateError){
+console.error("Token regenerate update failed:", updateError)
+return null
+}
+
+return updated?.token || newToken
+}
+
+const { data: inserted, error: insertError } = await supabase
+.from("event_tokens")
+.insert([{ event_id: safeEventId, ...resetPayload }])
+.select("token")
+.limit(1)
+.maybeSingle()
+
+if(insertError){
+console.error("Token regenerate insert failed:", insertError)
+return null
+}
+
+return inserted?.token || newToken
+}catch(err){
+console.error("Token regenerate error:", err)
+return null
+}
+}
+
+window.regeneratePublicShareToken = regeneratePublicShareToken
+
 async function canUseFreeLimitedGalleryFeature(eventId, ownerId){
 const safeEventId = String(eventId || "").trim()
 const safeOwnerId = String(ownerId || "").trim()
@@ -1249,6 +1335,7 @@ return `
 <div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
 <div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
+<div onclick="regenerateToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Regenerate Token</div>
 <div onclick="openPhotoPriceModal('${id}', this)" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Price ₹${getSafePhotoSellingPriceFromMenu(id)}</div>
 <div onclick="toggleGuestFreeDownload('${id}', ${safeMode})" class="px-3 py-2 hover:bg-white/10 cursor-pointer">
 ${buildGuestDownloadLabel(guestFreeDownload)}
@@ -1495,6 +1582,50 @@ return
 
 await showStudioOSInfo(token, "Gallery Token")
 
+}
+
+
+window.regenerateToken = async function(id){
+const allowed = await guardPublicGalleryFeature(id, "sharing")
+if(!allowed) return
+
+const confirmed = await showStudioOSConfirm({
+title: "Regenerate client token?",
+message: "The old client token will stop working. Two-device access will reset for this event. Share the new token only with the trusted client.",
+confirmText: "Regenerate",
+cancelText: "Cancel",
+danger: true
+})
+
+if(!confirmed) return
+
+closeFloatingMenu()
+showStudioOSToast("Regenerating token...")
+
+const token = await regeneratePublicShareToken(id)
+
+if(!token){
+await showStudioOSInfo("Unable to regenerate token. Please try again.", "Gallery Token")
+return
+}
+
+try{
+await copyTextToClipboard(token)
+showStudioOSToast("New token copied")
+}catch(e){
+console.warn("Regenerated token copy failed:", e)
+}
+
+if(typeof window.openStudioOSGalleryTokenModal === "function"){
+await window.openStudioOSGalleryTokenModal(token, {
+title: "New Gallery Token",
+subtitle: "Old token has been replaced. Share this new token only with trusted clients.",
+copyToast: "New token copied"
+})
+return
+}
+
+await showStudioOSInfo(token, "New Gallery Token")
 }
 
 // =============================
