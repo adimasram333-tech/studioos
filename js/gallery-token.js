@@ -2,52 +2,22 @@
 // TOKEN MODULE (PRODUCTION PREMIUM MODAL)
 // =============================
 
-window.showToken = async function(eventId){
-
-const menu = document.getElementById("floatingMenu")
-if(menu) menu.remove()
-
-if(typeof guardPublicGalleryFeature !== "function"){
-console.error("Public gallery subscription guard missing")
-
-if(typeof showStudioOSInfo === "function"){
-await showStudioOSInfo("Unable to verify gallery access. Please try again.", "Gallery Token")
-}else{
-alert("Unable to verify gallery access. Please try again.")
+function escapeGalleryTokenHtml(value){
+return String(value ?? "")
+.replace(/&/g, "&amp;")
+.replace(/</g, "&lt;")
+.replace(/>/g, "&gt;")
+.replace(/\"/g, "&quot;")
+.replace(/'/g, "&#039;")
 }
 
-return
-}
-
-const allowed = await guardPublicGalleryFeature(eventId, "sharing")
-if(!allowed) return
-
-if(typeof window.ensurePublicShareToken !== "function"){
-console.error("Public share token helper missing")
-
-if(typeof showStudioOSInfo === "function"){
-await showStudioOSInfo("Unable to generate token. Please try again.", "Gallery Token")
-}else{
-alert("Unable to generate token. Please try again.")
-}
-
-return
-}
-
-const token = await window.ensurePublicShareToken(eventId)
-
-if(!token){
-
-if(typeof showStudioOSInfo === "function"){
-await showStudioOSInfo("Unable to generate token. Please try again.", "Gallery Token")
-}else{
-alert("Unable to generate token. Please try again.")
-}
-
-return
-}
-
+window.openStudioOSGalleryTokenModal = async function(token, options = {}){
 const safeToken = String(token || "").trim()
+if(!safeToken) return
+
+const title = options.title || "Gallery Token"
+const subtitle = options.subtitle || "Share this token only with trusted clients."
+const copyToast = options.copyToast || "Token copied"
 
 const existingModal = document.getElementById("studioosGalleryTokenModal")
 if(existingModal){
@@ -91,14 +61,14 @@ modal.innerHTML = `
     font-weight:850;
     letter-spacing:0.08em;
     text-transform:uppercase;
-  ">Gallery Token</div>
+  ">${escapeGalleryTokenHtml(title)}</div>
 
   <div style="
     margin-top:0.95rem;
     color:rgba(255,255,255,0.72);
     font-size:0.86rem;
     line-height:1.5;
-  ">Share this token only with trusted clients.</div>
+  ">${escapeGalleryTokenHtml(subtitle)}</div>
 
   <div id="studioosGalleryTokenValue" style="
     margin-top:0.95rem;
@@ -112,7 +82,7 @@ modal.innerHTML = `
     font-weight:950;
     letter-spacing:0.08em;
     word-break:break-word;
-  ">${safeToken.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>
+  ">${escapeGalleryTokenHtml(safeToken)}</div>
 
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:1rem;">
     <button id="studioosGalleryTokenCloseBtn" type="button" style="
@@ -170,9 +140,9 @@ await navigator.clipboard.writeText(safeToken)
 }
 
 if(typeof showStudioOSToast === "function"){
-showStudioOSToast("Token copied")
+showStudioOSToast(copyToast)
 }else{
-console.log("Token copied")
+console.log(copyToast)
 }
 }catch(error){
 console.error("Token copy failed:", error)
@@ -185,5 +155,57 @@ alert("Token copy failed")
 }
 }
 }
+}
+
+window.showToken = async function(eventId){
+
+const menu = document.getElementById("floatingMenu")
+if(menu) menu.remove()
+
+if(typeof guardPublicGalleryFeature !== "function"){
+console.error("Public gallery subscription guard missing")
+
+if(typeof showStudioOSInfo === "function"){
+await showStudioOSInfo("Unable to verify gallery access. Please try again.", "Gallery Token")
+}else{
+alert("Unable to verify gallery access. Please try again.")
+}
+
+return
+}
+
+const allowed = await guardPublicGalleryFeature(eventId, "sharing")
+if(!allowed) return
+
+if(typeof window.ensurePublicShareToken !== "function"){
+console.error("Public share token helper missing")
+
+if(typeof showStudioOSInfo === "function"){
+await showStudioOSInfo("Unable to generate token. Please try again.", "Gallery Token")
+}else{
+alert("Unable to generate token. Please try again.")
+}
+
+return
+}
+
+const token = await window.ensurePublicShareToken(eventId)
+
+if(!token){
+
+if(typeof showStudioOSInfo === "function"){
+await showStudioOSInfo("Unable to generate token. Please try again.", "Gallery Token")
+}else{
+alert("Unable to generate token. Please try again.")
+}
+
+return
+}
+
+await window.openStudioOSGalleryTokenModal(token, {
+title: "Gallery Token",
+subtitle: "Share this token only with trusted clients.",
+copyToast: "Token copied"
+})
 
 }
