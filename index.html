@@ -115,7 +115,7 @@
 
     <section class="section bg-white/[.025]" id="features">
       <div class="wrap">
-        <div class="max-w-3xl"><p class="text-cyan-200 text-sm font-black tracking-[.22em] uppercase">Complete app modules</p><h2 class="mt-4 text-4xl md:text-5xl font-black">Everything your photography studio needs</h2><p class="mt-4 text-slate-300 leading-8">No cheap emoji icons — every module uses clean vector icons and one consistent premium visual language.</p></div>
+        <div class="max-w-3xl"><p class="text-cyan-200 text-sm font-black tracking-[.22em] uppercase">Complete app modules</p><h2 class="mt-4 text-4xl md:text-5xl font-black">Everything your photography studio needs</h2><p class="mt-4 text-slate-300 leading-8">Powerful tools for every photography workflow — from enquiry to delivery.</p></div>
         <div class="grid-auto mt-10">
           <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 19V5m0 14h16M8 16V9m4 7V5m4 11v-4"/></svg></div><h3 class="mt-5 text-xl font-black">Studio Dashboard</h3><p class="mt-3 text-slate-300 leading-7">Track bookings, pending payments, revenue, reminders and recent quotations from one mobile-first dashboard.</p></article>
           <article class="feature-card soft rounded-3xl p-6"><div class="iconbox"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></div><h3 class="mt-5 text-xl font-black">Quotation Builder</h3><p class="mt-3 text-slate-300 leading-7">Create detailed event quotations with client details, dates, packages, services, deliverables, advance and balance.</p></article>
@@ -135,7 +135,7 @@
 
     <section class="section" id="screens">
       <div class="wrap">
-        <div class="text-center max-w-3xl mx-auto"><p class="text-indigo-200 text-sm font-black tracking-[.22em] uppercase">Real product screens</p><h2 class="mt-4 text-4xl md:text-5xl font-black">Actual mobile screens from the app</h2><p class="mt-4 text-slate-300 leading-8">Screens are placed inside phone frames with object-fit contain, so the full app UI stays visible and readable.</p></div>
+        <div class="text-center max-w-3xl mx-auto"><p class="text-indigo-200 text-sm font-black tracking-[.22em] uppercase">Real product screens</p><h2 class="mt-4 text-4xl md:text-5xl font-black">Actual mobile screens from the app</h2><p class="mt-4 text-slate-300 leading-8">Explore the real ChitraBook AI mobile experience across dashboard, galleries, quotations and AI face scan.</p></div>
         <div class="screens-row mt-12 grid grid-cols-2 md:grid-cols-3 gap-8 justify-items-center">
           <div class="phone"><div class="phone-screen"><img src="assets/dashboard.jpg" alt="Dashboard screen"></div><div class="screen-label"><span>Dashboard</span><span>Overview</span></div></div>
           <div class="phone"><div class="phone-screen"><img src="assets/gallery.jpg" alt="Gallery screen"></div><div class="screen-label"><span>Gallery</span><span>Share control</span></div></div>
@@ -172,8 +172,12 @@
           <p class="text-xs md:text-sm uppercase tracking-[0.3em] text-white/60">ChitraBook AI Subscription</p>
           <h2 class="mt-3 text-3xl md:text-5xl font-extrabold leading-tight">Flexible pricing for photographers</h2>
           <p class="mt-4 text-sm md:text-base text-white/70 leading-7 max-w-3xl mx-auto">Choose a plan based on your storage, gallery workflow and premium feature access. Premium website templates are purchased separately.</p>
-          <div class="mt-6 inline-flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/10 border border-white/10 text-sm font-black"><span class="px-4 py-2 rounded-xl text-white/70">1 Month</span><span class="px-4 py-2 rounded-xl bg-gradient-to-b from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-900/25">Yearly</span></div>
-          <p class="mt-3 text-xs text-white/60">Yearly plans are billed once for 12 months. One-month plans are available at higher pricing inside the app.</p>
+
+          <div class="mt-6 inline-flex billing-toggle" aria-label="Billing period">
+            <button id="landingMonthlyBtn" type="button" class="billing-btn">1 Month</button>
+            <button id="landingAnnualBtn" type="button" class="billing-btn active">Yearly</button>
+          </div>
+          <p id="landingBillingHelp" class="mt-3 text-xs text-white/60">Yearly plans are billed once for 12 months. One-month plans are available at higher pricing.</p>
         </div>
 
         <div class="pricing-stack-app mt-10">
@@ -186,9 +190,16 @@
             <div class="plan-body-app">
               <div class="storage-pill-app">Storage • 5GB billable</div>
               <ul class="feature-list-app">
-                <li>Template 1 access</li><li>Basic quotation workflow</li><li>Limited AI Face Search</li><li>Core dashboard usage</li><li>Gallery viewing</li><li>Limited Gallery Sharing</li><li>No photo selling</li><li>No team sheet sharing or PDF</li>
+                <li>Template 1 access</li>
+                <li>Basic quotation workflow</li>
+                <li>Limited AI Face Search</li>
+                <li>Core dashboard usage</li>
+                <li>Gallery viewing</li>
+                <li>Limited Gallery Sharing</li>
+                <li>No photo selling</li>
+                <li>No team sheet sharing or PDF</li>
               </ul>
-              <div class="plan-note-app">Ideal for testing ChitraBook AI before upgrading. Limited AI Face Search and Limited Gallery Sharing are included for trial usage.</div>
+              <div class="plan-note-app">Premium templates are not included in subscription. Free plan is ideal for testing ChitraBook AI before upgrading. Limited AI Face Search and Limited Gallery Sharing are included for trial usage.</div>
               <div class="plan-actions-app"><a href="subscription.html" class="plan-btn-app disabled">Free Plan</a></div>
             </div>
           </article>
@@ -196,37 +207,59 @@
           <article class="plan-card-app popular">
             <div class="plan-top-app">
               <span class="plan-badge-app">Most Popular</span>
-              <div class="mt-3"><span class="plan-badge-app">Basic</span></div>
-              <div class="plan-price-app"><strong>₹499</strong><span>/ mo</span></div>
-              <p class="plan-billing-note-app">Billed yearly • ₹5,988 charged once for 12 months</p>
+              <div class="plan-price-app"><strong id="landingBasicPrice">₹499</strong><span>/ mo</span></div>
+              <p id="landingBasicBillingNote" class="plan-billing-note-app">Billed yearly • ₹5988 charged once for 12 months</p>
               <p class="plan-subtitle-app">For working photographers who need client delivery, sharing and premium workflow tools.</p>
             </div>
             <div class="plan-body-app">
               <div class="storage-pill-app">Storage • 50GB billable</div>
               <ul class="feature-list-app">
-                <li>Everything in Free core plan</li><li>Premium quotation access</li><li>Team sheet sharing + PDF access</li><li>Gallery sharing enabled</li><li>AI Face Search</li><li>Photo Selling</li><li>Client workflow upgrade</li><li>Higher upload capacity</li><li>Premium templates sold separately</li><li>Priority feature access</li>
+                <li>Everything in Free core plan</li>
+                <li>Premium quotation access</li>
+                <li>Team sheet sharing + PDF access</li>
+                <li>Gallery sharing enabled</li>
+                <li>AI Face Search</li>
+                <li>Photo Selling</li>
+                <li>Client workflow upgrade</li>
+                <li>Higher upload capacity</li>
+                <li>Premium templates sold separately</li>
+                <li>Priority feature access</li>
               </ul>
               <div class="plan-note-app">Best for photographers who actively manage bookings, quotations and delivery inside ChitraBook AI.</div>
-              <div class="plan-actions-app"><a href="subscription.html" class="plan-btn-app primary">Choose Basic Yearly</a></div>
+              <div class="plan-actions-app"><a id="landingBasicPlanBtn" href="subscription.html" class="plan-btn-app primary">Choose Basic Yearly</a></div>
             </div>
           </article>
 
           <article class="plan-card-app pro">
             <div class="plan-top-app">
               <span class="plan-badge-app">Pro</span>
-              <div class="plan-price-app"><strong>₹999</strong><span>/ mo</span></div>
-              <p class="plan-billing-note-app">Billed yearly • ₹11,988 charged once for 12 months</p>
-              <p class="plan-subtitle-app">For studios that need stronger delivery capacity, selling and scale-ready workflow control.</p>
+              <div class="plan-price-app"><strong id="landingProPrice">₹999</strong><span>/ mo</span></div>
+              <p id="landingProBillingNote" class="plan-billing-note-app">Billed yearly • ₹11988 charged once for 12 months</p>
+              <p class="plan-subtitle-app">For studios that need selling, scale and stronger delivery capacity.</p>
             </div>
             <div class="plan-body-app">
               <div class="storage-pill-app">Storage • 100GB billable</div>
               <ul class="feature-list-app">
-                <li>Everything in Basic plan</li><li>Premium quotation access</li><li>Team sheet sharing + PDF access</li><li>Gallery sharing enabled</li><li>AI Face Search</li><li>Photo Selling</li><li>Client workflow upgrade</li><li>Higher upload capacity</li><li>Premium templates sold separately</li><li>Priority feature access</li>
+                <li>Everything in Basic plan</li>
+                <li>Premium quotation access</li>
+                <li>Team sheet sharing + PDF access</li>
+                <li>Gallery sharing enabled</li>
+                <li>AI Face Search</li>
+                <li>Photo Selling</li>
+                <li>Client workflow upgrade</li>
+                <li>Higher upload capacity</li>
+                <li>Premium templates sold separately</li>
+                <li>Priority feature access</li>
               </ul>
               <div class="plan-note-app">Built for photographers and studios who want to monetize galleries and scale image-heavy workflows.</div>
-              <div class="plan-actions-app"><a href="subscription.html" class="plan-btn-app secondary">Choose Pro Yearly</a></div>
+              <div class="plan-actions-app"><a id="landingProPlanBtn" href="subscription.html" class="plan-btn-app secondary">Choose Pro Yearly</a></div>
             </div>
           </article>
+        </div>
+
+        <div class="note-strip mt-5">
+          <strong class="text-white">Important:</strong>
+          Subscription unlocks platform features, billable storage, sharing and workflow tools. Basic and Pro support both yearly and one-month billing. Premium website templates are separate products and are not included automatically in subscription plans.
         </div>
       </div>
     </section>
@@ -272,5 +305,72 @@
     </div>
     <div class="wrap mt-10 pt-8 border-t border-white/10 text-center text-slate-500 text-sm">© 2026 ChitraBook AI. All rights reserved.</div>
   </footer>
+
+  <script>
+    (function(){
+      const monthlyBtn = document.getElementById("landingMonthlyBtn");
+      const annualBtn = document.getElementById("landingAnnualBtn");
+      const basicPrice = document.getElementById("landingBasicPrice");
+      const proPrice = document.getElementById("landingProPrice");
+      const basicNote = document.getElementById("landingBasicBillingNote");
+      const proNote = document.getElementById("landingProBillingNote");
+      const basicPlanBtn = document.getElementById("landingBasicPlanBtn");
+      const proPlanBtn = document.getElementById("landingProPlanBtn");
+      const helpText = document.getElementById("landingBillingHelp");
+
+      function setLandingBillingMode(mode){
+        const isMonthly = mode === "monthly";
+
+        if(monthlyBtn){
+          monthlyBtn.classList.toggle("active", isMonthly);
+          monthlyBtn.setAttribute("aria-pressed", String(isMonthly));
+        }
+
+        if(annualBtn){
+          annualBtn.classList.toggle("active", !isMonthly);
+          annualBtn.setAttribute("aria-pressed", String(!isMonthly));
+        }
+
+        if(basicPrice) basicPrice.textContent = isMonthly ? "₹1499" : "₹499";
+        if(proPrice) proPrice.textContent = isMonthly ? "₹1999" : "₹999";
+
+        if(basicNote){
+          basicNote.textContent = isMonthly
+            ? "1 month plan • ₹1499 charged for one month only"
+            : "Billed yearly • ₹5988 charged once for 12 months";
+        }
+
+        if(proNote){
+          proNote.textContent = isMonthly
+            ? "1 month plan • ₹1999 charged for one month only"
+            : "Billed yearly • ₹11988 charged once for 12 months";
+        }
+
+        if(basicPlanBtn) basicPlanBtn.textContent = isMonthly ? "Choose Basic 1 Month" : "Choose Basic Yearly";
+        if(proPlanBtn) proPlanBtn.textContent = isMonthly ? "Choose Pro 1 Month" : "Choose Pro Yearly";
+
+        if(helpText){
+          helpText.textContent = isMonthly
+            ? "One-month plans are charged for one month only. Yearly plans give the lowest monthly price."
+            : "Yearly plans are billed once for 12 months. One-month plans are available at higher pricing.";
+        }
+      }
+
+      if(monthlyBtn){
+        monthlyBtn.addEventListener("click", function(){
+          setLandingBillingMode("monthly");
+        });
+      }
+
+      if(annualBtn){
+        annualBtn.addEventListener("click", function(){
+          setLandingBillingMode("annual");
+        });
+      }
+
+      setLandingBillingMode("annual");
+    })();
+  </script>
+
 </body>
 </html>
