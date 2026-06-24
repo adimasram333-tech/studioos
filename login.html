@@ -143,7 +143,7 @@ Signup
 
 <script type="module">
 
-import { login, signup, googleLogin } from "./js/auth.js"
+import { login, signup, googleLogin, getSafeAuthNextUrl } from "./js/auth.js"
 
 function waitForSupabase(){
 return new Promise(resolve=>{
@@ -183,13 +183,19 @@ const base = current.substring(0, current.lastIndexOf("/") + 1)
 return `${base}reset-password.html`
 }
 
+function getRequestedNextUrl(){
+const params = new URLSearchParams(window.location.search)
+return getSafeAuthNextUrl(params.get("next"))
+}
+
 const supabase = await waitForSupabase()
+const nextUrl = getRequestedNextUrl()
 
 const { data:{ session } } =
 await supabase.auth.getSession()
 
 if(session){
-window.location.replace("dashboard.html")
+window.location.replace(nextUrl)
 }else{
 document.getElementById("loginBox").classList.remove("hidden")
 }
@@ -286,7 +292,7 @@ btn.disabled = true
 googleBtn.disabled = true
 
 if(mode==="login"){
-await login(email,password)
+await login(email,password,nextUrl)
 }else{
 await signup(email,password)
 setFeedback("success", "Signup request submitted. Please check your email if confirmation is required.")
