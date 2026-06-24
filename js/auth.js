@@ -35,6 +35,57 @@ return "https://adimasram333-tech.github.io/studioos"
 }
 
 
+export function getSafeAuthNextUrl(nextUrl){
+
+const fallbackUrl = "dashboard.html"
+const rawNextUrl = String(nextUrl || "").trim()
+
+if(!rawNextUrl){
+return fallbackUrl
+}
+
+let decodedNextUrl = rawNextUrl
+
+try{
+decodedNextUrl = decodeURIComponent(rawNextUrl)
+}catch(err){
+decodedNextUrl = rawNextUrl
+}
+
+const cleanNextUrl = decodedNextUrl.replace(/^\.\/+/, "")
+
+if(
+cleanNextUrl.includes("://") ||
+cleanNextUrl.startsWith("/") ||
+cleanNextUrl.startsWith("\\") ||
+cleanNextUrl.includes("..")
+){
+return fallbackUrl
+}
+
+if(cleanNextUrl === "index.html" || cleanNextUrl === "login.html"){
+return fallbackUrl
+}
+
+if(!/^[A-Za-z0-9_-]+\.html(?:\?[A-Za-z0-9._~=&%+-]*)?$/.test(cleanNextUrl)){
+return fallbackUrl
+}
+
+return cleanNextUrl
+
+}
+
+
+function getCurrentProtectedPageNextUrl(){
+
+const pageName = window.location.pathname.split("/").pop() || "dashboard.html"
+const queryString = window.location.search || ""
+
+return getSafeAuthNextUrl(pageName + queryString)
+
+}
+
+
 function getStudioOSGoogleRedirectUrl(){
 
 // Production-safe OAuth callback:
@@ -52,7 +103,7 @@ return getStudioOSPublicBaseUrl() + "/dashboard.html"
 // LOGIN
 // =============================
 
-export async function login(email,password){
+export async function login(email,password,nextUrl){
 
 const supabase = await getSupabase()
 
@@ -71,7 +122,7 @@ return
 
 }
 
-window.location.replace("dashboard.html")
+window.location.replace(getSafeAuthNextUrl(nextUrl))
 
 }
 
@@ -179,7 +230,7 @@ if(finalSession){
 return
 }
 
-window.location.replace("login.html")
+window.location.replace("login.html?next=" + encodeURIComponent(getCurrentProtectedPageNextUrl()))
 
 }
 
