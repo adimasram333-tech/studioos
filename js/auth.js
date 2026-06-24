@@ -179,7 +179,7 @@ if(finalSession){
 return
 }
 
-window.location.replace("index.html")
+window.location.replace("login.html")
 
 }
 
@@ -195,6 +195,6 @@ const supabase = await getSupabase()
 
 await supabase.auth.signOut()
 
-window.location.replace("index.html")
+window.location.replace("login.html")
 
 }
