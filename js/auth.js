@@ -30,7 +30,7 @@ if(configuredUrl){
 return configuredUrl.replace(/\/+$/,"")
 }
 
-return "https://adimasram333-tech.github.io/studioos"
+return "https://app.chitrabookai.in"
 
 }
 
