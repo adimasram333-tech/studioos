@@ -196,8 +196,8 @@ if(url){
 return url
 }
 
-alert("Public web URL is not configured. Please open this feature from StudioOS Web or configure STUDIOOS_PUBLIC_WEB_APP_BASE_URL for Android.")
-throw new Error("StudioOS public web URL is not configured.")
+alert("Public web URL is not configured. Please open this feature from ChitraBook AI Web or configure STUDIOOS_PUBLIC_WEB_APP_BASE_URL for Android.")
+throw new Error("ChitraBook AI public web URL is not configured.")
 }
 
 
@@ -569,7 +569,7 @@ toast.remove()
 }, 1850)
 }
 
-function showStudioOSInfo(message, title = "StudioOS"){
+function showStudioOSInfo(message, title = "ChitraBook AI"){
 return new Promise(resolve=>{
 const existingModal = document.getElementById("studioosGalleryInfoModal")
 if(existingModal){
@@ -705,7 +705,7 @@ modal.innerHTML = `
     font-weight:850;
     letter-spacing:0.08em;
     text-transform:uppercase;
-  ">${danger ? "Important" : "StudioOS"}</div>
+  ">${danger ? "Important" : "ChitraBook AI"}</div>
 
   <div style="
     margin-top:0.9rem;
@@ -832,18 +832,18 @@ reader.readAsDataURL(blob)
 })
 }
 
-async function saveBlobWithCapacitor(blob, fileName, shareTitle = "StudioOS File"){
+async function saveBlobWithCapacitor(blob, fileName, shareTitle = "ChitraBook AI File"){
 const saver = getStudioOSFileSaverPlugin()
 
 if(!saver || typeof saver.saveFile !== "function"){
-throw new Error("StudioOS native file saver is not available")
+throw new Error("ChitraBook AI native file saver is not available")
 }
 
 const safeFileName =
-String(fileName || "studioos-file")
+String(fileName || "chitrabook-ai-file")
 .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
 .replace(/\s+/g, "_")
-.trim() || "studioos-file"
+.trim() || "chitrabook-ai-file"
 
 const base64Data = await blobToBase64(blob)
 const mimeType = blob?.type || guessMimeTypeFromFileName(safeFileName)
@@ -880,7 +880,7 @@ return "application/octet-stream"
 
 async function saveStudioOSBlob(blob, filename){
 if(isCapacitorNativeApp()){
-return await saveBlobWithCapacitor(blob, filename, "StudioOS File")
+return await saveBlobWithCapacitor(blob, filename, "ChitraBook AI File")
 }
 
 triggerBlobDownload(blob, filename)
@@ -2106,7 +2106,7 @@ return naturalCompareText(a?.id, b?.id)
 
 async function triggerBlobDownload(blob, filename){
 if(isCapacitorNativeApp()){
-await saveBlobWithCapacitor(blob, filename, "StudioOS File")
+await saveBlobWithCapacitor(blob, filename, "ChitraBook AI File")
 return true
 }
 
