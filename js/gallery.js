@@ -1,4 +1,4 @@
-﻿// =============================
+// =============================
 // GLOBAL MENU SYSTEM (S3 ONLY)
 // =============================
 
@@ -23,6 +23,19 @@ const modalImagePreloadCache = new Map()
 
 function buildGuestDownloadLabel(isFree){
 return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
+}
+
+function normalizeGallerySharingStatus(value){
+const status = String(value || "active").trim().toLowerCase()
+return status || "active"
+}
+
+function isGallerySharingStopped(status){
+return normalizeGallerySharingStatus(status) === "stopped"
+}
+
+function buildGallerySharingActionLabel(status){
+return isGallerySharingStopped(status) ? "Resume Gallery Sharing" : "Stop Gallery Sharing"
 }
 
 // =============================
@@ -366,6 +379,92 @@ console.error("Public share token create error:", err)
 return null
 }
 }
+
+
+async function regeneratePublicShareToken(eventId){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId) return null
+
+try{
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!supabase || !user){
+return null
+}
+
+const { data: ev, error: eventError } = await supabase
+.from("events")
+.select("id,user_id")
+.eq("id", safeEventId)
+.eq("user_id", user.id)
+.maybeSingle()
+
+if(eventError || !ev){
+console.error("Token regenerate event ownership validation failed:", eventError)
+return null
+}
+
+const newToken = generatePublicShareToken()
+
+const resetPayload = {
+token: newToken,
+used: false,
+used_by: null,
+device_id: null,
+device_id_2: null
+}
+
+const { data: existingTokenRow, error: existingError } = await supabase
+.from("event_tokens")
+.select("id")
+.eq("event_id", safeEventId)
+.order("created_at", { ascending: true })
+.limit(1)
+.maybeSingle()
+
+if(existingError){
+console.error("Token regenerate lookup failed:", existingError)
+return null
+}
+
+if(existingTokenRow?.id){
+const { data: updated, error: updateError } = await supabase
+.from("event_tokens")
+.update(resetPayload)
+.eq("id", existingTokenRow.id)
+.select("token")
+.limit(1)
+.maybeSingle()
+
+if(updateError){
+console.error("Token regenerate update failed:", updateError)
+return null
+}
+
+return updated?.token || newToken
+}
+
+const { data: inserted, error: insertError } = await supabase
+.from("event_tokens")
+.insert([{ event_id: safeEventId, ...resetPayload }])
+.select("token")
+.limit(1)
+.maybeSingle()
+
+if(insertError){
+console.error("Token regenerate insert failed:", insertError)
+return null
+}
+
+return inserted?.token || newToken
+}catch(err){
+console.error("Token regenerate error:", err)
+return null
+}
+}
+
+window.regeneratePublicShareToken = regeneratePublicShareToken
 
 async function canUseFreeLimitedGalleryFeature(eventId, ownerId){
 const safeEventId = String(eventId || "").trim()
@@ -1109,7 +1208,7 @@ modal.innerHTML = `
   <div style="font-size:1.2rem; font-weight:800; margin-top:0.9rem;">Set download price</div>
 
   <div style="margin-top:1rem;">
-    <label style="display:block; font-size:0.78rem; color:rgba(255,255,255,0.62); margin-bottom:0.45rem;">Minimum â‚¹49</label>
+    <label style="display:block; font-size:0.78rem; color:rgba(255,255,255,0.62); margin-bottom:0.45rem;">Minimum ₹49</label>
     <div style="
       display:flex;
       align-items:center;
@@ -1119,7 +1218,7 @@ modal.innerHTML = `
       background:rgba(255,255,255,0.06);
       border:1px solid rgba(255,255,255,0.08);
     ">
-      <span style="font-size:1rem; font-weight:800;">â‚¹</span>
+      <span style="font-size:1rem; font-weight:800;">₹</span>
       <input id="photoPriceInput" type="number" min="49" step="1" value="${safePrice}" style="
         width:100%;
         background:transparent;
@@ -1184,7 +1283,7 @@ const nextPrice = Number(input?.value || 0)
 
 if(!Number.isFinite(nextPrice) || nextPrice < GALLERY_MIN_PHOTO_SELLING_PRICE){
 if(feedback){
-feedback.innerText = "Minimum price is â‚¹49"
+feedback.innerText = "Minimum price is ₹49"
 feedback.style.display = "block"
 }
 return
@@ -1241,15 +1340,21 @@ closeFloatingMenu()
 showPhotoPriceModal(eventId, getSafePhotoSellingPriceFromMenu(eventId))
 }
 
-function buildMenuHtml(id, guestFreeDownload){
+function buildMenuHtml(id, guestFreeDownload, galleryStatus = "active"){
 const safeMode = guestFreeDownload ? "true" : "false"
+const safeStatus = normalizeGallerySharingStatus(galleryStatus)
+const sharingActionClass = isGallerySharingStopped(safeStatus)
+? "px-3 py-2 hover:bg-emerald-500/20 text-emerald-300 cursor-pointer"
+: "px-3 py-2 hover:bg-amber-500/20 text-amber-300 cursor-pointer"
 
 return `
 <div onclick="openEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Open</div>
 <div onclick="shareEvent('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Share Link</div>
 <div onclick="showQR('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show QR</div>
 <div onclick="showToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Show Token</div>
-<div onclick="openPhotoPriceModal('${id}', this)" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Price â‚¹${getSafePhotoSellingPriceFromMenu(id)}</div>
+<div onclick="regenerateToken('${id}')" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Regenerate Token</div>
+<div onclick="toggleGallerySharingStatus('${id}', '${safeStatus}')" class="${sharingActionClass}">${buildGallerySharingActionLabel(safeStatus)}</div>
+<div onclick="openPhotoPriceModal('${id}', this)" class="px-3 py-2 hover:bg-white/10 cursor-pointer">Price ₹${getSafePhotoSellingPriceFromMenu(id)}</div>
 <div onclick="toggleGuestFreeDownload('${id}', ${safeMode})" class="px-3 py-2 hover:bg-white/10 cursor-pointer">
 ${buildGuestDownloadLabel(guestFreeDownload)}
 </div>
@@ -1345,7 +1450,7 @@ menu.style.left = `${Math.max(safeMargin, left)}px`
 menu.style.top = `${Math.max(safeMargin, top)}px`
 }
 
-window.toggleMenu = function(id, btn, guestFreeDownload = false){
+window.toggleMenu = function(id, btn, guestFreeDownload = false, galleryStatus = "active"){
 
 const existing = document.getElementById("floatingMenu")
 
@@ -1361,6 +1466,7 @@ const menu = document.createElement("div")
 menu.id = "floatingMenu"
 menu.dataset.id = id
 menu.dataset.guestFreeDownload = guestFreeDownload ? "true" : "false"
+menu.dataset.galleryStatus = normalizeGallerySharingStatus(galleryStatus)
 
 menu.style.position = "fixed"
 menu.style.top = "0px"
@@ -1376,7 +1482,7 @@ menu.style.minWidth = "180px"
 menu.style.maxWidth = "calc(100vw - 16px)"
 menu.style.boxSizing = "border-box"
 
-menu.innerHTML = buildMenuHtml(id, !!guestFreeDownload)
+menu.innerHTML = buildMenuHtml(id, !!guestFreeDownload, galleryStatus)
 
 document.body.appendChild(menu)
 activeMenu = menu
@@ -1497,6 +1603,50 @@ await showStudioOSInfo(token, "Gallery Token")
 
 }
 
+
+window.regenerateToken = async function(id){
+const allowed = await guardPublicGalleryFeature(id, "sharing")
+if(!allowed) return
+
+const confirmed = await showStudioOSConfirm({
+title: "Regenerate client token?",
+message: "The old client token will stop working. Two-device access will reset for this event. Share the new token only with the trusted client.",
+confirmText: "Regenerate",
+cancelText: "Cancel",
+danger: true
+})
+
+if(!confirmed) return
+
+closeFloatingMenu()
+showStudioOSToast("Regenerating token...")
+
+const token = await regeneratePublicShareToken(id)
+
+if(!token){
+await showStudioOSInfo("Unable to regenerate token. Please try again.", "Gallery Token")
+return
+}
+
+try{
+await copyTextToClipboard(token)
+showStudioOSToast("New token copied")
+}catch(e){
+console.warn("Regenerated token copy failed:", e)
+}
+
+if(typeof window.openStudioOSGalleryTokenModal === "function"){
+await window.openStudioOSGalleryTokenModal(token, {
+title: "New Gallery Token",
+subtitle: "Old token has been replaced. Share this new token only with trusted clients.",
+copyToast: "New token copied"
+})
+return
+}
+
+await showStudioOSInfo(token, "New Gallery Token")
+}
+
 // =============================
 // GUEST FREE DOWNLOAD TOGGLE
 // =============================
@@ -1555,6 +1705,72 @@ location.reload()
 }catch(err){
 console.error(err)
 showStudioOSToast("Failed to update guest download mode", "error")
+}
+
+}
+
+// =============================
+// GALLERY SHARING STATUS
+// =============================
+
+window.toggleGallerySharingStatus = async function(id, currentStatus = "active"){
+
+const safeEventId = String(id || "").trim()
+if(!safeEventId){
+showStudioOSToast("Invalid event", "error")
+return
+}
+
+const isStopped = isGallerySharingStopped(currentStatus)
+const nextStatus = isStopped ? "active" : "stopped"
+
+const confirmed = await showStudioOSConfirm({
+title: isStopped ? "Resume gallery sharing?" : "Stop gallery sharing?",
+message: isStopped
+? "Clients and guests will be able to access this gallery again using the existing link, QR, or valid token."
+: "Clients and guests will no longer be able to open this gallery from link, QR, token, or saved session until you resume sharing. Photographer access will remain available.",
+confirmText: isStopped ? "Resume" : "Stop Sharing",
+cancelText: "Cancel",
+danger: !isStopped
+})
+
+if(!confirmed) return
+
+closeFloatingMenu()
+
+try{
+
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!supabase || !user){
+await showStudioOSInfo("Please login again and try.", "Session expired")
+return
+}
+
+const { data: updatedEvent, error } = await supabase
+.from("events")
+.update({ status: nextStatus })
+.eq("id", safeEventId)
+.eq("user_id", user.id)
+.select("id,status")
+.maybeSingle()
+
+if(error || !updatedEvent){
+console.error("Gallery sharing status update failed:", error)
+showStudioOSToast("Failed to update gallery sharing", "error")
+return
+}
+
+showStudioOSToast(nextStatus === "stopped" ? "Gallery sharing stopped" : "Gallery sharing resumed")
+
+setTimeout(()=>{
+location.reload()
+}, 650)
+
+}catch(err){
+console.error("Gallery sharing status update error:", err)
+showStudioOSToast("Failed to update gallery sharing", "error")
 }
 
 }
@@ -2481,6 +2697,12 @@ return
 FACE_FILTER_ACTIVE = false
 btn.innerText = "Face Scan"
 btn.onclick = async function(){
+
+// Photographer-side action remains protected by the subscription/feature gate.
+// Client/public viewers should not see photographer upgrade or limit popups here;
+// they already reached this page through a valid public access flow, and the
+// actual face-search permission is validated again on face-capture.html.
+if(effectiveRole === "photographer"){
 const allowed = await guardPublicGalleryFeature(eventId, "face_search")
 if(!allowed) return
 
@@ -2488,6 +2710,7 @@ const token = await ensurePublicShareToken(eventId)
 if(!token){
 alert("Unable to enable limited Face Search. Please try again.")
 return
+}
 }
 
 setFaceFilterDisabledForEvent(eventId, false)
@@ -2512,101 +2735,10 @@ uploadBtn.disabled = true
 
 
 // =============================
-// FACE MATCH COUNT BANNER
-// =============================
-
-function removeFaceMatchCountBanner(){
-const existing = document.getElementById("studioosFaceMatchCountBanner")
-if(existing){
-existing.remove()
-}
-}
-
-function getFaceMatchCountText(count){
-const safeCount = Math.max(0, Number(count || 0))
-return safeCount === 1 ? "1 photo matched for you" : `${safeCount} photos matched for you`
-}
-
-function showFaceMatchCountBanner(eventId, effectiveRole, matchedImages, displayCount = null){
-removeFaceMatchCountBanner()
-
-const safeEventId = String(eventId || "").trim()
-const sessionCount = matchedImages && typeof matchedImages.size === "number" ? matchedImages.size : 0
-const count = displayCount !== null && displayCount !== undefined
-? Math.max(0, Number(displayCount || 0))
-: sessionCount
-
-if(!safeEventId || count <= 0){
-return
-}
-
-const grid = document.getElementById("galleryGrid")
-if(!grid || !grid.parentNode){
-return
-}
-
-const banner = document.createElement("div")
-banner.id = "studioosFaceMatchCountBanner"
-banner.dataset.eventId = safeEventId
-banner.dataset.role = String(effectiveRole || "guest")
-banner.style.width = "100%"
-banner.style.margin = "0 0 14px 0"
-banner.style.padding = "12px 14px"
-banner.style.borderRadius = "16px"
-banner.style.border = "1px solid rgba(34,211,238,0.28)"
-banner.style.background = "linear-gradient(135deg, rgba(8,47,73,0.78), rgba(15,23,42,0.92))"
-banner.style.boxShadow = "0 18px 45px rgba(2,6,23,0.28), inset 0 0 18px rgba(34,211,238,0.06)"
-banner.style.color = "#ffffff"
-banner.style.boxSizing = "border-box"
-banner.style.display = "flex"
-banner.style.alignItems = "center"
-banner.style.justifyContent = "space-between"
-banner.style.gap = "12px"
-
-const roleLabel = effectiveRole === "photographer"
-? "Face filter active"
-: effectiveRole === "client"
-? "Client face match"
-: "Guest face match"
-
-banner.innerHTML = `
-  <div style="min-width:0;">
-    <div style="font-size:12px; font-weight:850; letter-spacing:0.08em; text-transform:uppercase; color:#67e8f9;">
-      AI Face Match Result
-    </div>
-    <div style="margin-top:3px; font-size:14px; font-weight:850; color:#f8fafc;">
-      ${escapeStudioOSHtml(getFaceMatchCountText(count))}
-    </div>
-    <div style="margin-top:3px; font-size:11px; line-height:1.4; color:rgba(203,213,225,0.82);">
-      ${escapeStudioOSHtml(roleLabel)}
-    </div>
-  </div>
-  <div style="
-    flex:0 0 auto;
-    min-width:48px;
-    min-height:48px;
-    border-radius:999px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:rgba(34,211,238,0.12);
-    border:1px solid rgba(34,211,238,0.26);
-    color:#67e8f9;
-    font-size:20px;
-    font-weight:950;
-  ">${count}</div>
-`
-
-grid.parentNode.insertBefore(banner, grid)
-}
-
-// =============================
 // LOAD GALLERY
 // =============================
 
 async function loadGallery(){
-
-removeFaceMatchCountBanner()
 
 const params = new URLSearchParams(window.location.search)
 
@@ -2645,11 +2777,12 @@ const visitorId = sessionStorage.getItem("visitor_id")
 let eventName = "Event"
 let eventOwnerId = null
 let guestFreeDownload = false
+let eventStatus = "active"
 
 if(eventId){
 const { data: ev, error: eventFetchError } = await supabase
 .from("events")
-.select("event_name, client_name, user_id, guest_free_download")
+.select("event_name, client_name, user_id, guest_free_download, status")
 .eq("id", eventId)
 .maybeSingle()
 
@@ -2661,6 +2794,7 @@ if(ev){
 eventName = ev.event_name || ev.client_name || "Event"
 eventOwnerId = ev.user_id || null
 guestFreeDownload = !!ev.guest_free_download
+eventStatus = normalizeGallerySharingStatus(ev.status)
 }else{
 clearDeletedEventSession(eventId)
 
@@ -2700,8 +2834,66 @@ eventOwnerId
 
 updateUploadButton(effectiveRole)
 
+if(eventId && effectiveRole !== "photographer" && isGallerySharingStopped(eventStatus)){
+clearDeletedEventSession(eventId)
+
+const stoppedGrid = document.getElementById("galleryGrid")
+const stoppedEmpty = document.getElementById("emptyState")
+const stoppedFaceBanner = document.getElementById("faceMatchBanner")
+
+if(stoppedGrid){
+stoppedGrid.innerHTML = ""
+stoppedGrid.classList.add("hidden")
+}
+
+if(stoppedFaceBanner){
+stoppedFaceBanner.classList.remove("show")
+}
+
+if(stoppedEmpty){
+stoppedEmpty.className = "mt-6"
+stoppedEmpty.innerHTML = `
+  <div style="
+    border-radius:1.35rem;
+    padding:1.2rem;
+    background:rgba(15,23,42,0.92);
+    border:1px solid rgba(251,191,36,0.28);
+    box-shadow:0 24px 60px rgba(0,0,0,0.32), inset 0 0 20px rgba(251,191,36,0.06);
+    text-align:center;
+  ">
+    <div style="
+      display:inline-flex;
+      align-items:center;
+      min-height:30px;
+      padding:0 0.78rem;
+      border-radius:999px;
+      background:rgba(251,191,36,0.14);
+      border:1px solid rgba(251,191,36,0.28);
+      color:rgb(253 230 138);
+      font-size:0.72rem;
+      font-weight:850;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    ">Gallery Closed</div>
+    <div style="margin-top:0.95rem; font-size:1.12rem; font-weight:900; color:white; line-height:1.3;">
+      This gallery is currently closed by the photographer.
+    </div>
+    <div style="margin-top:0.55rem; color:rgba(255,255,255,0.68); font-size:0.9rem; line-height:1.55;">
+      Please contact the photographer if you need access again.
+    </div>
+  </div>
+`
+stoppedEmpty.classList.remove("hidden")
+}
+
+updateUploadButton(effectiveRole)
+updateFaceActionButton()
+
+return
+}
+
 if(effectiveRole === "photographer"){
-console.log("ðŸ‘¤ Photographer access (owner verified)")
+console.log("👤 Photographer access (owner verified)")
 }else{
 
 if(eventId){
@@ -2726,7 +2918,7 @@ window.location.href = `access.html?event_id=${eventId}`
 return
 }
 
-console.log("âœ… Guest/Client verified | Role:", effectiveRole)
+console.log("✅ Guest/Client verified | Role:", effectiveRole)
 
 }
 
@@ -2829,6 +3021,8 @@ displayName = e.client_name || "Booking Event"
 }
 
 const isGuestFree = !!e.guest_free_download
+const galleryStatus = normalizeGallerySharingStatus(e.status)
+const isSharingStopped = isGallerySharingStopped(galleryStatus)
 setEventPhotoPriceCache(e.id, e.photo_selling_price)
 
 div.innerHTML = `
@@ -2836,11 +3030,12 @@ div.innerHTML = `
   <div class="min-w-0 flex-1">
     <div class="text-sm font-semibold truncate">${displayName}</div>
     <div class="text-xs text-gray-400">${date}</div>
+    ${isSharingStopped ? `<div class="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-400/20">Sharing Stopped</div>` : ""}
   </div>
 
   <div class="flex items-center gap-2 shrink-0">
     ${buildToggleMarkup(e.id, isGuestFree)}
-    <button onclick="toggleMenu('${e.id}', this, ${isGuestFree ? "true" : "false"})" class="text-xl px-1 leading-none">â‹®</button>
+    <button onclick="toggleMenu('${e.id}', this, ${isGuestFree ? "true" : "false"}, '${galleryStatus}')" class="text-xl px-1 leading-none">⋮</button>
   </div>
 </div>
 `
@@ -2892,20 +3087,6 @@ const visiblePhotos = sortPhotosByFileSequence(
 getVisibleGalleryPhotos(data, effectiveRole, matchedImages, FACE_FILTER_ACTIVE)
 )
 
-const hasFaceScanMatches = matchedImages && matchedImages.size > 0
-const shouldShowFaceMatchCount =
-eventId &&
-hasFaceScanMatches &&
-(
-effectiveRole === "guest" ||
-effectiveRole === "client" ||
-effectiveRole === "photographer"
-)
-
-if(shouldShowFaceMatchCount){
-const displayedMatchCount = visiblePhotos.length > 0 ? visiblePhotos.length : matchedImages.size
-showFaceMatchCountBanner(eventId, effectiveRole, matchedImages, displayedMatchCount)
-}
 
 const modalPhotos = visiblePhotos
 let currentModalIndex = -1
@@ -3058,12 +3239,12 @@ modal.style.zIndex = 9999
 
 modal.innerHTML = `
 <button id="prevImageBtn"
-style="position:absolute; left:max(10px, env(safe-area-inset-left)); top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.9); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center; z-index:10002; pointer-events:auto; box-shadow:0 12px 32px rgba(0,0,0,0.35);">â€¹</button>
+style="position:absolute; left:max(10px, env(safe-area-inset-left)); top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.9); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center; z-index:10002; pointer-events:auto; box-shadow:0 12px 32px rgba(0,0,0,0.35);">‹</button>
 
 <img id="modalImg" src="" style="max-width:90%; max-height:70vh; object-fit:contain; border-radius:14px; transition:opacity 180ms ease, transform 180ms ease; will-change:opacity, transform; box-shadow:0 24px 80px rgba(0,0,0,0.45); position:relative; z-index:10000;" />
 
 <button id="nextImageBtn"
-style="position:absolute; right:max(10px, env(safe-area-inset-right)); top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.9); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center; z-index:10002; pointer-events:auto; box-shadow:0 12px 32px rgba(0,0,0,0.35);">â€º</button>
+style="position:absolute; right:max(10px, env(safe-area-inset-right)); top:50%; transform:translateY(-50%); background:rgba(79,70,229,0.9); color:white; width:42px; height:42px; border-radius:9999px; font-size:22px; display:flex; align-items:center; justify-content:center; z-index:10002; pointer-events:auto; box-shadow:0 12px 32px rgba(0,0,0,0.35);">›</button>
 
 <button id="downloadBtn"
 style="position:absolute; left:50%; transform:translateX(-50%); bottom:calc(112px + env(safe-area-inset-bottom, 0px)); background:#4f46e5; color:white; padding:10px 18px; border-radius:999px; font-size:14px; font-weight:800; z-index:10003; box-shadow:0 16px 42px rgba(79,70,229,0.38);">
@@ -3228,4 +3409,3 @@ empty.classList.remove("hidden")
 document.addEventListener("DOMContentLoaded",()=>{
 loadGallery()
 })
-
