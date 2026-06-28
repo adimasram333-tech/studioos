@@ -21,10 +21,11 @@ const IMAGE_PRELOAD_CACHE_LIMIT = 300
 const galleryPreviewPreloadCache = new Map()
 const modalImagePreloadCache = new Map()
 
-const GALLERY_SHARING_WATCH_INTERVAL_MS = 12000
+const GALLERY_SHARING_WATCH_INTERVAL_MS = 2500
 let gallerySharingStatusWatchTimer = null
 let gallerySharingStatusWatchInFlight = false
 let gallerySharingStatusBlocked = false
+let gallerySharingStatusRealtimeChannel = null
 
 function buildGuestDownloadLabel(isFree){
 return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
@@ -2191,6 +2192,16 @@ console.warn("Download usage log failed:", err)
 
 async function directDownloadImage(url, filename = "photo.jpg", logContext = null){
 const cleanUrl = normalizeImageUrl(url)
+const contextEventId = String(logContext?.eventId || CURRENT_GALLERY_STATE?.eventId || "").trim()
+const contextRole = String(CURRENT_GALLERY_STATE?.effectiveRole || sessionStorage.getItem("role") || "guest").trim()
+
+if(contextEventId && contextRole !== "photographer"){
+const sharingAllowed = await checkGallerySharingStatusForViewer(contextEventId, contextRole, { failClosed: true })
+if(!sharingAllowed){
+showStudioOSToast("Gallery is closed", "error")
+return false
+}
+}
 
 try{
 const response = await fetch(cleanUrl, {
@@ -2743,7 +2754,24 @@ if(gallerySharingStatusWatchTimer){
 clearInterval(gallerySharingStatusWatchTimer)
 gallerySharingStatusWatchTimer = null
 }
+
 gallerySharingStatusWatchInFlight = false
+
+if(gallerySharingStatusRealtimeChannel){
+const channel = gallerySharingStatusRealtimeChannel
+gallerySharingStatusRealtimeChannel = null
+
+try{
+const supabase = window.supabaseClient || null
+if(supabase && typeof supabase.removeChannel === "function"){
+supabase.removeChannel(channel)
+}else if(channel && typeof channel.unsubscribe === "function"){
+channel.unsubscribe()
+}
+}catch(error){
+console.warn("Gallery realtime watcher cleanup failed:", error)
+}
+}
 }
 
 function closeGalleryInteractiveOverlays(){
@@ -2850,14 +2878,26 @@ matchedImages: new Set()
 
 async function checkGallerySharingStatusForViewer(eventId, effectiveRole, options = {}){
 const safeEventId = String(eventId || "").trim()
+const safeRole = String(effectiveRole || "guest").trim().toLowerCase()
+const failClosed = options.failClosed !== false
 
-if(!safeEventId || effectiveRole === "photographer"){
+if(!safeEventId || safeRole === "photographer"){
 return true
+}
+
+if(gallerySharingStatusBlocked){
+return false
 }
 
 try{
 const supabase = await window.getSupabase()
 if(!supabase){
+if(failClosed){
+renderGalleryClosedState(safeEventId, safeRole, {
+clearSession: options.clearSession !== false
+})
+return false
+}
 return true
 }
 
@@ -2869,11 +2909,17 @@ const { data: ev, error } = await supabase
 
 if(error){
 console.warn("Gallery sharing status recheck failed:", error)
+if(failClosed){
+renderGalleryClosedState(safeEventId, safeRole, {
+clearSession: options.clearSession !== false
+})
+return false
+}
 return true
 }
 
 if(!ev || isGallerySharingStopped(ev.status)){
-renderGalleryClosedState(safeEventId, effectiveRole, {
+renderGalleryClosedState(safeEventId, safeRole, {
 clearSession: options.clearSession !== false
 })
 return false
@@ -2882,7 +2928,68 @@ return false
 return true
 }catch(err){
 console.warn("Gallery sharing status recheck error:", err)
+if(failClosed){
+renderGalleryClosedState(safeEventId, safeRole, {
+clearSession: options.clearSession !== false
+})
+return false
+}
 return true
+}
+}
+
+async function startGallerySharingRealtimeWatcher(eventId, effectiveRole){
+const safeEventId = String(eventId || "").trim()
+const safeRole = String(effectiveRole || "guest").trim().toLowerCase()
+
+if(!safeEventId || safeRole === "photographer" || gallerySharingStatusRealtimeChannel){
+return
+}
+
+try{
+const supabase = await window.getSupabase()
+if(!supabase || typeof supabase.channel !== "function"){
+return
+}
+
+const channel = supabase
+.channel(`studioos-gallery-status-${safeEventId}`)
+.on(
+"postgres_changes",
+{
+event: "UPDATE",
+schema: "public",
+table: "events",
+filter: `id=eq.${safeEventId}`
+},
+(payload)=>{
+const nextStatus = normalizeGallerySharingStatus(payload?.new?.status)
+if(isGallerySharingStopped(nextStatus)){
+renderGalleryClosedState(safeEventId, safeRole)
+}
+}
+)
+.on(
+"postgres_changes",
+{
+event: "DELETE",
+schema: "public",
+table: "events",
+filter: `id=eq.${safeEventId}`
+},
+()=>{
+renderGalleryClosedState(safeEventId, safeRole)
+}
+)
+.subscribe((status)=>{
+if(status === "CHANNEL_ERROR" || status === "TIMED_OUT"){
+console.warn("Gallery realtime watcher status:", status)
+}
+})
+
+gallerySharingStatusRealtimeChannel = channel
+}catch(error){
+console.warn("Gallery realtime watcher start failed:", error)
 }
 }
 
@@ -2891,47 +2998,48 @@ stopGallerySharingStatusWatcher()
 gallerySharingStatusBlocked = false
 
 const safeEventId = String(eventId || "").trim()
-if(!safeEventId || effectiveRole === "photographer"){
+const safeRole = String(effectiveRole || "guest").trim().toLowerCase()
+
+if(!safeEventId || safeRole === "photographer"){
 return
 }
 
 const runCheck = async ()=>{
 if(gallerySharingStatusWatchInFlight || gallerySharingStatusBlocked){
-return
+return false
 }
 
 gallerySharingStatusWatchInFlight = true
 try{
-await checkGallerySharingStatusForViewer(safeEventId, effectiveRole)
+return await checkGallerySharingStatusForViewer(safeEventId, safeRole, { failClosed: true })
 }finally{
 gallerySharingStatusWatchInFlight = false
 }
 }
 
 gallerySharingStatusWatchTimer = setInterval(runCheck, GALLERY_SHARING_WATCH_INTERVAL_MS)
-
-const focusCheck = ()=>{
-if(document.visibilityState === "visible"){
-runCheck()
-}
-}
+startGallerySharingRealtimeWatcher(safeEventId, safeRole).catch(error=>{
+console.warn("Gallery realtime watcher failed:", error)
+})
 
 if(!window.__studioosGallerySharingFocusWatcherBound){
 window.__studioosGallerySharingFocusWatcherBound = true
+
 document.addEventListener("visibilitychange", ()=>{
 if(document.visibilityState === "visible" && CURRENT_GALLERY_STATE?.eventId && CURRENT_GALLERY_STATE?.effectiveRole !== "photographer"){
-checkGallerySharingStatusForViewer(CURRENT_GALLERY_STATE.eventId, CURRENT_GALLERY_STATE.effectiveRole)
+checkGallerySharingStatusForViewer(CURRENT_GALLERY_STATE.eventId, CURRENT_GALLERY_STATE.effectiveRole, { failClosed: true })
 }
 })
 
 window.addEventListener("focus", ()=>{
 if(CURRENT_GALLERY_STATE?.eventId && CURRENT_GALLERY_STATE?.effectiveRole !== "photographer"){
-checkGallerySharingStatusForViewer(CURRENT_GALLERY_STATE.eventId, CURRENT_GALLERY_STATE.effectiveRole)
+checkGallerySharingStatusForViewer(CURRENT_GALLERY_STATE.eventId, CURRENT_GALLERY_STATE.effectiveRole, { failClosed: true })
 }
 })
 }
 
-setTimeout(runCheck, 1200)
+setTimeout(runCheck, 0)
+setTimeout(runCheck, 900)
 }
 
 
@@ -3282,7 +3390,7 @@ if(btn.dataset.loading === "true"){
 return
 }
 
-const sharingAllowed = await checkGallerySharingStatusForViewer(eventId, effectiveRole)
+const sharingAllowed = await checkGallerySharingStatusForViewer(eventId, effectiveRole, { failClosed: true })
 if(!sharingAllowed){
 return
 }
@@ -3373,7 +3481,7 @@ renderModalPhoto(modalPhotos[currentModalIndex])
 }
 
 async function openImage(photo){
-const sharingAllowed = await checkGallerySharingStatusForViewer(eventId, effectiveRole)
+const sharingAllowed = await checkGallerySharingStatusForViewer(eventId, effectiveRole, { failClosed: true })
 if(!sharingAllowed){
 return
 }
