@@ -21,6 +21,11 @@ const IMAGE_PRELOAD_CACHE_LIMIT = 300
 const galleryPreviewPreloadCache = new Map()
 const modalImagePreloadCache = new Map()
 
+const GALLERY_SHARING_WATCH_INTERVAL_MS = 12000
+let gallerySharingStatusWatchTimer = null
+let gallerySharingStatusWatchInFlight = false
+let gallerySharingStatusBlocked = false
+
 function buildGuestDownloadLabel(isFree){
 return isFree ? "Guest Free Download: ON" : "Guest Free Download: OFF"
 }
@@ -2733,6 +2738,202 @@ uploadBtn.disabled = true
 }
 }
 
+function stopGallerySharingStatusWatcher(){
+if(gallerySharingStatusWatchTimer){
+clearInterval(gallerySharingStatusWatchTimer)
+gallerySharingStatusWatchTimer = null
+}
+gallerySharingStatusWatchInFlight = false
+}
+
+function closeGalleryInteractiveOverlays(){
+const overlayIds = [
+"floatingMenu",
+"imageModal",
+"photoPriceModal",
+"galleryUpgradeModal",
+"studioosGalleryInfoModal",
+"studioosGalleryConfirmModal"
+]
+
+overlayIds.forEach(id=>{
+const el = document.getElementById(id)
+if(el){
+el.remove()
+}
+})
+
+activeMenu = null
+
+try{
+document.body.style.overflow = ""
+}catch(e){}
+}
+
+function renderGalleryClosedState(eventId, effectiveRole = "guest", options = {}){
+const safeEventId = String(eventId || "").trim()
+const shouldClearSession = options.clearSession !== false
+
+gallerySharingStatusBlocked = true
+stopGallerySharingStatusWatcher()
+closeGalleryInteractiveOverlays()
+
+if(shouldClearSession && safeEventId){
+clearDeletedEventSession(safeEventId)
+}
+
+const grid = document.getElementById("galleryGrid")
+const empty = document.getElementById("emptyState")
+const faceBanner = document.getElementById("faceMatchBanner")
+const faceBtn = document.getElementById("faceActionBtn")
+
+if(grid){
+grid.innerHTML = ""
+grid.classList.add("hidden")
+}
+
+if(faceBanner){
+faceBanner.classList.remove("show")
+}
+
+if(faceBtn && effectiveRole !== "photographer"){
+faceBtn.classList.add("hidden")
+faceBtn.onclick = null
+}
+
+if(empty){
+empty.className = "mt-6"
+empty.innerHTML = `
+  <div style="
+    border-radius:1.35rem;
+    padding:1.2rem;
+    background:rgba(15,23,42,0.92);
+    border:1px solid rgba(251,191,36,0.28);
+    box-shadow:0 24px 60px rgba(0,0,0,0.32), inset 0 0 20px rgba(251,191,36,0.06);
+    text-align:center;
+  ">
+    <div style="
+      display:inline-flex;
+      align-items:center;
+      min-height:30px;
+      padding:0 0.78rem;
+      border-radius:999px;
+      background:rgba(251,191,36,0.14);
+      border:1px solid rgba(251,191,36,0.28);
+      color:rgb(253 230 138);
+      font-size:0.72rem;
+      font-weight:850;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    ">Gallery Closed</div>
+    <div style="margin-top:0.95rem; font-size:1.12rem; font-weight:900; color:white; line-height:1.3;">
+      This gallery is currently closed by the photographer.
+    </div>
+    <div style="margin-top:0.55rem; color:rgba(255,255,255,0.68); font-size:0.9rem; line-height:1.55;">
+      Please contact the photographer if you need access again.
+    </div>
+  </div>
+`
+empty.classList.remove("hidden")
+}
+
+if(effectiveRole !== "photographer"){
+updateUploadButton(effectiveRole)
+}
+
+CURRENT_GALLERY_STATE = {
+eventId: safeEventId || null,
+effectiveRole: effectiveRole || "guest",
+matchedImages: new Set()
+}
+}
+
+async function checkGallerySharingStatusForViewer(eventId, effectiveRole, options = {}){
+const safeEventId = String(eventId || "").trim()
+
+if(!safeEventId || effectiveRole === "photographer"){
+return true
+}
+
+try{
+const supabase = await window.getSupabase()
+if(!supabase){
+return true
+}
+
+const { data: ev, error } = await supabase
+.from("events")
+.select("id,status")
+.eq("id", safeEventId)
+.maybeSingle()
+
+if(error){
+console.warn("Gallery sharing status recheck failed:", error)
+return true
+}
+
+if(!ev || isGallerySharingStopped(ev.status)){
+renderGalleryClosedState(safeEventId, effectiveRole, {
+clearSession: options.clearSession !== false
+})
+return false
+}
+
+return true
+}catch(err){
+console.warn("Gallery sharing status recheck error:", err)
+return true
+}
+}
+
+function startGallerySharingStatusWatcher(eventId, effectiveRole){
+stopGallerySharingStatusWatcher()
+gallerySharingStatusBlocked = false
+
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId || effectiveRole === "photographer"){
+return
+}
+
+const runCheck = async ()=>{
+if(gallerySharingStatusWatchInFlight || gallerySharingStatusBlocked){
+return
+}
+
+gallerySharingStatusWatchInFlight = true
+try{
+await checkGallerySharingStatusForViewer(safeEventId, effectiveRole)
+}finally{
+gallerySharingStatusWatchInFlight = false
+}
+}
+
+gallerySharingStatusWatchTimer = setInterval(runCheck, GALLERY_SHARING_WATCH_INTERVAL_MS)
+
+const focusCheck = ()=>{
+if(document.visibilityState === "visible"){
+runCheck()
+}
+}
+
+if(!window.__studioosGallerySharingFocusWatcherBound){
+window.__studioosGallerySharingFocusWatcherBound = true
+document.addEventListener("visibilitychange", ()=>{
+if(document.visibilityState === "visible" && CURRENT_GALLERY_STATE?.eventId && CURRENT_GALLERY_STATE?.effectiveRole !== "photographer"){
+checkGallerySharingStatusForViewer(CURRENT_GALLERY_STATE.eventId, CURRENT_GALLERY_STATE.effectiveRole)
+}
+})
+
+window.addEventListener("focus", ()=>{
+if(CURRENT_GALLERY_STATE?.eventId && CURRENT_GALLERY_STATE?.effectiveRole !== "photographer"){
+checkGallerySharingStatusForViewer(CURRENT_GALLERY_STATE.eventId, CURRENT_GALLERY_STATE.effectiveRole)
+}
+})
+}
+
+setTimeout(runCheck, 1200)
+}
+
 
 // =============================
 // LOAD GALLERY
@@ -2835,60 +3036,8 @@ eventOwnerId
 updateUploadButton(effectiveRole)
 
 if(eventId && effectiveRole !== "photographer" && isGallerySharingStopped(eventStatus)){
-clearDeletedEventSession(eventId)
-
-const stoppedGrid = document.getElementById("galleryGrid")
-const stoppedEmpty = document.getElementById("emptyState")
-const stoppedFaceBanner = document.getElementById("faceMatchBanner")
-
-if(stoppedGrid){
-stoppedGrid.innerHTML = ""
-stoppedGrid.classList.add("hidden")
-}
-
-if(stoppedFaceBanner){
-stoppedFaceBanner.classList.remove("show")
-}
-
-if(stoppedEmpty){
-stoppedEmpty.className = "mt-6"
-stoppedEmpty.innerHTML = `
-  <div style="
-    border-radius:1.35rem;
-    padding:1.2rem;
-    background:rgba(15,23,42,0.92);
-    border:1px solid rgba(251,191,36,0.28);
-    box-shadow:0 24px 60px rgba(0,0,0,0.32), inset 0 0 20px rgba(251,191,36,0.06);
-    text-align:center;
-  ">
-    <div style="
-      display:inline-flex;
-      align-items:center;
-      min-height:30px;
-      padding:0 0.78rem;
-      border-radius:999px;
-      background:rgba(251,191,36,0.14);
-      border:1px solid rgba(251,191,36,0.28);
-      color:rgb(253 230 138);
-      font-size:0.72rem;
-      font-weight:850;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-    ">Gallery Closed</div>
-    <div style="margin-top:0.95rem; font-size:1.12rem; font-weight:900; color:white; line-height:1.3;">
-      This gallery is currently closed by the photographer.
-    </div>
-    <div style="margin-top:0.55rem; color:rgba(255,255,255,0.68); font-size:0.9rem; line-height:1.55;">
-      Please contact the photographer if you need access again.
-    </div>
-  </div>
-`
-stoppedEmpty.classList.remove("hidden")
-}
-
-updateUploadButton(effectiveRole)
+renderGalleryClosedState(eventId, effectiveRole)
 updateFaceActionButton()
-
 return
 }
 
@@ -2953,6 +3102,12 @@ CURRENT_GALLERY_STATE = {
 eventId,
 effectiveRole,
 matchedImages
+}
+
+if(eventId && effectiveRole !== "photographer"){
+startGallerySharingStatusWatcher(eventId, effectiveRole)
+}else{
+stopGallerySharingStatusWatcher()
 }
 
 updateFaceActionButton()
@@ -3127,6 +3282,11 @@ if(btn.dataset.loading === "true"){
 return
 }
 
+const sharingAllowed = await checkGallerySharingStatusForViewer(eventId, effectiveRole)
+if(!sharingAllowed){
+return
+}
+
 const originalText = btn.innerText
 btn.dataset.loading = "true"
 btn.innerText = isCapacitorNativeApp() ? "Preparing..." : "Downloading..."
@@ -3213,6 +3373,11 @@ renderModalPhoto(modalPhotos[currentModalIndex])
 }
 
 async function openImage(photo){
+const sharingAllowed = await checkGallerySharingStatusForViewer(eventId, effectiveRole)
+if(!sharingAllowed){
+return
+}
+
 currentModalIndex = modalPhotos.findIndex(item => getPhotoOriginalUrl(item) === getPhotoOriginalUrl(photo))
 if(currentModalIndex < 0){
 currentModalIndex = 0
