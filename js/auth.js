@@ -1,4 +1,4 @@
-// =============================
+﻿// =============================
 // GET SUPABASE CLIENT SAFELY
 // =============================
 
@@ -249,3 +249,4 @@ await supabase.auth.signOut()
 window.location.replace("login.html")
 
 }
+
