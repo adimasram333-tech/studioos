@@ -357,7 +357,7 @@ function sanitizeStudioOSDownloadFileName(value, fallbackExtension = "jpg") {
     .replace(/_+/g, "_")
     .replace(/^_+|_+$/g, "");
 
-  const fallback = `studioos-photo-${Date.now()}.${fallbackExtension}`;
+  const fallback = `chitrabook-ai-photo-${Date.now()}.${fallbackExtension}`;
   const fileName = safeValue || fallback;
 
   if (/\.[a-z0-9]{2,6}$/i.test(fileName)) {
@@ -398,7 +398,7 @@ function getStudioOSDownloadFileName(imageUrl, blob, trackingOptions = {}) {
     // ignore and use fallback
   }
 
-  return sanitizeStudioOSDownloadFileName(`studioos-photo-${Date.now()}`, extension);
+  return sanitizeStudioOSDownloadFileName(`chitrabook-ai-photo-${Date.now()}`, extension);
 }
 
 function blobToBase64ForStudioOSNativeSave(blob) {
@@ -433,7 +433,7 @@ async function savePhotoBlobInStudioOSAndroidApp(blob, imageUrl, trackingOptions
   const saver = getStudioOSFileSaverPlugin();
 
   if (!saver || typeof saver.saveFile !== "function") {
-    throw new Error("StudioOS native file saver is not available");
+    throw new Error("ChitraBook AI native file saver is not available");
   }
 
   const mimeType = blob?.type || "image/jpeg";
@@ -736,7 +736,7 @@ async function showPaymentModal(imageUrl, eventId, photographerId, eventName, op
         key: razorpayKey,
         amount: order.amount,
         currency: order.currency || "INR",
-        name: "StudioOS",
+        name: "ChitraBook AI",
         description: "Photo Purchase",
         order_id: order.id,
 
