@@ -485,7 +485,7 @@ const plugins = getCapacitorPlugins()
 const Filesystem = plugins.Filesystem
 
 if(!Filesystem || typeof Filesystem.writeFile !== "function"){
-throw new Error("StudioOS file saver is not available")
+throw new Error("ChitraBook AI file saver is not available")
 }
 
 const directory =
@@ -843,7 +843,7 @@ const { blob, fileName } = await buildInvoicePdfBlob()
 await triggerBestDownload(blob, fileName)
 
 if(isCapacitorNativeApp()){
-showInvoiceToast("Invoice saved to Downloads/StudioOS", "success")
+showInvoiceToast("Invoice saved to Downloads/ChitraBook AI", "success")
 return
 }
 
