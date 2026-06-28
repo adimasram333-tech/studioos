@@ -452,7 +452,7 @@ async function savePremiumProposalPdfBlobNatively(blob, filename){
 const saver = getStudioOSFileSaverPlugin()
 
 if(!saver || typeof saver.saveFile !== "function"){
-throw new Error("StudioOS native file saver is not available")
+throw new Error("ChitraBook AI native file saver is not available")
 }
 
 const fileName = sanitizePremiumProposalPdfFileName(filename)
@@ -481,7 +481,7 @@ Your premium photography proposal is attached as PDF.
 ${profile?.studio_name || ""}
 ${profile?.phone || ""}
 
-Powered by StudioOS`
+Powered by ChitraBook AI`
 
 }
 
@@ -494,7 +494,7 @@ Your premium photography proposal is attached as PDF.
 ${profile?.studio_name || ""}
 ${profile?.phone || ""}
 
-Powered by StudioOS`
+Powered by ChitraBook AI`
 
 }
 
@@ -507,7 +507,7 @@ throw new Error("Native Share plugin is not available")
 }
 
 await Share.share({
-title: "StudioOS Premium Proposal",
+title: "ChitraBook AI Premium Proposal",
 text: buildPremiumProposalTextShareMessage(data, profile),
 dialogTitle: "Share Premium Proposal"
 })
