@@ -1,4 +1,4 @@
-// ======================
+﻿// ======================
 // GET QUOTATION ID
 // ======================
 
@@ -81,7 +81,7 @@ if(configuredUrl){
 return configuredUrl.replace(/\/+$/,"")
 }
 
-return "https://adimasram333-tech.github.io/studioos"
+return "https://app.chitrabookai.in"
 
 }
 
@@ -120,7 +120,7 @@ document.head.appendChild(style)
 const btn = document.createElement("button")
 btn.id = "studioOSProposalNativeBackBtn"
 btn.type = "button"
-btn.textContent = "← Back"
+btn.textContent = "â† Back"
 
 btn.addEventListener("click", function(){
 
@@ -163,7 +163,7 @@ return slugParts.length ? slugParts[slugParts.length - 1] : null
 // ======================
 
 function formatMoney(num){
-return "₹ " + Number(num || 0).toLocaleString("en-IN") + "/-"
+return "â‚¹ " + Number(num || 0).toLocaleString("en-IN") + "/-"
 }
 
 
@@ -233,7 +233,7 @@ return category + " Photography Proposal"
 function getEventDateText(data){
 
 if(data?.event_date && data?.end_date){
-return formatDate(data.event_date) + " → " + formatDate(data.end_date)
+return formatDate(data.event_date) + " â†’ " + formatDate(data.end_date)
 }
 
 return formatDate(data?.event_date)
