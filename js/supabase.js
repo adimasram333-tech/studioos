@@ -160,14 +160,14 @@ overlay.innerHTML = `
       line-height:1.55rem;
       font-weight:900;
       color:#ffffff;
-    ">Your StudioOS account is blocked</div>
+    ">Your ChitraBook AI account is blocked</div>
 
     <div style="
       margin-top:0.55rem;
       color:rgba(255,255,255,0.72);
       font-size:0.9rem;
       line-height:1.55;
-    ">You cannot access StudioOS pages or use app features right now. Please contact StudioOS support.</div>
+    ">You cannot access ChitraBook AI pages or use app features right now. Please contact ChitraBook AI support.</div>
 
     <button id="studioosBlockedLogoutBtn" type="button" style="
       margin-top:1rem;
