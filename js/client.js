@@ -1,4 +1,4 @@
-// =============================
+﻿// =============================
 // GET CURRENT USER
 // =============================
 
@@ -137,7 +137,7 @@ if(configured && !isUnsafePublicBaseUrl(configured)){
 return configured
 }
 
-return "https://adimasram333-tech.github.io/studioos"
+return "https://app.chitrabookai.in"
 
 }
 
@@ -322,14 +322,14 @@ modal.innerHTML = `
     </h2>
 
     <div class="mt-3 space-y-2 text-sm text-gray-300">
-      <p>• Share Team Sheet link</p>
-      <p>• Client/public team sheet access</p>
-      <p>• Team Sheet PDF sharing</p>
+      <p>â€¢ Share Team Sheet link</p>
+      <p>â€¢ Client/public team sheet access</p>
+      <p>â€¢ Team Sheet PDF sharing</p>
     </div>
 
     <div class="mt-5 rounded-xl border border-white/10 bg-white/5 p-4">
       <div class="text-sm font-semibold">Basic Plan</div>
-      <div class="mt-1 text-2xl font-bold">₹499/mo</div>
+      <div class="mt-1 text-2xl font-bold">â‚¹499/mo</div>
       <p class="mt-2 text-xs text-gray-400">
         Upgrade to enable team sharing.
       </p>
@@ -470,7 +470,7 @@ formatDate(startDate)
 if(endDate && startDate !== endDate){
 
 eventDateText =
-formatDate(startDate) + " → " + formatDate(endDate)
+formatDate(startDate) + " â†’ " + formatDate(endDate)
 
 }
 
@@ -490,7 +490,7 @@ const total =
 Number(quote.total || 0)
 
 document.getElementById("totalAmount").innerText =
-"₹" + total
+"â‚¹" + total
 
 
 
@@ -533,9 +533,9 @@ row.className =
 
 row.innerHTML = `
 <div>
-₹${p.amount}
+â‚¹${p.amount}
 <div class="text-xs text-gray-400">
-${p.payment_type} • ${p.method}
+${p.payment_type} â€¢ ${p.method}
 </div>
 </div>
 
@@ -557,10 +557,10 @@ container.appendChild(row)
 // =============================
 
 document.getElementById("paidAmount").innerText =
-"₹" + paid
+"â‚¹" + paid
 
 document.getElementById("balanceAmount").innerText =
-"₹" + (total - paid)
+"â‚¹" + (total - paid)
 
 
 
@@ -682,3 +682,4 @@ console.error("LOAD CLIENT ERROR:", err)
 window.addEventListener("DOMContentLoaded",()=>{
 loadClient()
 })
+
