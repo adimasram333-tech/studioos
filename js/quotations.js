@@ -1,4 +1,4 @@
-// =============================
+﻿// =============================
 // SAFE SUPABASE ACCESS
 // =============================
 
@@ -70,7 +70,7 @@ if(configuredUrl){
 return configuredUrl.replace(/\/+$/,"")
 }
 
-return "https://adimasram333-tech.github.io/studioos"
+return "https://app.chitrabookai.in"
 
 }
 
@@ -315,14 +315,14 @@ ${formatDate(q.event_date)}
 <div class="flex items-center gap-2">
 
 <div class="text-sm font-semibold">
-₹${q.total}
+â‚¹${q.total}
 </div>
 
 <button
 onclick="toggleMenu(event, '${q.id}')"
 data-quotation-menu-toggle="true"
 class="text-xl px-2">
-⋮
+â‹®
 </button>
 
 </div>
@@ -472,7 +472,7 @@ loadQuotations()
 
 
 // =============================
-// 🔥 CONFIRM BOOKING (FIXED PROPERLY)
+// ðŸ”¥ CONFIRM BOOKING (FIXED PROPERLY)
 // =============================
 
 async function confirmBooking(id){
@@ -484,7 +484,7 @@ if(!user) return
 
 const supabase = getSupabase()
 
-// 🔥 Update status
+// ðŸ”¥ Update status
 const { error } =
 await supabase
 .from("quotations")
@@ -498,7 +498,7 @@ alert("Error confirming booking")
 return
 }
 
-// 🔥 GET QUOTATION DATA
+// ðŸ”¥ GET QUOTATION DATA
 const { data: quotation, error: fetchError } =
 await supabase
 .from("quotations")
@@ -511,7 +511,7 @@ console.error("Fetch quotation error:", fetchError)
 return
 }
 
-// 🔥 CREATE EVENT
+// ðŸ”¥ CREATE EVENT
 const { data: eventData, error: eventError } =
 await supabase
 .from("events")
@@ -531,7 +531,7 @@ console.error("EVENT ERROR:", eventError)
 return
 }
 
-// 🔥 CREATE TOKEN
+// ðŸ”¥ CREATE TOKEN
 const token =
 Math.random().toString(36).substring(2,10).toUpperCase()
 
@@ -591,3 +591,4 @@ openProposalFromQuotation(quotation)
 // =============================
 
 loadQuotations()
+
