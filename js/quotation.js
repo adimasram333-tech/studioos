@@ -1,4 +1,4 @@
-// =============================
+﻿// =============================
 // SAFE SUPABASE ACCESS (PERMANENT FIX)
 // =============================
 
@@ -82,7 +82,7 @@ if(configuredUrl){
 return configuredUrl.replace(/\/+$/,"")
 }
 
-return "https://adimasram333-tech.github.io/studioos"
+return "https://app.chitrabookai.in"
 
 }
 
@@ -1611,7 +1611,7 @@ await checkEventLoad(startDate,user.id)
 if(existingEvents > 0){
 
 alert(
-`⚠ ${existingEvents} event(s) already booked on this date`
+`âš  ${existingEvents} event(s) already booked on this date`
 )
 
 }
