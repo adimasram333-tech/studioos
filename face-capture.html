@@ -452,7 +452,7 @@ font-size:16px;
 
 <div id="aiMatchSummary" class="ai-result-summary hidden" aria-live="polite">
   <div id="aiMatchSummaryTitle" class="ai-result-title">✓ Face matched successfully</div>
-  <div id="aiMatchSummarySubtitle" class="ai-result-subtitle">0 photo matches found in StudioOS</div>
+  <div id="aiMatchSummarySubtitle" class="ai-result-subtitle">0 photo matches found in ChitraBook AI</div>
 </div>
 
 <button id="startBtn"
@@ -947,7 +947,7 @@ return {
 title: "Camera mode unavailable",
 status: "Camera Mode Failed",
 body: "This device could not open the requested front-camera mode.",
-help: "Tap Retry Camera. StudioOS will try a basic camera mode."
+help: "Tap Retry Camera. ChitraBook AI will try a basic camera mode."
 }
 }
 
@@ -956,7 +956,7 @@ return {
 title: "Secure connection required",
 status: "HTTPS Required",
 body: "Camera works only on a secure HTTPS page.",
-help: "Open the public StudioOS link from the browser using HTTPS."
+help: "Open the public ChitraBook AI link from the browser using HTTPS."
 }
 }
 
@@ -1365,7 +1365,7 @@ return
 
 hideRetryUI()
 stopCamera()
-showAIMatchSummary("", "✓ Face matched successfully", `${matchedImages.length} ${matchedImages.length === 1 ? "photo match" : "photo matches"} found in StudioOS`)
+showAIMatchSummary("", "✓ Face matched successfully", `${matchedImages.length} ${matchedImages.length === 1 ? "photo match" : "photo matches"} found in ChitraBook AI`)
 setAIScanVisualState("ai-success", `${matchedImages.length} ${matchedImages.length === 1 ? "photo matched" : "photos matched"}`)
 setBusyState(false, `${matchedImages.length} Match${matchedImages.length === 1 ? "" : "es"} Found ✅`)
 
