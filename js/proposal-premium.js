@@ -1,4 +1,4 @@
-// ======================
+﻿// ======================
 // GET QUOTATION ID (SAME SYSTEM)
 // ======================
 
@@ -48,7 +48,7 @@ shortId = parts[parts.length - 1]
 // ======================
 
 function formatMoney(num){
-return "₹ " + Number(num || 0).toLocaleString("en-IN")
+return "â‚¹ " + Number(num || 0).toLocaleString("en-IN")
 }
 
 function formatDate(dateStr){
@@ -107,7 +107,7 @@ if(configuredUrl){
 return configuredUrl.replace(/\/+$/,"")
 }
 
-return "https://adimasram333-tech.github.io/studioos"
+return "https://app.chitrabookai.in"
 
 }
 
@@ -825,7 +825,7 @@ let eventDateText = "-"
 if(data.event_date && data.end_date){
 eventDateText =
 formatDate(data.event_date) +
-" → " +
+" â†’ " +
 formatDate(data.end_date)
 }else{
 eventDateText = formatDate(data.event_date)
