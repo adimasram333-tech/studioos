@@ -49,6 +49,12 @@ shortId = getShortIdFromSlug(lastPart)
 
 let studioOSBackButtonInjected = false
 
+const PROPOSAL_SYMBOLS = Object.freeze({
+RUPEE: "\u20B9",
+DATE_RANGE_ARROW: "\u2192",
+BACK_ARROW: "\u2190"
+})
+
 function isStudioOSNativeApp(){
 
 try{
@@ -120,7 +126,7 @@ document.head.appendChild(style)
 const btn = document.createElement("button")
 btn.id = "studioOSProposalNativeBackBtn"
 btn.type = "button"
-btn.textContent = "â† Back"
+btn.textContent = PROPOSAL_SYMBOLS.BACK_ARROW + " Back"
 
 btn.addEventListener("click", function(){
 
@@ -163,7 +169,7 @@ return slugParts.length ? slugParts[slugParts.length - 1] : null
 // ======================
 
 function formatMoney(num){
-return "â‚¹ " + Number(num || 0).toLocaleString("en-IN") + "/-"
+return PROPOSAL_SYMBOLS.RUPEE + " " + Number(num || 0).toLocaleString("en-IN") + "/-"
 }
 
 
@@ -233,7 +239,7 @@ return category + " Photography Proposal"
 function getEventDateText(data){
 
 if(data?.event_date && data?.end_date){
-return formatDate(data.event_date) + " â†’ " + formatDate(data.end_date)
+return formatDate(data.event_date) + " " + PROPOSAL_SYMBOLS.DATE_RANGE_ARROW + " " + formatDate(data.end_date)
 }
 
 return formatDate(data?.event_date)
