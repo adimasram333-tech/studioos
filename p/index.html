@@ -141,9 +141,9 @@ const fullId = record.id
 // REDIRECT
 // =====================
 
-window.location.replace(
-"/studioos/proposal.html?id=" + fullId
-)
+const proposalUrl = new URL("../proposal.html", window.location.href)
+proposalUrl.searchParams.set("id", fullId)
+window.location.replace(proposalUrl.toString())
 
 }catch(err){
 
