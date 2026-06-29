@@ -136,6 +136,9 @@ let activeQuotationMenuId = null
 let quotationMenuListenersInitialized = false
 let loadedQuotationMap = new Map()
 
+const QUOTATION_INR_SYMBOL = "\u20B9"
+const QUOTATION_MENU_ICON = "\u22EE"
+
 function closeAllMenus(exceptId = null){
 
 const allMenus = document.querySelectorAll('[id^="menu-"]')
@@ -315,14 +318,14 @@ ${formatDate(q.event_date)}
 <div class="flex items-center gap-2">
 
 <div class="text-sm font-semibold">
-â‚¹${q.total}
+${QUOTATION_INR_SYMBOL}${q.total}
 </div>
 
 <button
 onclick="toggleMenu(event, '${q.id}')"
 data-quotation-menu-toggle="true"
 class="text-xl px-2">
-â‹®
+${QUOTATION_MENU_ICON}
 </button>
 
 </div>
