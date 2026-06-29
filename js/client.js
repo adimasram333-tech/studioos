@@ -31,6 +31,16 @@ return params.get("quotation") || params.get("id")
 
 
 // =============================
+// SAFE DISPLAY SYMBOLS
+// =============================
+
+const CLIENT_CURRENCY_SYMBOL = "\u20B9"
+const CLIENT_DATE_RANGE_ARROW = "\u2192"
+const CLIENT_PAYMENT_SEPARATOR = "\u2022"
+
+
+
+// =============================
 // FORMAT DATE
 // =============================
 
@@ -322,14 +332,14 @@ modal.innerHTML = `
     </h2>
 
     <div class="mt-3 space-y-2 text-sm text-gray-300">
-      <p>â€¢ Share Team Sheet link</p>
-      <p>â€¢ Client/public team sheet access</p>
-      <p>â€¢ Team Sheet PDF sharing</p>
+      <p>${CLIENT_PAYMENT_SEPARATOR} Share Team Sheet link</p>
+      <p>${CLIENT_PAYMENT_SEPARATOR} Client/public team sheet access</p>
+      <p>${CLIENT_PAYMENT_SEPARATOR} Team Sheet PDF sharing</p>
     </div>
 
     <div class="mt-5 rounded-xl border border-white/10 bg-white/5 p-4">
       <div class="text-sm font-semibold">Basic Plan</div>
-      <div class="mt-1 text-2xl font-bold">â‚¹499/mo</div>
+      <div class="mt-1 text-2xl font-bold">${CLIENT_CURRENCY_SYMBOL}499/mo</div>
       <p class="mt-2 text-xs text-gray-400">
         Upgrade to enable team sharing.
       </p>
@@ -470,7 +480,7 @@ formatDate(startDate)
 if(endDate && startDate !== endDate){
 
 eventDateText =
-formatDate(startDate) + " â†’ " + formatDate(endDate)
+formatDate(startDate) + " " + CLIENT_DATE_RANGE_ARROW + " " + formatDate(endDate)
 
 }
 
@@ -490,7 +500,7 @@ const total =
 Number(quote.total || 0)
 
 document.getElementById("totalAmount").innerText =
-"â‚¹" + total
+CLIENT_CURRENCY_SYMBOL + total
 
 
 
@@ -533,9 +543,9 @@ row.className =
 
 row.innerHTML = `
 <div>
-â‚¹${p.amount}
+${CLIENT_CURRENCY_SYMBOL}${p.amount}
 <div class="text-xs text-gray-400">
-${p.payment_type} â€¢ ${p.method}
+${p.payment_type} ${CLIENT_PAYMENT_SEPARATOR} ${p.method}
 </div>
 </div>
 
@@ -557,10 +567,10 @@ container.appendChild(row)
 // =============================
 
 document.getElementById("paidAmount").innerText =
-"â‚¹" + paid
+CLIENT_CURRENCY_SYMBOL + paid
 
 document.getElementById("balanceAmount").innerText =
-"â‚¹" + (total - paid)
+CLIENT_CURRENCY_SYMBOL + (total - paid)
 
 
 
