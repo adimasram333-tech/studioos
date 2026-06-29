@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Website Builder - StudioOS</title>
+<title>Website Builder - ChitraBook AI</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -2233,7 +2233,7 @@ const razorpayInstance = new window.Razorpay({
 key: orderResponse?.razorpay_key_id,
 amount: orderResponse?.amount,
 currency: orderResponse?.currency || "INR",
-name: "StudioOS",
+name: "ChitraBook AI",
 description: `${templateMeta.name} template unlock`,
 order_id: orderResponse?.order?.id,
 handler: async function (paymentResponse) {
@@ -2514,7 +2514,7 @@ return
 try{
 if(isStudioOSNativeBuilderApp() && navigator.share){
 await navigator.share({
-title: "My StudioOS Website",
+title: "My ChitraBook AI Website",
 text: "View my photography website",
 url: shareUrl
 })
