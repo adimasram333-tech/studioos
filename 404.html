@@ -5,23 +5,49 @@
 <title>Loading...</title>
 
 <script>
+(function(){
 
-const path = window.location.pathname
+const APP_BASE_URL = "https://app.chitrabookai.in"
+const path = String(window.location.pathname || "")
+const params = new URLSearchParams(window.location.search || "")
 
-if(path.includes("/p/")){
-
-const slug = path.split("/").pop()
-
-window.location.replace(
-"/studioos/p/index.html?slug=" + slug
-)
-
-}else{
-
-window.location.replace("/studioos/")
-
+function redirectTo(url){
+window.location.replace(url)
 }
 
+function getProposalSlug(){
+const existingSlug = String(params.get("slug") || "").trim()
+if(existingSlug && existingSlug !== "index.html"){
+return existingSlug
+}
+
+const parts = path.split("/").filter(Boolean)
+const pIndex = parts.findIndex(part => String(part || "").toLowerCase() === "p")
+
+if(pIndex >= 0 && parts[pIndex + 1]){
+const slug = String(parts[pIndex + 1] || "").trim()
+if(slug && slug !== "index.html"){
+return slug
+}
+}
+
+return ""
+}
+
+if(path.includes("/p/")){
+const slug = getProposalSlug()
+
+if(slug){
+const target = new URL("/p/index.html", APP_BASE_URL)
+target.searchParams.set("slug", slug)
+redirectTo(target.toString())
+return
+}
+}
+
+redirectTo(APP_BASE_URL + "/")
+
+})()
 </script>
 
 </head>
