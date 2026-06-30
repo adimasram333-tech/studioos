@@ -48,7 +48,7 @@ shortId = parts[parts.length - 1]
 // ======================
 
 function formatMoney(num){
-return "â‚¹ " + Number(num || 0).toLocaleString("en-IN")
+return "₹ " + Number(num || 0).toLocaleString("en-IN")
 }
 
 function formatDate(dateStr){
@@ -825,7 +825,7 @@ let eventDateText = "-"
 if(data.event_date && data.end_date){
 eventDateText =
 formatDate(data.event_date) +
-" â†’ " +
+" → " +
 formatDate(data.end_date)
 }else{
 eventDateText = formatDate(data.event_date)
