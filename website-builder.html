@@ -1171,7 +1171,7 @@ padding:0.56rem;
 <div class="max-w-md mx-auto">
 
 <div class="flex items-center justify-between gap-3 mb-5">
-<a href="dashboard.html" class="text-sm text-gray-400 hover:text-white transition">â† Back</a>
+<a href="dashboard.html" class="text-sm text-gray-400 hover:text-white transition">&#8592; Back</a>
 <span id="builderStatus" class="status-badge">Builder Ready</span>
 </div>
 
@@ -1208,7 +1208,7 @@ Create your personal photography website with ready-made premium templates.
 <h3 class="text-sm font-semibold">Template 2</h3>
 <div class="mt-1 flex items-center justify-between gap-3">
 <p class="text-xs text-gray-400">Luxury Wedding</p>
-<span class="text-xs font-semibold text-white/90">â‚¹1099 one-time</span>
+<span class="text-xs font-semibold text-white/90">&#8377;1099 one-time</span>
 </div>
 </div>
 
@@ -1219,7 +1219,7 @@ Create your personal photography website with ready-made premium templates.
 <h3 class="text-sm font-semibold">Template 3</h3>
 <div class="mt-1 flex items-center justify-between gap-3">
 <p class="text-xs text-gray-400">Dark Cinematic</p>
-<span class="text-xs font-semibold text-white/90">â‚¹1599 one-time</span>
+<span class="text-xs font-semibold text-white/90">&#8377;1599 one-time</span>
 </div>
 </div>
 
@@ -1230,7 +1230,7 @@ Create your personal photography website with ready-made premium templates.
 <h3 class="text-sm font-semibold">Template 4</h3>
 <div class="mt-1 flex items-center justify-between gap-3">
 <p class="text-xs text-gray-400">Modern Studio</p>
-<span class="text-xs font-semibold text-white/90">â‚¹1499 one-time</span>
+<span class="text-xs font-semibold text-white/90">&#8377;1499 one-time</span>
 </div>
 </div>
 
@@ -1241,7 +1241,7 @@ Create your personal photography website with ready-made premium templates.
 <h3 class="text-sm font-semibold">Template 5</h3>
 <div class="mt-1 flex items-center justify-between gap-3">
 <p class="text-xs text-gray-400">Instagram Style</p>
-<span class="text-xs font-semibold text-white/90">â‚¹1499 one-time</span>
+<span class="text-xs font-semibold text-white/90">&#8377;1499 one-time</span>
 </div>
 </div>
 
@@ -1252,7 +1252,7 @@ Create your personal photography website with ready-made premium templates.
 <h3 class="text-sm font-semibold">Template 6</h3>
 <div class="mt-1 flex items-center justify-between gap-3">
 <p class="text-xs text-gray-400">Premium Agency</p>
-<span class="text-xs font-semibold text-white/90">â‚¹1099 one-time</span>
+<span class="text-xs font-semibold text-white/90">&#8377;1099 one-time</span>
 </div>
 </div>
 
@@ -1281,7 +1281,7 @@ Create your personal photography website with ready-made premium templates.
 <button id="previewTopBtn" type="button" class="preview-btn primary preview-main-btn">Preview Selected Template</button>
 
 <div class="preview-menu-wrap">
-<button id="previewMenuBtn" type="button" class="preview-btn secondary preview-menu-btn" aria-label="Open preview actions menu" aria-expanded="false">â‹®</button>
+<button id="previewMenuBtn" type="button" class="preview-btn secondary preview-menu-btn" aria-label="Open preview actions menu" aria-expanded="false">&#8942;</button>
 
 <div id="previewMenuDropdown" class="preview-menu-dropdown hidden" role="menu" aria-label="Preview actions">
 <button id="menuEditBtn" type="button" class="preview-menu-item" role="menuitem">Edit Website Details</button>
@@ -1353,9 +1353,9 @@ Ready to save
 <div class="glass rounded-2xl p-5">
 <h2 class="text-lg font-semibold mb-3">Current Status</h2>
 <div class="space-y-2 text-sm text-gray-300">
-<p>â€¢ 6 templates now have visible preview styles</p>
-<p>â€¢ Live preview updates from your builder details</p>
-<p>â€¢ Public website publish step now supports paid template unlock flow</p>
+<p>&bull; 6 templates now have visible preview styles</p>
+<p>&bull; Live preview updates from your builder details</p>
+<p>&bull; Public website publish step now supports paid template unlock flow</p>
 </div>
 </div>
 
@@ -1371,7 +1371,7 @@ This template supports preview, editing and draft saving. A one-time purchase is
 
 <div class="purchase-modal-card">
 <div id="purchaseTemplateName" class="purchase-modal-template">Template Name</div>
-<div id="purchaseTemplatePrice" class="purchase-modal-price">â‚¹0</div>
+<div id="purchaseTemplatePrice" class="purchase-modal-price">&#8377;0</div>
 <div class="purchase-modal-note">One-time purchase to unlock publishing</div>
 </div>
 
@@ -1634,14 +1634,14 @@ return String(value || "")
 
 function formatPriceINR(value){
 const numericValue = Number(value || 0)
-return `â‚¹${numericValue.toLocaleString("en-IN")}`
+return `\u20B9${numericValue.toLocaleString("en-IN")}`
 }
 
 function formatCurrencyINR(value){
 const numericValue = Number(value || 0)
 
 if(!Number.isFinite(numericValue)){
-return "â‚¹0"
+return "\u20B90"
 }
 
 return new Intl.NumberFormat("en-IN", {
