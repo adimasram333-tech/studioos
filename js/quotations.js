@@ -339,9 +339,9 @@ class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs">
 View
 </button>
 
-<button onclick="editQuotation('${q.id}')"
-class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded text-xs">
-Edit
+<button onclick="deleteQuotation('${q.id}')"
+class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-xs">
+Delete
 </button>
 
 </div>
