@@ -440,12 +440,100 @@ window.location.href =
 
 
 // =============================
+// APP STYLE CONFIRM MODAL
+// =============================
+
+function showQuotationConfirmModal({
+title = "Are you sure?",
+message = "",
+confirmText = "OK",
+cancelText = "Cancel",
+danger = false
+} = {}){
+
+return new Promise((resolve)=>{
+
+const existingModal = document.getElementById("quotationConfirmModal")
+if(existingModal){
+existingModal.remove()
+}
+
+const overlay = document.createElement("div")
+overlay.id = "quotationConfirmModal"
+overlay.className = "fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 px-4"
+
+overlay.innerHTML = `
+<div class="glass w-full max-w-sm rounded-2xl p-5 shadow-2xl border border-white/10">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-full grid place-items-center ${danger ? "bg-red-500/20 text-red-300" : "bg-indigo-500/20 text-indigo-200"}">
+${danger ? "!" : "?"}
+</div>
+<div class="flex-1">
+<h3 class="text-lg font-bold text-white">${title}</h3>
+<p class="mt-2 text-sm leading-6 text-gray-300">${message}</p>
+</div>
+</div>
+<div class="mt-5 flex justify-end gap-3">
+<button type="button" data-confirm-cancel="true" class="px-4 py-2 rounded-lg text-sm font-semibold bg-white/10 hover:bg-white/15 text-gray-200">
+${cancelText}
+</button>
+<button type="button" data-confirm-ok="true" class="px-4 py-2 rounded-lg text-sm font-bold ${danger ? "bg-red-600 hover:bg-red-700 text-white" : "bg-indigo-600 hover:bg-indigo-700 text-white"}">
+${confirmText}
+</button>
+</div>
+</div>
+`
+
+document.body.appendChild(overlay)
+
+const cleanup = (value)=>{
+overlay.remove()
+document.removeEventListener("keydown", onKeyDown)
+resolve(value)
+}
+
+const onKeyDown = (event)=>{
+if(event.key === "Escape"){
+cleanup(false)
+}
+}
+
+overlay.querySelector("[data-confirm-cancel='true']").addEventListener("click", ()=>{
+cleanup(false)
+})
+
+overlay.querySelector("[data-confirm-ok='true']").addEventListener("click", ()=>{
+cleanup(true)
+})
+
+overlay.addEventListener("click", (event)=>{
+if(event.target === overlay){
+cleanup(false)
+}
+})
+
+document.addEventListener("keydown", onKeyDown)
+
+})
+
+}
+
+
+// =============================
 // DELETE QUOTATION
 // =============================
 
 async function deleteQuotation(id){
 
-if(!confirm("Delete this quotation?")) return
+const confirmed = await showQuotationConfirmModal({
+title: "Delete quotation?",
+message: "This quotation will be permanently deleted. This action cannot be undone.",
+confirmText: "Delete",
+cancelText: "Cancel",
+danger: true
+})
+
+if(!confirmed) return
 
 const user = await getCurrentUser()
 
