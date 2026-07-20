@@ -1035,6 +1035,44 @@
       return data?.session?.access_token || null;
     }
 
+    function isNativeAndroidApp(){
+      try{
+        if(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform()){
+          if(typeof window.Capacitor.getPlatform === "function"){
+            return window.Capacitor.getPlatform() === "android";
+          }
+
+          return true;
+        }
+
+        const protocol = String(window.location.protocol || "").toLowerCase();
+        return protocol === "capacitor:" || protocol === "file:";
+      }catch(error){
+        return false;
+      }
+    }
+
+    function getRazorpayNativePlugin(){
+      try{
+        return window.Capacitor?.Plugins?.RazorpayNative || null;
+      }catch(error){
+        return null;
+      }
+    }
+
+    function buildNativeCheckoutOptions(options){
+      return {
+        key: options.key,
+        amount: options.amount,
+        currency: options.currency,
+        name: options.name,
+        description: options.description,
+        order_id: options.order_id,
+        prefill: options.prefill,
+        theme: options.theme
+      };
+    }
+
     function setButtonBusy(isBusy){
       basicPlanBtn.disabled = isBusy;
       proPlanBtn.disabled = isBusy;
@@ -1411,9 +1449,75 @@
           throw new Error("Missing Razorpay key from order response.");
         }
 
-        if(typeof window.Razorpay !== "function"){
+        const razorpayNativePlugin = isNativeAndroidApp() ? getRazorpayNativePlugin() : null;
+        const shouldUseNativeCheckout = Boolean(razorpayNativePlugin);
+
+        if(!shouldUseNativeCheckout && typeof window.Razorpay !== "function"){
           throw new Error("Razorpay checkout failed to load.");
         }
+
+        const verifySubscriptionPayment = async function(response){
+          openOverlay({
+            badge: "Verifying",
+            title: "Confirming payment",
+            text: "Your payment was received. We are verifying and activating your subscription.",
+            showActions: false,
+          });
+
+          try{
+            const verifyAccessToken = await getAccessToken();
+            if (!verifyAccessToken) {
+              throw new Error("Login session expired during payment verification.");
+            }
+
+            const { response: verifyRes, data: verifyData } = await fetchJsonWithTimeout(
+              SUBSCRIPTION_VERIFY_URL,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "apikey": window.SUPABASE_ANON_KEY,
+                  "Authorization": `Bearer ${verifyAccessToken}`
+                },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  plan: selectedPlan,
+                  billing_cycle: config.billing_cycle
+                })
+              }
+            );
+
+            if(!verifyRes.ok || !verifyData?.success){
+              throw new Error(getFriendlySubscriptionError(verifyData?.error || "Payment verification failed."));
+            }
+
+            await loadPlanState();
+            closeOverlay();
+            showToast("success", verifyData?.idempotent ? "Subscription already verified and active." : "Subscription activated successfully.");
+          }catch(verifyError){
+            console.error("Subscription verify failed:", verifyError);
+            const verifyMessage = verifyError instanceof Error
+              ? getFriendlySubscriptionError(verifyError.message)
+              : "Payment completed but subscription verification failed.";
+
+            openOverlay({
+              badge: "Verification Failed",
+              title: "Payment received, verification pending",
+              text: verifyMessage,
+              showActions: true,
+              showPrimary: false,
+              secondaryLabel: "Close",
+              onSecondary: () => closeOverlay(),
+              dismissible: true,
+            });
+            showToast("error", verifyMessage);
+          }finally{
+            checkoutInProgress = false;
+            setButtonBusy(false);
+          }
+        };
 
         const options = {
           key: orderData.razorpay_key_id,
@@ -1422,68 +1526,7 @@
           name: "ChitraBook AI",
           description: orderData.order.description || `${selectedPlan} subscription`,
           order_id: orderData.order.id,
-          handler: async function(response){
-            openOverlay({
-              badge: "Verifying",
-              title: "Confirming payment",
-              text: "Your payment was received. We are verifying and activating your subscription.",
-              showActions: false,
-            });
-
-            try{
-              const verifyAccessToken = await getAccessToken();
-              if (!verifyAccessToken) {
-                throw new Error("Login session expired during payment verification.");
-              }
-
-              const { response: verifyRes, data: verifyData } = await fetchJsonWithTimeout(
-                SUBSCRIPTION_VERIFY_URL,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "apikey": window.SUPABASE_ANON_KEY,
-                    "Authorization": `Bearer ${verifyAccessToken}`
-                  },
-                  body: JSON.stringify({
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_signature: response.razorpay_signature,
-                    plan: selectedPlan,
-                    billing_cycle: config.billing_cycle
-                  })
-                }
-              );
-
-              if(!verifyRes.ok || !verifyData?.success){
-                throw new Error(getFriendlySubscriptionError(verifyData?.error || "Payment verification failed."));
-              }
-
-              await loadPlanState();
-              closeOverlay();
-              showToast("success", verifyData?.idempotent ? "Subscription already verified and active." : "Subscription activated successfully.");
-            }catch(verifyError){
-              console.error("Subscription verify failed:", verifyError);
-              const verifyMessage = verifyError instanceof Error
-                ? getFriendlySubscriptionError(verifyError.message)
-                : "Payment completed but subscription verification failed.";
-
-              openOverlay({
-                badge: "Verification Failed",
-                title: "Payment received, verification pending",
-                text: verifyMessage,
-                showActions: true,
-                showPrimary: false,
-                secondaryLabel: "Close",
-                onSecondary: () => closeOverlay(),
-                dismissible: true,
-              });
-              showToast("error", verifyMessage);
-            }finally{
-              checkoutInProgress = false;
-              setButtonBusy(false);
-            }
-          },
+          handler: verifySubscriptionPayment,
           prefill: {
             name: currentSettings?.studio_name || "",
             email: currentUser.email || ""
@@ -1502,28 +1545,65 @@
           }
         };
 
-        const rzp = new Razorpay(options);
+        let rzp = null;
 
-        rzp.on("payment.failed", function(errorResponse){
-          console.error("Razorpay payment failed:", errorResponse);
-          checkoutInProgress = false;
-          setButtonBusy(false);
-          closeOverlay();
+        if(!shouldUseNativeCheckout){
+          rzp = new Razorpay(options);
 
-          const paymentFailedMessage =
-            errorResponse?.error?.description ||
-            errorResponse?.error?.reason ||
-            "Payment failed. Please try again.";
+          rzp.on("payment.failed", function(errorResponse){
+            console.error("Razorpay payment failed:", errorResponse);
+            checkoutInProgress = false;
+            setButtonBusy(false);
+            closeOverlay();
 
-          showToast("error", paymentFailedMessage);
-        });
+            const paymentFailedMessage =
+              errorResponse?.error?.description ||
+              errorResponse?.error?.reason ||
+              "Payment failed. Please try again.";
+
+            showToast("error", paymentFailedMessage);
+          });
+        }
 
         openCheckoutSummaryOverlay({
           plan: selectedPlan,
           mode: billingMode,
           pricing: orderData?.pricing,
-          onContinue: () => {
+          onContinue: async () => {
             closeOverlay();
+
+            if(shouldUseNativeCheckout){
+              openOverlay({
+                badge: "Payment",
+                title: "Opening secure payment",
+                text: "Please complete the payment in Razorpay checkout.",
+                showActions: false,
+              });
+
+              try{
+                const nativeResponse = await razorpayNativePlugin.startPayment({
+                  options: buildNativeCheckoutOptions(options)
+                });
+
+                await verifySubscriptionPayment(nativeResponse);
+              }catch(nativeError){
+                console.error("Native Razorpay checkout failed:", nativeError);
+
+                checkoutInProgress = false;
+                setButtonBusy(false);
+                closeOverlay();
+
+                const nativeMessage =
+                  nativeError?.message ||
+                  nativeError?.errorMessage ||
+                  "Payment failed or was cancelled.";
+
+                showToast("error", nativeMessage);
+              }
+
+              return;
+            }
+
             rzp.open();
           },
           onCancel: () => {
