@@ -1069,7 +1069,7 @@
         description: options.description,
         order_id: options.order_id,
         prefill: options.prefill,
-        theme: options.theme
+        "theme.color": options?.theme?.color || "#4f46e5"
       };
     }
 
@@ -1266,6 +1266,71 @@
       }
 
       return raw || "Unable to process subscription right now.";
+    }
+
+    function getFriendlyNativePaymentError(error){
+      const values = [];
+
+      if(typeof error === "string"){
+        values.push(error);
+      }
+
+      if(error?.message){
+        values.push(error.message);
+      }
+
+      if(error?.errorMessage){
+        values.push(error.errorMessage);
+      }
+
+      if(error?.description){
+        values.push(error.description);
+      }
+
+      const raw = values.filter(Boolean).join(" ").trim();
+      let code = "";
+      let description = "";
+      let reason = "";
+
+      for(const value of values){
+        try{
+          const parsed = JSON.parse(value);
+          code = String(parsed?.error?.code || parsed?.code || code || "").trim();
+          description = String(parsed?.error?.description || parsed?.description || description || "").trim();
+          reason = String(parsed?.error?.reason || parsed?.reason || reason || "").trim();
+        }catch(parseError){
+          // Keep raw text fallback.
+        }
+      }
+
+      const combined = `${raw} ${code} ${description} ${reason}`.toLowerCase();
+
+      if(
+        combined.includes("payment_cancelled") ||
+        combined.includes("payment cancelled") ||
+        combined.includes("payment canceled") ||
+        combined.includes("cancelled") ||
+        combined.includes("canceled") ||
+        combined.includes("user cancelled") ||
+        combined.includes("user canceled") ||
+        (combined.includes("bad_request_error") && combined.includes("undefined"))
+      ){
+        return {
+          type: "info",
+          message: "Payment cancelled. No changes were made."
+        };
+      }
+
+      const safeDescription = description &&
+        description.toLowerCase() !== "undefined" &&
+        description.toLowerCase() !== "null"
+          ? description
+          : "";
+
+      return {
+        type: "error",
+        message: safeDescription || "Payment failed. Please try again."
+      };
     }
 
     function updateBillingMode(mode){
@@ -1593,12 +1658,8 @@
                 setButtonBusy(false);
                 closeOverlay();
 
-                const nativeMessage =
-                  nativeError?.message ||
-                  nativeError?.errorMessage ||
-                  "Payment failed or was cancelled.";
-
-                showToast("error", nativeMessage);
+                const nativeFailure = getFriendlyNativePaymentError(nativeError);
+                showToast(nativeFailure.type, nativeFailure.message);
               }
 
               return;
