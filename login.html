@@ -158,6 +158,208 @@ Signup
 
 import { login, signup, googleLogin, getSafeAuthNextUrl } from "./js/auth.js"
 
+const CHITRABOOK_AI_ANDROID_VERSION_CODE = 1
+const CHITRABOOK_AI_ANDROID_VERSION_NAME = "1.0"
+
+function isChitraBookNativeAndroidApp(){
+try{
+const ua = navigator.userAgent || ""
+const isAndroid = /Android/i.test(ua)
+const protocol = window.location.protocol || ""
+const host = window.location.hostname || ""
+const hasCapacitorBridge =
+!!window.Capacitor ||
+!!window.AndroidBridge ||
+protocol === "capacitor:" ||
+host === "localhost"
+
+return isAndroid && hasCapacitorBridge
+}catch(err){
+return false
+}
+}
+
+function toSafeVersionCode(value){
+const code = Number(value)
+return Number.isFinite(code) ? Math.floor(code) : 0
+}
+
+function showAppUpdateOverlay(versionInfo, forceUpdate){
+const existing = document.getElementById("chitrabookAppUpdateOverlay")
+if(existing){
+existing.remove()
+}
+
+const updateTitle =
+versionInfo?.update_title ||
+(forceUpdate ? "Update required" : "Update available")
+
+const updateMessage =
+versionInfo?.update_message ||
+(forceUpdate
+? "Please update ChitraBook AI to continue."
+: "A new version of ChitraBook AI is available.")
+
+const updateUrl = String(versionInfo?.update_url || "").trim()
+
+const overlay = document.createElement("div")
+overlay.id = "chitrabookAppUpdateOverlay"
+overlay.style.position = "fixed"
+overlay.style.inset = "0"
+overlay.style.zIndex = "2147483647"
+overlay.style.display = "flex"
+overlay.style.alignItems = "center"
+overlay.style.justifyContent = "center"
+overlay.style.padding = "1rem"
+overlay.style.background = "rgba(2,6,23,0.88)"
+overlay.style.backdropFilter = "blur(12px)"
+overlay.style.color = "#ffffff"
+
+overlay.innerHTML = `
+  <div style="
+    width:min(100%, 420px);
+    border-radius:1.35rem;
+    padding:1.2rem;
+    background:rgba(15,23,42,0.98);
+    border:1px solid rgba(255,255,255,0.12);
+    box-shadow:0 28px 90px rgba(0,0,0,0.45);
+    text-align:left;
+  ">
+    <div style="
+      display:inline-flex;
+      align-items:center;
+      padding:0.36rem 0.7rem;
+      border-radius:999px;
+      font-size:0.7rem;
+      font-weight:900;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      color:${forceUpdate ? "#fecaca" : "#bfdbfe"};
+      background:${forceUpdate ? "rgba(239,68,68,0.14)" : "rgba(59,130,246,0.14)"};
+      border:1px solid ${forceUpdate ? "rgba(239,68,68,0.28)" : "rgba(59,130,246,0.28)"};
+    ">${forceUpdate ? "Update Required" : "Update Available"}</div>
+
+    <div style="
+      margin-top:0.9rem;
+      font-size:1.25rem;
+      line-height:1.55rem;
+      font-weight:900;
+      color:#ffffff;
+    ">${updateTitle}</div>
+
+    <div style="
+      margin-top:0.55rem;
+      color:rgba(255,255,255,0.74);
+      font-size:0.9rem;
+      line-height:1.55;
+    ">${updateMessage}</div>
+
+    <div style="
+      margin-top:0.75rem;
+      color:rgba(255,255,255,0.46);
+      font-size:0.76rem;
+      line-height:1.45;
+    ">Installed version: ${CHITRABOOK_AI_ANDROID_VERSION_NAME}</div>
+
+    <button id="chitrabookUpdateNowBtn" type="button" style="
+      margin-top:1rem;
+      width:100%;
+      min-height:46px;
+      border-radius:0.95rem;
+      border:1px solid rgba(255,255,255,0.10);
+      background:rgb(79,70,229);
+      color:#ffffff;
+      font-size:0.9rem;
+      font-weight:850;
+      cursor:pointer;
+    ">Update Now</button>
+
+    ${forceUpdate ? "" : `
+      <button id="chitrabookUpdateLaterBtn" type="button" style="
+        margin-top:0.65rem;
+        width:100%;
+        min-height:42px;
+        border-radius:0.9rem;
+        border:1px solid rgba(255,255,255,0.12);
+        background:rgba(255,255,255,0.06);
+        color:rgba(255,255,255,0.86);
+        font-size:0.86rem;
+        font-weight:750;
+        cursor:pointer;
+      ">Later</button>
+    `}
+  </div>
+`
+
+document.body.appendChild(overlay)
+
+const updateBtn = document.getElementById("chitrabookUpdateNowBtn")
+if(updateBtn){
+updateBtn.onclick = function(){
+if(updateUrl){
+window.location.href = updateUrl
+}else{
+updateBtn.innerText = "Update link will be available soon"
+updateBtn.disabled = true
+updateBtn.style.opacity = "0.75"
+}
+}
+}
+
+const laterBtn = document.getElementById("chitrabookUpdateLaterBtn")
+if(laterBtn){
+laterBtn.onclick = function(){
+overlay.remove()
+}
+}
+}
+
+async function checkChitraBookAndroidAppVersion(supabase){
+if(!isChitraBookNativeAndroidApp()){
+return true
+}
+
+try{
+const { data, error } = await supabase
+.from("app_versions")
+.select("latest_version_name, latest_version_code, min_required_version_code, update_title, update_message, update_url, force_update, is_active")
+.eq("platform", "android")
+.eq("is_active", true)
+.maybeSingle()
+
+if(error){
+console.warn("App version check failed:", error)
+return true
+}
+
+if(!data){
+return true
+}
+
+const currentCode = toSafeVersionCode(CHITRABOOK_AI_ANDROID_VERSION_CODE)
+const latestCode = toSafeVersionCode(data.latest_version_code)
+const minRequiredCode = toSafeVersionCode(data.min_required_version_code)
+
+const mustForceUpdate =
+currentCode < minRequiredCode ||
+(data.force_update === true && currentCode < latestCode)
+
+if(mustForceUpdate){
+showAppUpdateOverlay(data, true)
+return false
+}
+
+if(currentCode < latestCode){
+showAppUpdateOverlay(data, false)
+}
+
+return true
+}catch(err){
+console.warn("App version check skipped:", err)
+return true
+}
+}
+
 function waitForSupabase(){
 return new Promise(resolve=>{
 const check = setInterval(()=>{
@@ -204,6 +406,9 @@ return getSafeAuthNextUrl(params.get("next"))
 const supabase = await waitForSupabase()
 const nextUrl = getRequestedNextUrl()
 
+const appVersionAllowed = await checkChitraBookAndroidAppVersion(supabase)
+
+if(appVersionAllowed){
 const { data:{ session } } =
 await supabase.auth.getSession()
 
@@ -211,6 +416,7 @@ if(session){
 window.location.replace(nextUrl)
 }else{
 document.getElementById("loginBox").classList.remove("hidden")
+}
 }
 
 let mode = "login"
