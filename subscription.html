@@ -440,10 +440,13 @@
     }
     .status-toast{
       position:fixed;
-      right:1rem;
-      bottom:1rem;
+      left:50%;
+      top:50%;
+      right:auto;
+      bottom:auto;
+      transform:translate(-50%, -50%);
       width:min(420px, calc(100vw - 2rem));
-      z-index:1200;
+      z-index:1400;
       display:none;
       padding:0.95rem 1rem;
       border-radius:1rem;
@@ -453,6 +456,7 @@
       color:white;
       font-size:0.9rem;
       line-height:1.55;
+      text-align:center;
     }
 
     .status-toast.show{
@@ -621,10 +625,12 @@
 
     @media (max-width: 480px){
       .status-toast{
-        right:0.85rem;
         left:0.85rem;
+        right:0.85rem;
+        top:50%;
+        bottom:auto;
         width:auto;
-        bottom:0.85rem;
+        transform:translateY(-50%);
       }
 
       .page-overlay-actions{
