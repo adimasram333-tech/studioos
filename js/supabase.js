@@ -336,12 +336,136 @@ return
 const user = await window.getCurrentUserWithoutBlockCheck()
 
 if(user?.id){
-await window.ensureActiveStudioOSAccount(user)
+const activeUser = await window.ensureActiveStudioOSAccount(user)
+
+if(activeUser?.id){
+window.registerChitraBookPushDevice(activeUser).catch(err=>{
+console.warn("Push token registration guard failed:", err)
+})
+}
+
 return
 }
 
 if(hasStudioOSBlockedFlag() && !isPublicGuestAccessPage() && !isBlockedGuardSafePage()){
 showBlockedAccountOverlay()
+}
+}
+
+
+// ================================
+// ANDROID PUSH TOKEN REGISTRATION
+// ================================
+
+const CHITRABOOK_PUSH_APP_VERSION_CODE = 1
+const CHITRABOOK_PUSH_APP_VERSION_NAME = "1.0"
+let chitraBookPushTokenRegistering = false
+
+function isChitraBookNativeAndroidForPush(){
+try{
+const ua = navigator.userAgent || ""
+const isAndroid = /Android/i.test(ua)
+const protocol = window.location.protocol || ""
+const host = window.location.hostname || ""
+const hasCapacitorBridge =
+!!window.Capacitor ||
+protocol === "capacitor:" ||
+host === "localhost"
+
+return isAndroid && hasCapacitorBridge
+}catch(err){
+return false
+}
+}
+
+function getChitraBookPushPlugin(){
+try{
+return window.Capacitor?.Plugins?.ChitraBookPush || null
+}catch(err){
+return null
+}
+}
+
+window.registerChitraBookPushDevice = async function(user = null){
+if(!isChitraBookNativeAndroidForPush()){
+return false
+}
+
+if(chitraBookPushTokenRegistering){
+return false
+}
+
+chitraBookPushTokenRegistering = true
+
+try{
+const activeUser = user || await window.getCurrentUserWithoutBlockCheck()
+
+if(!activeUser?.id){
+return false
+}
+
+const pushPlugin = getChitraBookPushPlugin()
+
+if(!pushPlugin || typeof pushPlugin.getFcmToken !== "function"){
+console.warn("ChitraBook push plugin is not available.")
+return false
+}
+
+try{
+if(typeof pushPlugin.requestNotificationPermission === "function"){
+await pushPlugin.requestNotificationPermission()
+}
+}catch(permissionError){
+console.warn("Push permission request skipped:", permissionError)
+}
+
+const tokenResult = await pushPlugin.getFcmToken()
+const fcmToken = String(tokenResult?.token || "").trim()
+
+if(!fcmToken){
+return false
+}
+
+const supabase = await window.getSupabase()
+
+if(!supabase){
+return false
+}
+
+const now = new Date().toISOString()
+
+const payload = {
+user_id: activeUser.id,
+platform: "android",
+fcm_token: fcmToken,
+device_id: tokenResult?.device_id || null,
+app_version_code: CHITRABOOK_PUSH_APP_VERSION_CODE,
+app_version_name: CHITRABOOK_PUSH_APP_VERSION_NAME,
+device_model: tokenResult?.device_model || null,
+is_active: true,
+last_seen_at: now,
+updated_at: now
+}
+
+const { error } = await supabase
+.from("push_device_tokens")
+.upsert(payload, { onConflict: "user_id,fcm_token" })
+
+if(error){
+console.warn("Push token save failed:", error)
+return false
+}
+
+try{
+localStorage.setItem("chitrabook_push_token_registered_at", now)
+}catch(e){}
+
+return true
+}catch(err){
+console.warn("Push token registration failed:", err)
+return false
+}finally{
+chitraBookPushTokenRegistering = false
 }
 }
 
