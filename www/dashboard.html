@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ChitraBook AI</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+}
+
+.glass{
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+.blur-dashboard{
+filter: blur(6px);
+pointer-events:none;
+}
+
+.stat-card{
+cursor:pointer;
+transition:transform .2s ease;
+min-width:0;
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+padding:0.875rem;
+min-height:86px;
+}
+
+.stat-card:hover{
+transform:scale(1.03);
+}
+
+.notification-item{
+cursor:pointer;
+transition:all .2s ease;
+}
+
+.notification-item:hover{
+transform:translateX(5px);
+color:white;
+}
+
+.stat-label{
+font-size:0.875rem;
+line-height:1.2;
+color:rgb(156 163 175);
+word-break:break-word;
+}
+
+.stat-value{
+font-size:clamp(1.05rem,4vw,1.55rem);
+line-height:1.1;
+font-weight:700;
+word-break:break-word;
+overflow-wrap:anywhere;
+margin-top:8px;
+}
+
+.stat-card-wide{
+min-height:80px;
+}
+
+.menu-wrapper{
+position:relative;
+}
+
+.menu-btn{
+display:flex;
+align-items:center;
+justify-content:center;
+width:42px;
+height:42px;
+border-radius:0.75rem;
+background: rgba(255,255,255,0.05);
+border:1px solid rgba(255,255,255,0.1);
+font-size:1.25rem;
+line-height:1;
+}
+
+.menu-btn:hover{
+background: rgba(255,255,255,0.1);
+}
+
+.dropdown-menu{
+position:absolute;
+top:calc(100% + 8px);
+right:0;
+min-width:180px;
+padding:0.5rem;
+border-radius:1rem;
+background: rgba(15,23,42,0.96);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:0 12px 30px rgba(0,0,0,0.28);
+z-index:50;
+}
+
+.dropdown-menu.hidden{
+display:none;
+}
+
+.menu-item{
+display:block;
+width:100%;
+text-align:left;
+padding:0.75rem 0.9rem;
+border-radius:0.75rem;
+font-size:0.95rem;
+color:white;
+background:transparent;
+transition:background .2s ease;
+}
+
+.menu-item:hover{
+background: rgba(255,255,255,0.08);
+}
+
+.menu-item-danger{
+color:#fca5a5;
+}
+
+.app-header{
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+gap:0.75rem;
+}
+
+.search-wrap{
+position:relative;
+flex:1;
+min-width:0;
+}
+
+.search-shell{
+display:flex;
+align-items:center;
+height:42px;
+border-radius:999px;
+background: rgba(255,255,255,0.04);
+border:1px solid rgba(255,255,255,0.18);
+overflow:hidden;
+}
+
+.search-input{
+width:100%;
+height:100%;
+background:transparent;
+border:none;
+outline:none;
+color:white;
+padding:0 1rem;
+font-size:0.95rem;
+}
+
+.search-input::placeholder{
+color:rgba(255,255,255,0.42);
+transition:opacity .25s ease;
+}
+
+.search-input:focus::placeholder{
+opacity:0.55;
+}
+
+.search-btn{
+display:flex;
+align-items:center;
+justify-content:center;
+width:52px;
+height:100%;
+background:transparent;
+border:none;
+border-left:1px solid rgba(255,255,255,0.18);
+color:white;
+cursor:pointer;
+flex-shrink:0;
+}
+
+.search-btn svg{
+width:20px;
+height:20px;
+opacity:0.88;
+}
+
+.search-results{
+position:absolute;
+top:calc(100% + 10px);
+left:0;
+right:0;
+padding:0.45rem;
+border-radius:1rem;
+background: rgba(15,23,42,0.98);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:0 12px 30px rgba(0,0,0,0.28);
+z-index:60;
+max-height:280px;
+overflow:auto;
+}
+
+.search-results.hidden{
+display:none;
+}
+
+.search-result-item{
+display:block;
+width:100%;
+text-align:left;
+padding:0.8rem 0.9rem;
+border-radius:0.85rem;
+background:transparent;
+color:white;
+transition:background .2s ease;
+}
+
+.search-result-item:hover{
+background: rgba(255,255,255,0.08);
+}
+
+.search-result-name{
+font-size:0.95rem;
+font-weight:600;
+line-height:1.25;
+word-break:break-word;
+}
+
+.search-result-meta{
+font-size:0.78rem;
+line-height:1.35;
+color:rgb(156 163 175);
+margin-top:0.18rem;
+word-break:break-word;
+}
+
+.search-empty{
+padding:0.85rem 0.9rem;
+font-size:0.85rem;
+color:rgb(156 163 175);
+}
+
+.search-hint{
+position:absolute;
+left:1rem;
+top:50%;
+transform:translateY(-50%);
+font-size:0.92rem;
+color:rgba(255,255,255,0.42);
+pointer-events:none;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+max-width:calc(100% - 4.5rem);
+animation:softHint 3.2s ease-in-out infinite;
+}
+
+.search-shell.has-value .search-hint,
+.search-shell.is-focused .search-hint{
+opacity:0;
+}
+
+@keyframes softHint{
+0%,100%{
+opacity:0.32;
+transform:translateY(-50%) translateX(0);
+}
+50%{
+opacity:0.6;
+transform:translateY(-50%) translateX(2px);
+}
+}
+
+@media (min-width: 640px){
+.stat-card{
+padding:1rem;
+min-height:100px;
+}
+.stat-card-wide{
+min-height:92px;
+}
+.stat-value{
+font-size:clamp(1.2rem,3vw,1.75rem);
+}
+}
+
+@media (max-width: 360px){
+.stat-card{
+padding:0.75rem;
+min-height:80px;
+}
+.stat-card-wide{
+min-height:76px;
+}
+.stat-label{
+font-size:0.8rem;
+}
+.stat-value{
+font-size:1rem;
+margin-top:6px;
+}
+.menu-btn{
+width:40px;
+height:40px;
+}
+.search-shell{
+height:40px;
+}
+.search-btn{
+width:48px;
+}
+.search-input{
+font-size:0.9rem;
+padding:0 0.9rem;
+}
+.search-hint{
+font-size:0.86rem;
+left:0.9rem;
+max-width:calc(100% - 4rem);
+}
+}
+
+</style>
+
+</head>
+
+
+<body class="text-white min-h-screen p-4 relative">
+
+<!-- TOP APP HEADER -->
+<div class="max-w-md mx-auto mb-5">
+
+<div class="app-header">
+
+<div class="search-wrap">
+
+<div id="searchShell" class="search-shell">
+<input
+id="clientSearchInput"
+type="text"
+class="search-input"
+autocomplete="off"
+aria-label="Search client name"
+>
+<span id="searchHint" class="search-hint">Search client details</span>
+
+<button
+id="clientSearchBtn"
+type="button"
+class="search-btn"
+aria-label="Search client"
+>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="11" cy="11" r="7"></circle>
+<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+</svg>
+</button>
+</div>
+
+<div id="searchResults" class="search-results hidden"></div>
+
+</div>
+
+<div class="menu-wrapper">
+<button
+id="menuBtn"
+type="button"
+class="menu-btn shrink-0"
+aria-label="Open menu"
+aria-expanded="false"
+aria-controls="dashboardMenu"
+>
+⋮
+</button>
+
+<div id="dashboardMenu" class="dropdown-menu hidden">
+<a
+href="#"
+id="websiteBuilderBtn"
+class="menu-item"
+>
+Website Builder
+</a>
+
+<a
+href="#"
+id="subscriptionBtn"
+class="menu-item"
+>
+Subscription & Billing
+</a>
+
+<button
+id="logoutBtn"
+type="button"
+class="menu-item menu-item-danger"
+>
+Logout
+</button>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div id="dashboard" class="max-w-md mx-auto">
+
+<div class="glass rounded-2xl p-4 flex justify-between items-center gap-3 mb-5">
+
+<div class="min-w-0 flex-1">
+<h2 id="studioDisplay" class="text-xl font-bold break-words">ChitraBook AI</h2>
+</div>
+
+<a
+id="setupBtn"
+href="profile.html"
+class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm shrink-0"
+>
+Setup
+</a>
+
+</div>
+
+
+<div class="grid grid-cols-2 gap-3 mb-5">
+
+<div onclick="location.href='clients.html'" class="glass rounded-2xl stat-card">
+<p class="stat-label">Total Bookings</p>
+<h2 id="totalBookings" class="stat-value">0</h2>
+</div>
+
+<div onclick="location.href='pending-payments.html'" class="glass rounded-2xl stat-card">
+<p class="stat-label">Pending Payments</p>
+<h2 id="pendingPayments" class="stat-value">₹0</h2>
+</div>
+
+<div onclick="location.href='monthly-revenue.html'" class="glass rounded-2xl stat-card stat-card-wide col-span-2">
+<p class="stat-label">Monthly Revenue</p>
+<h2 id="monthlyRevenue" class="stat-value">₹0</h2>
+</div>
+
+</div>
+
+
+<div class="glass rounded-2xl p-4 mb-6">
+
+<div class="flex justify-between items-center mb-3 gap-3">
+
+<h3 class="text-lg font-semibold">
+Recent Quotations
+</h3>
+
+<a href="quotations.html"
+class="text-indigo-400 text-sm hover:underline shrink-0">
+View All →
+</a>
+
+</div>
+
+<div id="recentQuotations" class="space-y-2 text-sm text-gray-300">
+
+<p class="text-gray-400">No quotations yet</p>
+
+</div>
+
+</div>
+
+
+<div class="glass rounded-2xl p-4 mb-6">
+
+<h3 class="text-lg font-semibold mb-3">
+Notifications
+</h3>
+
+<div id="notifications" class="space-y-2 text-sm text-gray-300">
+
+<p class="text-gray-400">No notifications</p>
+
+</div>
+
+</div>
+
+
+
+<div class="space-y-4">
+
+<a href="quotation.html"
+class="block glass rounded-2xl p-4 hover:scale-105 transition">
+📄 Quotations
+</a>
+
+<a href="clients.html"
+class="block glass rounded-2xl p-4 hover:scale-105 transition">
+👤 Clients
+</a>
+
+<a href="gallery-upload.html"
+class="block glass rounded-2xl p-4 hover:scale-105 transition">
+📦 Upload Photos
+</a>
+
+<a href="gallery.html"
+class="block glass rounded-2xl p-4 hover:scale-105 transition">
+🖼 Gallery
+</a>
+
+<a href="earnings.html"
+class="block glass rounded-2xl p-4 hover:scale-105 transition">
+💰 Earnings
+</a>
+
+
+</div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+
+<script type="module">
+
+import { protectPage, logout } from "./js/auth.js"
+
+
+// =============================
+// GET CURRENT USER (FIXED)
+// =============================
+
+async function getCurrentUser(){
+
+const supabase = await window.getSupabase()
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+return user
+
+}
+
+
+// =============================
+// PROTECT PAGE
+// =============================
+
+await protectPage()
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click", logout)
+
+
+// =============================
+// MENU LOGIC
+// =============================
+
+const menuBtn =
+document.getElementById("menuBtn")
+
+const dashboardMenu =
+document.getElementById("dashboardMenu")
+
+const websiteBuilderBtn =
+document.getElementById("websiteBuilderBtn")
+
+const subscriptionBtn =
+document.getElementById("subscriptionBtn")
+
+menuBtn.addEventListener("click",(e)=>{
+
+e.stopPropagation()
+
+const isHidden =
+dashboardMenu.classList.contains("hidden")
+
+if(isHidden){
+dashboardMenu.classList.remove("hidden")
+menuBtn.setAttribute("aria-expanded","true")
+}else{
+dashboardMenu.classList.add("hidden")
+menuBtn.setAttribute("aria-expanded","false")
+}
+
+})
+
+document.addEventListener("click",(e)=>{
+
+if(
+!dashboardMenu.contains(e.target) &&
+!menuBtn.contains(e.target)
+){
+dashboardMenu.classList.add("hidden")
+menuBtn.setAttribute("aria-expanded","false")
+}
+
+})
+
+websiteBuilderBtn.addEventListener("click",(e)=>{
+
+e.preventDefault()
+dashboardMenu.classList.add("hidden")
+menuBtn.setAttribute("aria-expanded","false")
+window.location.href = "website-builder.html"
+
+})
+
+subscriptionBtn.addEventListener("click",(e)=>{
+
+e.preventDefault()
+dashboardMenu.classList.add("hidden")
+menuBtn.setAttribute("aria-expanded","false")
+window.location.href = "subscription.html"
+
+})
+
+
+// =============================
+// SEARCH LOGIC
+// =============================
+
+const clientSearchInput =
+document.getElementById("clientSearchInput")
+
+const clientSearchBtn =
+document.getElementById("clientSearchBtn")
+
+const searchResults =
+document.getElementById("searchResults")
+
+const searchShell =
+document.getElementById("searchShell")
+
+let searchDebounceTimer = null
+let activeSearchToken = 0
+
+function escapeHtml(value){
+return String(value ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;")
+}
+
+function closeSearchResults(){
+searchResults.classList.add("hidden")
+searchResults.innerHTML = ""
+}
+
+function formatResultDate(value){
+if(!value) return "No date"
+const parsed = new Date(value)
+if(Number.isNaN(parsed.getTime())) return "No date"
+return parsed.toLocaleDateString("en-IN")
+}
+
+function updateSearchShellState(){
+const hasValue = clientSearchInput.value.trim().length > 0
+searchShell.classList.toggle("has-value", hasValue)
+}
+
+function renderSearchResults(results){
+
+if(!results.length){
+searchResults.innerHTML =
+`<div class="search-empty">No client found</div>`
+searchResults.classList.remove("hidden")
+return
+}
+
+searchResults.innerHTML = ""
+
+results.forEach(item=>{
+
+const btn = document.createElement("button")
+btn.type = "button"
+btn.className = "search-result-item"
+
+const clientName = escapeHtml(item.client_name || "Unnamed client")
+const eventDate = escapeHtml(formatResultDate(item.event_date))
+const amount = escapeHtml(formatCurrency(item.total || 0))
+
+btn.innerHTML = `
+<div class="search-result-name">${clientName}</div>
+<div class="search-result-meta">${eventDate} • ${amount}</div>
+`
+
+btn.addEventListener("click", ()=>{
+window.location.href = `client.html?quotation=${encodeURIComponent(item.id)}`
+})
+
+searchResults.appendChild(btn)
+
+})
+
+searchResults.classList.remove("hidden")
+
+}
+
+async function searchClientsByName(query){
+
+const supabase = await window.getSupabase()
+const user = await getCurrentUser()
+
+if(!user) return []
+
+const { data, error } =
+await supabase
+.from("quotations")
+.select("id,client_name,event_date,total")
+.eq("user_id", user.id)
+.ilike("client_name", `%${query}%`)
+.order("created_at",{ascending:false})
+.limit(8)
+
+if(error){
+console.error("Client search failed:", error)
+return []
+}
+
+return data || []
+
+}
+
+async function performClientSearch(){
+
+const query = clientSearchInput.value.trim()
+
+updateSearchShellState()
+
+if(query.length < 2){
+closeSearchResults()
+return
+}
+
+const currentToken = ++activeSearchToken
+
+const results = await searchClientsByName(query)
+
+if(currentToken !== activeSearchToken) return
+
+renderSearchResults(results)
+
+}
+
+clientSearchInput.addEventListener("focus", ()=>{
+searchShell.classList.add("is-focused")
+if(clientSearchInput.value.trim().length >= 2 && searchResults.innerHTML.trim()){
+searchResults.classList.remove("hidden")
+}
+})
+
+clientSearchInput.addEventListener("blur", ()=>{
+searchShell.classList.remove("is-focused")
+})
+
+clientSearchInput.addEventListener("input", ()=>{
+
+updateSearchShellState()
+
+clearTimeout(searchDebounceTimer)
+
+searchDebounceTimer = setTimeout(()=>{
+performClientSearch()
+},220)
+
+})
+
+clientSearchInput.addEventListener("keydown", async (e)=>{
+
+if(e.key === "Escape"){
+closeSearchResults()
+clientSearchInput.blur()
+return
+}
+
+if(e.key === "Enter"){
+e.preventDefault()
+
+const firstResultButton =
+searchResults.querySelector(".search-result-item")
+
+if(firstResultButton){
+firstResultButton.click()
+return
+}
+
+await performClientSearch()
+}
+
+})
+
+clientSearchBtn.addEventListener("click", async ()=>{
+await performClientSearch()
+})
+
+document.addEventListener("click",(e)=>{
+
+if(
+!searchResults.contains(e.target) &&
+!clientSearchInput.contains(e.target) &&
+!clientSearchBtn.contains(e.target)
+){
+closeSearchResults()
+}
+
+})
+
+
+// =============================
+// FORMAT CURRENCY
+// =============================
+
+function formatCurrency(value){
+
+const amount = Number(value || 0)
+
+return "₹" + amount.toLocaleString("en-IN")
+
+}
+
+
+
+// =============================
+// ENSURE PHOTOGRAPHER SETTINGS
+// =============================
+
+async function ensurePhotographerSettings(){
+
+const supabase = await window.getSupabase()
+
+const user = await getCurrentUser()
+
+if(!user) return null
+
+const { data: existing, error: fetchError } =
+await supabase
+.from("photographer_settings")
+.select("id,studio_name")
+.eq("user_id", user.id)
+.maybeSingle()
+
+if(fetchError){
+console.error("Photographer settings fetch failed:", fetchError)
+return null
+}
+
+if(existing){
+return existing
+}
+
+const insertPayload = {
+user_id: user.id
+}
+
+const { data: inserted, error: insertError } =
+await supabase
+.from("photographer_settings")
+.insert([insertPayload])
+.select("id,studio_name")
+.single()
+
+if(insertError){
+console.error("Photographer settings auto-create failed:", insertError)
+
+const { data: retryData, error: retryError } =
+await supabase
+.from("photographer_settings")
+.select("id,studio_name")
+.eq("user_id", user.id)
+.maybeSingle()
+
+if(retryError){
+console.error("Photographer settings retry fetch failed:", retryError)
+return null
+}
+
+return retryData || null
+}
+
+return inserted || null
+
+}
+
+
+
+// =============================
+// LOAD STUDIO
+// =============================
+
+async function loadStudio(){
+
+const settings = await ensurePhotographerSettings()
+
+if(settings?.studio_name){
+document.getElementById("studioDisplay").innerText =
+settings.studio_name
+}
+
+}
+
+loadStudio()
+
+
+
+// =============================
+// LOAD DASHBOARD
+// =============================
+
+async function loadDashboard(){
+
+const supabase = await window.getSupabase()
+
+const user = await getCurrentUser()
+
+if(!user) return
+
+
+
+// RECENT QUOTATIONS
+
+const { data: quotations } =
+await supabase
+.from("quotations")
+.select("id,client_name,total,created_at")
+.eq("user_id", user.id)
+.order("created_at",{ascending:false})
+.limit(3)
+
+const list =
+document.getElementById("recentQuotations")
+
+if(quotations && quotations.length){
+
+list.innerHTML = ""
+
+quotations.forEach(q=>{
+
+const date =
+new Date(q.created_at)
+.toLocaleDateString("en-IN")
+
+const row =
+document.createElement("div")
+
+row.innerHTML =
+`
+<div class="flex justify-between gap-3">
+<div class="min-w-0">
+<div class="break-words">${q.client_name}</div>
+<div class="text-xs text-gray-400">${date}</div>
+</div>
+<span class="shrink-0 break-words">${formatCurrency(q.total)}</span>
+</div>
+`
+
+list.appendChild(row)
+
+})
+
+}
+
+
+
+// TOTAL BOOKINGS
+
+const { count } =
+await supabase
+.from("quotations")
+.select("*",{count:"exact",head:true})
+.eq("user_id", user.id)
+.eq("status","confirmed")
+
+document.getElementById("totalBookings").innerText =
+count || 0
+
+
+
+// PAYMENTS + REVENUE
+
+const { data: allQuotes } =
+await supabase
+.from("quotations")
+.select("id,total")
+.eq("user_id", user.id)
+.eq("status","confirmed")
+
+const { data: allPayments } =
+await supabase
+.from("payments")
+.select("*")
+.eq("user_id", user.id)
+
+
+
+let pending = 0
+let monthlyRevenue = 0
+
+const now = new Date()
+const currentMonth = now.getMonth()
+const currentYear = now.getFullYear()
+
+
+
+allPayments?.forEach(p=>{
+
+const payDate = new Date(p.payment_date)
+
+if(
+payDate.getMonth() === currentMonth &&
+payDate.getFullYear() === currentYear
+){
+monthlyRevenue += Number(p.amount || 0)
+}
+
+})
+
+
+
+for(const q of (allQuotes || [])){
+
+const payments =
+allPayments?.filter(p=>p.quotation_id === q.id) || []
+
+let paid = 0
+
+payments.forEach(p=>{
+paid += Number(p.amount || 0)
+})
+
+const remaining = Number(q.total || 0) - paid
+
+if(remaining > 0){
+pending += remaining
+}
+
+}
+
+
+
+document.getElementById("pendingPayments").innerText =
+formatCurrency(pending)
+
+document.getElementById("monthlyRevenue").innerText =
+formatCurrency(monthlyRevenue)
+
+
+
+// NOTIFICATIONS
+
+const { data: events } =
+await supabase
+.from("quotations")
+.select("client_name,event_date,status")
+.eq("user_id", user.id)
+.eq("status","confirmed")
+
+const notify =
+document.getElementById("notifications")
+
+notify.innerHTML = ""
+
+const today = new Date()
+
+let shown = 0
+
+events?.forEach(e=>{
+
+if(shown >= 3) return
+
+const eventDate =
+new Date(e.event_date)
+
+const diff =
+Math.ceil(
+(eventDate - today)/(1000*60*60*24)
+)
+
+let text = ""
+
+if(diff === 0){
+text = `📅 ${e.client_name} event today`
+}
+else if(diff === 1){
+text = `📅 ${e.client_name} event tomorrow`
+}
+else if(diff <= 3 && diff > 1){
+text = `📅 ${e.client_name} event in ${diff} days`
+}
+
+if(text){
+
+const div = document.createElement("div")
+
+div.className = "notification-item"
+
+div.onclick = () => location.href = "clients.html"
+
+div.innerText = text
+
+notify.appendChild(div)
+
+shown++
+
+}
+
+})
+
+if(notify.innerHTML === ""){
+notify.innerHTML =
+"<p class='text-gray-400'>No reminders</p>"
+}
+
+}
+
+loadDashboard()
+
+</script>
+
+<script src="js/app-bottom-nav.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Face Capture</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- 🔥 REQUIRED DEPENDENCIES -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+
+<style>
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+}
+.circle{
+width:260px;
+height:260px;
+border-radius:50%;
+overflow:hidden;
+border:4px solid rgba(255,255,255,0.2);
+position:relative;
+}
+.circle video{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+.status{
+position:absolute;
+bottom:10px;
+left:50%;
+transform:translateX(-50%);
+background:rgba(0,0,0,0.6);
+padding:4px 10px;
+border-radius:20px;
+font-size:12px;
+}
+
+/* ============================= */
+/* AI FACE SCAN PREMIUM OVERLAY */
+/* ============================= */
+.circle{
+box-shadow:
+0 0 34px rgba(56,189,248,0.20),
+inset 0 0 18px rgba(255,255,255,0.08);
+border-color:rgba(56,189,248,0.36);
+}
+
+.ai-face-overlay{
+position:absolute;
+inset:18px;
+border-radius:50%;
+pointer-events:none;
+z-index:2;
+}
+
+.ai-face-ring{
+position:absolute;
+inset:0;
+border-radius:50%;
+border:2px solid rgba(56,189,248,0.42);
+box-shadow:
+0 0 18px rgba(56,189,248,0.22),
+inset 0 0 18px rgba(56,189,248,0.10);
+animation: aiPulse 2.4s ease-in-out infinite;
+}
+
+.ai-face-corner{
+position:absolute;
+width:38px;
+height:38px;
+border-color:#bfdbfe;
+opacity:0.95;
+filter:drop-shadow(0 0 7px rgba(56,189,248,0.48));
+}
+
+.ai-face-corner.tl{
+top:7px;
+left:17px;
+border-top:3px solid;
+border-left:3px solid;
+border-top-left-radius:20px;
+}
+
+.ai-face-corner.tr{
+top:7px;
+right:17px;
+border-top:3px solid;
+border-right:3px solid;
+border-top-right-radius:20px;
+}
+
+.ai-face-corner.bl{
+bottom:7px;
+left:17px;
+border-bottom:3px solid;
+border-left:3px solid;
+border-bottom-left-radius:20px;
+}
+
+.ai-face-corner.br{
+bottom:7px;
+right:17px;
+border-bottom:3px solid;
+border-right:3px solid;
+border-bottom-right-radius:20px;
+}
+
+.ai-center-dot{
+position:absolute;
+top:50%;
+left:50%;
+width:8px;
+height:8px;
+border-radius:999px;
+background:rgba(255,255,255,0.78);
+transform:translate(-50%,-50%);
+box-shadow:0 0 14px rgba(255,255,255,0.6);
+opacity:0.75;
+}
+
+.ai-frame-hud{
+position:absolute;
+inset:28px;
+border-radius:50%;
+pointer-events:none;
+z-index:4;
+opacity:0;
+transition:opacity 180ms ease;
+}
+
+.ai-frame-hud::before,
+.ai-frame-hud::after{
+content:"";
+position:absolute;
+left:12%;
+right:12%;
+height:1px;
+background:linear-gradient(90deg, transparent, rgba(56,189,248,0.85), transparent);
+box-shadow:0 0 10px rgba(56,189,248,0.5);
+}
+
+.ai-frame-hud::before{
+top:28%;
+}
+
+.ai-frame-hud::after{
+bottom:28%;
+}
+
+.ai-orbit-dot{
+position:absolute;
+width:5px;
+height:5px;
+border-radius:999px;
+background:#67e8f9;
+box-shadow:0 0 12px rgba(103,232,249,0.9);
+opacity:0.85;
+}
+
+.ai-orbit-dot.one{
+top:19%;
+left:27%;
+}
+
+.ai-orbit-dot.two{
+top:34%;
+right:18%;
+}
+
+.ai-orbit-dot.three{
+bottom:22%;
+left:31%;
+}
+
+.ai-orbit-dot.four{
+bottom:36%;
+right:27%;
+}
+
+.circle.ai-ready .ai-frame-hud,
+.circle.ai-scanning .ai-frame-hud,
+.circle.ai-success .ai-frame-hud{
+opacity:0.82;
+}
+
+.ai-scan-line{
+position:absolute;
+left:10%;
+width:80%;
+height:3px;
+border-radius:999px;
+background:linear-gradient(90deg, transparent, #38bdf8, transparent);
+box-shadow:0 0 16px rgba(56,189,248,0.72);
+opacity:0;
+animation: aiScanMove 1.8s linear infinite;
+z-index:3;
+}
+
+.circle.ai-scanning .ai-scan-line{
+opacity:1;
+}
+
+.circle.ai-ready .ai-face-ring{
+border-color:rgba(34,197,94,0.58);
+box-shadow:
+0 0 20px rgba(34,197,94,0.28),
+inset 0 0 18px rgba(34,197,94,0.12);
+}
+
+.circle.ai-ready .ai-face-corner{
+border-color:#22c55e;
+filter:drop-shadow(0 0 7px rgba(34,197,94,0.5));
+}
+
+.circle.ai-success .ai-face-ring{
+border-color:rgba(34,197,94,0.9);
+box-shadow:
+0 0 28px rgba(34,197,94,0.48),
+inset 0 0 22px rgba(34,197,94,0.18);
+}
+
+.circle.ai-failed .ai-face-ring{
+border-color:rgba(245,158,11,0.9);
+box-shadow:
+0 0 24px rgba(245,158,11,0.38),
+inset 0 0 18px rgba(245,158,11,0.12);
+}
+
+.ai-guide-text{
+font-size:11px;
+color:#c7d2fe;
+margin-top:10px;
+min-height:16px;
+}
+
+.status{
+z-index:5;
+}
+
+.circle video{
+position:relative;
+z-index:1;
+}
+
+
+
+.ai-scan-meta{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:10px;
+flex-wrap:wrap;
+margin:0 auto 14px;
+max-width:340px;
+}
+
+.ai-chip{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+min-height:34px;
+padding:7px 12px;
+border-radius:999px;
+border:1px solid rgba(56,189,248,0.36);
+background:rgba(15,23,42,0.54);
+box-shadow:0 12px 34px rgba(15,23,42,0.24), inset 0 0 18px rgba(56,189,248,0.08);
+backdrop-filter:blur(14px);
+-webkit-backdrop-filter:blur(14px);
+color:#e0e7ff;
+font-size:12px;
+font-weight:700;
+line-height:1;
+}
+
+.ai-chip-dot{
+width:9px;
+height:9px;
+border-radius:999px;
+background:#38bdf8;
+box-shadow:0 0 14px rgba(56,189,248,0.82);
+flex:0 0 auto;
+}
+
+.ai-chip-count{
+font-size:18px;
+font-weight:900;
+color:#93c5fd;
+letter-spacing:0.02em;
+}
+
+.ai-chip[data-state="ready"]{
+border-color:rgba(34,197,94,0.34);
+background:rgba(15,23,42,0.58);
+color:#dcfce7;
+}
+
+.ai-chip[data-state="ready"] .ai-chip-dot{
+background:#22c55e;
+box-shadow:0 0 14px rgba(34,197,94,0.75);
+}
+
+.ai-chip[data-state="scanning"]{
+border-color:rgba(56,189,248,0.44);
+color:#e0f2fe;
+}
+
+.ai-chip[data-state="success"]{
+border-color:rgba(34,197,94,0.44);
+color:#dcfce7;
+}
+
+.ai-chip[data-state="failed"]{
+border-color:rgba(245,158,11,0.5);
+color:#fef3c7;
+}
+
+.ai-chip-icon{
+font-size:14px;
+line-height:1;
+opacity:0.95;
+}
+
+/* Face-attached mesh intentionally removed: current production flow uses AWS Rekognition after capture, not live landmark tracking. */
+
+.ai-result-summary{
+width:min(100%,340px);
+margin:14px auto 0;
+padding:12px 14px;
+border-radius:18px;
+border:1px solid rgba(56,189,248,0.28);
+background:rgba(15,23,42,0.56);
+box-shadow:0 16px 42px rgba(2,6,23,0.24), inset 0 0 18px rgba(56,189,248,0.08);
+backdrop-filter:blur(14px);
+-webkit-backdrop-filter:blur(14px);
+}
+
+.ai-result-title{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+font-size:14px;
+font-weight:800;
+color:#86efac;
+}
+
+.ai-result-subtitle{
+margin-top:5px;
+font-size:12px;
+line-height:1.45;
+color:#c7d2fe;
+}
+
+.ai-result-summary.hidden{
+display:none;
+}
+
+.ai-result-summary.failed .ai-result-title{
+color:#fbbf24;
+}
+
+.ai-result-summary.scanning .ai-result-title{
+color:#67e8f9;
+}
+
+@media (min-width: 380px){
+.circle{
+width:286px;
+height:286px;
+}
+}
+
+@media (max-width: 360px){
+.ai-scan-meta{
+gap:8px;
+}
+
+.ai-chip{
+font-size:11px;
+padding:7px 10px;
+}
+
+.ai-chip-count{
+font-size:16px;
+}
+}
+
+@keyframes aiPulse{
+0%,100%{ transform:scale(1); opacity:0.78; }
+50%{ transform:scale(1.025); opacity:1; }
+}
+
+@keyframes aiScanMove{
+0%{ top:18%; opacity:0; }
+12%{ opacity:1; }
+88%{ opacity:1; }
+100%{ top:78%; opacity:0; }
+}
+
+</style>
+
+</head>
+
+<body class="text-white flex items-center justify-center min-h-screen">
+
+<div class="text-center">
+
+<h2 class="text-xl mb-2 font-semibold tracking-wide">AI Face Scan</h2>
+<p class="text-xs text-gray-400 mb-4">Align your face inside the circle for best results</p>
+
+<div class="ai-scan-meta" aria-live="polite">
+  <div id="aiScanChip" class="ai-chip">
+    <span id="aiScanDot" class="ai-chip-dot"></span>
+    <span id="aiScanChipText">AI Scan Ready</span>
+  </div>
+  <div class="ai-chip">
+    <span class="ai-chip-icon">👥</span>
+    <span id="aiMatchCount" class="ai-chip-count">0</span>
+    <span id="aiMatchCountLabel">photos matched</span>
+  </div>
+</div>
+
+<div class="circle mx-auto">
+<video id="video" autoplay muted playsinline></video>
+<div class="ai-face-overlay" aria-hidden="true">
+  <div class="ai-face-ring"></div>
+  <div class="ai-face-corner tl"></div>
+  <div class="ai-face-corner tr"></div>
+  <div class="ai-face-corner bl"></div>
+  <div class="ai-face-corner br"></div>
+  <!-- No fixed face mesh here: scan HUD stays frame-level so it does not fake live tracking. -->
+  <div class="ai-frame-hud">
+    <span class="ai-orbit-dot one"></span>
+    <span class="ai-orbit-dot two"></span>
+    <span class="ai-orbit-dot three"></span>
+    <span class="ai-orbit-dot four"></span>
+  </div>
+  <div class="ai-center-dot"></div>
+  <div class="ai-scan-line"></div>
+</div>
+<div id="status" class="status">Click Start</div>
+</div>
+
+<div id="aiGuideText" class="ai-guide-text">Click Start to begin AI scan</div>
+
+<div id="aiMatchSummary" class="ai-result-summary hidden" aria-live="polite">
+  <div id="aiMatchSummaryTitle" class="ai-result-title">✓ Face matched successfully</div>
+  <div id="aiMatchSummarySubtitle" class="ai-result-subtitle">0 photo matches found in ChitraBook AI</div>
+</div>
+
+<button id="startBtn"
+class="mt-6 bg-indigo-600 px-6 py-2 rounded-lg">
+Start Camera
+</button>
+
+<button id="captureBtn"
+class="mt-3 bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg hidden">
+Capture & Search
+</button>
+
+<button id="retryBtn"
+class="mt-3 bg-amber-500 hover:bg-amber-600 px-6 py-2 rounded-lg hidden">
+Retry Scan
+</button>
+
+<p id="helpText" class="text-xs text-gray-400 mt-3 max-w-xs mx-auto hidden">
+Try again with front face, eyes open, and better lighting. Avoid sunglasses if possible.
+</p>
+
+</div>
+
+<script>
+
+let stream = null
+let processingFace = false
+let cameraReady = false
+
+const FACE_CAPTURE_MAX_SIZE = 1280
+const FACE_CAPTURE_JPEG_QUALITY = 0.72
+const FACE_SEARCH_TIMEOUT_MS = 25000
+const FACE_SEARCH_RETRIES = 2
+
+const video = document.getElementById("video")
+const status = document.getElementById("status")
+const startBtn = document.getElementById("startBtn")
+const captureBtn = document.getElementById("captureBtn")
+const retryBtn = document.getElementById("retryBtn")
+const helpText = document.getElementById("helpText")
+const aiScanChip = document.getElementById("aiScanChip")
+const aiScanChipText = document.getElementById("aiScanChipText")
+const aiMatchCount = document.getElementById("aiMatchCount")
+const aiMatchCountLabel = document.getElementById("aiMatchCountLabel")
+const aiMatchSummary = document.getElementById("aiMatchSummary")
+const aiMatchSummaryTitle = document.getElementById("aiMatchSummaryTitle")
+const aiMatchSummarySubtitle = document.getElementById("aiMatchSummarySubtitle")
+
+function getEventId(){
+const params = new URLSearchParams(window.location.search)
+const eventId = (params.get("event_id") || "").trim()
+return eventId || null
+}
+
+function getRedirectUrl(eventId){
+const params = new URLSearchParams(window.location.search)
+const redirect = (params.get("redirect") || "").trim()
+
+if(redirect){
+try{
+const parsed = new URL(redirect, window.location.origin)
+if(parsed.origin === window.location.origin){
+return parsed.href
+}
+}catch(_err){}
+}
+
+return `gallery.html?event_id=${encodeURIComponent(eventId)}`
+}
+
+function clearFaceSession(){
+
+// Old browser face-api session cleanup
+sessionStorage.removeItem("face_encoding")
+
+// Current AWS Rekognition result session cleanup
+sessionStorage.removeItem("matched_images")
+sessionStorage.removeItem("matched_images_by_event")
+sessionStorage.removeItem("face_verified")
+sessionStorage.removeItem("face_scan_done")
+sessionStorage.removeItem("face_scan_event_id")
+
+}
+
+function normalizeImageKey(value){
+if(!value) return ""
+return String(value).split("?")[0].replace(/^\/+/,"").trim()
+}
+
+function sleep(ms){
+return new Promise(resolve=>setTimeout(resolve, ms))
+}
+
+
+function setAIScanVisualState(state, message){
+const circle = document.querySelector(".circle")
+const guideText = document.getElementById("aiGuideText")
+
+if(circle){
+circle.classList.remove("ai-ready", "ai-scanning", "ai-success", "ai-failed")
+
+if(state){
+circle.classList.add(state)
+}
+}
+
+if(guideText && message){
+guideText.innerText = message
+}
+
+updateAIScanChip(state)
+}
+
+function updateAIScanChip(state){
+if(aiScanChip){
+aiScanChip.removeAttribute("data-state")
+}
+
+if(!aiScanChipText) return
+
+if(state === "ai-ready"){
+if(aiScanChip) aiScanChip.dataset.state = "ready"
+aiScanChipText.innerText = "AI Scan Active"
+return
+}
+
+if(state === "ai-scanning"){
+if(aiScanChip) aiScanChip.dataset.state = "scanning"
+aiScanChipText.innerText = "AI Scanning"
+return
+}
+
+if(state === "ai-success"){
+if(aiScanChip) aiScanChip.dataset.state = "success"
+aiScanChipText.innerText = "Face Matched"
+return
+}
+
+if(state === "ai-failed"){
+if(aiScanChip) aiScanChip.dataset.state = "failed"
+aiScanChipText.innerText = "Scan Needs Retry"
+return
+}
+
+aiScanChipText.innerText = "AI Scan Ready"
+}
+
+function updateAIMatchCounter(count){
+const safeCount = Math.max(0, Number(count || 0))
+
+if(aiMatchCount){
+aiMatchCount.innerText = String(safeCount)
+}
+
+if(aiMatchCountLabel){
+aiMatchCountLabel.innerText = safeCount === 1 ? "photo matched" : "photos matched"
+}
+}
+
+function showAIMatchSummary(type, title, subtitle){
+if(!aiMatchSummary) return
+
+aiMatchSummary.classList.remove("hidden", "failed", "scanning")
+
+if(type){
+aiMatchSummary.classList.add(type)
+}
+
+if(aiMatchSummaryTitle){
+aiMatchSummaryTitle.innerText = title || "AI scan status"
+}
+
+if(aiMatchSummarySubtitle){
+aiMatchSummarySubtitle.innerText = subtitle || ""
+}
+}
+
+function hideAIMatchSummary(){
+if(aiMatchSummary){
+aiMatchSummary.classList.add("hidden")
+aiMatchSummary.classList.remove("failed", "scanning")
+}
+}
+
+function stopCamera(){
+try{
+if(stream){
+stream.getTracks().forEach(track=>track.stop())
+}
+}catch(e){
+console.error("Camera stop error:", e)
+}
+stream = null
+cameraReady = false
+}
+
+function setBusyState(isBusy, text){
+processingFace = isBusy
+
+startBtn.disabled = isBusy
+startBtn.style.opacity = isBusy ? "0.7" : "1"
+startBtn.style.pointerEvents = isBusy ? "none" : "auto"
+
+captureBtn.disabled = isBusy
+captureBtn.style.opacity = isBusy ? "0.7" : "1"
+captureBtn.style.pointerEvents = isBusy ? "none" : "auto"
+
+retryBtn.disabled = isBusy
+retryBtn.style.opacity = isBusy ? "0.7" : "1"
+retryBtn.style.pointerEvents = isBusy ? "none" : "auto"
+
+if(text){
+status.innerText = text
+}
+}
+
+function showRetryUI(message){
+updateAIMatchCounter(0)
+showAIMatchSummary("failed", "No face match found", "Try again with front face, eyes open, and better lighting.")
+setAIScanVisualState("ai-failed", "Try front face with better light")
+setBusyState(false, message || "No Match Found ❌")
+retryBtn.classList.remove("hidden")
+helpText.classList.remove("hidden")
+captureBtn.classList.add("hidden")
+}
+
+function hideRetryUI(){
+retryBtn.classList.add("hidden")
+helpText.classList.add("hidden")
+}
+
+function withTimeout(promise, ms, message){
+return new Promise((resolve, reject)=>{
+const timer = setTimeout(()=>{
+reject(new Error(message || "Operation timed out"))
+}, ms)
+
+promise
+.then(result=>{
+clearTimeout(timer)
+resolve(result)
+})
+.catch(err=>{
+clearTimeout(timer)
+reject(err)
+})
+})
+}
+
+function isRetryableFaceSearchError(err){
+const message = String(err?.message || err || "").toLowerCase()
+return (
+message.includes("timeout") ||
+message.includes("network") ||
+message.includes("failed to fetch") ||
+message.includes("temporarily") ||
+message.includes("rate") ||
+message.includes("throttl")
+)
+}
+
+function saveMatchedImagesToSession(eventId, matchedImages){
+const cleanImages = matchedImages
+.map(normalizeImageKey)
+.filter(Boolean)
+
+sessionStorage.setItem("matched_images", JSON.stringify(cleanImages))
+
+let map = {}
+try{
+map = JSON.parse(sessionStorage.getItem("matched_images_by_event") || "{}")
+}catch(e){
+map = {}
+}
+
+map[eventId] = cleanImages
+
+sessionStorage.setItem("matched_images_by_event", JSON.stringify(map))
+sessionStorage.setItem("face_verified", cleanImages.length > 0 ? "true" : "false")
+sessionStorage.setItem("face_scan_done", "true")
+sessionStorage.setItem("face_scan_event_id", eventId)
+}
+
+function getSearchFacesEndpoint(){
+if(window.SEARCH_FACES_BY_SELFIE_URL){
+return window.SEARCH_FACES_BY_SELFIE_URL
+}
+
+if(window.SAVE_S3_GALLERY_PHOTO_URL){
+return String(window.SAVE_S3_GALLERY_PHOTO_URL).replace("/save-s3-gallery-photo", "/search-faces-by-selfie")
+}
+
+return "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/search-faces-by-selfie"
+}
+
+async function getAccessToken(){
+try{
+if(typeof window.getCurrentSession === "function"){
+const session = await window.getCurrentSession()
+return session?.access_token || null
+}
+
+if(typeof window.getSupabase === "function"){
+const supabase = await window.getSupabase()
+const { data } = await supabase.auth.getSession()
+return data?.session?.access_token || null
+}
+}catch(err){
+console.warn("Session token unavailable for face search:", err)
+}
+
+return null
+}
+
+
+// =============================
+// FREE PLAN AI FACE SEARCH GATE
+// =============================
+
+const FACE_SEARCH_PLAN_CACHE_TTL_MS = 60000
+const faceSearchPlanCache = new Map()
+
+function normalizePlanValue(value){
+return String(value || "").trim().toLowerCase()
+}
+
+function isActivePaidFaceSearchPlan(settings){
+if(!settings) return false
+
+const plan = normalizePlanValue(settings.plan)
+const status = normalizePlanValue(settings.subscription_status)
+const isPaid = settings.is_paid === true
+const expiresAt = settings.plan_expires_at ? new Date(settings.plan_expires_at).getTime() : 0
+const hasValidExpiry = Number.isFinite(expiresAt) && expiresAt > Date.now()
+
+return isPaid && status === "active" && hasValidExpiry && (plan === "basic" || plan === "pro")
+}
+
+async function getFaceSearchEventOwnerId(eventId){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId) return ""
+
+try{
+const supabase = await window.getSupabase()
+if(!supabase) return ""
+
+const { data, error } = await supabase
+.from("events")
+.select("id,user_id")
+.eq("id", safeEventId)
+.maybeSingle()
+
+if(error){
+console.error("Face search event owner check failed:", error)
+return ""
+}
+
+return data?.user_id || ""
+}catch(err){
+console.error("Face search event owner check error:", err)
+return ""
+}
+}
+
+async function canUseFaceSearchForEvent(eventId){
+const safeEventId = String(eventId || "").trim()
+if(!safeEventId) return false
+
+const cached = faceSearchPlanCache.get(safeEventId)
+if(cached && cached.expiresAt > Date.now()){
+return cached.allowed
+}
+
+try{
+const supabase = await window.getSupabase()
+if(!supabase) return false
+
+const ownerId = await getFaceSearchEventOwnerId(safeEventId)
+if(!ownerId) return false
+
+const { data: settings, error: settingsError } = await supabase
+.from("photographer_settings")
+.select("plan, subscription_status, is_paid, plan_expires_at")
+.eq("user_id", ownerId)
+.maybeSingle()
+
+if(settingsError){
+console.error("Face search plan check failed:", settingsError)
+return false
+}
+
+let allowed = isActivePaidFaceSearchPlan(settings)
+
+if(!allowed){
+const { data: firstEvent, error: firstEventError } = await supabase
+.from("events")
+.select("id")
+.eq("user_id", ownerId)
+.order("id", { ascending:true })
+.limit(1)
+.maybeSingle()
+
+if(firstEventError){
+console.error("Free face search event limit check failed:", firstEventError)
+return false
+}
+
+allowed = String(firstEvent?.id || "") === safeEventId
+}
+
+faceSearchPlanCache.set(safeEventId, {
+allowed,
+expiresAt: Date.now() + FACE_SEARCH_PLAN_CACHE_TTL_MS
+})
+
+return allowed
+}catch(err){
+console.error("Face search access check error:", err)
+return false
+}
+}
+
+async function guardFaceSearchAccess(eventId){
+const allowed = await canUseFaceSearchForEvent(eventId)
+
+if(!allowed){
+setAIScanVisualState("ai-failed", "AI Face Search limit reached")
+setBusyState(false, "Limit Reached")
+alert("AI Face Search is limited to 1 event on the Free plan. Please upgrade to use AI Face Search on more events.")
+return false
+}
+
+return true
+}
+
+
+function isSecureCameraContext(){
+try{
+return window.isSecureContext === true || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+}catch(e){
+return false
+}
+}
+
+function isLikelyInAppBrowser(){
+const ua = String(navigator.userAgent || "").toLowerCase()
+return (
+ua.includes("wv") ||
+ua.includes("fbav") ||
+ua.includes("fban") ||
+ua.includes("instagram") ||
+ua.includes("line/") ||
+ua.includes("micromessenger")
+)
+}
+
+function getCameraErrorInfo(error){
+const name = String(error?.name || "").trim()
+const message = String(error?.message || "").trim()
+
+if(name === "NotAllowedError" || name === "PermissionDeniedError"){
+return {
+title: "Camera permission blocked",
+status: "Permission Blocked",
+body: "Camera permission is blocked for this browser or this site.\n\nPlease allow Camera permission from browser site settings, then tap Retry Camera.",
+help: isLikelyInAppBrowser()
+? "If this link opened inside WhatsApp/Instagram/Facebook browser, open it in Chrome and allow Camera."
+: "In Chrome: tap the lock icon near the address bar → Permissions → Camera → Allow."
+}
+}
+
+if(name === "NotFoundError" || name === "DevicesNotFoundError"){
+return {
+title: "Camera not found",
+status: "Camera Not Found",
+body: "No camera was found on this device.",
+help: "Please try on a mobile with a working front camera."
+}
+}
+
+if(name === "NotReadableError" || name === "TrackStartError"){
+return {
+title: "Camera is busy",
+status: "Camera Busy",
+body: "Camera is being used by another app or browser tab.",
+help: "Close other camera apps, then tap Retry Camera."
+}
+}
+
+if(name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError"){
+return {
+title: "Camera mode unavailable",
+status: "Camera Mode Failed",
+body: "This device could not open the requested front-camera mode.",
+help: "Tap Retry Camera. ChitraBook AI will try a basic camera mode."
+}
+}
+
+if(!isSecureCameraContext()){
+return {
+title: "Secure connection required",
+status: "HTTPS Required",
+body: "Camera works only on a secure HTTPS page.",
+help: "Open the public ChitraBook AI link from the browser using HTTPS."
+}
+}
+
+return {
+title: "Camera could not start",
+status: "Camera Error",
+body: message || "Unable to start camera on this browser.",
+help: isLikelyInAppBrowser()
+? "Open this link in Chrome, allow Camera permission, then retry."
+: "Check browser Camera permission and retry."
+}
+}
+
+function showCameraPermissionHelp(error){
+const info = getCameraErrorInfo(error)
+
+setAIScanVisualState("ai-failed", info.help || "Allow camera permission and retry")
+setBusyState(false, info.status || "Camera Error")
+captureBtn.classList.add("hidden")
+retryBtn.classList.remove("hidden")
+helpText.classList.remove("hidden")
+helpText.innerText = info.help || "Allow camera permission and retry."
+
+const existing = document.getElementById("studioosCameraPermissionModal")
+if(existing){
+existing.remove()
+}
+
+const modal = document.createElement("div")
+modal.id = "studioosCameraPermissionModal"
+modal.style.position = "fixed"
+modal.style.inset = "0"
+modal.style.display = "flex"
+modal.style.alignItems = "center"
+modal.style.justifyContent = "center"
+modal.style.padding = "1rem"
+modal.style.background = "rgba(2,6,23,0.76)"
+modal.style.backdropFilter = "blur(10px)"
+modal.style.zIndex = "2147482400"
+
+modal.innerHTML = `
+<div style="
+  width:min(100%, 390px);
+  border-radius:1.35rem;
+  padding:1.15rem;
+  background:rgba(15,23,42,0.97);
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 24px 70px rgba(0,0,0,0.4);
+  color:white;
+  text-align:left;
+">
+  <div style="
+    display:inline-flex;
+    align-items:center;
+    min-height:30px;
+    padding:0 0.78rem;
+    border-radius:999px;
+    background:rgba(245,158,11,0.16);
+    border:1px solid rgba(245,158,11,0.32);
+    color:rgb(254 243 199);
+    font-size:0.72rem;
+    font-weight:850;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  ">Camera Permission</div>
+
+  <div style="
+    margin-top:0.9rem;
+    font-size:1.15rem;
+    line-height:1.25;
+    font-weight:900;
+  ">${String(info.title || "Camera permission needed").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+
+  <div style="
+    margin-top:0.65rem;
+    color:rgba(255,255,255,0.78);
+    font-size:0.92rem;
+    line-height:1.58;
+    white-space:pre-line;
+  ">${String(info.body || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+
+  <div style="
+    margin-top:0.85rem;
+    padding:0.85rem;
+    border-radius:1rem;
+    background:rgba(245,158,11,0.12);
+    border:1px solid rgba(245,158,11,0.22);
+    color:rgba(255,255,255,0.82);
+    font-size:0.82rem;
+    line-height:1.5;
+    white-space:pre-line;
+  ">${String(info.help || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+
+  <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+    <button id="studioosCameraCloseBtn" type="button" style="
+      flex:1;
+      min-height:46px;
+      border-radius:0.95rem;
+      background:rgba(255,255,255,0.06);
+      color:white;
+      border:1px solid rgba(255,255,255,0.1);
+      font-size:0.88rem;
+      font-weight:800;
+      cursor:pointer;
+    ">Close</button>
+
+    <button id="studioosCameraRetryBtn" type="button" style="
+      flex:1;
+      min-height:46px;
+      border-radius:0.95rem;
+      background:rgb(79 70 229);
+      color:white;
+      border:1px solid transparent;
+      font-size:0.88rem;
+      font-weight:850;
+      cursor:pointer;
+      box-shadow:0 14px 30px rgba(79,70,229,0.25);
+    ">Retry Camera</button>
+  </div>
+</div>
+`
+
+document.body.appendChild(modal)
+
+const closeModal = ()=>{
+modal.remove()
+}
+
+modal.addEventListener("click", event=>{
+if(event.target === modal){
+closeModal()
+}
+})
+
+const closeBtn = document.getElementById("studioosCameraCloseBtn")
+const retryButton = document.getElementById("studioosCameraRetryBtn")
+
+if(closeBtn){
+closeBtn.onclick = closeModal
+}
+
+if(retryButton){
+retryButton.onclick = async ()=>{
+closeModal()
+stopCamera()
+await startCamera()
+}
+}
+}
+
+async function getCameraPermissionState(){
+try{
+if(!navigator.permissions || typeof navigator.permissions.query !== "function"){
+return ""
+}
+
+const result = await navigator.permissions.query({ name: "camera" })
+return String(result?.state || "")
+}catch(e){
+return ""
+}
+}
+
+async function requestCameraStream(){
+try{
+return await navigator.mediaDevices.getUserMedia({
+video: {
+facingMode: "user",
+width: { ideal: 640 },
+height: { ideal: 480 }
+},
+audio: false
+})
+}catch(primaryError){
+const name = String(primaryError?.name || "")
+if(name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError"){
+return await navigator.mediaDevices.getUserMedia({
+video: true,
+audio: false
+})
+}
+throw primaryError
+}
+}
+
+
+async function startCamera(){
+
+try{
+
+const eventId = getEventId()
+if(!eventId){
+alert("Invalid event access")
+return
+}
+
+const faceSearchAllowed = await guardFaceSearchAccess(eventId)
+if(!faceSearchAllowed){
+return
+}
+
+clearFaceSession()
+hideRetryUI()
+hideAIMatchSummary()
+updateAIMatchCounter(0)
+setAIScanVisualState("", "Opening camera...")
+setBusyState(true, "Opening Camera...")
+
+if(!isSecureCameraContext()){
+throw new DOMException("Camera works only on secure HTTPS pages.", "SecurityError")
+}
+
+if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+throw new Error("Camera is not supported on this device/browser")
+}
+
+const permissionState = await getCameraPermissionState()
+if(permissionState === "denied"){
+throw new DOMException("Camera permission is blocked for this site.", "NotAllowedError")
+}
+
+stream = await requestCameraStream()
+
+video.srcObject = stream
+
+video.onloadedmetadata = async () => {
+try{
+await video.play()
+cameraReady = true
+setAIScanVisualState("ai-ready", "Face centered? Hold still")
+setBusyState(false, "Camera Ready")
+captureBtn.classList.remove("hidden")
+retryBtn.classList.add("hidden")
+helpText.classList.add("hidden")
+helpText.innerText = "Try again with front face, eyes open, and better lighting. Avoid sunglasses if possible."
+startBtn.innerText = "Restart Camera"
+}catch(err){
+console.error("Video play error:", err)
+stopCamera()
+showCameraPermissionHelp(err)
+}
+}
+
+}catch(err){
+console.error("Camera start error:", err)
+stopCamera()
+showCameraPermissionHelp(err)
+}
+}
+
+function captureVideoFrameBase64(){
+if(!cameraReady || !video.videoWidth || !video.videoHeight){
+throw new Error("Camera is not ready yet")
+}
+
+const sourceWidth = Number(video.videoWidth || 0)
+const sourceHeight = Number(video.videoHeight || 0)
+
+if(!sourceWidth || !sourceHeight){
+throw new Error("Invalid camera frame")
+}
+
+const scale = Math.min(1, FACE_CAPTURE_MAX_SIZE / sourceWidth, FACE_CAPTURE_MAX_SIZE / sourceHeight)
+const targetWidth = Math.max(1, Math.round(sourceWidth * scale))
+const targetHeight = Math.max(1, Math.round(sourceHeight * scale))
+
+const canvas = document.createElement("canvas")
+canvas.width = targetWidth
+canvas.height = targetHeight
+
+const ctx = canvas.getContext("2d", { alpha:false })
+if(!ctx){
+throw new Error("Unable to capture image")
+}
+
+ctx.fillStyle = "#ffffff"
+ctx.fillRect(0, 0, targetWidth, targetHeight)
+ctx.drawImage(video, 0, 0, targetWidth, targetHeight)
+
+const dataUrl = canvas.toDataURL("image/jpeg", FACE_CAPTURE_JPEG_QUALITY)
+const parts = dataUrl.split(",")
+
+if(parts.length < 2 || !parts[1]){
+throw new Error("Invalid captured image")
+}
+
+if(parts[1].length < 1000){
+throw new Error("Captured image is too small")
+}
+
+return parts[1]
+}
+
+async function searchFaceWithAWS(eventId, imageBase64){
+const endpoint = getSearchFacesEndpoint()
+const accessToken = await getAccessToken()
+
+const headers = {
+"Content-Type": "application/json",
+"apikey": window.SUPABASE_ANON_KEY || ""
+}
+
+if(accessToken){
+headers.Authorization = `Bearer ${accessToken}`
+}
+
+let lastError = null
+
+for(let attempt = 0; attempt <= FACE_SEARCH_RETRIES; attempt++){
+
+try{
+
+const response = await withTimeout(
+fetch(endpoint, {
+method: "POST",
+headers,
+body: JSON.stringify({
+event_id: eventId,
+image_base64: imageBase64
+})
+}),
+FACE_SEARCH_TIMEOUT_MS,
+"Face search timeout"
+)
+
+let result = null
+try{
+result = await response.json()
+}catch(_err){
+result = null
+}
+
+if(!response.ok || !result?.success){
+throw new Error(result?.error || "Face search failed")
+}
+
+return result
+
+}catch(err){
+
+lastError = err
+
+if(attempt >= FACE_SEARCH_RETRIES || !isRetryableFaceSearchError(err)){
+throw err
+}
+
+status.innerText = `Retrying scan ${attempt + 1}/${FACE_SEARCH_RETRIES}...`
+await sleep(700 * Math.pow(2, attempt))
+
+}
+
+}
+
+throw lastError || new Error("Face search failed")
+}
+
+async function captureAndSearch(){
+
+if(processingFace) return
+
+const eventId = getEventId()
+
+if(!eventId){
+setBusyState(false, "Invalid Event")
+alert("Invalid event access")
+window.location.href = "access.html"
+return
+}
+
+const faceSearchAllowed = await guardFaceSearchAccess(eventId)
+if(!faceSearchAllowed){
+return
+}
+
+try{
+
+setAIScanVisualState("ai-scanning", "Scanning face sample and matching photos...")
+showAIMatchSummary("scanning", "AI scan in progress", "Searching matching photos from this event gallery...")
+setBusyState(true, "AI Analyzing...")
+
+const imageBase64 = captureVideoFrameBase64()
+
+const result = await searchFaceWithAWS(eventId, imageBase64)
+
+const confirmed = Array.isArray(result?.confirmed) ? result.confirmed : []
+const possible = Array.isArray(result?.possible) ? result.possible : []
+const matches = Array.isArray(result?.matches) ? result.matches : []
+
+const mergedResults = confirmed.length > 0
+? [...confirmed, ...possible]
+: matches
+
+const matchedImages = mergedResults
+.map(item => item?.object_key || item?.preview_key || item?.image_url || "")
+.map(normalizeImageKey)
+.filter(Boolean)
+
+saveMatchedImagesToSession(eventId, matchedImages)
+updateAIMatchCounter(matchedImages.length)
+
+if(matchedImages.length === 0){
+clearFaceSession()
+showRetryUI("No Match Found ❌")
+return
+}
+
+hideRetryUI()
+stopCamera()
+showAIMatchSummary("", "✓ Face matched successfully", `${matchedImages.length} ${matchedImages.length === 1 ? "photo match" : "photo matches"} found in ChitraBook AI`)
+setAIScanVisualState("ai-success", `${matchedImages.length} ${matchedImages.length === 1 ? "photo matched" : "photos matched"}`)
+setBusyState(false, `${matchedImages.length} Match${matchedImages.length === 1 ? "" : "es"} Found ✅`)
+
+setTimeout(()=>{
+window.location.href = getRedirectUrl(eventId)
+}, 500)
+
+}catch(err){
+console.error("Face search error:", err)
+clearFaceSession()
+showRetryUI("Processing Failed")
+alert("Face processing failed: " + (err?.message || "Unknown error"))
+}
+}
+
+startBtn.onclick = async ()=>{
+if(processingFace) return
+stopCamera()
+await startCamera()
+}
+
+captureBtn.onclick = async ()=>{
+if(processingFace) return
+await captureAndSearch()
+}
+
+retryBtn.onclick = async ()=>{
+if(processingFace) return
+stopCamera()
+await startCamera()
+}
+
+window.addEventListener("beforeunload", ()=>{
+stopCamera()
+})
+
+</script>
+
+</body>
+</html>

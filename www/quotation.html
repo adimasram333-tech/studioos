@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Create Quotation</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+:root{
+--primary:#6366f1;
+--accent:#1e293b;
+--glass:rgba(255,255,255,0.05);
+}
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+font-family:Inter,system-ui;
+}
+
+.glass{
+background: var(--glass);
+backdrop-filter: blur(12px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+.input{
+width:100%;
+padding:10px;
+border-radius:10px;
+background:#374151;
+margin-bottom:8px;
+color:white;
+border:1px solid rgba(255,255,255,0.1);
+transition:0.2s;
+}
+
+.input:focus{
+border-color:var(--primary);
+outline:none;
+}
+
+.dateRow{
+display:grid;
+grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+gap:8px;
+width:100%;
+}
+
+.dateRow .input{
+min-width:0;
+}
+
+.dateField{
+position:relative;
+width:100%;
+min-width:0;
+}
+
+.dateField .input{
+padding-right:34px;
+}
+
+.dateFieldLabel{
+display:block;
+position:absolute;
+left:12px;
+top:50%;
+transform:translateY(-50%);
+font-size:14px;
+line-height:1;
+color:#d1d5db;
+pointer-events:none;
+z-index:2;
+transition:0.15s ease;
+max-width:calc(100% - 42px);
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.dateField.hasValue .dateFieldLabel{
+opacity:0;
+visibility:hidden;
+}
+
+.dateField .input:focus + .dateFieldLabel{
+opacity:0;
+visibility:hidden;
+}
+
+/* Android/WebView-safe native date input rendering */
+input[type="date"].input{
+appearance:auto;
+-webkit-appearance:auto;
+min-height:46px;
+height:46px;
+line-height:46px;
+color:white;
+-webkit-text-fill-color:white;
+background:#374151;
+}
+
+input[type="date"].input::-webkit-date-and-time-value{
+text-align:left;
+min-height:46px;
+line-height:46px;
+padding:0;
+}
+
+input[type="date"].input::-webkit-calendar-picker-indicator{
+opacity:0.85;
+}
+
+.deliverable{
+display:block;
+margin-top:6px;
+}
+
+.serviceRow{
+display:flex;
+align-items:center;
+margin-bottom:10px;
+gap:10px;
+}
+
+.serviceRow span{
+width:160px;
+font-size:14px;
+}
+
+.serviceInput{
+width:55px;
+height:32px;
+background:#1f2937;
+border:1px solid rgba(255,255,255,0.2);
+border-radius:6px;
+color:white;
+text-align:center;
+outline:none;
+}
+
+.serviceInput::-webkit-outer-spin-button,
+.serviceInput::-webkit-inner-spin-button{
+-webkit-appearance:none;
+margin:0;
+}
+
+.serviceInput[type=number]{
+-moz-appearance:textfield;
+background:#1f2937;
+color:white;
+}
+
+.serviceInput:focus{
+border-color:var(--primary);
+}
+
+.serviceHeader{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:6px;
+}
+
+.serviceHeader .blank{
+width:160px;
+}
+
+.serviceHeader span{
+width:55px;
+text-align:center;
+font-size:12px;
+color:#9ca3af;
+}
+
+.brandingCard{
+padding:14px;
+border-radius:14px;
+background:rgba(255,255,255,0.04);
+border:1px solid rgba(255,255,255,0.08);
+margin-bottom:12px;
+}
+
+.brandingHeader{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+margin-bottom:10px;
+}
+
+.brandingTitle{
+font-size:14px;
+font-weight:600;
+color:white;
+}
+
+.brandingBadge{
+font-size:11px;
+color:#9ca3af;
+}
+
+.brandingActions{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+.brandBtn{
+flex:1;
+padding:10px 12px;
+border-radius:10px;
+background:#374151;
+color:white;
+border:1px solid rgba(255,255,255,0.1);
+font-size:13px;
+transition:0.2s;
+cursor:pointer;
+}
+
+.brandBtn:hover{
+border-color:rgba(255,255,255,0.2);
+background:#425066;
+}
+
+.brandBtnRemove{
+background:transparent;
+color:#f87171;
+border:1px solid rgba(248,113,113,0.35);
+}
+
+.brandBtnRemove:hover{
+background:rgba(248,113,113,0.08);
+border-color:rgba(248,113,113,0.45);
+}
+
+.brandPreviewWrap{
+display:none;
+margin-top:10px;
+overflow:hidden;
+border-radius:12px;
+border:1px solid rgba(255,255,255,0.1);
+background:#111827;
+}
+
+.brandPreviewWrap.show{
+display:block;
+}
+
+.brandPreview{
+width:100%;
+height:170px;
+object-fit:cover;
+display:block;
+}
+
+.brandHelper{
+margin-top:8px;
+font-size:12px;
+line-height:1.5;
+color:#9ca3af;
+}
+
+@media (max-width:768px){
+
+body{
+padding:16px;
+align-items:flex-start;
+justify-content:center;
+}
+
+.quotationCard{
+width:100%;
+max-width:460px;
+padding:20px;
+}
+
+.serviceHeader{
+display:grid;
+grid-template-columns:1fr 56px 56px;
+gap:8px;
+align-items:center;
+}
+
+.serviceHeader .blank{
+width:auto;
+min-width:0;
+}
+
+.serviceHeader span{
+width:auto;
+font-size:11px;
+}
+
+.serviceRow{
+display:grid;
+grid-template-columns:1fr 56px 56px;
+gap:8px;
+align-items:center;
+}
+
+.serviceRow span{
+width:auto;
+min-width:0;
+font-size:13px;
+line-height:1.35;
+word-break:break-word;
+}
+
+.serviceInput{
+width:56px;
+height:34px;
+}
+
+.dateFieldLabel{
+display:block;
+font-size:14px;
+color:#d1d5db;
+}
+
+.brandingActions{
+flex-direction:column;
+}
+
+.brandPreview{
+height:150px;
+}
+
+}
+
+@media (max-width:420px){
+
+body{
+padding:12px;
+}
+
+.dateRow{
+display:grid;
+grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+gap:8px;
+}
+
+.dateRow .input{
+font-size:15px;
+padding:0 34px 0 10px;
+min-height:46px;
+height:46px;
+line-height:46px;
+margin-bottom:8px;
+background:#374151;
+}
+
+.quotationCard{
+padding:16px;
+border-radius:18px;
+}
+
+
+.serviceHeader{
+grid-template-columns:1fr 52px 52px;
+gap:7px;
+}
+
+.serviceRow{
+grid-template-columns:1fr 52px 52px;
+gap:7px;
+}
+
+.serviceInput{
+width:52px;
+height:34px;
+}
+
+.serviceRow span{
+font-size:12.5px;
+}
+
+.input{
+font-size:14px;
+}
+
+}
+
+/* StudioOS Android-safe date placeholder */
+.dateField:not(.hasValue) .dateFieldLabel{
+opacity:1;
+visibility:visible;
+}
+
+.dateField.hasValue .dateFieldLabel,
+.dateField:focus-within .dateFieldLabel{
+opacity:0;
+visibility:hidden;
+}
+
+@media (max-width:768px){
+  .dateField:not(.hasValue) input[type="date"].input{
+    color:transparent !important;
+    -webkit-text-fill-color:transparent !important;
+  }
+
+  .dateField:not(.hasValue) input[type="date"].input::-webkit-date-and-time-value{
+    color:transparent !important;
+    -webkit-text-fill-color:transparent !important;
+  }
+
+  .dateField.hasValue input[type="date"].input,
+  .dateField:focus-within input[type="date"].input{
+    color:#ffffff !important;
+    -webkit-text-fill-color:#ffffff !important;
+  }
+
+  .dateField.hasValue input[type="date"].input::-webkit-date-and-time-value,
+  .dateField:focus-within input[type="date"].input::-webkit-date-and-time-value{
+    color:#ffffff !important;
+    -webkit-text-fill-color:#ffffff !important;
+  }
+}
+
+/* StudioOS desktop-only date input cleanup
+   Desktop browsers already render native date placeholders.
+   Keep Android/mobile custom labels untouched; hide overlay labels only on desktop
+   to prevent the double mm/dd/yyyy + custom label layer. */
+@media (min-width:769px){
+  .dateFieldLabel{
+    display:none !important;
+  }
+
+  .dateField .input{
+    padding-right:10px !important;
+  }
+}
+
+
+/* StudioOS custom select picker (Android-safe)
+   Keeps original select values/IDs intact and replaces only the visible picker UI. */
+.studioosNativeSelectHidden{
+position:absolute !important;
+left:-9999px !important;
+width:1px !important;
+height:1px !important;
+opacity:0 !important;
+pointer-events:none !important;
+}
+
+.studioosSelectTrigger{
+width:100%;
+min-height:46px;
+padding:10px;
+border-radius:10px;
+background:#374151;
+margin-bottom:8px;
+color:white;
+border:1px solid rgba(255,255,255,0.1);
+transition:0.2s;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+text-align:left;
+cursor:pointer;
+}
+
+.studioosSelectTrigger:focus{
+border-color:var(--primary);
+outline:none;
+}
+
+.studioosSelectTriggerText{
+min-width:0;
+overflow:hidden;
+white-space:nowrap;
+text-overflow:ellipsis;
+}
+
+.studioosSelectTriggerPlaceholder{
+color:#ffffff;
+}
+
+.studioosSelectChevron{
+flex:0 0 auto;
+font-size:18px;
+line-height:1;
+color:#d1d5db;
+}
+
+.studioosSelectModal{
+position:fixed;
+inset:0;
+z-index:2147482200;
+display:flex;
+align-items:flex-end;
+justify-content:center;
+padding:14px;
+background:rgba(2,6,23,0.72);
+backdrop-filter:blur(10px);
+}
+
+.studioosSelectPanel{
+width:min(100%, 430px);
+max-height:min(72vh, 620px);
+overflow:hidden;
+border-radius:22px;
+background:rgba(15,23,42,0.98);
+border:1px solid rgba(255,255,255,0.12);
+box-shadow:0 24px 80px rgba(0,0,0,0.45);
+color:white;
+display:flex;
+flex-direction:column;
+}
+
+.studioosSelectHeader{
+padding:16px 18px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.studioosSelectTitle{
+font-size:15px;
+font-weight:850;
+color:#ffffff;
+}
+
+.studioosSelectClose{
+width:34px;
+height:34px;
+border-radius:999px;
+border:1px solid rgba(255,255,255,0.1);
+background:rgba(255,255,255,0.06);
+color:white;
+font-size:18px;
+line-height:1;
+cursor:pointer;
+}
+
+.studioosSelectList{
+overflow:auto;
+-webkit-overflow-scrolling:touch;
+padding:6px;
+}
+
+.studioosSelectOption{
+width:100%;
+min-height:50px;
+padding:12px 14px;
+border-radius:14px;
+border:1px solid transparent;
+background:transparent;
+color:white;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+font-size:15px;
+font-weight:700;
+text-align:left;
+cursor:pointer;
+}
+
+.studioosSelectOption + .studioosSelectOption{
+margin-top:4px;
+}
+
+.studioosSelectOption:hover,
+.studioosSelectOption:focus{
+background:rgba(255,255,255,0.07);
+outline:none;
+}
+
+.studioosSelectOption.isSelected{
+background:rgba(99,102,241,0.18);
+border-color:rgba(99,102,241,0.36);
+}
+
+.studioosSelectCheck{
+flex:0 0 auto;
+width:20px;
+height:20px;
+border-radius:999px;
+border:2px solid rgba(255,255,255,0.36);
+box-sizing:border-box;
+}
+
+.studioosSelectOption.isSelected .studioosSelectCheck{
+border-color:#818cf8;
+background:radial-gradient(circle at center,#818cf8 0 44%, transparent 48%);
+}
+
+@media (min-width:769px){
+  .studioosSelectModal{
+    align-items:center;
+  }
+}
+
+</style>
+
+</head>
+
+<body class="text-white min-h-screen flex items-center justify-center p-6">
+
+<div class="glass p-6 rounded-2xl w-[460px] quotationCard">
+
+<a href="dashboard.html" class="text-sm text-gray-400">← Back</a>
+
+<h1 id="pageTitle" class="text-xl font-bold mt-2 mb-6">
+Create Quotation
+</h1>
+
+<input id="clientName" class="input" placeholder="Client Name" required>
+
+<input id="clientPhone"
+type="tel"
+class="input"
+placeholder="Client Phone"
+required>
+
+<select id="eventCategory" class="input">
+<option value="">Select Event Category</option>
+<option>Wedding</option>
+<option>Pre Wedding</option>
+<option>Engagement</option>
+<option>Haldi</option>
+<option>Mehndi</option>
+<option>Sangeet</option>
+<option>Reception</option>
+<option>Birthday</option>
+<option>Maternity</option>
+<option>Corporate Event</option>
+<option>Other</option>
+</select>
+
+<div class="dateRow">
+<div class="dateField">
+<input id="startDate" type="date" class="input" required>
+<span class="dateFieldLabel">Start Date</span>
+</div>
+<div class="dateField">
+<input id="endDate" type="date" class="input">
+<span class="dateFieldLabel">End Date</span>
+</div>
+</div>
+
+<select id="packageSelect" class="input">
+<option value="">Select Package</option>
+<option value="50000">Silver</option>
+<option value="80000">Gold</option>
+<option value="120000">Platinum</option>
+</select>
+
+<!-- PROPOSAL COVER BRANDING -->
+
+<div id="proposalBrandingSection" class="brandingCard">
+
+<div class="brandingHeader">
+<div class="brandingTitle">Proposal Cover Branding</div>
+<div id="proposalCoverStatus" class="brandingBadge">Default image</div>
+</div>
+
+<input
+id="proposalCoverInput"
+type="file"
+accept="image/*"
+class="hidden"
+>
+
+<div id="proposalCoverPreviewWrap" class="brandPreviewWrap">
+<img
+id="proposalCoverPreview"
+class="brandPreview"
+alt="Proposal cover preview"
+>
+</div>
+
+<div class="brandingActions">
+<button
+type="button"
+id="proposalCoverChooseBtn"
+class="brandBtn">
+Upload / Change Cover Image
+</button>
+
+<button
+type="button"
+id="proposalCoverRemoveBtn"
+class="brandBtn brandBtnRemove hidden">
+Remove Image
+</button>
+</div>
+
+<p class="brandHelper">
+This cover image will be used only for premium proposal branding. Image will be optimized automatically for better performance.
+</p>
+
+</div>
+
+<hr class="my-3 border-gray-600">
+
+<h3 class="font-semibold mb-2">Services & Coverage</h3>
+
+<div class="serviceHeader">
+<div class="blank"></div>
+<span>Qty</span>
+<span>Days</span>
+</div>
+
+<div class="serviceRow">
+<span>Candid Photographer</span>
+<input id="candidQty" type="number" min="0" value="0" class="serviceInput">
+<input id="candidDays" type="number" min="0" value="0" class="serviceInput">
+</div>
+
+<div class="serviceRow">
+<span>Traditional Photographer</span>
+<input id="traditionalPhotoQty" type="number" min="0" value="0" class="serviceInput">
+<input id="traditionalPhotoDays" type="number" min="0" value="0" class="serviceInput">
+</div>
+
+<div class="serviceRow">
+<span>Traditional Videographer</span>
+<input id="traditionalVideoQty" type="number" min="0" value="0" class="serviceInput">
+<input id="traditionalVideoDays" type="number" min="0" value="0" class="serviceInput">
+</div>
+
+<div class="serviceRow">
+<span>Cinematographer</span>
+<input id="cinemaQty" type="number" min="0" value="0" class="serviceInput">
+<input id="cinemaDays" type="number" min="0" value="0" class="serviceInput">
+</div>
+
+<div class="serviceRow">
+<span>Drone</span>
+<input id="droneQty" type="number" min="0" value="0" class="serviceInput">
+<input id="droneDays" type="number" min="0" value="0" class="serviceInput">
+</div>
+
+<div class="serviceRow">
+<span>LED Screen Wall</span>
+<input id="ledQty" type="number" min="0" value="0" class="serviceInput">
+<input id="ledDays" type="number" min="0" value="0" class="serviceInput">
+</div>
+
+<div class="serviceRow">
+<span>Assistant</span>
+<input id="assistantQty" type="number" min="0" value="0" class="serviceInput">
+<input id="assistantDays" type="number" min="0" value="0" class="serviceInput">
+</div>
+
+<hr class="my-3 border-gray-600">
+
+<h3 class="font-semibold mb-2">Deliverables</h3>
+
+<label class="deliverable">
+<input type="checkbox" id="rawCheck"> Raw Soft Copy
+</label>
+
+<label class="deliverable">
+<input type="checkbox" id="traditionalCheck"> Traditional Video (Full Event)
+</label>
+
+<label class="deliverable">
+<input type="checkbox" id="cinematicCheck"> Cinematic Highlight
+</label>
+
+<label class="deliverable">
+<input type="checkbox" id="albumCheck"> Printed Album
+</label>
+
+<input id="albumPagesInput"
+type="number"
+placeholder="Album Pages"
+class="input hidden">
+
+<label class="deliverable">
+<input type="checkbox" id="giftCheck"> Free Gift
+</label>
+
+<input id="giftInput"
+type="text"
+placeholder="Gift Name"
+class="input hidden">
+
+<hr class="my-3 border-gray-600">
+
+<input id="totalAmount"
+type="number"
+class="input"
+placeholder="Total ₹">
+
+<input id="advanceAmount"
+type="number"
+class="input"
+placeholder="Advance ₹">
+
+<input id="balanceAmount"
+type="number"
+class="input"
+placeholder="Balance ₹"
+readonly>
+
+<button id="previewBtn"
+class="w-full p-3 rounded-xl mt-2 transition"
+style="background:var(--primary)">
+Preview Quote
+</button>
+
+</div>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- SUPABASE CONNECTION -->
+<script src="js/supabase.js"></script>
+
+<!-- PACKAGES ENGINE -->
+<script src="js/packages.js"></script>
+
+<!-- QUOTATION ENGINE -->
+<script src="js/quotation.js"></script>
+
+<!-- Proposal cover UI is controlled by js/quotation.js.
+     Do not add a second inline file-input handler here, because it bypasses
+     Android normalization and paid-plan branding state. -->
+
+
+
+
+<script>
+(function(){
+
+function isNativeAppLike(){
+try{
+const cap = window.Capacitor
+const protocol = String(window.location.protocol || "").toLowerCase()
+return !!(
+(cap && typeof cap.isNativePlatform === "function" && cap.isNativePlatform()) ||
+protocol === "capacitor:" ||
+protocol === "ionic:" ||
+protocol === "file:"
+)
+}catch(e){
+return false
+}
+}
+
+function shouldUseStudioOSPicker(){
+return isNativeAppLike() || window.matchMedia("(max-width: 768px)").matches
+}
+
+function getOptionDisplayText(select, option){
+const text = String(option?.textContent || "").trim()
+const value = String(option?.value || "").trim()
+
+if(select && select.id === "packageSelect" && value && /^\d+$/.test(value) && !text.includes("₹")){
+return `${text} (₹${value})`
+}
+
+return text
+}
+
+function updateStudioOSSelectTrigger(select, trigger){
+if(!select || !trigger) return
+
+const textNode = trigger.querySelector(".studioosSelectTriggerText")
+if(!textNode) return
+
+const selectedOption = select.options[select.selectedIndex] || select.options[0]
+const selectedText = selectedOption ? getOptionDisplayText(select, selectedOption) : ""
+
+textNode.textContent = selectedText || select.getAttribute("data-placeholder") || "Select"
+textNode.classList.toggle("studioosSelectTriggerPlaceholder", !select.value)
+}
+
+function closeStudioOSSelectModal(){
+const existing = document.getElementById("studioosSelectModal")
+if(existing){
+existing.remove()
+}
+document.body.style.overflow = ""
+}
+
+function openStudioOSSelectModal(select, trigger){
+if(!select || !trigger) return
+
+closeStudioOSSelectModal()
+
+const modal = document.createElement("div")
+modal.id = "studioosSelectModal"
+modal.className = "studioosSelectModal"
+
+const title = select.getAttribute("data-placeholder") || (select.options[0] ? select.options[0].textContent : "Select") || "Select"
+
+const optionsHtml = Array.from(select.options).map(function(option, index){
+const value = String(option.value || "")
+const isPlaceholder = index === 0 && value === ""
+if(isPlaceholder){
+return ""
+}
+
+const label = getOptionDisplayText(select, option)
+const selected = select.value === option.value
+
+return `
+<button type="button" class="studioosSelectOption ${selected ? "isSelected" : ""}" data-option-index="${index}">
+  <span>${label.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</span>
+  <span class="studioosSelectCheck"></span>
+</button>
+`
+}).join("")
+
+modal.innerHTML = `
+<div class="studioosSelectPanel" role="dialog" aria-modal="true" aria-label="${String(title).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}">
+  <div class="studioosSelectHeader">
+    <div class="studioosSelectTitle">${String(title).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>
+    <button type="button" class="studioosSelectClose" aria-label="Close">×</button>
+  </div>
+  <div class="studioosSelectList">${optionsHtml}</div>
+</div>
+`
+
+modal.addEventListener("click", function(event){
+if(event.target === modal || event.target.closest(".studioosSelectClose")){
+closeStudioOSSelectModal()
+return
+}
+
+const optionButton = event.target.closest(".studioosSelectOption")
+if(!optionButton) return
+
+const optionIndex = Number(optionButton.dataset.optionIndex)
+if(!Number.isFinite(optionIndex) || !select.options[optionIndex]) return
+
+select.selectedIndex = optionIndex
+updateStudioOSSelectTrigger(select, trigger)
+select.dispatchEvent(new Event("input", { bubbles:true }))
+select.dispatchEvent(new Event("change", { bubbles:true }))
+closeStudioOSSelectModal()
+})
+
+document.body.appendChild(modal)
+document.body.style.overflow = "hidden"
+}
+
+function enhanceStudioOSSelect(selectId, placeholder){
+const select = document.getElementById(selectId)
+if(!select || select.dataset.studioosPickerBound === "true") return
+if(!shouldUseStudioOSPicker()) return
+
+select.dataset.studioosPickerBound = "true"
+select.setAttribute("data-placeholder", placeholder || (select.options[0] ? select.options[0].textContent : "Select"))
+
+const trigger = document.createElement("button")
+trigger.type = "button"
+trigger.className = "studioosSelectTrigger"
+trigger.setAttribute("aria-haspopup", "dialog")
+trigger.innerHTML = `<span class="studioosSelectTriggerText"></span><span class="studioosSelectChevron">⌄</span>`
+
+select.classList.add("studioosNativeSelectHidden")
+select.insertAdjacentElement("afterend", trigger)
+
+updateStudioOSSelectTrigger(select, trigger)
+
+trigger.addEventListener("click", function(){
+openStudioOSSelectModal(select, trigger)
+})
+
+select.addEventListener("change", function(){
+updateStudioOSSelectTrigger(select, trigger)
+})
+}
+
+function bindStudioOSQuotationPickers(){
+enhanceStudioOSSelect("eventCategory", "Select Event Category")
+enhanceStudioOSSelect("packageSelect", "Select Package")
+}
+
+if(document.readyState === "loading"){
+document.addEventListener("DOMContentLoaded", bindStudioOSQuotationPickers)
+}else{
+bindStudioOSQuotationPickers()
+}
+
+})()
+</script>
+
+<script>
+(function(){
+
+function syncDateFieldState(input){
+if(!input) return
+
+const wrap = input.closest(".dateField")
+if(!wrap) return
+
+if(input.value){
+wrap.classList.add("hasValue")
+}else{
+wrap.classList.remove("hasValue")
+}
+}
+
+window.syncStudioOSQuotationDateFields = function(){
+const inputs = [
+document.getElementById("startDate"),
+document.getElementById("endDate")
+]
+
+inputs.forEach(syncDateFieldState)
+}
+
+function bindDateFieldLabels(){
+const inputs = [
+document.getElementById("startDate"),
+document.getElementById("endDate")
+]
+
+inputs.forEach(function(input){
+if(!input) return
+
+syncDateFieldState(input)
+
+input.addEventListener("input", function(){
+syncDateFieldState(input)
+})
+
+input.addEventListener("change", function(){
+syncDateFieldState(input)
+})
+
+input.addEventListener("blur", function(){
+syncDateFieldState(input)
+})
+})
+}
+
+if(document.readyState === "loading"){
+document.addEventListener("DOMContentLoaded", bindDateFieldLabels)
+}else{
+bindDateFieldLabels()
+}
+
+})()
+</script>
+
+<script src="js/app-bottom-nav.js"></script>
+
+</body>
+</html>

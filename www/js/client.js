@@ -1,0 +1,695 @@
+﻿// =============================
+// GET CURRENT USER
+// =============================
+
+async function getCurrentUser(){
+
+const supabase = await window.getSupabase()
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+return user
+
+}
+
+
+
+// =============================
+// GET QUOTATION ID FROM URL
+// =============================
+
+function getQuotationId(){
+
+const params =
+new URLSearchParams(window.location.search)
+
+return params.get("quotation") || params.get("id")
+
+}
+
+
+
+// =============================
+// SAFE DISPLAY SYMBOLS
+// =============================
+
+const CLIENT_CURRENCY_SYMBOL = "\u20B9"
+const CLIENT_DATE_RANGE_ARROW = "\u2192"
+const CLIENT_PAYMENT_SEPARATOR = "\u2022"
+
+
+
+// =============================
+// FORMAT DATE
+// =============================
+
+function formatDate(dateString){
+
+if(!dateString) return "-"
+
+const date = new Date(dateString)
+
+return date.toLocaleDateString("en-IN",{
+day:"numeric",
+month:"short",
+year:"numeric"
+})
+
+}
+
+
+
+// =============================
+// ANDROID SAFE SHARE HELPERS
+// =============================
+
+function isStudioOSNativeApp(){
+
+try{
+
+const cap = window.Capacitor
+const protocol = String(window.location.protocol || "").toLowerCase()
+
+if(cap && typeof cap.isNativePlatform === "function" && cap.isNativePlatform()){
+return true
+}
+
+if(protocol === "capacitor:" || protocol === "ionic:" || protocol === "file:"){
+return true
+}
+
+const plugins = cap?.Plugins || {}
+return !!(plugins.Share)
+
+}catch(error){
+
+return false
+
+}
+
+}
+
+function getClientCapacitorPlugins(){
+
+try{
+return window.Capacitor?.Plugins || {}
+}catch(error){
+return {}
+}
+
+}
+
+function getStudioOSPublicWebBaseUrl(){
+
+const configured = String(
+window.STUDIOOS_PUBLIC_WEB_APP_BASE_URL ||
+window.PUBLIC_WEB_APP_BASE_URL ||
+window.STUDIOOS_WEB_BASE_URL ||
+""
+).trim().replace(/\/+$/,"")
+
+function isUnsafePublicBaseUrl(value){
+try{
+const url = new URL(String(value || "").trim())
+const protocol = String(url.protocol || "").toLowerCase()
+const host = String(url.hostname || "").trim().toLowerCase()
+
+if(protocol !== "https:"){
+return true
+}
+
+if(
+host === "localhost" ||
+host === "127.0.0.1" ||
+host === "0.0.0.0" ||
+host === "::1" ||
+host.endsWith(".localhost")
+){
+return true
+}
+
+if(
+host.startsWith("192.168.") ||
+host.startsWith("10.") ||
+/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)
+){
+return true
+}
+
+return false
+}catch(error){
+return true
+}
+}
+
+if(configured && !isUnsafePublicBaseUrl(configured)){
+return configured
+}
+
+return "https://app.chitrabookai.in"
+
+}
+
+function buildPublicTeamSheetShareUrl(quotationId){
+
+const safeQuotationId = String(quotationId || "").trim()
+const query = new URLSearchParams()
+
+if(safeQuotationId){
+query.set("quotation", safeQuotationId)
+}
+
+return `${getStudioOSPublicWebBaseUrl()}/team-sheet.html${query.toString() ? `?${query.toString()}` : ""}`
+
+}
+
+function showClientToast(message, type = "success"){
+
+const existing = document.getElementById("clientPageToast")
+if(existing){
+existing.remove()
+}
+
+const toast = document.createElement("div")
+toast.id = "clientPageToast"
+toast.style.position = "fixed"
+toast.style.left = "50%"
+toast.style.bottom = "calc(86px + env(safe-area-inset-bottom, 0px))"
+toast.style.transform = "translateX(-50%)"
+toast.style.width = "min(calc(100% - 32px), 360px)"
+toast.style.zIndex = "2147482600"
+toast.style.padding = "0.85rem 1rem"
+toast.style.borderRadius = "1rem"
+toast.style.background = type === "error" ? "rgba(127,29,29,0.96)" : "rgba(15,23,42,0.96)"
+toast.style.border = type === "error" ? "1px solid rgba(248,113,113,0.35)" : "1px solid rgba(255,255,255,0.12)"
+toast.style.boxShadow = "0 18px 55px rgba(0,0,0,0.38)"
+toast.style.backdropFilter = "blur(16px)"
+toast.style.webkitBackdropFilter = "blur(16px)"
+toast.style.color = "#ffffff"
+toast.style.fontSize = "0.9rem"
+toast.style.fontWeight = "750"
+toast.style.textAlign = "center"
+toast.style.pointerEvents = "none"
+toast.textContent = message
+
+document.body.appendChild(toast)
+
+setTimeout(()=>{
+toast.style.transition = "opacity 180ms ease, transform 180ms ease"
+toast.style.opacity = "0"
+toast.style.transform = "translateX(-50%) translateY(8px)"
+setTimeout(()=>{
+toast.remove()
+}, 220)
+}, 1850)
+
+}
+
+async function shareClientTeamSheet(url){
+
+const plugins = getClientCapacitorPlugins()
+const Share = plugins.Share
+
+if(isStudioOSNativeApp() && Share && typeof Share.share === "function"){
+
+await Share.share({
+title: "Team Sheet",
+text: "Event Team Sheet",
+url,
+dialogTitle: "Share Team Sheet"
+})
+
+return true
+
+}
+
+if(navigator.share){
+
+await navigator.share({
+title: "Team Sheet",
+text: "Event Team Sheet",
+url
+})
+
+return true
+
+}
+
+if(navigator.clipboard && navigator.clipboard.writeText){
+
+await navigator.clipboard.writeText(url)
+showClientToast("Team Sheet link copied")
+return true
+
+}
+
+return false
+
+}
+
+
+
+// =============================
+// TEAM SHARE PLAN GATE
+// =============================
+
+function normalizePlanValue(value){
+
+return String(value || "").trim().toLowerCase()
+
+}
+
+function isActivePaidTeamSharePlan(settings){
+
+if(!settings) return false
+
+const plan = normalizePlanValue(settings.plan)
+const status = normalizePlanValue(settings.subscription_status)
+const isPaid = settings.is_paid === true
+const expiresAt = settings.plan_expires_at ? new Date(settings.plan_expires_at).getTime() : 0
+const hasValidExpiry = Number.isFinite(expiresAt) && expiresAt > Date.now()
+
+return isPaid && status === "active" && hasValidExpiry && (plan === "basic" || plan === "pro")
+
+}
+
+async function canCurrentUserShareTeam(supabase,userId){
+
+if(!userId) return false
+
+try{
+
+const { data, error } =
+await supabase
+.from("photographer_settings")
+.select("plan, subscription_status, is_paid, plan_expires_at")
+.eq("user_id",userId)
+.maybeSingle()
+
+if(error){
+console.error("TEAM SHARE PLAN CHECK ERROR:", error)
+return false
+}
+
+return isActivePaidTeamSharePlan(data)
+
+}catch(err){
+console.error("TEAM SHARE PLAN CHECK ERROR:", err)
+return false
+}
+
+}
+
+function closeTeamShareUpgradeModal(){
+
+const existing = document.getElementById("teamShareUpgradeModal")
+
+if(existing){
+existing.remove()
+}
+
+document.body.classList.remove("overflow-hidden")
+
+}
+
+function showTeamShareUpgradeModal(){
+
+closeTeamShareUpgradeModal()
+
+const modal = document.createElement("div")
+modal.id = "teamShareUpgradeModal"
+modal.className = "fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+
+modal.innerHTML = `
+  <div class="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0f172a] p-5 text-white shadow-2xl">
+    <div class="inline-flex rounded-full border border-indigo-400/30 bg-indigo-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-indigo-200">
+      Basic / Pro Required
+    </div>
+
+    <h2 class="mt-4 text-xl font-bold">
+      Unlock team sharing
+    </h2>
+
+    <div class="mt-3 space-y-2 text-sm text-gray-300">
+      <p>${CLIENT_PAYMENT_SEPARATOR} Share Team Sheet link</p>
+      <p>${CLIENT_PAYMENT_SEPARATOR} Client/public team sheet access</p>
+      <p>${CLIENT_PAYMENT_SEPARATOR} Team Sheet PDF sharing</p>
+    </div>
+
+    <div class="mt-5 rounded-xl border border-white/10 bg-white/5 p-4">
+      <div class="text-sm font-semibold">Basic Plan</div>
+      <div class="mt-1 text-2xl font-bold">${CLIENT_CURRENCY_SYMBOL}499/mo</div>
+      <p class="mt-2 text-xs text-gray-400">
+        Upgrade to enable team sharing.
+      </p>
+    </div>
+
+    <div class="mt-5 grid grid-cols-2 gap-3">
+      <button
+        type="button"
+        id="teamShareUpgradeCancel"
+        class="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10">
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        id="teamShareUpgradePlans"
+        class="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700">
+        View Plans
+      </button>
+    </div>
+  </div>
+`
+
+document.body.appendChild(modal)
+document.body.classList.add("overflow-hidden")
+
+const cancelBtn = document.getElementById("teamShareUpgradeCancel")
+const plansBtn = document.getElementById("teamShareUpgradePlans")
+
+if(cancelBtn){
+cancelBtn.onclick = closeTeamShareUpgradeModal
+}
+
+if(plansBtn){
+plansBtn.onclick = function(){
+window.location.href = "subscription.html"
+}
+}
+
+modal.addEventListener("click",function(e){
+if(e.target === modal){
+closeTeamShareUpgradeModal()
+}
+})
+
+}
+
+
+
+// =============================
+// LOAD CLIENT PROFILE
+// =============================
+
+async function loadClient(){
+
+try{
+
+const supabase = await window.getSupabase()
+
+const quotationId = getQuotationId()
+
+if(!quotationId) {
+console.warn("No quotationId found")
+return
+}
+
+
+
+// =============================
+// GET QUOTATION
+// =============================
+
+const { data: quote, error } =
+await supabase
+.from("quotations")
+.select("*")
+.eq("id",quotationId)
+.single()
+
+if(error){
+console.error("QUOTE ERROR:", error)
+return
+}
+
+if(!quote) return
+
+const currentUser = await getCurrentUser()
+const currentUserId = currentUser?.id || ""
+const quotationOwnerId = quote.user_id || currentUserId
+
+
+
+// =============================
+// CLIENT DETAILS
+// =============================
+
+document.getElementById("clientName").innerText =
+quote.client_name || "-"
+
+document.getElementById("clientPhone").innerText =
+quote.phone || "-"
+
+
+
+// =============================
+// EVENT DETAILS
+// =============================
+
+const eventType =
+quote.event_category ||
+quote.event_type ||
+quote.package ||
+"-"
+
+document.getElementById("eventType").innerText =
+eventType
+
+
+
+// =============================
+// EVENT DATE
+// =============================
+
+const startDate =
+quote.event_start_date ||
+quote.event_date
+
+const endDate =
+quote.event_end_date ||
+quote.end_date ||
+quote.event_date
+
+
+
+let eventDateText =
+formatDate(startDate)
+
+if(endDate && startDate !== endDate){
+
+eventDateText =
+formatDate(startDate) + " " + CLIENT_DATE_RANGE_ARROW + " " + formatDate(endDate)
+
+}
+
+document.getElementById("eventDate").innerText =
+eventDateText
+
+document.getElementById("eventVenue").innerText =
+quote.venue || "-"
+
+
+
+// =============================
+// TOTAL PACKAGE
+// =============================
+
+const total =
+Number(quote.total || 0)
+
+document.getElementById("totalAmount").innerText =
+CLIENT_CURRENCY_SYMBOL + total
+
+
+
+// =============================
+// GET PAYMENTS
+// =============================
+
+const { data: payments } =
+await supabase
+.from("payments")
+.select("*")
+.eq("quotation_id", quotationId)
+.order("payment_date",{ascending:true})
+
+
+const container =
+document.getElementById("paymentsList")
+
+let paid = 0
+
+
+if(!payments || payments.length === 0){
+
+container.innerHTML =
+"<p class='text-gray-400'>No payments yet</p>"
+
+}else{
+
+container.innerHTML = ""
+
+payments.forEach(p=>{
+
+paid += Number(p.amount || 0)
+
+const row =
+document.createElement("div")
+
+row.className =
+"flex justify-between"
+
+row.innerHTML = `
+<div>
+${CLIENT_CURRENCY_SYMBOL}${p.amount}
+<div class="text-xs text-gray-400">
+${p.payment_type} ${CLIENT_PAYMENT_SEPARATOR} ${p.method}
+</div>
+</div>
+
+<div class="text-xs text-gray-400">
+${formatDate(p.payment_date)}
+</div>
+`
+
+container.appendChild(row)
+
+})
+
+}
+
+
+
+// =============================
+// PAID + BALANCE
+// =============================
+
+document.getElementById("paidAmount").innerText =
+CLIENT_CURRENCY_SYMBOL + paid
+
+document.getElementById("balanceAmount").innerText =
+CLIENT_CURRENCY_SYMBOL + (total - paid)
+
+
+
+// =============================
+// BUTTON LINKS
+// =============================
+
+document.getElementById("addPaymentBtn").href =
+"payment.html?quotation=" + quotationId
+
+document.getElementById("viewInvoiceBtn").href =
+"invoice.html?quotation=" + quotationId
+
+const addTeamBtn = document.getElementById("addTeamBtn")
+
+if(addTeamBtn){
+addTeamBtn.href =
+"team.html?quotation=" + quotationId
+}
+
+
+
+// =============================
+// MENU LOGIC
+// =============================
+
+const menuBtn = document.getElementById("menuBtn")
+const menuDropdown = document.getElementById("menuDropdown")
+
+if(menuBtn && menuDropdown){
+
+menuBtn.onclick = (e)=>{
+e.stopPropagation()
+menuDropdown.classList.toggle("hidden")
+}
+
+menuDropdown.onclick = (e)=>{
+e.stopPropagation()
+}
+
+document.addEventListener("click",()=>{
+menuDropdown.classList.add("hidden")
+})
+
+}
+
+
+
+// =============================
+// MENU ACTIONS
+// =============================
+
+const openTeamBtn = document.getElementById("openTeamBtn")
+const viewTeamSheetBtn = document.getElementById("viewTeamSheetBtn")
+const shareTeamBtn = document.getElementById("shareTeamBtn")
+const backBtn = document.getElementById("backBtn")
+
+if(openTeamBtn){
+openTeamBtn.onclick = ()=>{
+window.location.href =
+"team.html?quotation=" + quotationId
+}
+}
+
+if(viewTeamSheetBtn){
+viewTeamSheetBtn.onclick = ()=>{
+window.location.href =
+"team-sheet.html?quotation=" + quotationId
+}
+}
+
+if(shareTeamBtn){
+shareTeamBtn.onclick = async ()=>{
+try{
+
+menuDropdown.classList.add("hidden")
+
+const canShareTeam =
+await canCurrentUserShareTeam(supabase, quotationOwnerId)
+
+if(!canShareTeam){
+showTeamShareUpgradeModal()
+return
+}
+
+const url = buildPublicTeamSheetShareUrl(quotationId)
+
+const shared = await shareClientTeamSheet(url)
+
+if(!shared){
+showClientToast("Unable to share. Please copy the link manually.", "error")
+}
+
+}catch(err){
+console.error("SHARE TEAM ERROR:", err)
+showClientToast("Team share failed", "error")
+}
+}
+}
+
+if(backBtn){
+backBtn.onclick = ()=>{
+window.location.href = "clients.html"
+}
+}
+
+}catch(err){
+console.error("LOAD CLIENT ERROR:", err)
+}
+
+}
+
+
+
+// =============================
+// INIT (SAFE)
+// =============================
+
+window.addEventListener("DOMContentLoaded",()=>{
+loadClient()
+})
+

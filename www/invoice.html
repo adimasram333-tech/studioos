@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Invoice</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+font-family:Arial, Helvetica, sans-serif;
+margin:0;
+padding:16px;
+box-sizing:border-box;
+}
+
+*,
+*::before,
+*::after{
+box-sizing:border-box;
+}
+
+/* EXACT A4 PAGE */
+
+.invoice-page{
+background:white;
+width:794px;
+min-height:1122px;
+margin:auto;
+color:#111827;
+overflow:visible;
+border-radius:6px;
+box-shadow:0 10px 30px rgba(0,0,0,0.15);
+}
+
+/* HEADER */
+
+.invoice-header{
+background:linear-gradient(135deg,#5b4cc4,#4c3db2);
+color:white;
+padding:55px 50px 80px 50px;
+position:relative;
+overflow:hidden;
+}
+
+.invoice-title{
+position:absolute;
+right:50px;
+top:50px;
+font-size:34px;
+font-weight:bold;
+letter-spacing:2px;
+}
+
+.wave-1{
+position:absolute;
+bottom:-30px;
+left:0;
+width:100%;
+height:80px;
+background:rgba(255,255,255,0.35);
+border-top-left-radius:100% 80px;
+border-top-right-radius:100% 80px;
+}
+
+.wave-2{
+position:absolute;
+bottom:-45px;
+left:0;
+width:100%;
+height:90px;
+background:white;
+border-top-left-radius:100% 90px;
+border-top-right-radius:100% 90px;
+}
+
+/* BODY */
+
+.invoice-body{
+padding:60px 55px;
+}
+
+.invoice-top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-size:15px;
+margin-bottom:18px;
+gap:20px;
+}
+
+.divider{
+height:1px;
+background:#e5e7eb;
+margin-bottom:35px;
+}
+
+.client-event{
+display:flex;
+gap:40px;
+margin-bottom:40px;
+}
+
+.client{flex:1;}
+
+.event{
+flex:1;
+padding-left:40px;
+border-left:1px solid #e5e7eb;
+}
+
+/* TABLE */
+
+.invoice-table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+font-size:15px;
+table-layout:fixed;
+}
+
+.invoice-table thead{
+background:#4c3db2;
+color:white;
+}
+
+.invoice-table th{
+padding:14px 12px;
+text-align:left;
+font-weight:600;
+}
+
+.invoice-table td{
+padding:14px 12px;
+border-bottom:1px solid #e5e7eb;
+word-break:break-word;
+}
+
+.invoice-table th:nth-child(2),
+.invoice-table th:nth-child(3){
+text-align:right;
+}
+
+.invoice-table td:nth-child(2),
+.invoice-table td:nth-child(3){
+text-align:right;
+}
+
+.invoice-table th:nth-child(1){width:60%;}
+.invoice-table th:nth-child(2){width:20%;}
+.invoice-table th:nth-child(3){width:20%;}
+
+/* PAYMENTS */
+
+.payment-summary{
+margin-top:40px;
+}
+
+/* TERMS */
+
+.terms{
+margin-top:45px;
+}
+
+.terms ul{
+margin-top:10px;
+padding-left:0;
+}
+
+.terms li{
+margin-bottom:6px;
+list-style:none;
+}
+
+/* FOOTER */
+
+.invoice-footer{
+padding:40px 55px;
+}
+
+.signature{
+text-align:right;
+margin-top:50px;
+line-height:1.6;
+}
+
+.signature-line{
+width:200px;
+border-bottom:1px solid #9ca3af;
+margin-left:auto;
+margin-top:6px;
+margin-bottom:6px;
+}
+
+.generated{
+text-align:center;
+font-size:12px;
+color:#6b7280;
+margin-top:40px;
+}
+
+/* MOBILE RESPONSIVE PREVIEW */
+
+@media (max-width: 860px){
+
+body{
+padding:12px;
+}
+
+.invoice-page{
+width:100%;
+max-width:794px;
+min-height:auto;
+}
+
+}
+
+@media (max-width: 640px){
+
+body{
+padding:10px;
+}
+
+.invoice-page{
+width:100%;
+border-radius:10px;
+overflow:hidden;
+}
+
+.invoice-header{
+padding:28px 18px 62px 18px;
+}
+
+.invoice-title{
+position:static;
+margin-top:14px;
+font-size:20px;
+letter-spacing:1px;
+text-align:right;
+}
+
+.invoice-header h1{
+font-size:14px;
+line-height:1.4;
+max-width:70%;
+word-break:break-word;
+}
+
+.invoice-header .text-sm{
+font-size:11px;
+line-height:1.5;
+max-width:80%;
+word-break:break-word;
+}
+
+.wave-1{
+bottom:-24px;
+height:58px;
+border-top-left-radius:100% 58px;
+border-top-right-radius:100% 58px;
+}
+
+.wave-2{
+bottom:-34px;
+height:68px;
+border-top-left-radius:100% 68px;
+border-top-right-radius:100% 68px;
+}
+
+.invoice-body{
+padding:26px 16px;
+}
+
+.invoice-top{
+flex-direction:column;
+align-items:flex-start;
+font-size:14px;
+gap:10px;
+margin-bottom:14px;
+}
+
+.divider{
+margin-bottom:22px;
+}
+
+.client-event{
+flex-direction:column;
+gap:18px;
+margin-bottom:24px;
+}
+
+.event{
+padding-left:0;
+padding-top:16px;
+border-left:none;
+border-top:1px solid #e5e7eb;
+}
+
+.invoice-table{
+font-size:13px;
+margin-top:12px;
+}
+
+.invoice-table th,
+.invoice-table td{
+padding:12px 10px;
+}
+
+.invoice-table th:nth-child(1){width:50%;}
+.invoice-table th:nth-child(2){width:25%;}
+.invoice-table th:nth-child(3){width:25%;}
+
+.payment-summary{
+margin-top:28px;
+}
+
+.payment-summary h3{
+font-size:16px;
+}
+
+.terms{
+margin-top:30px;
+}
+
+.invoice-footer{
+padding:28px 16px;
+}
+
+.invoice-footer .text-sm{
+font-size:13px;
+}
+
+.signature{
+text-align:left;
+margin-top:32px;
+}
+
+.signature-line{
+margin-left:0;
+}
+
+.generated{
+margin-top:28px;
+font-size:11px;
+}
+
+#downloadInvoice{
+font-size:14px;
+padding:14px 16px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="invoiceContainer" class="invoice-page">
+
+<div class="invoice-header">
+
+<h1 id="studioName">Studio Name</h1>
+
+<div class="text-sm mt-2">
+<span id="studioPhone">Phone</span> •
+<span id="studioEmail">Email</span>
+</div>
+
+<div class="invoice-title">INVOICE</div>
+
+<div class="wave-1"></div>
+<div class="wave-2"></div>
+
+</div>
+
+<div class="invoice-body">
+
+<div class="invoice-top">
+
+<div>
+<strong>Invoice No :</strong>
+<span id="invoiceNumber">INV-2026-001</span>
+</div>
+
+<div>
+<strong>Invoice Date :</strong>
+<span id="invoiceDate">-</span>
+</div>
+
+</div>
+
+<div class="divider"></div>
+
+<div class="client-event">
+
+<div class="client">
+<strong>Invoice To</strong><br>
+<span id="clientName">Client Name</span><br>
+<span id="clientPhone">Phone</span>
+</div>
+
+<div class="event">
+
+<strong>Event</strong><br>
+<span id="eventType">Event Type</span><br>
+
+<strong class="block mt-2">Event Date</strong>
+
+<span id="eventStart">-</span>
+ →
+<span id="eventEnd">-</span>
+
+<br>
+<span id="eventVenue">Venue</span>
+
+</div>
+
+</div>
+
+<table class="invoice-table">
+
+<thead>
+<tr>
+<th>ITEM NAME</th>
+<th>PRICE</th>
+<th>TOTAL</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Photography Package</td>
+<td id="invoiceTotal">₹0</td>
+<td id="invoiceTotalFooter">₹0</td>
+</tr>
+
+<tr>
+<td>Amount Paid</td>
+<td id="invoicePaid">₹0</td>
+<td id="invoicePaidFooter">₹0</td>
+</tr>
+
+<tr>
+<td>Balance</td>
+<td id="invoiceBalance">₹0</td>
+<td id="invoiceBalanceFooter">₹0</td>
+</tr>
+
+</tbody>
+
+</table>
+
+<div class="payment-summary">
+
+<h3 class="font-semibold mb-3">Payments</h3>
+
+<div id="invoicePayments">
+<p class="text-gray-500 text-sm">No payments yet</p>
+</div>
+
+</div>
+
+<div class="terms">
+
+<strong>Terms and Conditions</strong>
+
+<ul>
+<li>✓ Balance payment required before final delivery</li>
+<li>✓ Album delivery timeline 30 days</li>
+</ul>
+
+</div>
+
+</div>
+
+<div class="invoice-footer">
+
+<div class="text-sm">
+
+<strong>Payment Info</strong>
+
+<p class="text-gray-600 mt-2">
+UPI / Bank Transfer accepted
+</p>
+
+</div>
+
+<div class="signature">
+
+<div>Thank you for your business</div>
+
+<div id="photographerName">Aditya Masram Photography</div>
+
+<div class="signature-line"></div>
+
+<div>Authorized Sign</div>
+
+</div>
+
+<div class="generated">
+Invoice generated by ChitraBook AI
+</div>
+
+</div>
+
+</div>
+
+<div class="max-w-md mx-auto mt-6">
+
+<button
+id="downloadInvoice"
+class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl">
+
+Download Invoice
+
+</button>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/invoice.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script src="js/app-bottom-nav.js"></script>
+
+</body>
+</html>

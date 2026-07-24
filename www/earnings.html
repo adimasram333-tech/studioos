@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Earnings - ChitraBook AI</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- REQUIRED -->
+<script src="js/supabase.js"></script>
+
+<style>
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+color:white;
+font-family:system-ui;
+}
+.glass{
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+}
+</style>
+
+</head>
+
+<body class="min-h-screen p-4">
+
+<div class="max-w-md mx-auto">
+
+<h1 class="text-xl font-semibold mb-6">💰 Earnings Dashboard</h1>
+
+<!-- SUMMARY -->
+<div class="grid grid-cols-2 gap-4 mb-6">
+
+<div class="glass rounded-2xl p-4">
+<p class="text-gray-400 text-sm">Total Earnings</p>
+<h2 id="totalEarnings" class="text-2xl font-bold">₹0</h2>
+</div>
+
+<div class="glass rounded-2xl p-4">
+<p class="text-gray-400 text-sm">This Month</p>
+<h2 id="monthlyEarnings" class="text-2xl font-bold">₹0</h2>
+</div>
+
+<div class="glass rounded-2xl p-4 col-span-2">
+<p class="text-gray-400 text-sm">Total Sales</p>
+<h2 id="totalSales" class="text-2xl font-bold">0</h2>
+</div>
+
+</div>
+
+<!-- 📊 MONTHLY GRAPH -->
+<div class="glass rounded-2xl p-4 mb-6">
+<div class="flex items-center justify-between gap-3 mb-3">
+  <div>
+    <h2 class="text-lg font-semibold text-white">📊 Monthly Earnings</h2>
+    <p class="text-xs text-sky-200/75 mt-1">Month-wise earning performance</p>
+  </div>
+  <span id="monthlyGrowthBadge" class="hidden px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-black shadow-lg"></span>
+</div>
+<div class="rounded-2xl bg-white p-4 border border-sky-200/60 shadow-2xl">
+  <div class="h-[230px]">
+    <canvas id="monthlyChart"></canvas>
+  </div>
+</div>
+</div>
+
+<!-- 💳 PAYOUT SYSTEM -->
+<div class="glass rounded-2xl p-4 mb-6">
+<h2 class="text-lg mb-3">💳 Payout</h2>
+
+<div class="flex justify-between mb-2 text-sm">
+<span class="text-gray-400">Available Balance</span>
+<span id="availableBalance" class="font-semibold">₹0</span>
+</div>
+
+<div id="withdrawStatus" class="text-xs text-yellow-400 mb-3 hidden"></div>
+
+<button id="withdrawBtn"
+class="w-full bg-blue-500 hover:bg-blue-600 p-2 rounded-xl font-semibold">
+Withdraw Earnings
+</button>
+
+</div>
+
+<!-- 🏆 TOP EVENTS -->
+<div class="glass rounded-2xl p-4 mb-6">
+<h2 class="text-lg mb-3">🏆 Top Events</h2>
+<div id="topEvents" class="space-y-2 text-sm text-gray-300"></div>
+</div>
+
+<!-- 👤 CLIENT EARNINGS -->
+<div class="glass rounded-2xl p-4 mb-6">
+<h2 class="text-lg mb-3">👤 Client Earnings</h2>
+<div id="clientEarnings" class="space-y-2 text-sm text-gray-300"></div>
+</div>
+
+<!-- 💰 PROFIT SPLIT -->
+<div class="glass rounded-2xl p-4 mb-6">
+<h2 class="text-lg mb-3">💰 Profit Split</h2>
+<div id="profitSplit" class="text-sm text-gray-300"></div>
+</div>
+
+<!-- TRANSACTIONS -->
+<div class="glass rounded-2xl p-4">
+<h2 class="text-lg mb-3">📄 Transactions</h2>
+
+<div id="transactionsList" class="space-y-3 text-sm text-gray-300">
+<p class="text-gray-400">No earnings yet</p>
+</div>
+</div>
+
+</div>
+
+<!-- ✅ PREMIUM WITHDRAW MODAL -->
+<div id="withdrawModal"
+class="hidden fixed inset-0 items-center justify-center z-50 bg-slate-950/75 backdrop-blur-md p-4">
+
+  <div class="w-full max-w-sm rounded-3xl border border-white/10 bg-[#0f172a]/95 shadow-2xl overflow-hidden">
+
+    <div class="flex items-start justify-between gap-3 p-5 border-b border-white/10">
+      <div>
+        <div class="inline-flex items-center px-3 py-1 rounded-full bg-sky-500/15 border border-sky-300/20 text-sky-200 text-[11px] font-black uppercase tracking-[0.16em]">
+          Payout Request
+        </div>
+        <h2 class="text-xl font-black mt-3">Confirm Withdrawal</h2>
+        <p class="text-sm text-slate-400 mt-1">Verify details before submitting payout request.</p>
+      </div>
+
+      <button onclick="window.closeWithdrawModal()"
+      class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 text-white text-xl leading-none">
+        ×
+      </button>
+    </div>
+
+    <div class="p-5 space-y-3 text-sm">
+
+      <div class="grid grid-cols-1 gap-3">
+        <div class="rounded-2xl bg-white/[0.045] border border-white/10 p-3">
+          <p class="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-black">Name</p>
+          <p id="modalName" class="mt-1 text-white font-bold break-words"></p>
+        </div>
+
+        <div class="rounded-2xl bg-white/[0.045] border border-white/10 p-3">
+          <p class="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-black">UPI ID</p>
+          <p id="modalUpi" class="mt-1 text-white font-bold break-words"></p>
+        </div>
+
+        <div class="rounded-2xl bg-sky-500/10 border border-sky-300/20 p-3">
+          <p class="text-[11px] uppercase tracking-[0.14em] text-sky-200 font-black">Amount</p>
+          <p class="mt-1 text-2xl text-white font-black">₹<span id="modalAmount"></span></p>
+        </div>
+      </div>
+
+      <div class="rounded-2xl bg-yellow-400/10 border border-yellow-300/20 p-3 text-yellow-200 text-xs leading-relaxed">
+        ⚠️ Payment will be sent to this UPI ID after admin verification. Please check carefully.
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 pt-1">
+
+        <button onclick="window.goToProfile()"
+        class="rounded-2xl bg-slate-600/80 hover:bg-slate-600 border border-white/10 p-3 text-sm font-black">
+          Edit
+        </button>
+
+        <button onclick="window.closeWithdrawModal()"
+        class="rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 p-3 text-sm font-black">
+          Cancel
+        </button>
+
+        <button onclick="window.confirmWithdrawFinal()"
+        class="rounded-2xl bg-sky-500 hover:bg-sky-400 border border-sky-300/30 p-3 text-sm font-black text-white shadow-lg shadow-sky-500/20">
+          Confirm
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script type="module" src="js/earnings.js"></script>
+
+<script src="js/app-bottom-nav.js"></script>
+
+</body>
+</html>

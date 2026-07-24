@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Team Sheet</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+font-family: Georgia, "Times New Roman", serif;
+}
+
+.sheet-title{
+letter-spacing:0.02em;
+}
+
+.sheet-page{
+background:#f4f1ed;
+}
+
+.sheet-panel{
+background:#fcfbfa;
+}
+
+.detail-label{
+color:#7a746d;
+}
+
+.role-title{
+color:#2c2a28;
+}
+
+.role-subtitle{
+color:#9a938b;
+}
+
+.member-card{
+background:#ffffff;
+border:1px solid #ece7e2;
+}
+
+.professional-note{
+color:#6e675f;
+}
+
+.footer-brand{
+color:#9a938b;
+font-size:12px;
+text-align:center;
+margin-top:20px;
+}
+
+@media print{
+body{
+background:#ffffff;
+padding:0;
+margin:0;
+}
+.no-print{
+display:none !important;
+}
+.print-shell{
+max-width:none !important;
+width:100% !important;
+margin:0 !important;
+padding:0 !important;
+}
+.print-sheet{
+min-height:auto !important;
+border-radius:0 !important;
+box-shadow:none !important;
+}
+}
+
+/* =========================================
+   DESKTOP PDF EXPORT ONLY
+   mobile untouched
+   ========================================= */
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop{
+background:#ffffff !important;
+padding:0 !important;
+margin:0 !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .print-shell{
+max-width:none !important;
+width:100% !important;
+margin:0 !important;
+padding:0 !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .print-sheet{
+min-height:auto !important;
+border-radius:0 !important;
+box-shadow:none !important;
+display:flex !important;
+flex-direction:column !important;
+overflow:visible !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .print-sheet > div:first-child{
+width:100% !important;
+min-height:auto !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .print-sheet > div:first-child img{
+width:100% !important;
+height:auto !important;
+object-fit:contain !important;
+display:block !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .sheet-panel{
+width:100% !important;
+padding:16px !important;
+display:flex !important;
+flex-direction:column !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .mobile-safe-padding{
+padding:16px !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop #teamList{
+margin-top:24px !important;
+space-y:0 !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .member-card{
+padding:16px !important;
+border-radius:18px !important;
+break-inside:avoid !important;
+page-break-inside:avoid !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .member-card > div:first-child{
+display:flex !important;
+flex-direction:column !important;
+align-items:flex-start !important;
+justify-content:flex-start !important;
+gap:8px !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .member-card > div:first-child > div:last-child{
+text-align:left !important;
+min-width:0 !important;
+width:100% !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .role-title{
+font-size:20px !important;
+line-height:1.2 !important;
+}
+
+body.team-sheet-pdf-export.team-sheet-pdf-export-desktop .role-subtitle{
+font-size:13px !important;
+}
+
+@media (max-width: 1023px){
+.mobile-safe-padding{
+padding:16px;
+}
+}
+</style>
+
+</head>
+
+<body class="text-white min-h-screen p-4">
+
+<div class="max-w-7xl mx-auto print-shell">
+
+<a id="backBtn"
+class="no-print inline-block text-sm text-gray-300 cursor-pointer mb-4">
+← Back
+</a>
+
+<div class="sheet-page print-sheet rounded-[28px] overflow-hidden shadow-2xl min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
+
+  <!-- LEFT IMAGE PANEL -->
+
+  <div class="w-full lg:w-[40%] xl:w-[38%] min-h-[320px] lg:min-h-full relative">
+    <img
+      id="coverImage"
+      src="team-sheet.jpg"
+      alt="Wedding cover"
+      class="w-full h-full object-cover"
+    >
+  </div>
+
+  <!-- RIGHT CONTENT PANEL -->
+
+  <div class="sheet-panel w-full lg:w-[60%] xl:w-[62%] mobile-safe-padding px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10 flex flex-col">
+
+    <!-- HEADER -->
+
+    <div class="text-center">
+      <h1 id="sheetTitle"
+      class="sheet-title text-[28px] sm:text-[34px] lg:text-[42px] font-normal leading-tight"
+      style="color:#c78d82;">
+        Team Assignment Sheet
+      </h1>
+
+      <h2 id="studioName" class="mt-8 text-[24px] sm:text-[30px] lg:text-[38px] text-[#3a3734] leading-tight">
+        Studio Name
+      </h2>
+
+      <p id="studioPhone" class="mt-2 text-[16px] sm:text-[18px] lg:text-[20px] text-[#4b4743]">
+        Phone
+      </p>
+    </div>
+
+    <!-- EVENT DETAILS -->
+
+    <div class="mt-8 sm:mt-10 rounded-[20px] border border-[#ebe5df] bg-white/70 p-4 sm:p-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-x-8 sm:gap-y-4 text-[14px] sm:text-[15px]">
+        <div class="flex justify-between gap-4">
+          <span class="detail-label">Client</span>
+          <span id="clientName" class="text-right text-[#2f2b27]">-</span>
+        </div>
+
+        <div class="flex justify-between gap-4">
+          <span class="detail-label">Event</span>
+          <span id="eventName" class="text-right text-[#2f2b27]">-</span>
+        </div>
+
+        <div class="flex justify-between gap-4">
+          <span class="detail-label">Date</span>
+          <span id="eventDate" class="text-right text-[#2f2b27]">-</span>
+        </div>
+
+        <div class="flex justify-between gap-4">
+          <span class="detail-label">Venue</span>
+          <span id="venue" class="text-right text-[#2f2b27]">-</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEAM LIST -->
+
+    <div id="teamList" class="mt-8 space-y-6 flex-1">
+      <p id="loadingText" class="text-sm text-gray-500">Loading...</p>
+    </div>
+
+    <!-- NOTES -->
+
+    <div class="mt-8 rounded-[20px] border border-[#ebe5df] bg-white/80 p-4 sm:p-5">
+      <h3 class="text-[18px] sm:text-[20px] text-[#3a3734] mb-3">
+        Team Notes
+      </h3>
+
+      <div class="space-y-2 text-[13px] sm:text-[14px] professional-note leading-6">
+        <p>• Please report at least 30 minutes before event time.</p>
+        <p>• Carry all required equipment and backup.</p>
+        <p>• Maintain discipline and professional behaviour.</p>
+        <p>• Follow event timeline strictly.</p>
+        <p>• Do not miss important moments.</p>
+      </div>
+    </div>
+
+    <!-- 🔥 FOOTER BRAND -->
+
+    <div class="footer-brand">
+      Generated by ChitraBook AI
+    </div>
+
+    <!-- ACTIONS -->
+
+    <div class="no-print mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <button onclick="downloadPDF()"
+      class="w-full bg-[#22201e] hover:bg-[#161514] text-white p-3 rounded-xl text-sm font-semibold transition">
+        Download PDF
+      </button>
+
+      <button onclick="shareTeam()"
+      class="w-full border border-[#d8d0c7] text-[#2f2b27] hover:bg-[#f3ede7] p-3 rounded-xl text-sm font-semibold transition">
+        Send on WhatsApp
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/team-sheet.js"></script>
+
+<script>
+async function applyCoverAndColor(){
+  try{
+    const db = await window.getSupabase()
+    const { data } = await db.auth.getUser()
+    const user = data?.user
+
+    if(!user) return
+
+    const { data: settings } = await db
+    .from("photographer_settings")
+    .select("team_sheet_cover_image, team_sheet_title_color")
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+    const img = document.getElementById("coverImage")
+    const title = document.getElementById("sheetTitle")
+
+    if(settings?.team_sheet_cover_image){
+      img.src = settings.team_sheet_cover_image
+    }
+
+    if(settings?.team_sheet_title_color){
+      title.style.color = settings.team_sheet_title_color
+    }
+
+  }catch(e){
+    console.error("COVER LOAD ERROR:", e)
+  }
+}
+
+applyCoverAndColor()
+</script>
+
+<script>
+(function () {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const quotationId = params.get("quotation");
+    const backBtn = document.getElementById("backBtn");
+
+    if (backBtn) {
+      backBtn.onclick = function () {
+        if (quotationId) {
+          window.location.href = `client.html?quotation=${quotationId}`;
+        } else {
+          window.location.href = "clients.html";
+        }
+      };
+    }
+
+  } catch (err) {
+    console.error("BACK NAV ERROR:", err);
+  }
+})();
+</script>
+
+<script src="js/app-bottom-nav.js"></script>
+
+</body>
+</html>

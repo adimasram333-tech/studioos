@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "788035712257",
+    "project_id": "chitrabook-ai",
+    "storage_bucket": "chitrabook-ai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:788035712257:android:669418ef26d15fdf781700",
+        "android_client_info": {
+          "package_name": "com.studioos.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyEsNRKJiYknvdlbqFV3i7JIjE9tEz7no"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,475 @@
+// ================================
+// ACCESS SYSTEM + PHONE OTP (FINAL CLEAN)
+// ================================
+
+async function initAccess() {
+
+  let supabase;
+
+  if (window.getSupabase) {
+    supabase = await window.getSupabase();
+  } else if (window.supabase) {
+    supabase = window.supabase;
+  } else {
+    console.error("Supabase not found");
+    alert("System error: Supabase not initialized");
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  let eventId = params.get("event_id");
+
+  if (!eventId) {
+    eventId = localStorage.getItem("last_event_id");
+  }
+
+  if (!eventId) {
+    alert("Invalid access link");
+    return;
+  }
+
+  eventId = String(eventId).trim();
+  localStorage.setItem("last_event_id", eventId);
+
+  const form = document.getElementById("accessForm");
+
+  if (!form) {
+    console.error("Form not found");
+    return;
+  }
+
+  const eventIsValid = await validateEventAccess();
+
+  if (!eventIsValid) {
+    return;
+  }
+
+  // =============================
+  // DEVICE ID
+  // =============================
+
+  let deviceId = localStorage.getItem("device_id");
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem("device_id", deviceId);
+  }
+
+  let otpAttempts = 0;
+  const maxAttempts = 3;
+  let accessSubmitLocked = false;
+  let otpVerifyLocked = false;
+
+  function setButtonBusy(button, isBusy, text) {
+    if (!button) return;
+
+    if (isBusy) {
+      button.dataset.originalText = button.dataset.originalText || button.innerText;
+      button.innerText = text || "Please wait...";
+      button.disabled = true;
+      button.style.opacity = "0.7";
+      button.style.pointerEvents = "none";
+    } else {
+      button.innerText = button.dataset.originalText || button.innerText;
+      button.disabled = false;
+      button.style.opacity = "1";
+      button.style.pointerEvents = "auto";
+    }
+  }
+
+  async function validateEventAccess() {
+    const { data, error } = await supabase.rpc("validate_public_gallery_access", {
+      p_event_id: eventId
+    });
+
+    if (error) {
+      console.error("Public gallery access validation failed:", error);
+      alert("Unable to verify gallery access. Please try again.");
+      return false;
+    }
+
+    if (data?.allowed === true) {
+      return true;
+    }
+
+    const reason = String(data?.reason || "").trim();
+
+    if (reason === "event_not_found") {
+      alert("This event no longer exists or the access link is invalid.");
+      return false;
+    }
+
+    alert("This gallery is not available for public access. Please contact the photographer.");
+    return false;
+  }
+
+  let currentPhone = null;
+  let currentName = null;
+  let existingVisitor = null;
+  let userRole = "guest";
+
+  // =============================
+  // 🔥 SAFE SESSION PREP (FIXED)
+  // =============================
+
+  function clearOldFaceSession() {
+
+    const keys = [
+      "face_encoding",
+      "matched_images",
+      "matched_image_urls",
+      "face_matched_images",
+      "face_match_images",
+      "guest_matched_images",
+      "matched_images_by_event",
+      "matched_image_urls_by_event",
+      "face_matched_images_by_event",
+      "face_verified",
+      "face_scan_done",
+      "face_scan_event_id"
+    ];
+
+    keys.forEach((key) => {
+      try {
+        sessionStorage.removeItem(key);
+      } catch (err) {
+        console.warn("Session cleanup skipped:", key, err);
+      }
+    });
+
+  }
+
+  function setGallerySession(visitorId, role) {
+    const safeRole = role === "client" ? "client" : "guest";
+
+    sessionStorage.setItem("gallery_access", "true");
+    sessionStorage.setItem("event_id", eventId);
+    sessionStorage.setItem("visitor_id", visitorId);
+    sessionStorage.setItem("role", safeRole);
+  }
+
+  function goNext(role) {
+
+    // 🔥 ALWAYS RESET FACE SESSION
+    clearOldFaceSession();
+
+    // client gets full gallery directly
+    if (role === "client") {
+      window.location.href = `gallery.html?event_id=${eventId}`;
+      return;
+    }
+
+    // guest MUST go through fresh face scan
+    window.location.href = `face-capture.html?event_id=${eventId}`;
+  }
+
+  // =============================
+  // TOKEN INPUT
+  // =============================
+
+  if (!document.getElementById("tokenInput")) {
+
+    const tokenDiv = document.createElement("div");
+    tokenDiv.className = "mt-3";
+
+    tokenDiv.innerHTML = `
+      <input 
+        type="text"
+        id="tokenInput"
+        placeholder="Access Code (optional for client)"
+        class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600"
+      >
+    `;
+
+    form.insertBefore(tokenDiv, form.firstChild);
+  }
+
+  // =============================
+  // TOKEN VERIFY FUNCTION
+  // =============================
+
+  async function verifyToken(visitorId) {
+
+    const tokenInput = document.getElementById("tokenInput");
+    const token = tokenInput ? tokenInput.value.trim().toUpperCase() : "";
+
+    if (!token) return false;
+
+    const { data: tokenData } = await supabase
+      .from("event_tokens")
+      .select("*")
+      .eq("event_id", eventId)
+      .eq("token", token)
+      .limit(1);
+
+    if (tokenData && tokenData.length > 0) {
+
+      const t = tokenData[0];
+
+      if (!t.used) {
+
+        await supabase
+          .from("event_tokens")
+          .update({
+            used: true,
+            used_by: visitorId,
+            device_id: deviceId
+          })
+          .eq("id", t.id);
+
+        return true;
+      }
+
+      if (t.device_id === deviceId) {
+        return true;
+      }
+
+      if (!t.device_id_2) {
+
+        await supabase
+          .from("event_tokens")
+          .update({
+            device_id_2: deviceId
+          })
+          .eq("id", t.id);
+
+        return true;
+      }
+
+      alert("Token limit reached (only 2 devices allowed)");
+      return null;
+
+    } else {
+      alert("Invalid access code");
+      return null;
+    }
+  }
+
+  // =============================
+  // OTP UI
+  // =============================
+
+  function showOTPInput() {
+
+    if (document.getElementById("otpBox")) return;
+
+    const otpDiv = document.createElement("div");
+    otpDiv.id = "otpBox";
+    otpDiv.className = "mt-4 space-y-3";
+
+    otpDiv.innerHTML = `
+      <input 
+        type="text"
+        id="otpInput"
+        placeholder="Enter last 4 digits of your phone number"
+        class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600"
+      >
+
+      <button 
+        id="verifyOtpBtn"
+        class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg font-semibold"
+      >
+        Verify & Continue
+      </button>
+    `;
+
+    form.appendChild(otpDiv);
+
+    document.getElementById("verifyOtpBtn")
+      .addEventListener("click", verifyOTP);
+  }
+
+  // =============================
+  // VERIFY OTP
+  // =============================
+
+  async function verifyOTP() {
+
+    if (otpVerifyLocked) return;
+
+    const otpBtn = document.getElementById("verifyOtpBtn");
+    const entered = document.getElementById("otpInput").value.trim();
+
+    if (!entered) {
+      alert("Enter OTP");
+      return;
+    }
+
+    if (otpAttempts >= maxAttempts) {
+      alert("Too many attempts. Try again later.");
+      return;
+    }
+
+    const expectedOTP = currentPhone.slice(-4);
+
+    if (entered !== expectedOTP) {
+      otpAttempts++;
+      alert("Invalid OTP");
+      return;
+    }
+
+    otpAttempts = 0;
+
+    try {
+
+      otpVerifyLocked = true;
+      setButtonBusy(otpBtn, true, "Verifying...");
+
+      let visitorId;
+
+      if (existingVisitor) {
+
+        const { data, error } = await supabase
+          .from("event_visitors")
+          .update({
+            verified: true,
+            last_visit: new Date().toISOString()
+          })
+          .eq("id", existingVisitor.id)
+          .select()
+          .single();
+
+        if (error) {
+          console.error(error);
+          alert("Update failed");
+          return;
+        }
+
+        visitorId = data.id;
+
+      } else {
+
+        const { data, error } = await supabase
+          .from("event_visitors")
+          .insert([
+            {
+              event_id: eventId,
+              name: currentName,
+              phone: currentPhone,
+              verified: true,
+              last_visit: new Date().toISOString()
+            }
+          ])
+          .select()
+          .single();
+
+        if (error) {
+          console.error(error);
+          alert("Insert failed");
+          return;
+        }
+
+        visitorId = data.id;
+      }
+
+      const tokenResult = await verifyToken(visitorId);
+
+      if (tokenResult === null) return;
+
+      if (tokenResult === true) {
+        userRole = "client";
+      } else {
+        userRole = "guest";
+      }
+
+      setGallerySession(visitorId, userRole);
+      goNext(userRole);
+
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    } finally {
+      otpVerifyLocked = false;
+      setButtonBusy(otpBtn, false);
+    }
+  }
+
+  // =============================
+  // SUBMIT HANDLER
+  // =============================
+
+  form.addEventListener("submit", async function (e) {
+
+    e.preventDefault();
+
+    if (accessSubmitLocked) return;
+
+    const submitBtn = form.querySelector("button[type='submit']");
+
+    try {
+
+      accessSubmitLocked = true;
+      setButtonBusy(submitBtn, true, "Checking...");
+
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+
+      if (!name || !phone) {
+        alert("Please fill all details");
+        return;
+      }
+
+      if (!/^[0-9]{10}$/.test(phone)) {
+        alert("Enter valid 10 digit number");
+        return;
+      }
+
+      currentName = name;
+      currentPhone = phone;
+
+      const { data } = await supabase
+        .from("event_visitors")
+        .select("*")
+        .eq("event_id", eventId)
+        .eq("phone", phone)
+        .limit(1);
+
+      if (data && data.length > 0) {
+
+        existingVisitor = data[0];
+
+        const tokenResult = await verifyToken(existingVisitor.id);
+
+        if (tokenResult === null) return;
+
+        if (tokenResult === true) {
+
+          setGallerySession(existingVisitor.id, "client");
+          goNext("client");
+          return;
+        }
+
+        if (existingVisitor.verified) {
+
+          await supabase
+            .from("event_visitors")
+            .update({ last_visit: new Date().toISOString() })
+            .eq("id", existingVisitor.id);
+
+          setGallerySession(existingVisitor.id, "guest");
+          goNext("guest");
+          return;
+        }
+      }
+
+      alert("Verifying...");
+
+      await new Promise(res => setTimeout(res, 800));
+
+      showOTPInput();
+
+    } finally {
+      accessSubmitLocked = false;
+      setButtonBusy(submitBtn, false);
+    }
+
+  });
+
+}
+
+// =============================
+// INIT
+// =============================
+
+document.addEventListener("DOMContentLoaded", () => {
+  initAccess();
+});

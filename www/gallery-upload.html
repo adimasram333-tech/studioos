@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Upload Event Photos</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+}
+.glass{
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+/* =============================
+   ANDROID SAFE CUSTOM EVENT SELECT
+   Keeps original select as source of truth
+   ============================= */
+.event-native-select-hidden{
+position:absolute !important;
+left:-9999px !important;
+width:1px !important;
+height:1px !important;
+opacity:0 !important;
+pointer-events:none !important;
+}
+
+.event-select-shell{
+position:relative;
+margin-bottom:0.75rem;
+}
+
+.event-select-trigger{
+width:100%;
+min-height:46px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:0.75rem;
+background:#0f172a;
+border:1px solid #4b5563;
+border-radius:0.75rem;
+padding:0.65rem 0.8rem;
+font-size:0.875rem;
+color:white;
+text-align:left;
+}
+
+.event-select-trigger span{
+display:block;
+min-width:0;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+}
+
+.event-select-trigger svg{
+width:18px;
+height:18px;
+flex-shrink:0;
+color:rgba(255,255,255,0.65);
+transition:transform 160ms ease;
+}
+
+.event-select-shell.is-open .event-select-trigger svg{
+transform:rotate(180deg);
+}
+
+.event-select-panel{
+position:absolute;
+left:0;
+right:0;
+top:calc(100% + 8px);
+z-index:5000;
+display:none;
+max-height:min(360px, 56vh);
+overflow:auto;
+border-radius:1rem;
+background:rgba(15,23,42,0.98);
+border:1px solid rgba(255,255,255,0.12);
+box-shadow:0 24px 70px rgba(0,0,0,0.42);
+backdrop-filter:blur(18px);
+-webkit-backdrop-filter:blur(18px);
+padding:0.35rem;
+}
+
+.event-select-shell.is-open .event-select-panel{
+display:block;
+}
+
+.event-select-option{
+width:100%;
+border:0;
+background:transparent;
+color:rgba(255,255,255,0.84);
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:0.75rem;
+padding:0.85rem 0.85rem;
+border-radius:0.8rem;
+font-size:0.9rem;
+text-align:left;
+cursor:pointer;
+}
+
+.event-select-option:active,
+.event-select-option:hover{
+background:rgba(255,255,255,0.07);
+}
+
+.event-select-option.is-active{
+background:rgba(79,70,229,0.22);
+color:white;
+}
+
+.event-select-option.is-create{
+color:rgb(199 210 254);
+font-weight:700;
+}
+
+.event-select-option-check{
+width:7px;
+height:7px;
+border-radius:999px;
+background:white;
+opacity:0;
+flex-shrink:0;
+}
+
+.event-select-option.is-active .event-select-option-check{
+opacity:1;
+}
+
+</style>
+
+</head>
+
+<body class="text-white min-h-screen p-4">
+
+<div class="max-w-md mx-auto mt-24">
+
+<div class="glass rounded-2xl p-6">
+
+<h2 class="text-center text-lg font-semibold mb-6">
+Upload Event Photos
+</h2>
+
+<select id="eventSelect"
+class="event-native-select-hidden"
+aria-hidden="true"
+tabindex="-1">
+<option value="">Select Event</option>
+<option value="create_new">+ Create New Event</option>
+</select>
+
+<div id="eventSelectShell" class="event-select-shell">
+<button id="eventSelectTrigger"
+type="button"
+class="event-select-trigger"
+aria-haspopup="listbox"
+aria-expanded="false">
+<span id="eventSelectTriggerText">Select Event</span>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m6 9 6 6 6-6"></path>
+</svg>
+</button>
+<div id="eventSelectPanel" class="event-select-panel" role="listbox"></div>
+</div>
+
+<div id="createEventBox" style="display:none;" class="mb-4">
+
+<input
+type="text"
+id="manualEventName"
+placeholder="Enter Event Name"
+class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-2 text-sm"
+/>
+
+<input
+type="date"
+id="manualEventDate"
+class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 text-sm"
+/>
+
+<button
+type="button"
+id="createEventBtn"
+onclick="createManualEvent()"
+class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm font-medium">
+Create Event
+</button>
+
+</div>
+
+<input
+type="file"
+id="images"
+multiple
+accept="image/*"
+class="w-full bg-[#0f172a] border border-gray-600 rounded-xl p-2 mb-4 text-sm"
+/>
+
+<div class="flex gap-2 mb-4">
+
+<button onclick="selectFolder()"
+class="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-xl text-xs">
+Select Folder
+</button>
+
+<button onclick="selectImages()"
+class="flex-1 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-xl text-xs">
+Select Images
+</button>
+
+</div>
+
+<button onclick="handleUpload()"
+class="w-full bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl text-sm font-medium">
+Upload Photos
+</button>
+
+<p id="status" class="text-center text-sm mt-3 text-gray-400">
+Please select event and images
+</p>
+
+<div id="progress" class="text-center text-sm mt-2 text-green-400"></div>
+
+</div>
+
+</div>
+
+<script>
+
+// =============================
+// SELECT INPUT CONTROL
+// =============================
+
+function selectFolder(){
+const input = document.getElementById("images")
+if(!input) return
+input.setAttribute("webkitdirectory","")
+input.click()
+}
+
+function selectImages(){
+const input = document.getElementById("images")
+if(!input) return
+input.removeAttribute("webkitdirectory")
+input.click()
+}
+
+// =============================
+// GET EVENT FROM URL
+// =============================
+
+function getEventFromURL(){
+const params = new URLSearchParams(window.location.search)
+return params.get("event_id") || params.get("event")
+}
+
+let manualEventCreateInFlight = false
+
+function setStatusMessage(message, colorClass = "text-gray-400"){
+const status = document.getElementById("status")
+if(!status) return
+status.className = `text-center text-sm mt-3 ${colorClass}`
+status.innerText = message
+}
+
+
+// =============================
+// ANDROID SAFE CUSTOM EVENT SELECT
+// Original select remains source of truth for gallery-upload.js
+// =============================
+
+let eventSelectObserver = null
+
+function getSelectedEventLabel(){
+const select = document.getElementById("eventSelect")
+if(!select) return "Select Event"
+
+const selectedOption = select.options[select.selectedIndex]
+return selectedOption?.textContent?.trim() || "Select Event"
+}
+
+function closeEventSelectPanel(){
+const shell = document.getElementById("eventSelectShell")
+const trigger = document.getElementById("eventSelectTrigger")
+
+if(shell){
+shell.classList.remove("is-open")
+}
+
+if(trigger){
+trigger.setAttribute("aria-expanded", "false")
+}
+}
+
+function syncCustomEventSelect(){
+const select = document.getElementById("eventSelect")
+const panel = document.getElementById("eventSelectPanel")
+const triggerText = document.getElementById("eventSelectTriggerText")
+
+if(!select || !panel || !triggerText) return
+
+triggerText.innerText = getSelectedEventLabel()
+
+panel.innerHTML = ""
+
+Array.from(select.options).forEach(option=>{
+const btn = document.createElement("button")
+btn.type = "button"
+btn.className = "event-select-option"
+btn.setAttribute("role", "option")
+btn.dataset.value = option.value
+btn.innerHTML = `
+<span>${option.textContent || "Select Event"}</span>
+<span class="event-select-option-check"></span>
+`
+
+if(option.value === "create_new"){
+btn.classList.add("is-create")
+}
+
+if(option.value === select.value){
+btn.classList.add("is-active")
+btn.setAttribute("aria-selected", "true")
+}else{
+btn.setAttribute("aria-selected", "false")
+}
+
+btn.onclick = function(){
+select.value = option.value
+select.dispatchEvent(new Event("change", { bubbles:true }))
+syncCustomEventSelect()
+closeEventSelectPanel()
+}
+
+panel.appendChild(btn)
+})
+}
+
+function initCustomEventSelect(){
+const select = document.getElementById("eventSelect")
+const shell = document.getElementById("eventSelectShell")
+const trigger = document.getElementById("eventSelectTrigger")
+
+if(!select || !shell || !trigger) return
+
+syncCustomEventSelect()
+
+trigger.onclick = function(event){
+event.stopPropagation()
+
+const isOpen = shell.classList.contains("is-open")
+
+if(isOpen){
+closeEventSelectPanel()
+return
+}
+
+shell.classList.add("is-open")
+trigger.setAttribute("aria-expanded", "true")
+syncCustomEventSelect()
+}
+
+select.addEventListener("change", syncCustomEventSelect)
+
+document.addEventListener("click", function(event){
+if(!shell.contains(event.target)){
+closeEventSelectPanel()
+}
+})
+
+document.addEventListener("keydown", function(event){
+if(event.key === "Escape"){
+closeEventSelectPanel()
+}
+})
+
+if(eventSelectObserver){
+eventSelectObserver.disconnect()
+}
+
+eventSelectObserver = new MutationObserver(syncCustomEventSelect)
+eventSelectObserver.observe(select, {
+childList:true,
+subtree:true,
+attributes:true,
+attributeFilter:["selected"]
+})
+}
+
+document.addEventListener("DOMContentLoaded", initCustomEventSelect)
+
+async function createManualEvent(){
+
+if(manualEventCreateInFlight){
+return
+}
+
+const supabase = await window.getSupabase()
+const user = await window.getCurrentUser()
+
+if(!user){
+setStatusMessage("Login required", "text-red-400")
+return
+}
+
+const select = document.getElementById("eventSelect")
+const createBtn = document.getElementById("createEventBtn")
+const createBox = document.getElementById("createEventBox")
+const nameInput = document.getElementById("manualEventName")
+const dateInput = document.getElementById("manualEventDate")
+
+if(select.value !== "create_new"){
+setStatusMessage("Select Create New Event first", "text-amber-400")
+return
+}
+
+const name = nameInput.value.trim()
+const date = dateInput.value
+
+if(!name || !date){
+setStatusMessage("Enter event name and date", "text-amber-400")
+return
+}
+
+try{
+
+manualEventCreateInFlight = true
+createBtn.disabled = true
+createBtn.innerText = "Creating Event..."
+setStatusMessage("Creating event...", "text-indigo-300")
+
+const { data, error } =
+await supabase
+.from("events")
+.insert([{
+user_id: user.id,
+client_name: name,
+event_name: name,
+event_type: name,
+event_date: date,
+status: "active"
+}])
+.select()
+.single()
+
+if(error){
+setStatusMessage("Event create failed", "text-red-400")
+return
+}
+
+const token =
+Math.random().toString(36).substring(2,10).toUpperCase()
+
+await supabase
+.from("event_tokens")
+.insert([{
+event_id: data.id,
+token: token,
+used: false
+}])
+
+if(typeof window.loadConfirmedEvents === "function"){
+await window.loadConfirmedEvents(data.id)
+}else{
+const option = document.createElement("option")
+option.value = String(data.id)
+option.textContent = `${name} (${date})`
+select.appendChild(option)
+select.value = String(data.id)
+if(typeof syncCustomEventSelect === "function"){
+syncCustomEventSelect()
+}
+}
+
+select.value = String(data.id)
+if(typeof syncCustomEventSelect === "function"){
+syncCustomEventSelect()
+}
+createBox.style.display = "none"
+nameInput.value = ""
+dateInput.value = ""
+
+setStatusMessage("Event created successfully. Now select images and upload.", "text-green-400")
+
+}catch(err){
+setStatusMessage("Event create failed", "text-red-400")
+}finally{
+manualEventCreateInFlight = false
+createBtn.disabled = false
+createBtn.innerText = "Create Event"
+}
+}
+
+// =============================
+// HANDLE UPLOAD FLOW
+// =============================
+
+async function handleUpload(){
+
+const user = await window.getCurrentUser()
+
+if(!user){
+setStatusMessage("Login required", "text-red-400")
+return
+}
+
+const select = document.getElementById("eventSelect")
+const imagesInput = document.getElementById("images")
+
+let eventId = select.value
+
+if(!eventId){
+eventId = getEventFromURL()
+}
+
+if(!eventId){
+setStatusMessage("Please select event", "text-amber-400")
+return
+}
+
+if(!imagesInput || !imagesInput.files || !imagesInput.files.length){
+setStatusMessage("Please select images or folder", "text-amber-400")
+return
+}
+
+setStatusMessage("Starting upload...", "text-indigo-300")
+
+await window.uploadImages(eventId)
+
+}
+
+</script>
+
+<script src="js/supabase.js"></script>
+<script src="js/gallery-upload.js?v=2"></script>
+
+<script src="js/app-bottom-nav.js"></script>
+
+</body>
+</html>

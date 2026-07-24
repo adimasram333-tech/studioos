@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template 4 - ChitraBook AI</title>
+  <style>
+    :root{
+      --bg:#f3f3f3;
+      --surface:#ffffff;
+      --surface-dark:#1f1f1f;
+      --surface-darker:#090909;
+      --text:#161616;
+      --text-soft:#666666;
+      --text-light:#f7f7f7;
+      --text-light-soft:#cfcfcf;
+      --line:rgba(0,0,0,0.08);
+      --line-light:rgba(255,255,255,0.12);
+      --shadow:0 24px 80px rgba(0,0,0,0.14);
+      --container:1180px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      line-height:1.5;
+    }
+
+    a{text-decoration:none;color:inherit}
+    img{display:block;max-width:100%}
+    button,input,textarea{font:inherit}
+    .hidden{display:none!important}
+
+    .page-state{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(10,10,10,.78);
+      backdrop-filter:blur(10px);
+      z-index:100;
+      padding:24px;
+    }
+
+    .page-state-card{
+      width:min(460px,100%);
+      background:rgba(255,255,255,.96);
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:28px;
+      text-align:center;
+    }
+
+    .page-state-title{
+      margin:0;
+      font-size:2rem;
+      line-height:1;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .page-state-text{
+      margin-top:12px;
+      color:var(--text-soft);
+      font-size:.95rem;
+      line-height:1.75;
+    }
+
+    .page-state-btn{
+      margin-top:18px;
+      min-height:48px;
+      padding:0 18px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:#111;
+      color:#fff;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-size:.74rem;
+      border:1px solid rgba(0,0,0,.08);
+    }
+
+    .edit-toolbar{
+      position:fixed;
+      top:16px;
+      right:16px;
+      z-index:110;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-end;
+    }
+
+    .edit-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.96);
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow:var(--shadow);
+    }
+
+    .edit-label{
+      font-size:.8rem;
+      font-weight:700;
+      color:#111;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .toggle-btn{
+      appearance:none;
+      width:48px;
+      height:28px;
+      border-radius:999px;
+      background:#d1d1d1;
+      position:relative;
+      cursor:pointer;
+      transition:background .2s ease;
+      border:none;
+    }
+
+    .toggle-btn::after{
+      content:"";
+      position:absolute;
+      top:3px;
+      left:3px;
+      width:22px;
+      height:22px;
+      border-radius:999px;
+      background:#fff;
+      box-shadow:0 2px 8px rgba(0,0,0,.14);
+      transition:transform .2s ease;
+    }
+
+    .toggle-btn.active{background:#111}
+    .toggle-btn.active::after{transform:translateX(20px)}
+
+    .edit-status{
+      max-width:360px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:rgba(255,255,255,.96);
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow:var(--shadow);
+      color:var(--text-soft);
+      font-size:.82rem;
+      line-height:1.6;
+    }
+
+    .container{
+      width:min(var(--container), calc(100% - 40px));
+      margin:0 auto;
+    }
+
+    .site-header{
+      position:absolute;
+      top:0;
+      left:0;
+      right:0;
+      z-index:25;
+    }
+
+    .header-inner{
+      min-height:72px;
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      gap:20px;
+      color:#fff;
+      padding-top:10px;
+    }
+
+    .nav,.nav-right{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      flex-wrap:wrap;
+    }
+
+    .nav a,.nav-right a{
+      font-size:11px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.88);
+      transition:opacity .2s ease;
+    }
+
+    .nav a:hover,.nav-right a:hover,.footer-links a:hover{opacity:.75}
+
+    .brand-mark{
+      justify-self:center;
+      font-size:15px;
+      font-weight:800;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      white-space:nowrap;
+      color:#fff;
+      max-width:min(52vw, 420px);
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .mobile-menu-btn{
+      display:none;
+      min-width:42px;
+      min-height:42px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      cursor:pointer;
+    }
+
+    .editable-slot,.editable-text{position:relative}
+    .editable-text.edit-active{
+      cursor:pointer;
+      border-radius:10px;
+      transition:box-shadow .2s ease,background .2s ease;
+    }
+    .editable-text.edit-active:hover{
+      box-shadow:0 0 0 1px rgba(255,255,255,.18);
+      background:rgba(255,255,255,.05);
+    }
+    .editable-slot.edit-active{cursor:pointer}
+    .editable-slot.edit-active:hover{outline:1px solid rgba(255,255,255,.4)}
+
+    .edit-overlay{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.34);
+      color:#fff;
+      font-size:.9rem;
+      font-weight:600;
+      text-align:center;
+      padding:16px;
+      z-index:3;
+      pointer-events:none;
+    }
+
+    .editable-slot.edit-active .edit-overlay{display:flex}
+
+    .edit-overlay span{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:12px 16px;
+      border-radius:999px;
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.18);
+    }
+
+    .image-loading{
+      position:absolute;
+      top:12px;
+      right:12px;
+      display:none;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.95);
+      color:#111827;
+      font-size:.75rem;
+      font-weight:700;
+      z-index:4;
+    }
+
+    .editable-slot.uploading .image-loading{display:block}
+
+    .image-preview-modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background:rgba(0,0,0,.86);
+      backdrop-filter:blur(14px);
+      z-index:140;
+    }
+
+    .image-preview-modal.show{
+      display:flex;
+    }
+
+    .image-preview-card{
+      position:relative;
+      width:min(1120px, 100%);
+      max-height:min(86vh, 860px);
+      background:#090909;
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow:0 34px 110px rgba(0,0,0,.72);
+      overflow:hidden;
+    }
+
+    .image-preview-card img{
+      width:100%;
+      max-height:min(86vh, 860px);
+      object-fit:contain;
+      background:#090909;
+    }
+
+    .image-preview-close{
+      position:absolute;
+      top:14px;
+      right:14px;
+      width:42px;
+      height:42px;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:999px;
+      background:rgba(0,0,0,.62);
+      color:#fff;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      z-index:2;
+      font-size:1.35rem;
+      line-height:1;
+    }
+
+    .image-preview-close:hover{
+      background:#111;
+    }
+
+    .hero{
+      position:relative;
+      min-height:620px;
+      background:#000;
+      overflow:hidden;
+    }
+
+    .hero-media{
+      position:absolute;
+      inset:0;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      
+      transform:scale(1.01);
+      z-index:1;
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg,rgba(0,0,0,.26),rgba(0,0,0,.44));
+      pointer-events:none;
+      z-index:2;
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:5;
+      min-height:620px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      padding:130px 24px 70px;
+      text-align:center;
+      pointer-events:none;
+    }
+
+    .hero-copy{
+      max-width:760px;
+      color:#fff;
+      pointer-events:auto;
+    }
+
+    .hero-kicker{
+      font-size:11px;
+      letter-spacing:.34em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.86);
+      margin-bottom:14px;
+    }
+
+    .hero-title{
+      margin:0;
+      font-size:clamp(34px,5.8vw,72px);
+      line-height:.94;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      word-break:break-word;
+    }
+
+    .hero-tagline{
+      margin:18px auto 0;
+      max-width:620px;
+      color:rgba(255,255,255,.88);
+      font-size:14px;
+      line-height:1.9;
+    }
+
+    .hero-actions{
+      margin-top:24px;
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .hero-btn,.hero-btn-outline{
+      min-height:46px;
+      padding:0 18px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-size:11px;
+      font-weight:700;
+      border:1px solid rgba(255,255,255,.18);
+    }
+
+    .hero-btn{
+      background:#fff;
+      color:#111;
+    }
+
+    .hero-btn-outline{
+      background:rgba(255,255,255,.06);
+      color:#fff;
+    }
+
+    .portfolio-section{
+      background:var(--bg);
+      padding:56px 0 44px;
+    }
+
+    .section-kicker{
+      text-align:center;
+      font-size:11px;
+      letter-spacing:.32em;
+      text-transform:uppercase;
+      color:#a1a1a1;
+      margin-bottom:16px;
+    }
+
+    .section-title{
+      margin:0;
+      text-align:center;
+      font-size:clamp(42px,6vw,64px);
+      line-height:.95;
+      font-weight:900;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      color:#202020;
+    }
+
+    .section-subtitle{
+      margin:16px auto 0;
+      max-width:560px;
+      text-align:center;
+      color:#7a7a7a;
+      font-size:13px;
+      line-height:1.8;
+    }
+
+    .portfolio-grid{
+      margin:42px auto 0;
+      width:min(820px, 100%);
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:12px;
+      align-items:start;
+    }
+
+    .portfolio-stack{
+      display:grid;
+      gap:12px;
+    }
+
+    .portfolio-tile{
+      position:relative;
+      overflow:hidden;
+      background:#d7d7d7;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      min-height:180px;
+      
+    }
+
+    .tile-sm{min-height:170px}
+    .tile-md{min-height:215px}
+    .tile-lg{min-height:290px}
+
+    .portfolio-tile::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.08));
+      pointer-events:none;
+    }
+
+    .load-more-wrap{
+      display:flex;
+      justify-content:center;
+      margin-top:30px;
+    }
+
+    .load-more-btn{
+      min-height:42px;
+      padding:0 22px;
+      border-radius:999px;
+      background:#222;
+      color:#fff;
+      border:1px solid rgba(0,0,0,.08);
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-size:11px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      justify-content:center;
+    }
+
+    .about-section{
+      background:var(--surface-dark);
+      color:var(--text-light);
+      padding:74px 0;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .about-section::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.03), transparent 46%),
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+      pointer-events:none;
+    }
+
+    .about-inner{
+      position:relative;
+      z-index:1;
+      width:min(840px, calc(100% - 32px));
+      margin:0 auto;
+      text-align:center;
+    }
+
+    .about-kicker{
+      font-size:11px;
+      letter-spacing:.28em;
+      text-transform:uppercase;
+      color:#bdbdbd;
+      margin-bottom:16px;
+    }
+
+    .about-title{
+      margin:0;
+      font-size:clamp(36px, 5vw, 56px);
+      line-height:.98;
+      font-weight:900;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+
+    .about-copy{
+      margin:22px auto 0;
+      max-width:700px;
+      color:var(--text-light-soft);
+      font-size:14px;
+      line-height:1.95;
+    }
+
+    .about-points{
+      margin-top:32px;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .about-point{
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      padding:18px 16px;
+      color:#fff;
+      text-align:left;
+    }
+
+    .about-point strong{
+      display:block;
+      font-size:11px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:#fff;
+      margin-bottom:8px;
+    }
+
+    .about-point span{
+      display:block;
+      color:#cfcfcf;
+      font-size:13px;
+      line-height:1.75;
+    }
+
+
+    .featured-section{
+      background:#efefef;
+      padding:44px 0 18px;
+    }
+
+    .featured-wrap{
+      width:min(1080px, calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .featured-head{
+      text-align:center;
+      margin-bottom:24px;
+    }
+
+    .featured-grid{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:14px;
+      align-items:stretch;
+    }
+
+    .featured-card{
+      position:relative;
+      min-height:280px;
+      background:#d7d7d7;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      overflow:hidden;
+      
+    }
+
+    .featured-card.tall{
+      min-height:420px;
+    }
+
+    .featured-stack{
+      display:grid;
+      grid-template-rows:1fr 1fr;
+      gap:14px;
+    }
+
+    .featured-card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,.14));
+      pointer-events:none;
+    }
+
+    .pricing-section{
+      position:relative;
+      background:#171717;
+      color:#fff;
+      padding:66px 0;
+      overflow:hidden;
+    }
+
+    .pricing-bg{
+      position:absolute;
+      inset:0;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      opacity:.22;
+      
+    }
+
+    .pricing-section::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg,rgba(23,23,23,.52),rgba(23,23,23,.78));
+      pointer-events:none;
+    }
+
+    .pricing-inner{
+      position:relative;
+      z-index:1;
+      width:min(1080px, calc(100% - 32px));
+      margin:0 auto;
+      text-align:center;
+    }
+
+    .pricing-kicker{
+      font-size:11px;
+      letter-spacing:.3em;
+      text-transform:uppercase;
+      color:#d3d3d3;
+      margin-bottom:16px;
+    }
+
+    .pricing-title{
+      margin:0;
+      font-size:clamp(34px, 5vw, 58px);
+      line-height:.98;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+
+    .pricing-subtitle{
+      max-width:620px;
+      margin:16px auto 0;
+      color:#d0d0d0;
+      font-size:14px;
+      line-height:1.85;
+    }
+
+    .pricing-grid{
+      margin-top:34px;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:20px;
+    }
+
+    .price-card{
+      text-align:left;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      padding:24px 22px;
+      box-shadow:0 24px 70px rgba(0,0,0,.2);
+    }
+
+    .price-label{
+      font-size:11px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:#d4d4d4;
+      margin-bottom:10px;
+    }
+
+    .price-title{
+      font-size:26px;
+      line-height:1.1;
+      font-weight:900;
+      text-transform:uppercase;
+      margin:0;
+    }
+
+    .price-amount{
+      margin:16px 0 0;
+      font-size:34px;
+      font-weight:900;
+      color:#fff;
+    }
+
+    .price-list{
+      margin:18px 0 0;
+      display:grid;
+      gap:10px;
+    }
+
+    .price-item{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding-bottom:10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      color:#d3d3d3;
+      font-size:13px;
+    }
+
+    .price-item strong{
+      color:#fff;
+      text-align:right;
+      font-weight:700;
+    }
+
+    .price-btn{
+      margin-top:18px;
+      min-height:44px;
+      padding:0 16px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-size:11px;
+      font-weight:700;
+      background:#fff;
+      color:#111;
+    }
+
+    .contact-section{
+      background:var(--surface-darker);
+      color:#fff;
+      padding:54px 0;
+      border-top:1px solid var(--line-light);
+    }
+
+    .contact-wrap{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:24px;
+    }
+
+    .contact-card,.contact-form{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:28px;
+      padding:28px;
+      box-shadow:0 24px 70px rgba(0,0,0,.28);
+    }
+
+    .contact-heading{
+      margin:0;
+      font-size:clamp(28px, 4vw, 42px);
+      line-height:1;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+
+    .contact-copy{
+      margin:16px 0 0;
+      color:#cfcfcf;
+      font-size:14px;
+      line-height:1.9;
+    }
+
+    .contact-links{
+      display:grid;
+      gap:14px;
+      margin-top:24px;
+    }
+
+    .contact-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      min-height:62px;
+      padding:0 18px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      transition:transform .2s ease,border-color .2s ease;
+    }
+
+    .contact-link:hover{
+      transform:translateY(-2px);
+      border-color:rgba(255,255,255,.18);
+    }
+
+    .contact-link strong{
+      display:block;
+      font-size:11px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:#fff;
+      margin-bottom:4px;
+    }
+
+    .contact-link span{
+      display:block;
+      color:#c9c9c9;
+      font-size:14px;
+    }
+
+    .contact-form h3{
+      margin:0 0 18px;
+      font-size:22px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .form-grid{display:grid;gap:14px}
+
+    .field,.textarea{
+      width:100%;
+      border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.04);
+      border-radius:16px;
+      padding:16px 18px;
+      color:#fff;
+      outline:none;
+      transition:border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .field::placeholder,.textarea::placeholder{color:#9f9f9f}
+    .field:focus,.textarea:focus{
+      border-color:rgba(255,255,255,.22);
+      box-shadow:0 0 0 4px rgba(255,255,255,.04);
+    }
+
+    .textarea{min-height:150px;resize:vertical}
+
+    .btn{
+      min-height:50px;
+      padding:0 22px;
+      border-radius:999px;
+      background:#fff;
+      color:#111;
+      border:1px solid rgba(255,255,255,.12);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      font-size:11px;
+      font-weight:700;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      cursor:pointer;
+    }
+
+    .site-footer{
+      background:#000;
+      color:#fff;
+      padding:26px 0 34px;
+      border-top:1px solid rgba(255,255,255,.08);
+    }
+
+    .footer-wrap{
+      width:min(960px, calc(100% - 32px));
+      margin:0 auto;
+      text-align:center;
+    }
+
+    .footer-brand{
+      font-size:20px;
+      font-weight:900;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+
+    .footer-copy{
+      margin-top:10px;
+      color:#a8a8a8;
+      font-size:12px;
+      line-height:1.8;
+    }
+
+    .footer-social{
+      margin-top:14px;
+      display:flex;
+      justify-content:center;
+      gap:10px;
+    }
+
+    .footer-social a{
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      color:#fff;
+    }
+
+    @media (max-width:980px){
+      .pricing-grid{grid-template-columns:1fr}
+      .contact-wrap{grid-template-columns:1fr}
+      .about-points{grid-template-columns:1fr}
+    }
+
+    @media (max-width:860px){
+      .header-inner{grid-template-columns:auto 1fr auto}
+      .nav,.nav-right{display:none}
+      .mobile-menu-btn{display:inline-grid;place-items:center}
+      .mobile-nav-open .nav,.mobile-nav-open .nav-right{
+        display:flex;
+        grid-column:1/-1;
+        padding:8px 0 14px;
+        gap:14px;
+      }
+      .mobile-nav-open .header-inner{
+        grid-template-columns:auto 1fr auto;
+        align-items:start;
+      }
+      .edit-toolbar{
+        left:12px;
+        right:12px;
+        top:auto;
+        bottom:12px;
+        align-items:stretch;
+      }
+      .edit-chip{justify-content:space-between}
+      .edit-status{
+        max-width:none;
+        padding:12px 14px;
+        font-size:.78rem;
+        line-height:1.45;
+      }
+    }
+
+    @media (max-width:720px){
+      .portfolio-grid{grid-template-columns:1fr}
+      .featured-grid{grid-template-columns:1fr}
+      .featured-stack{grid-template-rows:auto auto}
+      .featured-card.tall,.featured-card{min-height:240px}
+    }
+
+    @media (max-width:640px){
+      .container{width:min(100% - 22px,100%)}
+      .hero,.hero-content{min-height:470px}
+      .hero-content{padding:108px 18px 30px}
+      .hero-kicker{font-size:10px;letter-spacing:.24em}
+      .hero-title{font-size:clamp(28px,9.5vw,42px);line-height:1}
+      .hero-tagline{font-size:13px;line-height:1.7;max-width:92%}
+      .portfolio-section{padding-top:40px}
+      .section-title{font-size:clamp(30px,11vw,42px)}
+      .about-section,.pricing-section,.contact-section,.featured-section{padding-top:44px;padding-bottom:44px}
+      .contact-card,.contact-form,.price-card{padding-left:18px;padding-right:18px}
+      .hero-actions{flex-direction:column}
+      .hero-btn,.hero-btn-outline{width:100%}
+      .brand-mark{max-width:58vw;font-size:13px;letter-spacing:.1em}
+    }
+  
+.filter-bw{filter:grayscale(100%);}
+
+/* =============================
+   ANDROID SAFE TEXT EDIT MODAL
+   Replaces native prompt() in app WebView
+   ============================= */
+.text-edit-modal{
+position:fixed;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+padding:1rem;
+background:rgba(15,23,42,0.72);
+backdrop-filter:blur(12px);
+-webkit-backdrop-filter:blur(12px);
+z-index:2147482600;
+}
+
+.text-edit-modal.show{
+display:flex;
+}
+
+.text-edit-card{
+width:min(100%, 420px);
+border-radius:1.35rem;
+padding:1.1rem;
+background:rgba(255,255,255,0.97);
+border:1px solid rgba(0,0,0,0.08);
+box-shadow:0 24px 80px rgba(0,0,0,0.32);
+color:#111827;
+}
+
+.text-edit-label{
+display:inline-flex;
+align-items:center;
+min-height:30px;
+padding:0 0.78rem;
+border-radius:999px;
+background:rgba(99,102,241,0.12);
+border:1px solid rgba(99,102,241,0.22);
+color:#4f46e5;
+font-size:0.72rem;
+font-weight:800;
+letter-spacing:0.08em;
+text-transform:uppercase;
+}
+
+.text-edit-title{
+margin-top:0.85rem;
+font-size:1.12rem;
+line-height:1.25;
+font-weight:850;
+color:#111827;
+}
+
+.text-edit-input{
+width:100%;
+min-height:116px;
+margin-top:0.85rem;
+resize:vertical;
+border-radius:1rem;
+border:1px solid rgba(15,23,42,0.14);
+background:#ffffff;
+color:#111827 !important;
+padding:0.9rem;
+font-size:0.95rem;
+line-height:1.5;
+outline:none;
+}
+
+.text-edit-input:focus{
+border-color:rgba(79,70,229,0.65);
+box-shadow:0 0 0 3px rgba(79,70,229,0.12);
+}
+
+.text-edit-actions{
+display:flex;
+gap:0.75rem;
+margin-top:1rem;
+}
+
+.text-edit-btn{
+flex:1;
+min-height:46px;
+border-radius:0.95rem;
+border:1px solid rgba(15,23,42,0.12);
+font-size:0.88rem;
+font-weight:800;
+cursor:pointer;
+}
+
+.text-edit-btn.cancel{
+background:#f8fafc;
+color:#334155;
+}
+
+.text-edit-btn.save{
+background:#4f46e5;
+color:white;
+border-color:#4f46e5;
+box-shadow:0 14px 30px rgba(79,70,229,0.22);
+}
+
+.text-edit-btn:disabled{
+opacity:0.6;
+cursor:not-allowed;
+}
+
+</style>
+
+</head>
+<body>
+  <div id="pageLoading" class="page-state">
+    <div class="page-state-card">
+      <p class="page-state-title">Loading Preview</p>
+      <p class="page-state-text">Fetching your website details and preparing Template 4.</p>
+    </div>
+  </div>
+
+  <div id="pageError" class="page-state hidden">
+    <div class="page-state-card">
+      <p class="page-state-title">Website Not Found</p>
+      <p id="pageErrorText" class="page-state-text">This website preview is not available right now.</p>
+      <a href="website-builder.html" class="page-state-btn">Back to Builder</a>
+    </div>
+  </div>
+
+  <div id="editToolbar" class="edit-toolbar hidden">
+    <div class="edit-chip">
+      <span class="edit-label">Edit Mode</span>
+      <button id="editModeToggle" type="button" class="toggle-btn" aria-label="Toggle edit mode"></button>
+    </div>
+    <div id="editStatus" class="edit-status">You are viewing preview mode.</div>
+  </div>
+
+  <input id="imageFileInput" type="file" accept="image/*" class="hidden" />
+
+  <div id="imagePreviewModal" class="image-preview-modal" aria-hidden="true">
+    <div class="image-preview-card" role="dialog" aria-modal="true" aria-label="Image preview">
+      <button id="imagePreviewClose" type="button" class="image-preview-close" aria-label="Close image preview">×</button>
+      <img id="imagePreviewImg" alt="Template image preview" />
+    </div>
+  </div>
+
+
+<div id="textEditModal" class="text-edit-modal" aria-hidden="true">
+<div class="text-edit-card" role="dialog" aria-modal="true" aria-label="Edit text">
+<div class="text-edit-label">Edit Content</div>
+<div class="text-edit-title">Update text</div>
+<textarea id="textEditInput" class="text-edit-input" placeholder="Enter text"></textarea>
+<div class="text-edit-actions">
+<button id="textEditCancelBtn" type="button" class="text-edit-btn cancel">Cancel</button>
+<button id="textEditSaveBtn" type="button" class="text-edit-btn save">Save</button>
+</div>
+</div>
+</div>
+
+
+  <div id="templateRoot" class="hidden">
+    <header class="site-header" id="top">
+      <div class="container header-inner" id="headerInner">
+        <nav class="nav" aria-label="Primary navigation">
+          <a href="#portfolio">Work</a>
+          <a href="#about">About</a>
+          <a href="#prices">Pricing</a>
+        </nav>
+        <a class="brand-mark editable-text" id="brandShort" data-field="name" href="#top">Studio Name</a>
+        <nav class="nav-right" aria-label="Secondary navigation">
+          <a id="headerInstagramLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">◎</a>
+          <a id="headerYoutubeLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">▶</a>
+        </nav>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">☰</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-label="Hero section">
+        <div id="heroImageSlot" class="hero-media editable-slot" data-image-slot="hero">
+          <div class="image-loading">Uploading...</div>
+          <div class="edit-overlay"><span>Replace Hero Image</span></div>
+        </div>
+
+        <div class="hero-content">
+          <div class="hero-copy">
+            <div class="hero-kicker editable-text" id="heroKicker" data-field="template_content.hero.kicker">Fine Art Wedding & Portrait Photography</div>
+            <h1 class="hero-title editable-text" id="heroName" data-field="name">Aditya Masram</h1>
+            <p class="hero-tagline editable-text" id="heroTagline" data-field="tagline">Monochrome storytelling for couples, portraits and personal moments that deserve a timeless frame.</p>
+            <div class="hero-actions">
+              <a class="hero-btn" href="#contacts">Book Now</a>
+              <a class="hero-btn-outline" href="#portfolio">View Work</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="featured-section" id="featured">
+        <div class="featured-wrap">
+          <div class="featured-head">
+            <div class="section-kicker editable-text" id="featuredKicker" data-field="template_content.featured.kicker">Featured Work</div>
+            <h2 class="section-title editable-text" id="featuredTitle" data-field="template_content.featured.title">Signature Frames</h2>
+            <p class="section-subtitle editable-text" id="featuredSubtitle" data-field="template_content.featured.subtitle">A refined highlight of portraits and wedding moments with a strong editorial feel.</p>
+          </div>
+
+          <div class="featured-grid">
+            <a id="featuredTile1" class="featured-card tall editable-slot" data-image-slot="featured_1" href="#contacts">
+              <div class="image-loading">Uploading...</div>
+              <div class="edit-overlay"><span>Replace Image</span></div>
+            </a>
+
+            <div class="featured-stack">
+              <a id="featuredTile2" class="featured-card editable-slot" data-image-slot="featured_2" href="#contacts">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+
+              <div class="about-point" style="background:#111;color:#fff;border-color:rgba(255,255,255,.08);min-height:0;">
+                <strong class="editable-text" id="featuredQuoteTitle" data-field="template_content.featured.quote_title">Why clients choose this style</strong>
+                <span class="editable-text" id="featuredQuoteText" data-field="template_content.featured.quote_text">Clean direction, timeless tones and a calm photography experience designed to make every frame feel intentional.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="portfolio-section" id="portfolio">
+        <div class="container">
+          <div class="section-kicker editable-text" id="portfolioKicker" data-field="template_content.portfolio.kicker">The Selected Set</div>
+          <h1 class="section-title editable-text" id="portfolioTitle" data-field="template_content.portfolio.title">Portfolio</h1>
+          <p class="section-subtitle editable-text" id="portfolioSubtitle" data-field="template_content.portfolio.subtitle">A quiet collection of portraits, landscapes and wedding frames shaped by light, texture and feeling.</p>
+
+          <div class="portfolio-grid">
+            <div class="portfolio-stack">
+              <a id="portfolioTile1" class="portfolio-tile tile-md editable-slot" data-image-slot="portfolio_1" href="#contacts">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+              <a id="portfolioTile2" class="portfolio-tile tile-md editable-slot" data-image-slot="portfolio_2" href="#contacts">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+              <a id="portfolioTile3" class="portfolio-tile tile-sm editable-slot" data-image-slot="portfolio_3" href="#contacts">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+            </div>
+
+            <div class="portfolio-stack">
+              <a id="portfolioTile4" class="portfolio-tile tile-sm editable-slot" data-image-slot="portfolio_4" href="#contacts">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+              <a id="portfolioTile5" class="portfolio-tile tile-lg editable-slot" data-image-slot="portfolio_5" href="#contacts">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+              <a id="portfolioTile6" class="portfolio-tile tile-sm editable-slot" data-image-slot="portfolio_6" href="#contacts">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+            </div>
+
+            <div class="portfolio-stack">
+              <a id="portfolioTile7" class="portfolio-tile tile-md editable-slot" data-image-slot="gallery_1" href="#contacts">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+              <a id="portfolioTile8" class="portfolio-tile tile-md editable-slot" data-image-slot="gallery_2" href="#contacts">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+              <a id="portfolioTile9" class="portfolio-tile tile-sm editable-slot" data-image-slot="gallery_3" href="#contacts">
+                <div class="image-loading">Uploading...</div>
+                <div class="edit-overlay"><span>Replace Image</span></div>
+              </a>
+            </div>
+          </div>
+
+          <div class="load-more-wrap">
+            <a class="load-more-btn" href="#contacts">◉ <span class="editable-text" id="portfolioButtonLabel" data-field="template_content.portfolio.button_label">Load More</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="about-section" id="about">
+        <div class="about-inner">
+          <div class="about-kicker editable-text" id="aboutKicker" data-field="template_content.about.kicker">Something About Me</div>
+          <h2 class="about-title editable-text" id="aboutTitle" data-field="template_content.about.title">About Me</h2>
+          <p class="about-copy editable-text" id="aboutCopy" data-field="about">I photograph people and stories with a calm eye and a strong sense of atmosphere. My work is rooted in honest direction, quiet details and portraits that feel both intimate and lasting. Whether it is a wedding day, a couple session or a personal portrait, I focus on real emotion, clean composition and a refined visual experience from first conversation to final gallery.</p>
+
+          <div class="about-points">
+            <div class="about-point">
+              <strong class="editable-text" id="aboutPoint1Title" data-field="template_content.about.points.0.title">Signature Style</strong>
+              <span class="editable-text" id="aboutPoint1Text" data-field="template_content.about.points.0.text">Timeless black and white inspired storytelling with a clean, emotional finish.</span>
+            </div>
+            <div class="about-point">
+              <strong class="editable-text" id="aboutPoint2Title" data-field="template_content.about.points.1.title">Best For</strong>
+              <span class="editable-text" id="aboutPoint2Text" data-field="template_content.about.points.1.text">Weddings, couples, portraits and personal editorial sessions.</span>
+            </div>
+            <div class="about-point">
+              <strong class="editable-text" id="aboutPoint3Title" data-field="template_content.about.points.2.title">Experience</strong>
+              <span class="editable-text" id="aboutPoint3Text" data-field="template_content.about.points.2.text">A guided, calm and detail-focused process designed to keep you comfortable in front of the camera.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="pricing-section" id="prices">
+        <div id="pricingBgSlot" class="pricing-bg editable-slot" data-image-slot="pricing_bg">
+          <div class="image-loading">Uploading...</div>
+          <div class="edit-overlay"><span>Replace Background</span></div>
+        </div>
+
+        <div class="pricing-inner">
+          <div class="pricing-kicker editable-text" id="pricingKicker" data-field="template_content.pricing.kicker">Collections</div>
+          <h2 class="pricing-title editable-text" id="pricingTitle" data-field="template_content.pricing.title">Pricing</h2>
+          <p class="pricing-subtitle editable-text" id="pricingSubtitle" data-field="template_content.pricing.subtitle">Choose a collection that fits your story. Each session is planned with care, clear direction and a premium delivery experience.</p>
+
+          <div class="pricing-grid">
+            <article class="price-card">
+              <div class="price-label editable-text" id="package1Label" data-field="template_content.packages.0.label">Portrait Session</div>
+              <h3 class="price-title editable-text" id="package1Title" data-field="template_content.packages.0.title">Minimal</h3>
+              <p class="price-amount editable-text" id="package1Price" data-field="template_content.packages.0.price">₹18,000</p>
+              <div class="price-list">
+                <div class="price-item"><span class="editable-text" id="package1Detail1Label" data-field="template_content.packages.0.details.0.label">Duration</span><strong class="editable-text" id="package1Detail1Value" data-field="template_content.packages.0.details.0.value">1 Hour</strong></div>
+                <div class="price-item"><span class="editable-text" id="package1Detail2Label" data-field="template_content.packages.0.details.1.label">Edited Photos</span><strong class="editable-text" id="package1Detail2Value" data-field="template_content.packages.0.details.1.value">25+</strong></div>
+                <div class="price-item"><span class="editable-text" id="package1Detail3Label" data-field="template_content.packages.0.details.2.label">Guidance</span><strong class="editable-text" id="package1Detail3Value" data-field="template_content.packages.0.details.2.value">Included</strong></div>
+                <div class="price-item"><span class="editable-text" id="package1Detail4Label" data-field="template_content.packages.0.details.3.label">Delivery</span><strong class="editable-text" id="package1Detail4Value" data-field="template_content.packages.0.details.3.value">Online Gallery</strong></div>
+              </div>
+              <a id="packageWhatsapp1" class="price-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+            </article>
+
+            <article class="price-card">
+              <div class="price-label editable-text" id="package2Label" data-field="template_content.packages.1.label">Couples / Pre-Wedding</div>
+              <h3 class="price-title editable-text" id="package2Title" data-field="template_content.packages.1.title">Standard</h3>
+              <p class="price-amount editable-text" id="package2Price" data-field="template_content.packages.1.price">₹35,000</p>
+              <div class="price-list">
+                <div class="price-item"><span class="editable-text" id="package2Detail1Label" data-field="template_content.packages.1.details.0.label">Duration</span><strong class="editable-text" id="package2Detail1Value" data-field="template_content.packages.1.details.0.value">2 Hours</strong></div>
+                <div class="price-item"><span class="editable-text" id="package2Detail2Label" data-field="template_content.packages.1.details.1.label">Edited Photos</span><strong class="editable-text" id="package2Detail2Value" data-field="template_content.packages.1.details.1.value">60+</strong></div>
+                <div class="price-item"><span class="editable-text" id="package2Detail3Label" data-field="template_content.packages.1.details.2.label">Direction</span><strong class="editable-text" id="package2Detail3Value" data-field="template_content.packages.1.details.2.value">Story Posing</strong></div>
+                <div class="price-item"><span class="editable-text" id="package2Detail4Label" data-field="template_content.packages.1.details.3.label">Delivery</span><strong class="editable-text" id="package2Detail4Value" data-field="template_content.packages.1.details.3.value">Preview + Full Gallery</strong></div>
+              </div>
+              <a id="packageWhatsapp2" class="price-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+            </article>
+
+            <article class="price-card">
+              <div class="price-label editable-text" id="package3Label" data-field="template_content.packages.2.label">Wedding Coverage</div>
+              <h3 class="price-title editable-text" id="package3Title" data-field="template_content.packages.2.title">Maximum</h3>
+              <p class="price-amount editable-text" id="package3Price" data-field="template_content.packages.2.price">₹85,000</p>
+              <div class="price-list">
+                <div class="price-item"><span class="editable-text" id="package3Detail1Label" data-field="template_content.packages.2.details.0.label">Duration</span><strong class="editable-text" id="package3Detail1Value" data-field="template_content.packages.2.details.0.value">Half / Full Day</strong></div>
+                <div class="price-item"><span class="editable-text" id="package3Detail2Label" data-field="template_content.packages.2.details.1.label">Edited Photos</span><strong class="editable-text" id="package3Detail2Value" data-field="template_content.packages.2.details.1.value">All Best Frames</strong></div>
+                <div class="price-item"><span class="editable-text" id="package3Detail3Label" data-field="template_content.packages.2.details.2.label">Planning</span><strong class="editable-text" id="package3Detail3Value" data-field="template_content.packages.2.details.2.value">Consultation Included</strong></div>
+                <div class="price-item"><span class="editable-text" id="package3Detail4Label" data-field="template_content.packages.2.details.3.label">Delivery</span><strong class="editable-text" id="package3Detail4Value" data-field="template_content.packages.2.details.3.value">Premium Gallery + Highlights</strong></div>
+              </div>
+              <a id="packageWhatsapp3" class="price-btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Book Now</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="contact-section" id="contacts">
+        <div class="container contact-wrap">
+          <div class="contact-card">
+            <h3 class="contact-heading editable-text" id="contactHeading" data-field="template_content.contact.heading">Book a Session</h3>
+            <p class="contact-copy editable-text" id="contactText" data-field="template_content.contact.text">For weddings, portraits and personal commissions, reach out directly on the platform you prefer. Every inquiry gets a thoughtful reply.</p>
+
+            <div class="contact-links">
+              <a id="phoneLink" class="contact-link" href="tel:+919876543210">
+                <div><strong>Phone</strong><span id="phoneText" class="editable-text" data-field="phone">+91 98765 43210</span></div><span>↗</span>
+              </a>
+              <a id="whatsappLink" class="contact-link" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
+                <div><strong>WhatsApp</strong><span id="whatsappText" class="editable-text" data-field="whatsapp">Chat on WhatsApp</span></div><span>↗</span>
+              </a>
+              <a id="instagramLink" class="contact-link" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
+                <div><strong>Instagram</strong><span id="instagramText" class="editable-text" data-field="instagram">@adityamasram.photography</span></div><span>↗</span>
+              </a>
+              <a id="youtubeLink" class="contact-link" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">
+                <div><strong>YouTube</strong><span id="youtubeText" class="editable-text" data-field="youtube">Watch latest films</span></div><span>↗</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="contact-form">
+            <h3>Send an Inquiry</h3>
+            <div class="form-grid">
+              <input class="field" type="text" placeholder="Your name" />
+              <input class="field" type="email" placeholder="Email address" />
+              <textarea class="textarea" placeholder="Tell me about your date, location and vision"></textarea>
+              <a id="contactWhatsappButton" class="btn" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-wrap">
+        <div class="footer-brand editable-text" id="footerBrand" data-field="template_content.footer.brand">AM</div>
+        <div class="footer-copy editable-text" id="footerCopyright" data-field="template_content.footer.copy">Copyright 2026. All Rights Reserved.</div>
+        <div class="footer-social">
+          <a id="footerInstagramLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">◎</a>
+          <a id="footerYoutubeLink" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube">▶</a>
+          <a id="footerWhatsappLink" href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">✆</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script type="module">
+    import { replaceTemplateImage } from "./js/storage.js";
+
+    const loadingState=document.getElementById("pageLoading");
+    const errorState=document.getElementById("pageError");
+    const errorText=document.getElementById("pageErrorText");
+    const templateRoot=document.getElementById("templateRoot");
+    const editToolbar=document.getElementById("editToolbar");
+    const editModeToggle=document.getElementById("editModeToggle");
+    const editStatus=document.getElementById("editStatus");
+    const imageFileInput=document.getElementById("imageFileInput");
+    const imagePreviewModal=document.getElementById("imagePreviewModal");
+    const imagePreviewImg=document.getElementById("imagePreviewImg");
+    const imagePreviewClose=document.getElementById("imagePreviewClose");
+
+    const DEFAULT_IMAGES={
+      hero:"https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1600&q=80",
+      portfolio_1:"https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
+      portfolio_2:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=80",
+      portfolio_3:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80",
+      portfolio_4:"https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80",
+      portfolio_5:"https://images.unsplash.com/photo-1516589091380-5d8e87df6999?auto=format&fit=crop&w=900&q=80",
+      portfolio_6:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80",
+      gallery_1:"https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=900&q=80",
+      gallery_2:"https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=900&q=80",
+      gallery_3:"https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80",
+      featured_1:"https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+      featured_2:"https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=1200&q=80",
+      pricing_bg:"https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1600&q=80"
+    };
+
+    const LEGACY_IMAGE_FIELD_MAP={
+      hero:"hero_image_url",
+      portfolio_1:"portfolio_image_1_url",
+      portfolio_2:"portfolio_image_2_url",
+      portfolio_3:"portfolio_image_3_url",
+      portfolio_4:"portfolio_image_4_url",
+      portfolio_5:"portfolio_image_5_url",
+      portfolio_6:"portfolio_image_6_url"
+    };
+
+    const DEFAULT_BASE={
+      name:"Aditya Masram",
+      tagline:"Monochrome storytelling for couples, portraits and personal moments that deserve a timeless frame.",
+      about:"I photograph people and stories with a calm eye and a strong sense of atmosphere. My work is rooted in honest direction, quiet details and portraits that feel both intimate and lasting. Whether it is a wedding day, a couple session or a personal portrait, I focus on real emotion, clean composition and a refined visual experience from first conversation to final gallery.",
+      phone:"+91 98765 43210",
+      instagram:"@adityamasram.photography",
+      city:"Pune",
+      email:"aditya@example.com",
+      youtube:"https://www.youtube.com/",
+      whatsapp:"https://wa.me/919876543210"
+    };
+
+    const DEFAULT_TEMPLATE_CONTENT={
+      hero:{
+        kicker:"Fine Art Wedding & Portrait Photography"
+      },
+      portfolio:{
+        kicker:"The Selected Set",
+        title:"Portfolio",
+        subtitle:"A quiet collection of portraits, landscapes and wedding frames shaped by light, texture and feeling.",
+        button_label:"Load More"
+      },
+      featured:{
+        kicker:"Featured Work",
+        title:"Signature Frames",
+        subtitle:"A refined highlight of portraits and wedding moments with a strong editorial feel.",
+        quote_title:"Why clients choose this style",
+        quote_text:"Clean direction, timeless tones and a calm photography experience designed to make every frame feel intentional."
+      },
+      about:{
+        kicker:"Something About Me",
+        title:"About Me",
+        points:[
+          { title:"Signature Style", text:"Timeless black and white inspired storytelling with a clean, emotional finish." },
+          { title:"Best For", text:"Weddings, couples, portraits and personal editorial sessions." },
+          { title:"Experience", text:"A guided, calm and detail-focused process designed to keep you comfortable in front of the camera." }
+        ]
+      },
+      pricing:{
+        kicker:"Collections",
+        title:"Pricing",
+        subtitle:"Choose a collection that fits your story. Each session is planned with care, clear direction and a premium delivery experience."
+      },
+      packages:[
+        {
+          title:"Minimal",
+          label:"Portrait Session",
+          price:"₹18,000",
+          details:[
+            { label:"Duration", value:"1 Hour" },
+            { label:"Edited Photos", value:"25+" },
+            { label:"Guidance", value:"Included" },
+            { label:"Delivery", value:"Online Gallery" }
+          ]
+        },
+        {
+          title:"Standard",
+          label:"Couples / Pre-Wedding",
+          price:"₹35,000",
+          details:[
+            { label:"Duration", value:"2 Hours" },
+            { label:"Edited Photos", value:"60+" },
+            { label:"Direction", value:"Story Posing" },
+            { label:"Delivery", value:"Preview + Full Gallery" }
+          ]
+        },
+        {
+          title:"Maximum",
+          label:"Wedding Coverage",
+          price:"₹85,000",
+          details:[
+            { label:"Duration", value:"Half / Full Day" },
+            { label:"Edited Photos", value:"All Best Frames" },
+            { label:"Planning", value:"Consultation Included" },
+            { label:"Delivery", value:"Premium Gallery + Highlights" }
+          ]
+        }
+      ],
+      contact:{
+        heading:"Book a Session",
+        text:"For weddings, portraits and personal commissions, reach out directly on the platform you prefer. Every inquiry gets a thoughtful reply."
+      },
+      footer:{
+        brand:"AM",
+        copy:"Copyright 2026. All Rights Reserved."
+      }
+    };
+
+    let currentWebsite=null;
+    let currentUserId=null;
+    let editModeEnabled=false;
+    let pendingImageSlot="";
+
+    function showLoading(){loadingState.classList.remove("hidden");errorState.classList.add("hidden");templateRoot.classList.add("hidden")}
+    function showError(message){loadingState.classList.add("hidden");errorState.classList.remove("hidden");templateRoot.classList.add("hidden");errorText.innerText=message}
+    function showTemplate(){loadingState.classList.add("hidden");errorState.classList.add("hidden");templateRoot.classList.remove("hidden")}
+
+    function getSlugFromUrl(){
+      const params=new URLSearchParams(window.location.search);
+      const querySlug=(params.get("slug")||"").trim();
+      if(querySlug) return decodeURIComponent(querySlug).replace(/^\/+|\/+$/g,"").toLowerCase();
+      const path=window.location.pathname||"";
+      const studioMatch=path.match(/\/studio\/([^/?#]+)/i);
+      return studioMatch&&studioMatch[1]?decodeURIComponent(studioMatch[1]).trim().replace(/^\/+|\/+$/g,"").toLowerCase():"";
+    }
+
+    function isEditRequestedFromUrl(){return new URLSearchParams(window.location.search).get("edit")==="true"}
+    function formatPhoneForDisplay(phone){const raw=String(phone||"").trim();return raw||DEFAULT_BASE.phone}
+    function formatPhoneForTel(phone){const raw=String(phone||"").replace(/[^\d+]/g,"");if(!raw)return "+919876543210";return raw.startsWith("+")?raw:`+${raw}`}
+    function formatPhoneForWhatsApp(phone,whatsappLink){
+      const explicitWhatsapp=String(whatsappLink||"").trim();
+      if(explicitWhatsapp.startsWith("https://wa.me/")) return explicitWhatsapp;
+      const raw=String(phone||"").replace(/\D/g,"");
+      if(!raw) return DEFAULT_BASE.whatsapp;
+      return raw.startsWith("91")?`https://wa.me/${raw}`:`https://wa.me/91${raw}`;
+    }
+    function normalizeInstagram(value){const raw=String(value||"").trim();if(!raw)return DEFAULT_BASE.instagram;return raw.startsWith("@")?raw:`@${raw}`}
+    function normalizeInstagramLink(value){const raw=String(value||"").trim();if(!raw)return "https://instagram.com/adityamasram.photography";if(/^https?:\/\//i.test(raw))return raw;return `https://instagram.com/${raw.replace(/^@/,"")}`}
+    function normalizeYoutubeLink(value){const raw=String(value||"").trim();return raw||DEFAULT_BASE.youtube}
+    function setEditStatus(message){editStatus.innerText=message}
+    function showEditToolbar(show){editToolbar.classList.toggle("hidden",!show)}
+
+    function setEditMode(enabled){
+      editModeEnabled=enabled;
+      editModeToggle.classList.toggle("active",enabled);
+      document.querySelectorAll(".editable-slot").forEach(slot=>slot.classList.toggle("edit-active",enabled));
+      document.querySelectorAll(".editable-text").forEach(el=>el.classList.toggle("edit-active",enabled));
+      setEditStatus(enabled?"Edit mode is ON. Click any text or image area to update it.":"You are viewing preview mode.");
+    }
+
+    function getSlotElement(slotName){
+      return Array.from(document.querySelectorAll(".editable-slot")).find(el=>el.dataset.imageSlot===slotName)||null;
+    }
+
+    function setSlotUploading(slotName,isUploading){
+      const slot=getSlotElement(slotName);
+      if(!slot) return;
+      slot.classList.toggle("uploading",isUploading);
+    }
+
+    function deepClone(value){return JSON.parse(JSON.stringify(value))}
+    function safeObject(value){return value&&typeof value==="object"&&!Array.isArray(value)?value:{}}
+
+    function mergeDefaults(defaults,value){
+      if(Array.isArray(defaults)){
+        const input=Array.isArray(value)?value:[];
+        return defaults.map((item,index)=>mergeDefaults(item,input[index]));
+      }
+      if(defaults&&typeof defaults==="object"){
+        const result={},input=safeObject(value);
+        Object.keys(defaults).forEach(key=>{result[key]=mergeDefaults(defaults[key],input[key])});
+        return result;
+      }
+      return value===undefined||value===null||value===""?defaults:value;
+    }
+
+    function setByPath(target,path,value){
+      const keys=String(path||"").split(".");
+      let ref=target;
+      for(let i=0;i<keys.length-1;i+=1){
+        const key=keys[i],nextKey=keys[i+1],nextIsIndex=/^\d+$/.test(nextKey);
+        if(/^\d+$/.test(key)){
+          const index=Number(key);
+          ref[index]=ref[index]??(nextIsIndex?[]:{});
+          ref=ref[index];
+        }else{
+          ref[key]=ref[key]??(nextIsIndex?[]:{});
+          ref=ref[key];
+        }
+      }
+      const lastKey=keys[keys.length-1];
+      if(/^\d+$/.test(lastKey)) ref[Number(lastKey)]=value;
+      else ref[lastKey]=value;
+    }
+
+    function getTemplateImages(website){return safeObject(website?.template_images)}
+
+    function sanitizeImageUrl(value){
+      const raw=String(value ?? "").trim();
+      if(!raw) return "";
+      const lower=raw.toLowerCase();
+      if(lower==="null" || lower==="undefined" || lower==="false" || lower==="nan") return "";
+      return raw;
+    }
+
+    function getImageUrl(website,slotName){
+      const images=getTemplateImages(website);
+      const legacyField=LEGACY_IMAGE_FIELD_MAP[slotName];
+
+      return (
+        sanitizeImageUrl(images[slotName]) ||
+        (legacyField ? sanitizeImageUrl(website?.[legacyField]) : "") ||
+        sanitizeImageUrl(DEFAULT_IMAGES[slotName]) ||
+        ""
+      );
+    }
+
+    function hasCustomTemplateImage(website,slotName){
+      const images=getTemplateImages(website);
+      return Boolean(sanitizeImageUrl(images[slotName]));
+    }
+
+    function composeContent(website){
+      return {
+        base:{
+          name:website?.name?.trim()||DEFAULT_BASE.name,
+          tagline:website?.tagline?.trim()||DEFAULT_BASE.tagline,
+          about:website?.about?.trim()||DEFAULT_BASE.about,
+          phone:formatPhoneForDisplay(website?.phone),
+          instagram:normalizeInstagram(website?.instagram),
+          city:website?.city?.trim()||DEFAULT_BASE.city,
+          email:String(website?.email||"").trim()||DEFAULT_BASE.email,
+          youtube:normalizeYoutubeLink(website?.youtube),
+          whatsapp:String(website?.whatsapp||"").trim()||formatPhoneForWhatsApp(website?.phone,website?.whatsapp)
+        },
+        templateContent:mergeDefaults(DEFAULT_TEMPLATE_CONTENT,safeObject(website?.template_content))
+      };
+    }
+
+    function buildImageBackground(url){
+      const safeUrl=String(url||"").replace(/"/g,'\\"');
+      return `url("${safeUrl}")`;
+    }
+
+    function isNestedInteractiveClick(event, slot){
+      const interactive=event.target.closest("a, button, input, textarea, select, label");
+      return Boolean(interactive && interactive!==slot);
+    }
+
+    function openImagePreview(slotName){
+      if(!currentWebsite || !slotName) return;
+      const imageUrl=getImageUrl(currentWebsite,slotName);
+      if(!imageUrl) return;
+
+      imagePreviewImg.src=imageUrl;
+      imagePreviewModal.classList.add("show");
+      imagePreviewModal.setAttribute("aria-hidden","false");
+      document.body.style.overflow="hidden";
+    }
+
+    function closeImagePreview(){
+      imagePreviewModal.classList.remove("show");
+      imagePreviewModal.setAttribute("aria-hidden","true");
+      imagePreviewImg.removeAttribute("src");
+      document.body.style.overflow="";
+    }
+
+    function setText(id,value){
+      const el=document.getElementById(id);
+      if(!el) return;
+      const next=value ?? "";
+      el.textContent=next;
+      el.innerText=next;
+    }
+
+    function setHref(id,value){
+      const el=document.getElementById(id);
+      if(!el) return;
+      el.href=value || "#";
+    }
+
+    function forceRenderAllContent(website){
+      if(!website) return;
+      const {base,templateContent}=composeContent(website);
+
+      const whatsappUrl=formatPhoneForWhatsApp(base.phone,base.whatsapp);
+      const phoneTel=formatPhoneForTel(base.phone);
+      const instagramUrl=normalizeInstagramLink(base.instagram);
+      const youtubeUrl=normalizeYoutubeLink(base.youtube);
+      const brandFromName=base.name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()||"").join("");
+      const footerBrand=templateContent.footer.brand||brandFromName||"AM";
+
+      document.title=`${base.name} - Template 4`;
+
+      setText("brandShort", base.name);
+      setText("footerBrand", footerBrand);
+
+      setText("heroKicker", templateContent.hero.kicker);
+      setText("heroName", base.name);
+      setText("heroTagline", base.tagline);
+
+      setText("featuredKicker", templateContent.featured.kicker);
+      setText("featuredTitle", templateContent.featured.title);
+      setText("featuredSubtitle", templateContent.featured.subtitle);
+      setText("featuredQuoteTitle", templateContent.featured.quote_title);
+      setText("featuredQuoteText", templateContent.featured.quote_text);
+
+      setText("portfolioKicker", templateContent.portfolio.kicker);
+      setText("portfolioTitle", templateContent.portfolio.title);
+      setText("portfolioSubtitle", templateContent.portfolio.subtitle);
+      setText("portfolioButtonLabel", templateContent.portfolio.button_label);
+
+      setText("aboutKicker", templateContent.about.kicker);
+      setText("aboutTitle", templateContent.about.title);
+      setText("aboutCopy", base.about);
+
+      for(let i=0;i<3;i+=1){
+        const point=templateContent.about.points[i]||DEFAULT_TEMPLATE_CONTENT.about.points[i];
+        setText(`aboutPoint${i+1}Title`, point?.title || "");
+        setText(`aboutPoint${i+1}Text`, point?.text || "");
+      }
+
+      setText("pricingKicker", templateContent.pricing.kicker);
+      setText("pricingTitle", templateContent.pricing.title);
+      setText("pricingSubtitle", templateContent.pricing.subtitle);
+
+      templateContent.packages.forEach((pkg,index)=>{
+        const num=index+1;
+        setText(`package${num}Label`, pkg.label);
+        setText(`package${num}Title`, pkg.title);
+        setText(`package${num}Price`, pkg.price);
+        pkg.details.forEach((detail,detailIndex)=>{
+          const detailNum=detailIndex+1;
+          setText(`package${num}Detail${detailNum}Label`, detail.label);
+          setText(`package${num}Detail${detailNum}Value`, detail.value);
+        });
+      });
+
+      setText("contactHeading", templateContent.contact.heading);
+      setText("contactText", templateContent.contact.text);
+
+      setText("phoneText", base.phone);
+      setText("whatsappText", base.whatsapp.startsWith("https://wa.me/") ? "Chat on WhatsApp" : base.whatsapp);
+      setText("instagramText", base.instagram);
+      setText("youtubeText", base.youtube.startsWith("http") ? "Watch latest films" : base.youtube);
+
+      setText("footerCopyright", templateContent.footer.copy);
+
+      setHref("phoneLink", `tel:${phoneTel}`);
+      setHref("whatsappLink", whatsappUrl);
+      setHref("contactWhatsappButton", whatsappUrl);
+      setHref("footerWhatsappLink", whatsappUrl);
+      setHref("packageWhatsapp1", whatsappUrl);
+      setHref("packageWhatsapp2", whatsappUrl);
+      setHref("packageWhatsapp3", whatsappUrl);
+
+      setHref("instagramLink", instagramUrl);
+      setHref("headerInstagramLink", instagramUrl);
+      setHref("footerInstagramLink", instagramUrl);
+
+      setHref("youtubeLink", youtubeUrl);
+      setHref("headerYoutubeLink", youtubeUrl);
+      setHref("footerYoutubeLink", youtubeUrl);
+
+      applyImages(website);
+    }
+
+    
+function applyBWCondition(el, slot, website){
+  if(!el) return;
+
+  if(hasCustomTemplateImage(website,slot)){
+    el.classList.remove("filter-bw");
+  }else{
+    el.classList.add("filter-bw");
+  }
+}
+
+function applyImageToSlot(elementId, slotName, website){
+  const el=document.getElementById(elementId);
+  if(!el) return;
+
+  const imageUrl=getImageUrl(website,slotName);
+
+  if(imageUrl){
+    el.style.backgroundImage=buildImageBackground(imageUrl);
+    el.dataset.previewUrl=imageUrl;
+  }else{
+    el.style.backgroundImage="";
+    delete el.dataset.previewUrl;
+  }
+
+  applyBWCondition(el,slotName,website);
+}
+
+function applyImages(website){
+      applyImageToSlot("heroImageSlot","hero",website);
+      applyImageToSlot("portfolioTile1","portfolio_1",website);
+      applyImageToSlot("portfolioTile2","portfolio_2",website);
+      applyImageToSlot("portfolioTile3","portfolio_3",website);
+      applyImageToSlot("portfolioTile4","portfolio_4",website);
+      applyImageToSlot("portfolioTile5","portfolio_5",website);
+      applyImageToSlot("portfolioTile6","portfolio_6",website);
+      applyImageToSlot("featuredTile1","featured_1",website);
+      applyImageToSlot("featuredTile2","featured_2",website);
+      applyImageToSlot("portfolioTile7","gallery_1",website);
+      applyImageToSlot("portfolioTile8","gallery_2",website);
+      applyImageToSlot("portfolioTile9","gallery_3",website);
+      applyImageToSlot("pricingBgSlot","pricing_bg",website);
+    }
+
+    function applyWebsiteData(website){
+      forceRenderAllContent(website);
+    }
+
+    async function fetchWebsiteBySlug(slug){
+      const supabase=await window.getSupabase();
+      const {data:authData}=await supabase.auth.getUser();
+      currentUserId=authData?.user?.id||null;
+
+      let query=supabase.from("user_websites").select("*").eq("site_slug",slug).eq("template_id",4).limit(1);
+      if(currentUserId) query=query.or(`is_published.eq.true,user_id.eq.${currentUserId}`);
+      else query=query.eq("is_published",true);
+
+      const {data,error}=await query.maybeSingle();
+      if(error) throw error;
+      return data||null;
+    }
+
+    function canCurrentUserEdit(website){
+      return Boolean(currentUserId&&website?.user_id&&currentUserId===website.user_id);
+    }
+
+    async function refreshWebsiteRecord(){
+      const supabase=await window.getSupabase();
+      const {data,error}=await supabase.from("user_websites").select("*").eq("id",currentWebsite.id).eq("user_id",currentUserId).single();
+      if(error) throw error;
+      return data;
+    }
+
+    async function updateWebsiteColumn(columnName,value){
+      const supabase=await window.getSupabase();
+      const {data,error}=await supabase.from("user_websites").update({[columnName]:value}).eq("id",currentWebsite.id).eq("user_id",currentUserId).select("*").single();
+      if(error) throw error;
+      currentWebsite=data;
+      return data;
+    }
+
+    async function updateWebsiteField(fieldPath,value){
+      if(!currentWebsite||!currentUserId) return;
+      const parts=String(fieldPath||"").split(".");
+      const root=parts[0];
+
+      if(root==="template_content"){
+        const nextValue=deepClone(safeObject(currentWebsite.template_content));
+        setByPath(nextValue,parts.slice(1).join("."),value);
+        return updateWebsiteColumn("template_content",nextValue);
+      }
+
+      return updateWebsiteColumn(fieldPath,value);
+    }
+
+    
+function isStudioOSNativeTemplateApp(){
+  try{
+    const protocol = String(window.location.protocol || "").toLowerCase();
+
+    if(
+      window.Capacitor &&
+      typeof window.Capacitor.isNativePlatform === "function" &&
+      window.Capacitor.isNativePlatform()
+    ){
+      return true;
+    }
+
+    return protocol === "capacitor:" || protocol === "ionic:" || protocol === "file:";
+  }catch(error){
+    return false;
+  }
+}
+
+function inferTemplateImageMimeType(fileName, fallback = "image/jpeg"){
+  const name = String(fileName || "").toLowerCase();
+
+  if(name.endsWith(".png")) return "image/png";
+  if(name.endsWith(".webp")) return "image/webp";
+  if(name.endsWith(".gif")) return "image/gif";
+  if(name.endsWith(".heic")) return "image/heic";
+  if(name.endsWith(".heif")) return "image/heif";
+  if(name.endsWith(".jpg") || name.endsWith(".jpeg")) return "image/jpeg";
+
+  return fallback;
+}
+
+function isUnsupportedNativeTemplateImage(file){
+  const name = String(file?.name || "").toLowerCase();
+  const type = String(file?.type || "").toLowerCase();
+
+  return (
+    name.endsWith(".heic") ||
+    name.endsWith(".heif") ||
+    type.includes("heic") ||
+    type.includes("heif")
+  );
+}
+
+async function normalizeTemplateImageFileForAndroid(file){
+  if(!file || !isStudioOSNativeTemplateApp()){
+    return file;
+  }
+
+  try{
+    const fileName = file.name || `template-image-${Date.now()}.jpg`;
+    const inferredType = file.type || inferTemplateImageMimeType(fileName);
+    const buffer = await file.arrayBuffer();
+
+    if(!buffer || !buffer.byteLength){
+      return file;
+    }
+
+    const blob = new Blob([buffer], {
+      type: inferredType || "image/jpeg"
+    });
+
+    try{
+      return new File([blob], fileName, {
+        type: inferredType || blob.type || "image/jpeg",
+        lastModified: file.lastModified || Date.now()
+      });
+    }catch(_fileError){
+      blob.name = fileName;
+      blob.lastModified = file.lastModified || Date.now();
+      return blob;
+    }
+  }catch(error){
+    console.warn("Android template image normalization skipped", error);
+    return file;
+  }
+}
+
+
+async function handleImageSelection(file){
+      if(!pendingImageSlot||!currentWebsite||!currentUserId) return;
+      const slotName=pendingImageSlot;
+
+      try{
+        setSlotUploading(slotName,true);
+        setEditStatus("Preparing selected image...");
+
+        const normalizedFile = await normalizeTemplateImageFileForAndroid(file);
+
+        if(isStudioOSNativeTemplateApp() && isUnsupportedNativeTemplateImage(normalizedFile)){
+          throw new Error("Please select a JPG, JPEG, PNG, or WEBP image. HEIC/HEIF is not supported inside the Android app.");
+        }
+
+        setEditStatus("Uploading and replacing image...");
+
+        const supabase=await window.getSupabase();
+        const currentImages={...getTemplateImages(currentWebsite)};
+
+        const replaceResult=await replaceTemplateImage({
+          supabase,
+          userId:currentUserId,
+          websiteId:currentWebsite.id,
+          slot:slotName,
+          file:normalizedFile,
+          currentData:currentImages
+        });
+
+        const refreshedWebsite=await refreshWebsiteRecord();
+        currentWebsite={
+          ...refreshedWebsite,
+          template_content:safeObject(refreshedWebsite.template_content)
+        };
+
+        if(replaceResult?.updatedUrl){
+          currentWebsite.template_images={
+            ...getTemplateImages(currentWebsite),
+            [slotName]:replaceResult.updatedUrl
+          };
+        }
+
+        applyWebsiteData(currentWebsite);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 50);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 180);
+        setEditStatus("Image replaced successfully.");
+      }catch(error){
+        console.error("Image replace failed:",error);
+        setEditStatus(error?.message||"Unable to replace image.");
+      }finally{
+        setSlotUploading(slotName,false);
+        pendingImageSlot="";
+        imageFileInput.value="";
+      }
+    }
+
+    function getFriendlyFieldLabel(fieldPath){
+      const map={name:"Studio Name",tagline:"Tagline",about:"About",phone:"Phone",instagram:"Instagram",youtube:"YouTube",whatsapp:"WhatsApp",email:"Email"};
+      return map[fieldPath]||"Content";
+    }
+
+    
+function ensureTextEditModal(){
+      const modal = document.getElementById("textEditModal");
+      const input = document.getElementById("textEditInput");
+      const cancelBtn = document.getElementById("textEditCancelBtn");
+      const saveBtn = document.getElementById("textEditSaveBtn");
+
+      if(!modal || !input || !cancelBtn || !saveBtn){
+        throw new Error("Text edit modal is missing");
+      }
+
+      return { modal, input, cancelBtn, saveBtn };
+    }
+
+    function openTextEditModal(currentValue){
+      return new Promise(resolve=>{
+        const { modal, input, cancelBtn, saveBtn } = ensureTextEditModal();
+
+        input.value = String(currentValue || "");
+        modal.classList.add("show");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+
+        const cleanup = (value)=>{
+          modal.classList.remove("show");
+          modal.setAttribute("aria-hidden", "true");
+          document.body.style.overflow = "";
+          cancelBtn.onclick = null;
+          saveBtn.onclick = null;
+          modal.onclick = null;
+          document.removeEventListener("keydown", keyHandler);
+          resolve(value);
+        };
+
+        const keyHandler = (event)=>{
+          if(event.key === "Escape"){
+            cleanup(null);
+          }
+        };
+
+        cancelBtn.onclick = ()=> cleanup(null);
+        saveBtn.onclick = ()=> cleanup(input.value);
+
+        modal.onclick = (event)=>{
+          if(event.target === modal){
+            cleanup(null);
+          }
+        };
+
+        document.addEventListener("keydown", keyHandler);
+
+        setTimeout(()=>{
+          input.focus();
+          input.setSelectionRange(input.value.length, input.value.length);
+        }, 40);
+      });
+    }
+
+    function captureEditableTextVisualState(el){
+      if(!el) return null;
+
+      const computed = window.getComputedStyle(el);
+      return {
+        color: computed.color,
+        inlineColor: el.style.color || ""
+      };
+    }
+
+    function restoreEditableTextVisualState(el, state){
+      if(!el || !state) return;
+
+      if(state.inlineColor){
+        el.style.color = state.inlineColor;
+        return;
+      }
+
+      if(state.color && state.color !== "rgba(0, 0, 0, 0)" && state.color !== "transparent"){
+        el.style.color = state.color;
+      }
+    }
+
+    function registerEditableText(){
+      document.querySelectorAll(".editable-text").forEach(el=>{
+        el.addEventListener("click", async event=>{
+          if(!editModeEnabled) return;
+          event.preventDefault();
+          event.stopPropagation();
+
+          const fieldPath=el.dataset.field || "";
+          if(!fieldPath) return;
+
+          const visualState=captureEditableTextVisualState(el);
+          const currentValue=el.innerText.trim();
+          el.classList.add("editing");
+
+          try{
+            const nextValue=await openTextEditModal(currentValue);
+            if(nextValue===null) return;
+
+            const cleanedValue=String(nextValue).trim();
+            if(!cleanedValue) return;
+
+            setEditStatus("Saving text update...");
+            await updateWebsiteField(fieldPath,cleanedValue);
+            applyWebsiteData(currentWebsite);
+
+            const refreshedEl=document.querySelector(`[data-field="${CSS.escape(fieldPath)}"]`);
+            restoreEditableTextVisualState(refreshedEl || el,visualState);
+
+            setEditStatus("Text updated successfully.");
+          }catch(error){
+            console.error("Text update failed:",error);
+            setEditStatus(error.message || "Unable to update text.");
+          }finally{
+            el.classList.remove("editing");
+          }
+        });
+      });
+    }
+
+    function registerEditableImageSlots(){
+      document.querySelectorAll(".editable-slot").forEach(slot=>{
+        slot.addEventListener("click",event=>{
+          const slotName=slot.dataset.imageSlot||"";
+          if(!slotName) return;
+
+          if(!editModeEnabled && isNestedInteractiveClick(event,slot)){
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          if(editModeEnabled){
+            pendingImageSlot=slotName;
+            imageFileInput.value="";
+            imageFileInput.click();
+            return;
+          }
+
+          openImagePreview(slotName);
+        });
+      });
+    }
+
+    imagePreviewClose.addEventListener("click",closeImagePreview);
+
+    imagePreviewModal.addEventListener("click",event=>{
+      if(event.target===imagePreviewModal){
+        closeImagePreview();
+      }
+    });
+
+    document.addEventListener("keydown",event=>{
+      if(event.key==="Escape" && imagePreviewModal.classList.contains("show")){
+        closeImagePreview();
+      }
+    });
+
+    imageFileInput.addEventListener("change",async e=>{
+      const file=e.target.files?.[0];
+
+      if(!file){
+        pendingImageSlot="";
+        imageFileInput.value="";
+        return;
+      }
+
+      await handleImageSelection(file);
+    });
+
+    editModeToggle.addEventListener("click",()=>setEditMode(!editModeEnabled));
+
+    async function initTemplate(){
+      showLoading();
+      const slug=getSlugFromUrl();
+      if(!slug){
+        showError("Missing website slug. Open this page using template-4.html?slug=your-site-slug or a clean URL like /studio/your-site-slug");
+        return;
+      }
+
+      try{
+        const website=await fetchWebsiteBySlug(slug);
+        if(!website){
+          showError("No website data found for this slug. Save your Website Builder first, then open this template using the correct slug.");
+          return;
+        }
+
+        currentWebsite=website;
+        registerEditableImageSlots();
+        registerEditableText();
+        showTemplate();
+        applyWebsiteData(website);
+        requestAnimationFrame(()=>forceRenderAllContent(currentWebsite));
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 120);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 500);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 1200);
+
+        const editable=canCurrentUserEdit(website);
+        showEditToolbar(editable);
+
+        if(editable&&isEditRequestedFromUrl()) setEditMode(true);
+        else setEditMode(false);
+      }catch(error){
+        console.error("Template 4 load failed:",error);
+        showError("Unable to load website preview right now.");
+      }
+    }
+
+    const mobileMenuBtn=document.getElementById("mobileMenuBtn");
+    const headerInner=document.getElementById("headerInner");
+    if(mobileMenuBtn&&headerInner){
+      mobileMenuBtn.addEventListener("click",()=>headerInner.classList.toggle("mobile-nav-open"));
+    }
+
+    window.addEventListener("resize", ()=>{
+      if(currentWebsite) forceRenderAllContent(currentWebsite);
+    });
+
+    window.addEventListener("orientationchange", ()=>{
+      if(currentWebsite){
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 120);
+        setTimeout(()=>forceRenderAllContent(currentWebsite), 500);
+      }
+    });
+
+    window.addEventListener("load", async ()=>{
+      await initTemplate();
+    });
+  </script>
+</body>
+</html>

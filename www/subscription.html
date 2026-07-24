@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subscription Plans - ChitraBook AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --bg-start:#1e293b;
+      --bg-end:#0f172a;
+      --card-white:#ffffff;
+      --text-dark:#0f172a;
+      --text-muted:#475569;
+      --primary:#4f46e5;
+      --primary-dark:#3730a3;
+      --primary-soft:#e0e7ff;
+      --success:#16a34a;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      background: radial-gradient(circle at top, var(--bg-start), var(--bg-end));
+      min-height:100vh;
+    }
+
+    .glass-shell{
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(14px);
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 20px 70px rgba(0,0,0,0.22);
+    }
+
+    .pricing-stack{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      align-items:end;
+      gap:1.15rem;
+    }
+
+    .plan-card{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      border-radius:1.7rem;
+      background:var(--card-white);
+      border:1px solid rgba(79,70,229,0.12);
+      box-shadow:0 24px 60px rgba(15,23,42,0.18);
+      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      min-height:640px;
+    }
+
+    .plan-card:hover{
+      transform:translateY(-4px);
+      box-shadow:0 30px 70px rgba(15,23,42,0.22);
+    }
+
+    .plan-card.popular{
+      transform:translateY(-18px);
+      border-color:rgba(79,70,229,0.38);
+      box-shadow:0 36px 84px rgba(79,70,229,0.22);
+    }
+
+    .plan-card.popular:hover{
+      transform:translateY(-22px);
+    }
+
+    .plan-top{
+      padding:1.2rem 1.2rem 1rem;
+      background:linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+      color:white;
+    }
+
+    .plan-card.free .plan-top{
+      background:linear-gradient(180deg, #64748b 0%, #475569 100%);
+    }
+
+    .plan-card.pro .plan-top{
+      background:linear-gradient(180deg, #312e81 0%, #4338ca 100%);
+    }
+
+    .plan-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:30px;
+      padding:0 0.8rem;
+      border-radius:999px;
+      background:rgba(255,255,255,0.16);
+      border:1px solid rgba(255,255,255,0.2);
+      font-size:0.72rem;
+      font-weight:700;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    }
+
+    .plan-price{
+      margin-top:1rem;
+      display:flex;
+      align-items:flex-end;
+      gap:0.25rem;
+      line-height:1;
+    }
+
+    .plan-price strong{
+      font-size:3rem;
+      font-weight:800;
+      letter-spacing:-0.04em;
+    }
+
+    .plan-price span{
+      font-size:0.9rem;
+      font-weight:600;
+      opacity:0.92;
+      padding-bottom:0.35rem;
+    }
+
+    .plan-subtitle{
+      margin-top:0.65rem;
+      font-size:0.92rem;
+      line-height:1.55;
+      color:rgba(255,255,255,0.88);
+    }
+
+    .plan-billing-note{
+      margin-top:0.55rem;
+      font-size:0.78rem;
+      line-height:1.45;
+      color:rgba(255,255,255,0.82);
+      font-weight:600;
+    }
+
+    .plan-body{
+      display:flex;
+      flex-direction:column;
+      flex:1;
+      padding:1.25rem 1.25rem 1.3rem;
+      color:var(--text-dark);
+    }
+
+    .storage-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:0.4rem;
+      align-self:flex-start;
+      min-height:34px;
+      padding:0 0.85rem;
+      border-radius:999px;
+      background:var(--primary-soft);
+      color:var(--primary-dark);
+      font-size:0.8rem;
+      font-weight:700;
+      margin-bottom:1rem;
+    }
+
+    .feature-list{
+      display:grid;
+      gap:0.9rem;
+      margin:0;
+      padding:0;
+      list-style:none;
+    }
+
+    .feature-list li{
+      display:flex;
+      align-items:flex-start;
+      gap:0.72rem;
+      color:var(--text-muted);
+      font-size:0.94rem;
+      line-height:1.55;
+    }
+
+    .feature-list li::before{
+      content:"✓";
+      width:1.35rem;
+      height:1.35rem;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+      background:var(--primary-soft);
+      color:var(--primary-dark);
+      font-size:0.78rem;
+      font-weight:800;
+      margin-top:0.08rem;
+    }
+
+    .plan-note{
+      margin-top:1rem;
+      padding-top:1rem;
+      border-top:1px solid rgba(15,23,42,0.08);
+      color:#64748b;
+      font-size:0.82rem;
+      line-height:1.55;
+    }
+
+    .plan-actions{
+      margin-top:auto;
+      padding-top:1.2rem;
+      display:grid;
+      gap:0.7rem;
+    }
+
+    .plan-btn{
+      width:100%;
+      min-height:50px;
+      border-radius:1rem;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.92rem;
+      font-weight:700;
+      transition:all .2s ease;
+      cursor:pointer;
+      border:1px solid transparent;
+    }
+
+    .plan-btn.primary{
+      background:var(--primary);
+      color:white;
+      box-shadow:0 12px 24px rgba(79,70,229,0.22);
+    }
+
+    .plan-btn.primary:hover{
+      background:#4338ca;
+    }
+
+    .plan-btn.secondary{
+      background:white;
+      color:var(--primary);
+      border-color:rgba(79,70,229,0.22);
+    }
+
+    .plan-btn.secondary:hover{
+      background:#eef2ff;
+    }
+
+    .plan-btn.disabled{
+      background:#e2e8f0;
+      color:#475569;
+      cursor:default;
+      border-color:#e2e8f0;
+      box-shadow:none;
+    }
+
+    .current-flag{
+      display:none;
+      align-items:center;
+      justify-content:center;
+      gap:0.45rem;
+      font-size:0.82rem;
+      font-weight:700;
+      color:var(--success);
+      background:#ecfdf5;
+      border:1px solid rgba(22,163,74,0.16);
+      border-radius:0.95rem;
+      min-height:46px;
+    }
+
+    .current-plan .current-flag{
+      display:flex;
+    }
+
+    .current-plan .upgrade-btn{
+      display:none;
+    }
+
+    .billing-toggle{
+      display:inline-flex;
+      align-items:center;
+      gap:0.35rem;
+      padding:0.35rem;
+      border-radius:1rem;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.1);
+    }
+
+    .billing-btn{
+      min-width:116px;
+      min-height:44px;
+      border-radius:0.8rem;
+      border:none;
+      background:transparent;
+      color:rgba(255,255,255,0.72);
+      font-size:0.86rem;
+      font-weight:700;
+      letter-spacing:0.02em;
+      cursor:pointer;
+      transition:all .2s ease;
+    }
+
+    .billing-btn.active{
+      background:linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+      color:white;
+      box-shadow:0 12px 24px rgba(79,70,229,0.24);
+    }
+
+    .mini-status-card{
+      display:grid;
+      grid-template-columns:1.1fr .9fr .8fr;
+      gap:1rem;
+      align-items:center;
+      color:white;
+    }
+
+    .mini-stat{
+      padding:1rem 1.1rem;
+      border-radius:1.1rem;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .mini-stat-label{
+      font-size:0.76rem;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,0.68);
+    }
+
+    .mini-stat-value{
+      margin-top:0.5rem;
+      font-size:1.4rem;
+      font-weight:800;
+      line-height:1;
+    }
+
+    .note-strip{
+      border-radius:1.25rem;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.08);
+      padding:1rem 1.1rem;
+      color:rgba(255,255,255,0.82);
+      font-size:0.9rem;
+      line-height:1.65;
+    }
+
+    @media (max-width: 960px){
+      .pricing-stack{
+        grid-template-columns:1fr;
+      }
+
+      .plan-card,
+      .plan-card.popular{
+        transform:none;
+        min-height:auto;
+      }
+
+      .plan-card.popular:hover{
+        transform:translateY(-4px);
+      }
+
+      .mini-status-card{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 640px){
+      body{
+        padding:0.85rem;
+      }
+
+      .glass-shell{
+        border-radius:1.35rem;
+      }
+
+      .pricing-stack{
+        gap:0.95rem;
+      }
+
+      .plan-card{
+        border-radius:1.35rem;
+      }
+
+      .mini-stat{
+        padding:0.9rem 0.95rem;
+      }
+
+      .mini-stat-value{
+        font-size:1.15rem;
+      }
+
+      .note-strip{
+        font-size:0.82rem;
+        line-height:1.55;
+      }
+    }
+
+    @media (max-width: 480px){
+      .billing-toggle{
+        width:100%;
+        justify-content:center;
+      }
+
+      .billing-btn{
+        min-width:0;
+        flex:1 1 0;
+      }
+
+      .plan-top{
+        padding:1rem 1rem 0.9rem;
+      }
+
+      .plan-body{
+        padding:1rem;
+      }
+
+      .plan-price strong{
+        font-size:2.35rem;
+      }
+
+      .plan-price span{
+        font-size:0.78rem;
+        padding-bottom:0.28rem;
+      }
+
+      .plan-subtitle{
+        font-size:0.84rem;
+        line-height:1.45;
+      }
+
+      .plan-billing-note{
+        font-size:0.72rem;
+      }
+
+      .feature-list{
+        gap:0.72rem;
+      }
+
+      .feature-list li{
+        font-size:0.86rem;
+        line-height:1.45;
+      }
+
+      .storage-pill{
+        font-size:0.74rem;
+      }
+    }
+    .status-toast{
+      position:fixed;
+      left:50%;
+      top:50%;
+      right:auto;
+      bottom:auto;
+      transform:translate(-50%, -50%);
+      width:min(420px, calc(100vw - 2rem));
+      z-index:1400;
+      display:none;
+      padding:0.95rem 1rem;
+      border-radius:1rem;
+      border:1px solid rgba(255,255,255,0.1);
+      box-shadow:0 20px 50px rgba(0,0,0,0.3);
+      backdrop-filter:blur(14px);
+      color:white;
+      font-size:0.9rem;
+      line-height:1.55;
+      text-align:center;
+    }
+
+    .status-toast.show{
+      display:block;
+    }
+
+    .status-toast.info{
+      background:rgba(79,70,229,0.18);
+      border-color:rgba(99,102,241,0.35);
+    }
+
+    .status-toast.success{
+      background:rgba(22,163,74,0.16);
+      border-color:rgba(22,163,74,0.35);
+    }
+
+    .status-toast.error{
+      background:rgba(239,68,68,0.16);
+      border-color:rgba(239,68,68,0.35);
+    }
+
+    .page-overlay{
+      position:fixed;
+      inset:0;
+      z-index:1100;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:1rem;
+      background:rgba(2,6,23,0.68);
+      backdrop-filter:blur(10px);
+    }
+
+    .page-overlay.show{
+      display:flex;
+    }
+
+    .page-overlay-card{
+      width:min(100%, 420px);
+      border-radius:1.35rem;
+      padding:1.1rem;
+      background:rgba(15,23,42,0.96);
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 24px 60px rgba(0,0,0,0.35);
+      color:white;
+    }
+
+    .page-overlay-badge{
+      display:inline-flex;
+      align-items:center;
+      min-height:30px;
+      padding:0 0.8rem;
+      border-radius:999px;
+      background:rgba(99,102,241,0.16);
+      border:1px solid rgba(99,102,241,0.3);
+      font-size:0.72rem;
+      font-weight:700;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    }
+
+    .page-overlay-title{
+      margin-top:0.9rem;
+      font-size:1.2rem;
+      font-weight:800;
+      line-height:1.2;
+    }
+
+    .page-overlay-text{
+      margin-top:0.55rem;
+      color:rgba(255,255,255,0.78);
+      font-size:0.9rem;
+      line-height:1.6;
+    }
+
+    .checkout-summary-box{
+      margin-top:0.85rem;
+      display:grid;
+      gap:0.65rem;
+    }
+
+    .checkout-summary-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      padding:0.7rem 0;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      color:rgba(255,255,255,0.82);
+    }
+
+    .checkout-summary-row:last-child{
+      border-bottom:0;
+    }
+
+    .checkout-summary-row strong{
+      color:white;
+      font-weight:800;
+    }
+
+    .checkout-summary-total{
+      margin-top:0.25rem;
+      padding:0.9rem 1rem;
+      border-radius:1rem;
+      background:rgba(99,102,241,0.16);
+      border:1px solid rgba(99,102,241,0.28);
+    }
+
+    .checkout-summary-total span,
+    .checkout-summary-total strong{
+      color:white;
+    }
+
+    .checkout-summary-hint{
+      margin-top:0.8rem;
+      font-size:0.78rem;
+      line-height:1.5;
+      color:rgba(255,255,255,0.58);
+    }
+
+    .page-overlay-actions{
+      display:flex;
+      gap:0.75rem;
+      margin-top:1rem;
+    }
+
+    .page-overlay-btn{
+      flex:1;
+      min-height:46px;
+      border-radius:0.95rem;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.88rem;
+      font-weight:700;
+      transition:all .2s ease;
+      border:1px solid transparent;
+      cursor:pointer;
+    }
+
+    .page-overlay-btn.primary{
+      background:var(--primary);
+      color:white;
+    }
+
+    .page-overlay-btn.primary:hover{
+      background:#4338ca;
+    }
+
+    .page-overlay-btn.secondary{
+      background:rgba(255,255,255,0.06);
+      color:white;
+      border-color:rgba(255,255,255,0.08);
+    }
+
+    .page-overlay-btn.secondary:hover{
+      background:rgba(255,255,255,0.1);
+    }
+
+    .plan-btn:disabled,
+    .billing-btn:disabled{
+      opacity:0.7;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    @media (max-width: 480px){
+      .status-toast{
+        left:0.85rem;
+        right:0.85rem;
+        top:50%;
+        bottom:auto;
+        width:auto;
+        transform:translateY(-50%);
+      }
+
+      .page-overlay-actions{
+        flex-direction:column;
+      }
+    }
+
+  </style>
+</head>
+<body class="text-white min-h-screen p-4">
+  <div class="max-w-6xl mx-auto pb-10">
+    <div class="flex items-center justify-between gap-3 mb-5">
+      <a href="dashboard.html" class="text-sm text-gray-300 hover:text-white transition">← Back</a>
+      <span id="planStatusBadge" class="inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-white/10 bg-white/5 text-white/80">
+        Plan Center
+      </span>
+    </div>
+
+    <section class="glass-shell rounded-[28px] p-5 md:p-8 mb-5">
+      <div class="text-center max-w-3xl mx-auto">
+        <p class="text-xs md:text-sm uppercase tracking-[0.3em] text-white/60">ChitraBook AI Subscription</p>
+        <h1 class="mt-3 text-3xl md:text-5xl font-extrabold leading-tight">
+          Flexible pricing for photographers
+        </h1>
+        <p class="mt-4 text-sm md:text-base text-white/70 leading-7">
+          Choose a plan based on your storage, gallery workflow, and premium feature access. Premium website templates are purchased separately.
+        </p>
+
+        <div class="mt-6 inline-flex billing-toggle">
+          <button id="monthlyBtn" type="button" class="billing-btn">1 Month</button>
+          <button id="annualBtn" type="button" class="billing-btn active">Yearly</button>
+        </div>
+        <p class="mt-3 text-xs text-white/60">Yearly plans are billed once for 12 months. One-month plans are available at higher pricing.</p>
+      </div>
+    </section>
+
+    <section class="glass-shell rounded-[28px] p-5 md:p-6 mb-5">
+      <div class="mini-status-card">
+        <div class="mini-stat">
+          <div class="mini-stat-label">Current Plan</div>
+          <div id="currentPlanText" class="mini-stat-value">Free</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Billable Storage Usage</div>
+          <div id="storageUsageText" class="mini-stat-value">0GB / 5GB</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Templates</div>
+          <div class="mini-stat-value">Separate</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pricing-stack mb-5">
+      <article id="freePlanCard" class="plan-card free current-plan">
+        <div class="plan-top">
+          <span class="plan-badge">Free</span>
+          <div class="plan-price">
+            <strong data-monthly="₹0" data-annual="₹0">₹0</strong>
+            <span>/ mo</span>
+          </div>
+          <p class="plan-subtitle">Best to start with ChitraBook AI and set up your first workflow.</p>
+        </div>
+
+        <div class="plan-body">
+          <div class="storage-pill">Storage • 5GB billable</div>
+
+          <ul class="feature-list">
+            <li>Template 1 access</li>
+            <li>Basic quotation workflow</li>
+            <li>Limited AI Face Search</li>
+            <li>Core dashboard usage</li>
+            <li>Gallery viewing</li>
+            <li>Limited Gallery Sharing</li>
+            <li>No photo selling</li>
+            <li>No team sheet sharing or PDF</li>
+          </ul>
+
+          <div class="plan-note">
+            Premium templates are not included in subscription. Free plan is ideal for testing ChitraBook AI before upgrading. Limited AI Face Search and Limited Gallery Sharing are included for trial usage. Photo selling and team sheet sharing are paid features.
+          </div>
+
+          <div class="plan-actions">
+            <div class="current-flag">✓ Current Plan</div>
+            <button id="freePlanBtn" class="plan-btn secondary upgrade-btn disabled" type="button">Current Plan</button>
+          </div>
+        </div>
+      </article>
+
+      <article id="basicPlanCard" class="plan-card popular">
+        <div class="plan-top">
+          <span class="plan-badge">Most Popular</span>
+          <div class="plan-price">
+            <strong data-monthly="₹1499" data-annual="₹499">₹499</strong>
+            <span>/ mo</span>
+          </div>
+          <p id="basicBillingNote" class="plan-billing-note">Billed yearly • ₹5988 charged once for 12 months</p>
+          <p class="plan-subtitle">For working photographers who need client delivery, sharing, and premium workflow tools.</p>
+        </div>
+
+        <div class="plan-body">
+          <div class="storage-pill">Storage • 50GB billable</div>
+
+          <ul class="feature-list">
+            <li>Everything in Free core plan</li>
+            <li>Premium quotation access</li>
+            <li>Team sheet sharing + PDF access</li>
+            <li>Gallery sharing enabled</li>
+            <li>AI Face Search</li>
+            <li>Photo Selling</li>
+            <li>Client workflow upgrade</li>
+            <li>Higher upload capacity</li>
+            <li>Premium templates sold separately</li>
+            <li>Priority feature access</li>
+          </ul>
+
+          <div class="plan-note">
+            Best for photographers who actively manage bookings, quotations, and delivery inside ChitraBook AI.
+          </div>
+
+          <div class="plan-actions">
+            <div class="current-flag">✓ Current Plan</div>
+            <button id="basicPlanBtn" class="plan-btn primary upgrade-btn" type="button">Choose Basic Yearly</button>
+          </div>
+        </div>
+      </article>
+
+      <article id="proPlanCard" class="plan-card pro">
+        <div class="plan-top">
+          <span class="plan-badge">Pro</span>
+          <div class="plan-price">
+            <strong data-monthly="₹1999" data-annual="₹999">₹999</strong>
+            <span>/ mo</span>
+          </div>
+          <p id="proBillingNote" class="plan-billing-note">Billed yearly • ₹11988 charged once for 12 months</p>
+          <p class="plan-subtitle">For studios that need selling, scale, and stronger delivery capacity.</p>
+        </div>
+
+        <div class="plan-body">
+          <div class="storage-pill">Storage • 100GB billable</div>
+
+          <ul class="feature-list">
+            <li>Everything in Basic plan</li>
+            <li>Premium quotation access</li>
+            <li>Team sheet sharing + PDF access</li>
+            <li>Gallery sharing enabled</li>
+            <li>AI Face Search</li>
+            <li>Photo Selling</li>
+            <li>Client workflow upgrade</li>
+            <li>Higher upload capacity</li>
+            <li>Premium templates sold separately</li>
+            <li>Priority feature access</li>
+          </ul>
+
+          <div class="plan-note">
+            Built for photographers and studios who want to monetize galleries and scale image-heavy workflows.
+          </div>
+
+          <div class="plan-actions">
+            <div class="current-flag">✓ Current Plan</div>
+            <button id="proPlanBtn" class="plan-btn secondary upgrade-btn" type="button">Choose Pro Yearly</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="note-strip">
+      <strong class="text-white">Important:</strong>
+      Subscription unlocks platform features, billable storage, sharing, and workflow tools. Storage usage is calculated from the original selected image size while ChitraBook AI optimizes the stored image internally.
+      Basic and Pro support both yearly and one-month billing. Yearly plans are billed once for 12 months.
+      Premium website templates are separate products and are not included automatically in subscription plans.
+    </section>
+  </div>
+
+  <div id="pageOverlay" class="page-overlay" aria-hidden="true">
+    <div class="page-overlay-card">
+      <div id="pageOverlayBadge" class="page-overlay-badge">Processing</div>
+      <div id="pageOverlayTitle" class="page-overlay-title">Please wait</div>
+      <div id="pageOverlayText" class="page-overlay-text">We are preparing your subscription payment.</div>
+      <div id="pageOverlayActions" class="page-overlay-actions hidden">
+        <button id="pageOverlaySecondaryBtn" type="button" class="page-overlay-btn secondary">Close</button>
+        <button id="pageOverlayPrimaryBtn" type="button" class="page-overlay-btn primary hidden">Retry</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="statusToast" class="status-toast info" role="status" aria-live="polite"></div>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script type="module">
+    import { protectPage } from "./js/auth.js";
+
+    await protectPage();
+
+    const monthlyBtn = document.getElementById("monthlyBtn");
+    const annualBtn = document.getElementById("annualBtn");
+    const currentPlanText = document.getElementById("currentPlanText");
+    const storageUsageText = document.getElementById("storageUsageText");
+    const planStatusBadge = document.getElementById("planStatusBadge");
+    const basicBillingNote = document.getElementById("basicBillingNote");
+    const proBillingNote = document.getElementById("proBillingNote");
+    const freePlanBtn = document.getElementById("freePlanBtn");
+    const basicPlanBtn = document.getElementById("basicPlanBtn");
+    const proPlanBtn = document.getElementById("proPlanBtn");
+    const statusToast = document.getElementById("statusToast");
+    const pageOverlay = document.getElementById("pageOverlay");
+    const pageOverlayBadge = document.getElementById("pageOverlayBadge");
+    const pageOverlayTitle = document.getElementById("pageOverlayTitle");
+    const pageOverlayText = document.getElementById("pageOverlayText");
+    const pageOverlayActions = document.getElementById("pageOverlayActions");
+    const pageOverlaySecondaryBtn = document.getElementById("pageOverlaySecondaryBtn");
+    const pageOverlayPrimaryBtn = document.getElementById("pageOverlayPrimaryBtn");
+
+    const planCards = {
+      free: document.getElementById("freePlanCard"),
+      basic: document.getElementById("basicPlanCard"),
+      pro: document.getElementById("proPlanCard")
+    };
+
+    const SUBSCRIPTION_ORDER_URL =
+      "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/create-subscription-order";
+
+    const SUBSCRIPTION_VERIFY_URL =
+      "https://gnnaaagvlrmdveqxicob.supabase.co/functions/v1/verify-subscription-payment";
+
+    const REQUEST_TIMEOUT_MS = 25000;
+
+    let billingMode = "annual";
+    let activePlan = "free";
+    let currentUser = null;
+    let currentSettings = null;
+    let checkoutInProgress = false;
+    let activeToastTimer = null;
+    let lastCheckoutPlan = null;
+
+    function normalizePlan(value){
+      const plan = String(value || "").trim().toLowerCase();
+      return ["free", "basic", "pro"].includes(plan) ? plan : "free";
+    }
+
+    function formatStorageUsageFromBytes(bytes){
+      const safeBytes = Math.max(0, Number(bytes || 0));
+
+      if(!Number.isFinite(safeBytes) || safeBytes <= 0){
+        return "0 MB";
+      }
+
+      const mb = safeBytes / (1024 * 1024);
+      const gb = safeBytes / (1024 * 1024 * 1024);
+
+      if(gb >= 1){
+        return `${gb.toFixed(2)} GB`;
+      }
+
+      if(mb >= 1){
+        return `${Math.ceil(mb)} MB`;
+      }
+
+      return "1 MB";
+    }
+
+    function formatStorageLimitFromGb(gb){
+      const safeGb = Number(gb || 0);
+
+      if(!Number.isFinite(safeGb) || safeGb <= 0){
+        return "0 GB";
+      }
+
+      if(Number.isInteger(safeGb)){
+        return `${safeGb} GB`;
+      }
+
+      return `${safeGb.toFixed(2)} GB`;
+    }
+
+    function bytesFromGb(gb){
+      const numeric = Number(gb || 0);
+      if(!Number.isFinite(numeric) || numeric <= 0) return 0;
+      return Math.floor(numeric * 1024 * 1024 * 1024);
+    }
+
+    function applyStorageQuotaUi({
+      effectivePlan,
+      storageLimitGb,
+      usedBytes,
+      reservedBytes
+    }){
+      const safeLimitGb = Number(storageLimitGb || 0) || (effectivePlan === "pro" ? 100 : effectivePlan === "basic" ? 50 : 5);
+      const limitBytes = bytesFromGb(safeLimitGb);
+      const used = Math.max(0, Number(usedBytes || 0));
+      const reserved = Math.max(0, Number(reservedBytes || 0));
+      const trackedBytes = used + reserved;
+
+      storageUsageText.textContent = `${formatStorageUsageFromBytes(trackedBytes)} / ${formatStorageLimitFromGb(safeLimitGb)}`;
+
+      const usageRatio = limitBytes > 0 ? trackedBytes / limitBytes : 0;
+
+      if(usageRatio >= 1){
+        planStatusBadge.textContent = "Storage Full";
+        planStatusBadge.className = "inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-red-400/30 bg-red-500/10 text-red-100";
+        showToast("error", "Your storage is full. Please delete some photos or upgrade your plan.", 5200);
+
+        if(effectivePlan === "free"){
+          basicPlanBtn.classList.remove("secondary");
+          basicPlanBtn.classList.add("primary");
+          basicPlanBtn.textContent = billingMode === "monthly" ? "Upgrade to Basic 1 Month" : "Upgrade to Basic Yearly";
+        }else if(effectivePlan === "basic"){
+          proPlanBtn.classList.remove("secondary");
+          proPlanBtn.classList.add("primary");
+          proPlanBtn.textContent = billingMode === "monthly" ? "Upgrade to Pro 1 Month" : "Upgrade to Pro Yearly";
+        }
+        return;
+      }
+
+      if(usageRatio >= 0.9){
+        planStatusBadge.textContent = "Storage Near Limit";
+        planStatusBadge.className = "inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-amber-300/30 bg-amber-400/10 text-amber-50";
+        showToast("info", "Your storage is almost full. Please delete unused photos or upgrade soon to avoid upload interruptions.", 5000);
+        return;
+      }
+
+      planStatusBadge.textContent = `${currentPlanText.textContent} Plan`;
+      planStatusBadge.className = "inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-white/10 bg-white/5 text-white/80";
+    }
+
+    function applyExpiredSubscriptionUi({
+      subscriptionStatus,
+      effectivePlan,
+      usedBytes,
+      storageLimitGb
+    }){
+      const status = String(subscriptionStatus || "").trim().toLowerCase();
+      const used = Math.max(0, Number(usedBytes || 0));
+      const limitGb = Number(storageLimitGb || 0) || 5;
+      const overLimit = used > bytesFromGb(limitGb);
+
+      if(status !== "expired"){
+        return;
+      }
+
+      planStatusBadge.textContent = "Subscription Expired";
+      planStatusBadge.className = "inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-wide uppercase border border-amber-300/30 bg-amber-400/10 text-amber-50";
+
+      if(overLimit){
+        showToast("error", "Your subscription expired and your current storage is above the free plan limit. Upgrade to continue uploads.", 5600);
+        basicPlanBtn.classList.remove("secondary");
+        basicPlanBtn.classList.add("primary");
+        basicPlanBtn.textContent = billingMode === "monthly" ? "Upgrade to Basic 1 Month" : "Upgrade to Basic Yearly";
+      }else{
+        showToast("info", "Your subscription expired. You are now on the Free plan.", 5000);
+      }
+
+      if(effectivePlan === "free"){
+        freePlanBtn.textContent = "Current Plan";
+      }
+    }
+
+    function getPlanConfig(plan, mode){
+      const plans = {
+        basic: {
+          annual: {
+            displayPrice: "₹499",
+            billing_cycle: "yearly",
+            storage_limit_gb: 50,
+            buttonLabel: "Choose Basic Yearly",
+            note: "Billed yearly • ₹5988 charged once for 12 months"
+          },
+          monthly: {
+            displayPrice: "₹1499",
+            billing_cycle: "monthly",
+            storage_limit_gb: 50,
+            buttonLabel: "Choose Basic 1 Month",
+            note: "1 month plan • ₹1499 charged for one month only"
+          }
+        },
+        pro: {
+          annual: {
+            displayPrice: "₹999",
+            billing_cycle: "yearly",
+            storage_limit_gb: 100,
+            buttonLabel: "Choose Pro Yearly",
+            note: "Billed yearly • ₹11988 charged once for 12 months"
+          },
+          monthly: {
+            displayPrice: "₹1999",
+            billing_cycle: "monthly",
+            storage_limit_gb: 100,
+            buttonLabel: "Choose Pro 1 Month",
+            note: "1 month plan • ₹1999 charged for one month only"
+          }
+        }
+      };
+
+      return plans?.[plan]?.[mode] || null;
+    }
+
+    async function getAccessToken(){
+      const supabase = await window.getSupabase();
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error) {
+        console.error("Unable to get session:", error);
+        return null;
+      }
+
+      return data?.session?.access_token || null;
+    }
+
+    function isNativeAndroidApp(){
+      try{
+        if(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform()){
+          if(typeof window.Capacitor.getPlatform === "function"){
+            return window.Capacitor.getPlatform() === "android";
+          }
+
+          return true;
+        }
+
+        const protocol = String(window.location.protocol || "").toLowerCase();
+        return protocol === "capacitor:" || protocol === "file:";
+      }catch(error){
+        return false;
+      }
+    }
+
+    function getRazorpayNativePlugin(){
+      try{
+        return window.Capacitor?.Plugins?.RazorpayNative || null;
+      }catch(error){
+        return null;
+      }
+    }
+
+    function buildNativeCheckoutOptions(options){
+      return {
+        key: options.key,
+        amount: options.amount,
+        currency: options.currency,
+        name: options.name,
+        description: options.description,
+        order_id: options.order_id,
+        prefill: options.prefill,
+        "theme.color": options?.theme?.color || "#4f46e5"
+      };
+    }
+
+    function setButtonBusy(isBusy){
+      basicPlanBtn.disabled = isBusy;
+      proPlanBtn.disabled = isBusy;
+      monthlyBtn.disabled = isBusy;
+      annualBtn.disabled = isBusy;
+
+      if(isBusy){
+        basicPlanBtn.dataset.originalText = basicPlanBtn.dataset.originalText || basicPlanBtn.textContent;
+        proPlanBtn.dataset.originalText = proPlanBtn.dataset.originalText || proPlanBtn.textContent;
+        if(activePlan !== "basic") basicPlanBtn.textContent = "Processing...";
+        if(activePlan !== "pro") proPlanBtn.textContent = "Processing...";
+      }else{
+        updateBillingMode(billingMode);
+      }
+    }
+
+    function showToast(type, message, duration = 4200){
+      if(activeToastTimer){
+        window.clearTimeout(activeToastTimer);
+      }
+
+      statusToast.className = `status-toast show ${type}`;
+      statusToast.textContent = message;
+
+      activeToastTimer = window.setTimeout(() => {
+        statusToast.className = "status-toast info";
+        statusToast.textContent = "";
+      }, duration);
+    }
+
+    function openOverlay({
+      badge = "Processing",
+      title = "Please wait",
+      text = "We are preparing your request.",
+      secondaryLabel = "Close",
+      primaryLabel = "",
+      onSecondary = null,
+      onPrimary = null,
+      showActions = false,
+      showPrimary = false,
+      dismissible = false,
+    } = {}){
+      pageOverlayBadge.textContent = badge;
+      pageOverlayTitle.textContent = title;
+      pageOverlayText.textContent = text;
+      pageOverlay.classList.add("show");
+      pageOverlay.setAttribute("aria-hidden", "false");
+
+      pageOverlayActions.classList.toggle("hidden", !showActions);
+      pageOverlayPrimaryBtn.classList.toggle("hidden", !showPrimary);
+
+      pageOverlaySecondaryBtn.textContent = secondaryLabel;
+      pageOverlayPrimaryBtn.textContent = primaryLabel || "Retry";
+
+      pageOverlaySecondaryBtn.onclick = () => {
+        if(typeof onSecondary === "function"){
+          onSecondary();
+        }else if(dismissible){
+          closeOverlay();
+        }
+      };
+
+      pageOverlayPrimaryBtn.onclick = () => {
+        if(typeof onPrimary === "function"){
+          onPrimary();
+        }
+      };
+    }
+
+    function closeOverlay(){
+      pageOverlay.classList.remove("show");
+      pageOverlay.setAttribute("aria-hidden", "true");
+      pageOverlaySecondaryBtn.onclick = null;
+      pageOverlayPrimaryBtn.onclick = null;
+    }
+
+    function formatCurrency(value){
+      const number = Number(value || 0);
+
+      if(!Number.isFinite(number)){
+        return "₹0";
+      }
+
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        minimumFractionDigits: number % 1 === 0 ? 0 : 2,
+        maximumFractionDigits: 2
+      }).format(number);
+    }
+
+    function getCheckoutPlanTitle(plan, mode){
+      const planName = String(plan || "").charAt(0).toUpperCase() + String(plan || "").slice(1);
+      const cycleName = mode === "monthly" ? "1 Month" : "Yearly";
+      return `${planName} ${cycleName} Plan`;
+    }
+
+    function openCheckoutSummaryOverlay({
+      plan,
+      mode,
+      pricing,
+      onContinue,
+      onCancel
+    }){
+      const safePricing = pricing || {};
+      const baseAmount = Number(safePricing.base_amount_rupees || 0);
+      const gstRate = Number(safePricing.gst_rate || 0.18);
+      const gstAmount = Number(safePricing.gst_amount_rupees || 0);
+      const totalAmount = Number(safePricing.total_amount_rupees || 0);
+
+      pageOverlayBadge.textContent = "Checkout";
+      pageOverlayTitle.textContent = getCheckoutPlanTitle(plan, mode);
+
+      pageOverlayText.innerHTML = `
+        <div class="checkout-summary-box">
+          <div class="checkout-summary-row">
+            <span>Plan amount</span>
+            <strong>${formatCurrency(baseAmount)}</strong>
+          </div>
+
+          <div class="checkout-summary-row">
+            <span>GST (${Math.round(gstRate * 100)}%)</span>
+            <strong>${formatCurrency(gstAmount)}</strong>
+          </div>
+
+          <div class="checkout-summary-row checkout-summary-total">
+            <span>Payable today</span>
+            <strong>${formatCurrency(totalAmount)}</strong>
+          </div>
+        </div>
+
+        <div class="checkout-summary-hint">
+          You will continue to Razorpay secure checkout after confirming this amount.
+        </div>
+      `;
+
+      pageOverlay.classList.add("show");
+      pageOverlay.setAttribute("aria-hidden", "false");
+
+      pageOverlayActions.classList.remove("hidden");
+      pageOverlayPrimaryBtn.classList.remove("hidden");
+
+      pageOverlaySecondaryBtn.textContent = "Cancel";
+      pageOverlayPrimaryBtn.textContent = "Continue to Payment";
+
+      pageOverlaySecondaryBtn.onclick = () => {
+        if(typeof onCancel === "function"){
+          onCancel();
+        }
+      };
+
+      pageOverlayPrimaryBtn.onclick = () => {
+        if(typeof onContinue === "function"){
+          onContinue();
+        }
+      };
+    }
+
+    async function fetchJsonWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS){
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+      try{
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+        });
+
+        const data = await response.json().catch(() => ({}));
+        return { response, data };
+      }finally{
+        window.clearTimeout(timeoutId);
+      }
+    }
+
+    function getFriendlySubscriptionError(message, code = ""){
+      const raw = String(message || "").trim();
+      const safeCode = String(code || "").trim().toLowerCase();
+      const lower = raw.toLowerCase();
+
+      if(safeCode === "subscription_already_active" || lower.includes("already have an active subscription")){
+        return "You already have an active subscription for this plan.";
+      }
+
+      if(lower.includes("login session expired")){
+        return "Your login session expired. Please login again and retry.";
+      }
+
+      if(lower.includes("payment verified but") || lower.includes("verification failed")){
+        return "Payment received, but subscription activation is still pending. Please wait a moment and refresh.";
+      }
+
+      return raw || "Unable to process subscription right now.";
+    }
+
+    function getFriendlyNativePaymentError(error){
+      const values = [];
+
+      if(typeof error === "string"){
+        values.push(error);
+      }
+
+      if(error?.message){
+        values.push(error.message);
+      }
+
+      if(error?.errorMessage){
+        values.push(error.errorMessage);
+      }
+
+      if(error?.description){
+        values.push(error.description);
+      }
+
+      const raw = values.filter(Boolean).join(" ").trim();
+      let code = "";
+      let description = "";
+      let reason = "";
+
+      for(const value of values){
+        try{
+          const parsed = JSON.parse(value);
+          code = String(parsed?.error?.code || parsed?.code || code || "").trim();
+          description = String(parsed?.error?.description || parsed?.description || description || "").trim();
+          reason = String(parsed?.error?.reason || parsed?.reason || reason || "").trim();
+        }catch(parseError){
+          // Keep raw text fallback.
+        }
+      }
+
+      const combined = `${raw} ${code} ${description} ${reason}`.toLowerCase();
+
+      if(
+        combined.includes("payment_cancelled") ||
+        combined.includes("payment cancelled") ||
+        combined.includes("payment canceled") ||
+        combined.includes("cancelled") ||
+        combined.includes("canceled") ||
+        combined.includes("user cancelled") ||
+        combined.includes("user canceled") ||
+        (combined.includes("bad_request_error") && combined.includes("undefined"))
+      ){
+        return {
+          type: "info",
+          message: "Payment cancelled. No changes were made."
+        };
+      }
+
+      const safeDescription = description &&
+        description.toLowerCase() !== "undefined" &&
+        description.toLowerCase() !== "null"
+          ? description
+          : "";
+
+      return {
+        type: "error",
+        message: safeDescription || "Payment failed. Please try again."
+      };
+    }
+
+    function updateBillingMode(mode){
+      billingMode = mode === "monthly" ? "monthly" : "annual";
+
+      monthlyBtn.classList.toggle("active", billingMode === "monthly");
+      annualBtn.classList.toggle("active", billingMode === "annual");
+      monthlyBtn.setAttribute("aria-pressed", String(billingMode === "monthly"));
+      annualBtn.setAttribute("aria-pressed", String(billingMode === "annual"));
+
+      const basicConfig = getPlanConfig("basic", billingMode);
+      const proConfig = getPlanConfig("pro", billingMode);
+
+      const priceNodes = document.querySelectorAll(".plan-price strong");
+      if(priceNodes[1]) priceNodes[1].textContent = basicConfig.displayPrice;
+      if(priceNodes[2]) priceNodes[2].textContent = proConfig.displayPrice;
+
+      document.querySelectorAll(".plan-price span").forEach(node => {
+        node.textContent = "/ mo";
+      });
+
+      basicBillingNote.textContent = basicConfig.note;
+      proBillingNote.textContent = proConfig.note;
+
+      basicPlanBtn.textContent = activePlan === "basic" ? "Current Plan" : basicConfig.buttonLabel;
+      proPlanBtn.textContent = activePlan === "pro" ? "Current Plan" : proConfig.buttonLabel;
+    }
+
+    function setCurrentPlan(plan){
+      activePlan = normalizePlan(plan);
+
+      Object.values(planCards).forEach(card => card.classList.remove("current-plan"));
+      planCards[activePlan].classList.add("current-plan");
+
+      currentPlanText.textContent = activePlan.charAt(0).toUpperCase() + activePlan.slice(1);
+      planStatusBadge.textContent = `${currentPlanText.textContent} Plan`;
+
+      if(freePlanBtn){
+        freePlanBtn.textContent = activePlan === "free" ? "Current Plan" : "Free Plan";
+      }
+
+      updateBillingMode(billingMode);
+    }
+
+    async function loadPlanState(){
+      const supabase = await window.getSupabase();
+
+      const authResult = await supabase.auth.getUser();
+      currentUser = authResult?.data?.user || null;
+      if(!currentUser) return;
+
+      const { data, error } = await supabase
+        .from("photographer_settings")
+        .select("plan, billing_cycle, subscription_status, storage_limit_gb, studio_name, plan_expires_at, used_storage_bytes, reserved_storage_bytes")
+        .eq("user_id", currentUser.id)
+        .maybeSingle();
+
+      if(error){
+        console.error("Unable to load photographer_settings:", error);
+        setCurrentPlan("free");
+        storageUsageText.textContent = "0 MB / 5 GB";
+        planStatusBadge.textContent = "Plan Center";
+        showToast("error", "Unable to load subscription state right now.");
+        return;
+      }
+
+      currentSettings = data || null;
+
+      const dbPlan = normalizePlan(data?.plan);
+      const dbBilling = String(data?.billing_cycle || "").trim().toLowerCase();
+      const subscriptionStatus = String(data?.subscription_status || "").trim().toLowerCase();
+      const planExpiresAt = String(data?.plan_expires_at || "").trim();
+
+      const subscriptionExpired =
+        subscriptionStatus === "expired" ||
+        (subscriptionStatus === "active" && planExpiresAt && new Date(planExpiresAt).getTime() <= Date.now());
+
+      const effectivePlan = subscriptionStatus === "active" && !subscriptionExpired ? dbPlan : "free";
+      const storageLimit = Number(
+        data?.storage_limit_gb ||
+        (effectivePlan === "pro" ? 100 : effectivePlan === "basic" ? 50 : 5)
+      );
+
+      setCurrentPlan(effectivePlan);
+
+      const usedBytes = Math.max(0, Number(data?.used_storage_bytes || 0));
+      const reservedBytes = Math.max(0, Number(data?.reserved_storage_bytes || 0));
+
+      applyStorageQuotaUi({
+        effectivePlan,
+        storageLimitGb: storageLimit,
+        usedBytes,
+        reservedBytes
+      });
+
+      if(effectivePlan !== "free" && (dbBilling === "monthly" || dbBilling === "yearly")){
+        updateBillingMode(dbBilling === "monthly" ? "monthly" : "annual");
+      }else{
+        updateBillingMode("annual");
+      }
+
+      // Re-apply after button labels refresh
+      applyStorageQuotaUi({
+        effectivePlan,
+        storageLimitGb: storageLimit,
+        usedBytes,
+        reservedBytes
+      });
+
+      applyExpiredSubscriptionUi({
+        subscriptionStatus: subscriptionExpired ? "expired" : subscriptionStatus,
+        effectivePlan,
+        usedBytes,
+        storageLimitGb: storageLimit
+      });
+    }
+
+    async function startSubscriptionCheckout(targetPlan){
+      const selectedPlan = normalizePlan(targetPlan);
+
+      if(checkoutInProgress){
+        return;
+      }
+
+      if(!currentUser){
+        showToast("error", "User session not found. Please login again.");
+        return;
+      }
+
+      if(activePlan === selectedPlan){
+        showToast("info", `You are already on the ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan.`);
+        return;
+      }
+
+      const config = getPlanConfig(selectedPlan, billingMode);
+      if(!config){
+        showToast("error", "Invalid plan selection.");
+        return;
+      }
+
+      const accessToken = await getAccessToken();
+      if (!accessToken) {
+        showToast("error", "Login session expired. Please login again.");
+        return;
+      }
+
+      checkoutInProgress = true;
+      lastCheckoutPlan = selectedPlan;
+      setButtonBusy(true);
+
+      openOverlay({
+        badge: "Subscription",
+        title: "Preparing secure checkout",
+        text: `Creating ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} ${billingMode} order...`,
+        showActions: false,
+      });
+
+      try{
+        const { response: orderRes, data: orderData } = await fetchJsonWithTimeout(
+          SUBSCRIPTION_ORDER_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": window.SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              plan: selectedPlan,
+              billing_cycle: config.billing_cycle
+            })
+          }
+        );
+
+        if(!orderRes.ok || !orderData?.success || !orderData?.order || !orderData?.order?.id){
+          const backendCode = String(orderData?.code || "").trim().toLowerCase();
+          throw new Error(getFriendlySubscriptionError(orderData?.error || "Unable to create subscription order.", backendCode));
+        }
+
+        if(!orderData?.razorpay_key_id){
+          throw new Error("Missing Razorpay key from order response.");
+        }
+
+        const razorpayNativePlugin = isNativeAndroidApp() ? getRazorpayNativePlugin() : null;
+        const shouldUseNativeCheckout = Boolean(razorpayNativePlugin);
+
+        if(!shouldUseNativeCheckout && typeof window.Razorpay !== "function"){
+          throw new Error("Razorpay checkout failed to load.");
+        }
+
+        const verifySubscriptionPayment = async function(response){
+          openOverlay({
+            badge: "Verifying",
+            title: "Confirming payment",
+            text: "Your payment was received. We are verifying and activating your subscription.",
+            showActions: false,
+          });
+
+          try{
+            const verifyAccessToken = await getAccessToken();
+            if (!verifyAccessToken) {
+              throw new Error("Login session expired during payment verification.");
+            }
+
+            const { response: verifyRes, data: verifyData } = await fetchJsonWithTimeout(
+              SUBSCRIPTION_VERIFY_URL,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "apikey": window.SUPABASE_ANON_KEY,
+                  "Authorization": `Bearer ${verifyAccessToken}`
+                },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  plan: selectedPlan,
+                  billing_cycle: config.billing_cycle
+                })
+              }
+            );
+
+            if(!verifyRes.ok || !verifyData?.success){
+              throw new Error(getFriendlySubscriptionError(verifyData?.error || "Payment verification failed."));
+            }
+
+            await loadPlanState();
+            closeOverlay();
+            showToast("success", verifyData?.idempotent ? "Subscription already verified and active." : "Subscription activated successfully.");
+          }catch(verifyError){
+            console.error("Subscription verify failed:", verifyError);
+            const verifyMessage = verifyError instanceof Error
+              ? getFriendlySubscriptionError(verifyError.message)
+              : "Payment completed but subscription verification failed.";
+
+            openOverlay({
+              badge: "Verification Failed",
+              title: "Payment received, verification pending",
+              text: verifyMessage,
+              showActions: true,
+              showPrimary: false,
+              secondaryLabel: "Close",
+              onSecondary: () => closeOverlay(),
+              dismissible: true,
+            });
+            showToast("error", verifyMessage);
+          }finally{
+            checkoutInProgress = false;
+            setButtonBusy(false);
+          }
+        };
+
+        const options = {
+          key: orderData.razorpay_key_id,
+          amount: orderData.order.amount,
+          currency: orderData.order.currency || "INR",
+          name: "ChitraBook AI",
+          description: orderData.order.description || `${selectedPlan} subscription`,
+          order_id: orderData.order.id,
+          handler: verifySubscriptionPayment,
+          prefill: {
+            name: currentSettings?.studio_name || "",
+            email: currentUser.email || ""
+          },
+          theme: {
+            color: "#4f46e5"
+          },
+          modal: {
+            escape: true,
+            ondismiss: function(){
+              checkoutInProgress = false;
+              setButtonBusy(false);
+              closeOverlay();
+              showToast("info", "Payment cancelled. No changes were made.");
+            }
+          }
+        };
+
+        let rzp = null;
+
+        if(!shouldUseNativeCheckout){
+          rzp = new Razorpay(options);
+
+          rzp.on("payment.failed", function(errorResponse){
+            console.error("Razorpay payment failed:", errorResponse);
+            checkoutInProgress = false;
+            setButtonBusy(false);
+            closeOverlay();
+
+            const paymentFailedMessage =
+              errorResponse?.error?.description ||
+              errorResponse?.error?.reason ||
+              "Payment failed. Please try again.";
+
+            showToast("error", paymentFailedMessage);
+          });
+        }
+
+        openCheckoutSummaryOverlay({
+          plan: selectedPlan,
+          mode: billingMode,
+          pricing: orderData?.pricing,
+          onContinue: async () => {
+            closeOverlay();
+
+            if(shouldUseNativeCheckout){
+              openOverlay({
+                badge: "Payment",
+                title: "Opening secure payment",
+                text: "Please complete the payment in Razorpay checkout.",
+                showActions: false,
+              });
+
+              try{
+                const nativeResponse = await razorpayNativePlugin.startPayment({
+                  options: buildNativeCheckoutOptions(options)
+                });
+
+                await verifySubscriptionPayment(nativeResponse);
+              }catch(nativeError){
+                console.error("Native Razorpay checkout failed:", nativeError);
+
+                checkoutInProgress = false;
+                setButtonBusy(false);
+                closeOverlay();
+
+                const nativeFailure = getFriendlyNativePaymentError(nativeError);
+                showToast(nativeFailure.type, nativeFailure.message);
+              }
+
+              return;
+            }
+
+            rzp.open();
+          },
+          onCancel: () => {
+            checkoutInProgress = false;
+            setButtonBusy(false);
+            closeOverlay();
+            showToast("info", "Payment cancelled. No changes were made.");
+          }
+        });
+      }catch(error){
+        console.error("Unable to start subscription checkout:", error);
+        checkoutInProgress = false;
+        setButtonBusy(false);
+
+        const checkoutMessage = error instanceof Error
+          ? getFriendlySubscriptionError(error.message)
+          : "Unable to start payment right now.";
+
+        openOverlay({
+          badge: "Checkout Failed",
+          title: "Unable to start payment",
+          text: checkoutMessage,
+          showActions: true,
+          showPrimary: true,
+          secondaryLabel: "Close",
+          primaryLabel: "Retry",
+          onSecondary: () => closeOverlay(),
+          onPrimary: async () => {
+            closeOverlay();
+            if(lastCheckoutPlan){
+              await startSubscriptionCheckout(lastCheckoutPlan);
+            }
+          },
+          dismissible: true,
+        });
+        showToast("error", checkoutMessage);
+      }
+    }
+
+    monthlyBtn.addEventListener("click", () => {
+      if(checkoutInProgress) return;
+      updateBillingMode("monthly");
+    });
+
+    annualBtn.addEventListener("click", () => {
+      if(checkoutInProgress) return;
+      updateBillingMode("annual");
+    });
+
+    basicPlanBtn.addEventListener("click", () => startSubscriptionCheckout("basic"));
+    proPlanBtn.addEventListener("click", () => startSubscriptionCheckout("pro"));
+
+    document.addEventListener("keydown", (event) => {
+      if(event.key === "Escape" && !checkoutInProgress && pageOverlay.classList.contains("show")){
+        closeOverlay();
+      }
+    });
+
+    updateBillingMode("annual");
+    await loadPlanState();
+  </script>
+  <script src="js/app-bottom-nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Loading Proposal...</title>
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.js"></script>
+
+</head>
+
+<body>
+
+<div id="status">Loading proposal...</div>
+
+<script>
+
+// =====================
+// WAIT FOR SUPABASE
+// =====================
+
+async function waitForSupabase(){
+
+let tries = 0
+
+// 🔥 FIX: only check function existence
+while((!window.getSupabase) && tries < 50){
+await new Promise(r => setTimeout(r,100))
+tries++
+}
+
+}
+
+
+// =====================
+// EXTRACT SHORT ID
+// =====================
+
+function extractShortId(){
+
+const params = new URLSearchParams(window.location.search)
+
+let id = null
+
+// CASE 1
+// ?id=xxxxx
+if(params.get("id")){
+id = params.get("id")
+}
+
+// CASE 2
+// ?slug=name-xxxxx
+if(!id && params.get("slug")){
+const slug = params.get("slug")
+if(slug.includes("-")){
+id = slug.substring(slug.lastIndexOf("-") + 1)
+}
+}
+
+// CASE 3
+// /p/name-xxxxx
+if(!id){
+const path = window.location.pathname
+const parts = path.split("/").filter(Boolean)
+const slug = parts[parts.length - 1]
+if(slug && slug.includes("-")){
+id = slug.substring(slug.lastIndexOf("-") + 1)
+}
+}
+
+return id
+
+}
+
+
+// =====================
+// LOAD PROPOSAL
+// =====================
+
+async function loadProposal(){
+
+await waitForSupabase()
+
+// 🔥 FIX: await REQUIRED
+const supabase = await window.getSupabase()
+
+const status = document.getElementById("status")
+
+const shortId = extractShortId()
+
+if(!shortId){
+status.innerHTML = "Invalid proposal link"
+return
+}
+
+try{
+
+// =====================
+// 🔴 ORIGINAL CODE (KEPT — NOT REMOVED)
+// =====================
+
+// const { data, error } = await supabase
+// .from("quotations")
+// .select("id")
+// .eq("short_id", shortId)
+// .maybeSingle()
+
+// =====================
+// ✅ FIXED CODE (ADDED)
+// =====================
+
+const { data, error } = await supabase
+.from("quotations")
+.select("id, short_id")
+.ilike("short_id", shortId + "%")
+
+if(error){
+status.innerHTML = "Error loading proposal"
+return
+}
+
+// ORIGINAL LOGIC (KEPT)
+let record = null
+
+if(data && data.length > 0){
+record = data[0]
+}
+
+// ORIGINAL CHECK (KEPT)
+if(!record){
+status.innerHTML = "Proposal not found"
+return
+}
+
+const fullId = record.id
+
+// =====================
+// REDIRECT
+// =====================
+
+const proposalUrl = new URL("../proposal.html", window.location.href)
+proposalUrl.searchParams.set("id", fullId)
+window.location.replace(proposalUrl.toString())
+
+}catch(err){
+
+console.error(err)
+status.innerHTML = "Error loading proposal"
+
+}
+
+}
+
+loadProposal()
+
+</script>
+
+</body>
+
+</html>

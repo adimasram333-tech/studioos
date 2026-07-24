@@ -1,0 +1,2645 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Website Builder - ChitraBook AI</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a);
+}
+
+.glass{
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+.template-card{
+cursor:pointer;
+transition:all .2s ease;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.template-card:hover{
+transform:translateY(-2px);
+border-color:rgba(99,102,241,0.6);
+}
+
+.template-card.active{
+border-color:rgb(99 102 241);
+box-shadow:0 0 0 1px rgba(99,102,241,0.35);
+background:rgba(99,102,241,0.08);
+}
+
+.template-preview{
+height:120px;
+border-radius:1rem;
+border:1px solid rgba(255,255,255,0.08);
+overflow:hidden;
+position:relative;
+}
+
+.template-preview::after{
+content:"";
+position:absolute;
+inset:0;
+pointer-events:none;
+box-shadow:inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+.template-preview-image{
+display:block;
+width:100%;
+height:100%;
+object-fit:cover;
+object-position:center top;
+background:#0b1220;
+}
+
+.live-preview-image-wrap{
+position:relative;
+width:100%;
+aspect-ratio:16 / 10;
+border-radius:1.15rem;
+overflow:hidden;
+border:1px solid rgba(255,255,255,0.08);
+background:#0b1220;
+}
+
+.live-preview-image{
+display:block;
+width:100%;
+height:100%;
+object-fit:cover;
+object-position:center top;
+background:#0b1220;
+}
+
+.template-preview.t1{
+background:
+linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+radial-gradient(circle at top left, rgba(99,102,241,0.22), transparent 42%),
+#101826;
+}
+
+.template-preview.t2{
+background:
+linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.12)),
+radial-gradient(circle at top right, rgba(251,191,36,0.22), transparent 42%),
+#1b1620;
+}
+
+.template-preview.t3{
+background:
+linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
+radial-gradient(circle at center, rgba(59,130,246,0.18), transparent 36%),
+#090d16;
+}
+
+.template-preview.t4{
+background:
+linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)),
+radial-gradient(circle at top left, rgba(34,197,94,0.18), transparent 40%),
+#101a18;
+}
+
+.template-preview.t5{
+background:
+linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01)),
+radial-gradient(circle at top center, rgba(236,72,153,0.18), transparent 38%),
+#1b1020;
+}
+
+.template-preview.t6{
+background:
+linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)),
+radial-gradient(circle at top right, rgba(168,85,247,0.18), transparent 40%),
+#151320;
+}
+
+.preview-ui{
+position:absolute;
+inset:0;
+padding:0.75rem;
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+}
+
+.preview-topbar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:0.5rem;
+}
+
+.preview-brand{
+display:flex;
+align-items:center;
+gap:0.4rem;
+min-width:0;
+}
+
+.preview-brand-dot{
+width:0.65rem;
+height:0.65rem;
+border-radius:999px;
+background:rgba(255,255,255,0.78);
+flex-shrink:0;
+}
+
+.preview-brand-text{
+font-size:0.6rem;
+font-weight:700;
+letter-spacing:0.01em;
+color:rgba(255,255,255,0.92);
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.preview-nav{
+display:flex;
+gap:0.25rem;
+}
+
+.preview-nav span{
+display:block;
+width:1.05rem;
+height:0.22rem;
+border-radius:999px;
+background:rgba(255,255,255,0.18);
+}
+
+.preview-hero{
+display:flex;
+flex-direction:column;
+gap:0.32rem;
+}
+
+.preview-line-lg{
+height:0.58rem;
+border-radius:999px;
+background:rgba(255,255,255,0.9);
+width:62%;
+}
+
+.preview-line-md{
+height:0.4rem;
+border-radius:999px;
+background:rgba(255,255,255,0.55);
+width:78%;
+}
+
+.preview-line-sm{
+height:0.3rem;
+border-radius:999px;
+background:rgba(255,255,255,0.35);
+width:46%;
+}
+
+.preview-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:0.32rem;
+}
+
+.preview-grid div{
+height:1.55rem;
+border-radius:0.45rem;
+background:rgba(255,255,255,0.13);
+}
+
+.preview-grid.alt-2{
+grid-template-columns:1.3fr 1fr;
+}
+
+.preview-grid.alt-2 div:first-child{
+height:2rem;
+}
+
+.preview-grid.alt-2 div:last-child{
+height:2rem;
+}
+
+.preview-footer{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:0.5rem;
+}
+
+.preview-pill{
+height:0.55rem;
+width:3rem;
+border-radius:999px;
+background:rgba(255,255,255,0.22);
+}
+
+.preview-pill.short{
+width:2rem;
+}
+
+.input-field,
+.textarea-field{
+width:100%;
+background: rgba(255,255,255,0.08);
+color:white;
+border:1px solid rgba(255,255,255,0.08);
+border-radius:0.95rem;
+outline:none;
+}
+
+.input-field{
+padding:0.9rem 1rem;
+}
+
+.textarea-field{
+padding:1rem;
+min-height:120px;
+resize:vertical;
+}
+
+.input-field::placeholder,
+.textarea-field::placeholder{
+color:rgba(255,255,255,0.45);
+}
+
+.input-field:focus,
+.textarea-field:focus{
+border-color:rgba(99,102,241,0.7);
+box-shadow:0 0 0 1px rgba(99,102,241,0.35);
+}
+
+.helper-text{
+font-size:0.78rem;
+color:rgb(156 163 175);
+}
+
+.status-badge{
+display:inline-flex;
+align-items:center;
+gap:0.4rem;
+padding:0.45rem 0.8rem;
+border-radius:999px;
+font-size:0.78rem;
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.08);
+color:rgb(209 213 219);
+}
+
+.preview-section{
+overflow:visible;
+}
+
+.publish-toggle-wrap{
+display:inline-flex;
+align-items:center;
+gap:0.65rem;
+}
+
+.publish-toggle-label{
+font-size:0.72rem;
+font-weight:600;
+letter-spacing:0.08em;
+text-transform:uppercase;
+color:rgb(209 213 219);
+}
+
+.publish-switch{
+position:relative;
+display:inline-flex;
+align-items:center;
+width:2.25rem;
+height:1.35rem;
+border-radius:999px;
+background:rgba(255,255,255,0.22);
+border:1px solid rgba(255,255,255,0.12);
+transition:all .2s ease;
+cursor:pointer;
+flex-shrink:0;
+}
+
+.publish-switch::after{
+content:"";
+position:absolute;
+left:2px;
+width:0.95rem;
+height:0.95rem;
+border-radius:999px;
+background:white;
+box-shadow:0 2px 8px rgba(0,0,0,0.18);
+transition:transform .2s ease;
+}
+
+.publish-switch.active{
+background:rgb(99 102 241);
+border-color:rgba(99,102,241,0.7);
+}
+
+.publish-switch.active::after{
+transform:translateX(0.88rem);
+}
+
+.publish-status-text{
+font-size:0.72rem;
+color:rgb(156 163 175);
+white-space:nowrap;
+}
+
+.publish-status-text.live{
+color:rgb(187 247 208);
+}
+
+.publish-control-row{
+display:flex;
+align-items:center;
+gap:0.65rem;
+flex-wrap:wrap;
+justify-content:flex-end;
+}
+
+
+.live-preview-shell{
+border-radius:1.2rem;
+border:1px solid rgba(255,255,255,0.08);
+padding:1rem;
+background:
+linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
+rgba(255,255,255,0.02);
+}
+
+.live-preview-frame{
+border-radius:1.15rem;
+overflow:hidden;
+border:1px solid rgba(255,255,255,0.08);
+background:#0b1220;
+}
+
+
+.live-template{
+padding:1rem;
+min-height:420px;
+}
+
+.live-template.t1{
+background:
+radial-gradient(circle at top left, rgba(99,102,241,0.14), transparent 28%),
+linear-gradient(180deg,#0f172a,#111827);
+}
+
+.live-template.t2{
+background:
+radial-gradient(circle at top right, rgba(251,191,36,0.14), transparent 28%),
+linear-gradient(180deg,#1f1725,#121826);
+}
+
+.live-template.t3{
+background:
+radial-gradient(circle at center, rgba(59,130,246,0.14), transparent 26%),
+linear-gradient(180deg,#090d16,#111827);
+}
+
+.live-template.t4{
+background:
+radial-gradient(circle at top left, rgba(34,197,94,0.14), transparent 28%),
+linear-gradient(180deg,#101b18,#111827);
+}
+
+.live-template.t5{
+background:
+radial-gradient(circle at top center, rgba(236,72,153,0.14), transparent 30%),
+linear-gradient(180deg,#1b1020,#111827);
+}
+
+.live-template.t6{
+background:
+radial-gradient(circle at top right, rgba(168,85,247,0.14), transparent 30%),
+linear-gradient(180deg,#171125,#111827);
+}
+
+.live-nav{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:0.75rem;
+margin-bottom:1.1rem;
+}
+
+.live-brand{
+font-size:0.92rem;
+font-weight:700;
+letter-spacing:0.02em;
+color:white;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+min-width:0;
+}
+
+.live-nav-links{
+display:flex;
+gap:0.45rem;
+flex-wrap:wrap;
+justify-content:flex-end;
+}
+
+.live-nav-links span{
+font-size:0.68rem;
+color:rgba(255,255,255,0.62);
+padding:0.28rem 0.55rem;
+border-radius:999px;
+background:rgba(255,255,255,0.06);
+}
+
+.live-hero{
+padding:1.1rem 0 1.25rem;
+}
+
+.live-eyebrow{
+font-size:0.72rem;
+text-transform:uppercase;
+letter-spacing:0.14em;
+color:rgba(255,255,255,0.55);
+margin-bottom:0.55rem;
+}
+
+.live-heading{
+font-size:1.7rem;
+line-height:1.05;
+font-weight:800;
+color:white;
+margin:0;
+word-break:break-word;
+}
+
+.live-tagline{
+font-size:0.9rem;
+line-height:1.5;
+color:rgba(255,255,255,0.75);
+margin-top:0.8rem;
+}
+
+.live-cta-row{
+display:flex;
+gap:0.7rem;
+margin-top:1rem;
+flex-wrap:wrap;
+}
+
+.live-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:0.68rem 1rem;
+border-radius:999px;
+font-size:0.82rem;
+font-weight:600;
+}
+
+.live-btn.primary{
+background:white;
+color:#0f172a;
+}
+
+.live-btn.secondary{
+background:rgba(255,255,255,0.08);
+color:white;
+border:1px solid rgba(255,255,255,0.12);
+}
+
+.live-section-title{
+font-size:0.84rem;
+font-weight:700;
+color:white;
+margin-bottom:0.7rem;
+}
+
+.live-about{
+font-size:0.82rem;
+line-height:1.6;
+color:rgba(255,255,255,0.74);
+}
+
+.live-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:0.5rem;
+margin-top:0.9rem;
+}
+
+.live-grid div{
+height:72px;
+border-radius:0.85rem;
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.06);
+}
+
+.live-services{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:0.55rem;
+margin-top:1.1rem;
+}
+
+.live-service-card{
+padding:0.75rem;
+border-radius:0.9rem;
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.06);
+}
+
+.live-service-title{
+font-size:0.78rem;
+font-weight:700;
+color:white;
+}
+
+.live-service-text{
+font-size:0.72rem;
+line-height:1.45;
+color:rgba(255,255,255,0.6);
+margin-top:0.24rem;
+}
+
+.live-footer{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:0.75rem;
+margin-top:1.2rem;
+padding-top:0.95rem;
+border-top:1px solid rgba(255,255,255,0.07);
+}
+
+.live-footer-text{
+font-size:0.72rem;
+color:rgba(255,255,255,0.6);
+word-break:break-word;
+}
+
+.live-social{
+display:flex;
+gap:0.4rem;
+flex-shrink:0;
+}
+
+.live-social span{
+width:1.8rem;
+height:1.8rem;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+border-radius:999px;
+background:rgba(255,255,255,0.08);
+font-size:0.72rem;
+color:white;
+}
+
+.preview-actions{
+display:flex;
+gap:0.7rem;
+flex-wrap:wrap;
+margin-top:1rem;
+}
+
+.preview-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:0.75rem 1rem;
+border-radius:0.95rem;
+font-size:0.85rem;
+font-weight:600;
+transition:all .2s ease;
+}
+
+.preview-btn.primary{
+background:rgb(79 70 229);
+color:white;
+}
+
+.preview-btn.primary:hover{
+background:rgb(67 56 202);
+}
+
+.preview-btn.secondary{
+background:rgba(255,255,255,0.06);
+color:white;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.preview-btn.secondary:hover{
+background:rgba(255,255,255,0.1);
+}
+
+.preview-main-btn{
+flex:1;
+min-width:0;
+}
+
+.preview-menu-wrap{
+position:relative;
+flex-shrink:0;
+}
+
+.preview-menu-btn{
+min-width:48px;
+padding-left:0.9rem;
+padding-right:0.9rem;
+font-size:1rem;
+line-height:1;
+}
+
+.preview-menu-dropdown{
+position:absolute;
+right:0;
+bottom:calc(100% + 0.55rem);
+top:auto;
+width:220px;
+padding:0.45rem;
+border-radius:1rem;
+background:rgba(15,23,42,0.98);
+border:1px solid rgba(255,255,255,0.08);
+box-shadow:0 18px 50px rgba(0,0,0,0.3);
+backdrop-filter:blur(16px);
+z-index:999;
+}
+
+.preview-menu-item{
+width:100%;
+display:flex;
+align-items:center;
+padding:0.78rem 0.85rem;
+border-radius:0.8rem;
+background:transparent;
+border:none;
+color:white;
+font-size:0.84rem;
+text-align:left;
+cursor:pointer;
+transition:background .2s ease;
+}
+
+.preview-menu-item:hover{
+background:rgba(255,255,255,0.08);
+}
+
+.save-feedback{
+display:none;
+padding:0.85rem 1rem;
+border-radius:0.95rem;
+font-size:0.84rem;
+line-height:1.45;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.save-feedback.show{
+display:block;
+}
+
+.save-feedback.success{
+background:rgba(34,197,94,0.12);
+border-color:rgba(34,197,94,0.28);
+color:rgb(187 247 208);
+}
+
+.save-feedback.error{
+background:rgba(239,68,68,0.12);
+border-color:rgba(239,68,68,0.28);
+color:rgb(254 202 202);
+}
+
+.save-feedback.info{
+background:rgba(99,102,241,0.12);
+border-color:rgba(99,102,241,0.28);
+color:rgb(199 210 254);
+}
+
+.purchase-modal-backdrop{
+position:fixed;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:1rem;
+background:rgba(2,6,23,0.7);
+backdrop-filter:blur(8px);
+z-index:1200;
+}
+
+.purchase-modal-backdrop.hidden{
+display:none;
+}
+
+.purchase-modal{
+width:min(100%, 420px);
+border-radius:1.4rem;
+padding:1.2rem;
+background:rgba(15,23,42,0.96);
+border:1px solid rgba(255,255,255,0.08);
+box-shadow:0 24px 60px rgba(0,0,0,0.35);
+}
+
+.purchase-modal-label{
+display:inline-flex;
+align-items:center;
+gap:0.4rem;
+padding:0.42rem 0.7rem;
+border-radius:999px;
+font-size:0.72rem;
+font-weight:600;
+letter-spacing:0.06em;
+text-transform:uppercase;
+background:rgba(99,102,241,0.12);
+border:1px solid rgba(99,102,241,0.24);
+color:rgb(199 210 254);
+}
+
+.purchase-modal-title{
+font-size:1.25rem;
+font-weight:800;
+color:white;
+margin-top:0.9rem;
+}
+
+.purchase-modal-subtitle{
+font-size:0.88rem;
+line-height:1.55;
+color:rgba(255,255,255,0.7);
+margin-top:0.5rem;
+}
+
+.purchase-modal-card{
+margin-top:1rem;
+padding:1rem;
+border-radius:1rem;
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.purchase-modal-template{
+font-size:1rem;
+font-weight:700;
+color:white;
+}
+
+.purchase-modal-price{
+font-size:1.35rem;
+font-weight:800;
+color:white;
+margin-top:0.35rem;
+}
+
+.purchase-modal-note{
+font-size:0.82rem;
+line-height:1.5;
+color:rgba(255,255,255,0.62);
+margin-top:0.4rem;
+}
+
+.purchase-modal-feedback{
+display:none;
+margin-top:0.9rem;
+padding:0.85rem 0.95rem;
+border-radius:0.95rem;
+font-size:0.84rem;
+line-height:1.45;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.purchase-modal-feedback.show{
+display:block;
+}
+
+.purchase-modal-feedback.error{
+background:rgba(239,68,68,0.12);
+border-color:rgba(239,68,68,0.28);
+color:rgb(254 202 202);
+}
+
+.purchase-modal-feedback.info{
+background:rgba(99,102,241,0.12);
+border-color:rgba(99,102,241,0.28);
+color:rgb(199 210 254);
+}
+
+.purchase-pricing-summary{
+display:none;
+margin-top:0.9rem;
+padding:0.9rem 1rem;
+border-radius:1rem;
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.purchase-pricing-summary.show{
+display:block;
+}
+
+.purchase-pricing-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:1rem;
+padding:0.62rem 0;
+border-bottom:1px solid rgba(255,255,255,0.08);
+font-size:0.84rem;
+color:rgba(255,255,255,0.76);
+}
+
+.purchase-pricing-row:last-child{
+border-bottom:0;
+}
+
+.purchase-pricing-row strong{
+color:white;
+font-weight:800;
+}
+
+.purchase-pricing-row.total{
+margin-top:0.3rem;
+padding:0.78rem 0.85rem;
+border:1px solid rgba(99,102,241,0.28);
+border-radius:0.85rem;
+background:rgba(99,102,241,0.14);
+}
+
+.purchase-pricing-row.total span,
+.purchase-pricing-row.total strong{
+color:white;
+}
+
+.purchase-modal-actions{
+display:flex;
+gap:0.75rem;
+margin-top:1rem;
+}
+
+.purchase-modal-btn{
+flex:1;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:0.9rem 1rem;
+border-radius:0.95rem;
+font-size:0.86rem;
+font-weight:700;
+transition:all .2s ease;
+}
+
+.purchase-modal-btn.secondary{
+background:rgba(255,255,255,0.06);
+color:white;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.purchase-modal-btn.secondary:hover{
+background:rgba(255,255,255,0.1);
+}
+
+.purchase-modal-btn.primary{
+background:rgb(79 70 229);
+color:white;
+}
+
+.purchase-modal-btn.primary:hover{
+background:rgb(67 56 202);
+}
+
+.purchase-modal-btn:disabled{
+opacity:0.6;
+cursor:not-allowed;
+}
+
+@media (max-width: 480px){
+.preview-header{
+flex-direction:column;
+align-items:flex-start;
+}
+
+.publish-control-row{
+width:100%;
+justify-content:space-between;
+align-items:center;
+}
+
+.live-preview-shell{
+padding:0.7rem;
+}
+
+.live-preview-image-wrap{
+aspect-ratio:16 / 11;
+}
+
+.template-preview{
+height:108px;
+}
+
+.live-preview-shell{
+padding:0.7rem;
+}
+
+.live-preview-frame{
+width:min(100%, 360px);
+margin:0 auto;
+aspect-ratio:9 / 18.5;
+}
+
+
+.live-template{
+padding:0.78rem;
+min-height:100%;
+height:100%;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
+
+.live-nav{
+flex-direction:column;
+align-items:flex-start;
+gap:0.45rem;
+margin-bottom:0.7rem;
+}
+
+.live-nav-links{
+justify-content:flex-start;
+gap:0.35rem;
+}
+
+.live-nav-links span{
+font-size:0.58rem;
+padding:0.18rem 0.42rem;
+}
+
+.live-brand{
+max-width:100%;
+white-space:normal;
+font-size:0.86rem;
+line-height:1.2;
+}
+
+.live-hero{
+padding:0.35rem 0 0.75rem;
+}
+
+.live-eyebrow{
+font-size:0.58rem;
+letter-spacing:0.12em;
+margin-bottom:0.4rem;
+}
+
+.live-heading{
+font-size:1.3rem;
+line-height:1.05;
+}
+
+.live-tagline{
+font-size:0.76rem;
+line-height:1.45;
+margin-top:0.55rem;
+display:-webkit-box;
+-webkit-line-clamp:3;
+-webkit-box-orient:vertical;
+overflow:hidden;
+}
+
+.live-cta-row{
+gap:0.45rem;
+margin-top:0.75rem;
+}
+
+.live-btn{
+padding:0.56rem 0.78rem;
+font-size:0.72rem;
+}
+
+.live-section-title{
+font-size:0.76rem;
+margin-bottom:0.5rem;
+}
+
+.live-grid{
+grid-template-columns:repeat(2,1fr);
+gap:0.4rem;
+margin-top:0.65rem;
+}
+
+.live-grid div{
+height:52px;
+border-radius:0.75rem;
+}
+
+.live-about{
+font-size:0.72rem;
+line-height:1.5;
+display:-webkit-box;
+-webkit-line-clamp:4;
+-webkit-box-orient:vertical;
+overflow:hidden;
+}
+
+.live-services{
+grid-template-columns:1fr;
+gap:0.42rem;
+margin-top:0.85rem;
+}
+
+.live-service-card{
+padding:0.62rem;
+}
+
+.live-service-card:last-child{
+display:none;
+}
+
+.live-service-title{
+font-size:0.72rem;
+}
+
+.live-service-text{
+font-size:0.66rem;
+line-height:1.35;
+display:-webkit-box;
+-webkit-line-clamp:2;
+-webkit-box-orient:vertical;
+overflow:hidden;
+}
+
+.live-footer{
+flex-direction:column;
+align-items:flex-start;
+gap:0.5rem;
+margin-top:auto;
+padding-top:0.7rem;
+}
+
+.live-footer-text{
+font-size:0.66rem;
+}
+
+.live-social span{
+width:1.55rem;
+height:1.55rem;
+font-size:0.64rem;
+}
+
+.preview-actions{
+flex-direction:row;
+align-items:stretch;
+}
+
+.preview-main-btn{
+flex:1;
+}
+
+.preview-menu-wrap{
+width:auto;
+}
+
+.preview-menu-btn{
+width:48px;
+min-width:48px;
+}
+
+.preview-menu-dropdown{
+right:0;
+left:auto;
+bottom:calc(100% + 0.5rem);
+top:auto;
+width:220px;
+}
+
+.preview-btn{
+width:auto;
+}
+
+.status-badge{
+font-size:0.72rem;
+padding:0.4rem 0.7rem;
+}
+
+.purchase-modal-actions{
+flex-direction:column;
+}
+}
+
+@media (max-width: 360px){
+.live-preview-frame{
+aspect-ratio:9 / 19;
+}
+
+.live-heading{
+font-size:1.18rem;
+}
+.live-tagline{
+font-size:0.72rem;
+}
+.live-btn{
+width:100%;
+}
+.live-cta-row{
+flex-direction:column;
+}
+.live-grid{
+grid-template-columns:1fr 1fr;
+gap:0.38rem;
+}
+.live-grid div{
+height:46px;
+}
+.live-service-card{
+padding:0.56rem;
+}
+}
+
+</style>
+
+</head>
+
+<body class="text-white min-h-screen p-4">
+
+<div class="max-w-md mx-auto">
+
+<div class="flex items-center justify-between gap-3 mb-5">
+<a href="dashboard.html" class="text-sm text-gray-400 hover:text-white transition">&#8592; Back</a>
+<span id="builderStatus" class="status-badge">Builder Ready</span>
+</div>
+
+<div class="glass rounded-2xl p-5 mb-5">
+<h1 class="text-2xl font-bold">Website Builder</h1>
+<p class="text-sm text-gray-400 mt-2">
+Create your personal photography website with ready-made premium templates.
+</p>
+</div>
+
+<div class="glass rounded-2xl p-5 mb-5">
+<div class="preview-header flex items-center justify-between gap-3 mb-4">
+<h2 class="text-lg font-semibold">Choose Template</h2>
+<span id="selectedTemplateText" class="text-xs text-gray-400">Selected: Template 1</span>
+</div>
+
+<div id="templateGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+<div class="template-card active glass rounded-2xl p-3" data-template="1">
+<div class="template-preview t1 mb-3">
+<img src="assets/template-thumbnails/template-1.png" alt="Template 1 thumbnail" class="template-preview-image" loading="lazy">
+</div>
+<h3 class="text-sm font-semibold">Template 1</h3>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Minimal Portfolio</p>
+<span class="text-xs font-semibold text-white/90">Free</span>
+</div>
+</div>
+
+<div class="template-card glass rounded-2xl p-3" data-template="2">
+<div class="template-preview t2 mb-3">
+<img src="assets/template-thumbnails/template-2.png" alt="Template 2 thumbnail" class="template-preview-image" loading="lazy">
+</div>
+<h3 class="text-sm font-semibold">Template 2</h3>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Luxury Wedding</p>
+<span class="text-xs font-semibold text-white/90">&#8377;1099 one-time</span>
+</div>
+</div>
+
+<div class="template-card glass rounded-2xl p-3" data-template="3">
+<div class="template-preview t3 mb-3">
+<img src="assets/template-thumbnails/template-3.png" alt="Template 3 thumbnail" class="template-preview-image" loading="lazy">
+</div>
+<h3 class="text-sm font-semibold">Template 3</h3>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Dark Cinematic</p>
+<span class="text-xs font-semibold text-white/90">&#8377;1599 one-time</span>
+</div>
+</div>
+
+<div class="template-card glass rounded-2xl p-3" data-template="4">
+<div class="template-preview t4 mb-3">
+<img src="assets/template-thumbnails/template-4.png" alt="Template 4 thumbnail" class="template-preview-image" loading="lazy">
+</div>
+<h3 class="text-sm font-semibold">Template 4</h3>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Modern Studio</p>
+<span class="text-xs font-semibold text-white/90">&#8377;1499 one-time</span>
+</div>
+</div>
+
+<div class="template-card glass rounded-2xl p-3" data-template="5">
+<div class="template-preview t5 mb-3">
+<img src="assets/template-thumbnails/template-5.png" alt="Template 5 thumbnail" class="template-preview-image" loading="lazy">
+</div>
+<h3 class="text-sm font-semibold">Template 5</h3>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Instagram Style</p>
+<span class="text-xs font-semibold text-white/90">&#8377;1499 one-time</span>
+</div>
+</div>
+
+<div class="template-card glass rounded-2xl p-3" data-template="6">
+<div class="template-preview t6 mb-3">
+<img src="assets/template-thumbnails/template-6.png" alt="Template 6 thumbnail" class="template-preview-image" loading="lazy">
+</div>
+<h3 class="text-sm font-semibold">Template 6</h3>
+<div class="mt-1 flex items-center justify-between gap-3">
+<p class="text-xs text-gray-400">Premium Agency</p>
+<span class="text-xs font-semibold text-white/90">&#8377;1099 one-time</span>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="glass rounded-2xl p-5 mb-5 preview-section">
+<div class="flex items-center justify-between gap-3 mb-4">
+<h2 class="text-lg font-semibold">Live Template Preview</h2>
+<div class="publish-control-row">
+<div class="publish-toggle-wrap">
+<span class="publish-toggle-label">Publish</span>
+<button id="publishToggleBtn" type="button" class="publish-switch" aria-label="Toggle website publish status" aria-pressed="false"></button>
+<span id="publishStatusText" class="publish-status-text">Draft</span>
+</div>
+<span id="previewTemplateLabel" class="text-xs text-gray-400">Template 1</span>
+</div>
+</div>
+
+<div class="live-preview-shell">
+<div class="live-preview-image-wrap">
+<img id="livePreviewImage" src="assets/template-thumbnails/template-1.png" alt="Selected template preview" class="live-preview-image" loading="lazy">
+</div>
+
+<div class="preview-actions">
+<button id="previewTopBtn" type="button" class="preview-btn primary preview-main-btn">Preview Selected Template</button>
+
+<div class="preview-menu-wrap">
+<button id="previewMenuBtn" type="button" class="preview-btn secondary preview-menu-btn" aria-label="Open preview actions menu" aria-expanded="false">&#8942;</button>
+
+<div id="previewMenuDropdown" class="preview-menu-dropdown hidden" role="menu" aria-label="Preview actions">
+<button id="menuEditBtn" type="button" class="preview-menu-item" role="menuitem">Edit Website Details</button>
+<button id="menuCopyBtn" type="button" class="preview-menu-item" role="menuitem">Copy Website Link</button>
+<button id="menuOpenBtn" type="button" class="preview-menu-item" role="menuitem">Open Website</button>
+<button id="menuPublicBtn" type="button" class="preview-menu-item" role="menuitem">View Public Page</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="builderFormSection" class="glass rounded-2xl p-5 mb-5 space-y-4">
+
+<h2 class="text-lg font-semibold">Website Details</h2>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">Website / Studio Name</label>
+<input id="siteName" class="input-field" type="text" placeholder="Your Studio Name (e.g. Aurora Frames Studio)">
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">Tagline</label>
+<input id="siteTagline" class="input-field" type="text" placeholder="Short tagline (e.g. Cinematic wedding & portrait stories)">
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">About</label>
+<textarea id="siteAbout" class="textarea-field" placeholder="Brief about your brand (services, style, experience)"></textarea>
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">Phone</label>
+<input id="sitePhone" class="input-field" type="text" placeholder="Primary contact number (e.g. +91 9XXXXXXXXX)">
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">Instagram</label>
+<input id="siteInstagram" class="input-field" type="text" placeholder="Instagram handle (e.g. @yourstudio_name)">
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">City</label>
+<input id="siteCity" class="input-field" type="text" placeholder="Your city (e.g. Mumbai / Delhi)">
+</div>
+
+<div>
+<label class="block text-sm text-gray-300 mb-2">Site Slug</label>
+<input id="siteSlug" class="input-field" type="text" placeholder="unique-site-slug (e.g. aurora-frames)">
+<p class="helper-text mt-2">This will be used for your public website link later.</p>
+</div>
+
+<div class="pt-2 space-y-3">
+<button
+id="saveWebsiteBtn"
+type="button"
+class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-xl font-semibold transition"
+>
+Save Website Builder
+</button>
+
+<div id="saveFeedback" class="save-feedback info">
+Ready to save
+</div>
+</div>
+
+</div>
+
+<div class="glass rounded-2xl p-5">
+<h2 class="text-lg font-semibold mb-3">Current Status</h2>
+<div class="space-y-2 text-sm text-gray-300">
+<p>&bull; 6 templates now have visible preview styles</p>
+<p>&bull; Live preview updates from your builder details</p>
+<p>&bull; Public website publish step now supports paid template unlock flow</p>
+</div>
+</div>
+
+</div>
+
+<div id="purchaseModalBackdrop" class="purchase-modal-backdrop hidden" aria-hidden="true">
+<div class="purchase-modal">
+<div class="purchase-modal-label">Premium Template</div>
+<div class="purchase-modal-title">Unlock publishing</div>
+<p class="purchase-modal-subtitle">
+This template supports preview, editing and draft saving. A one-time purchase is required to unlock publishing and public website actions.
+</p>
+
+<div class="purchase-modal-card">
+<div id="purchaseTemplateName" class="purchase-modal-template">Template Name</div>
+<div id="purchaseTemplatePrice" class="purchase-modal-price">&#8377;0</div>
+<div class="purchase-modal-note">One-time purchase to unlock publishing</div>
+</div>
+
+<div id="purchasePricingSummary" class="purchase-pricing-summary" aria-live="polite"></div>
+
+<div id="purchaseModalFeedback" class="purchase-modal-feedback info"></div>
+
+<div class="purchase-modal-actions">
+<button id="purchaseCancelBtn" type="button" class="purchase-modal-btn secondary">Cancel</button>
+<button id="purchaseBuyNowBtn" type="button" class="purchase-modal-btn primary">Buy Now</button>
+</div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="js/supabase.js"></script>
+
+<script type="module">
+
+import { protectPage } from "./js/auth.js"
+
+
+// =============================
+// PROTECT PAGE
+// =============================
+
+await protectPage()
+
+
+// =============================
+// ELEMENTS
+// =============================
+
+const templateCards = Array.from(document.querySelectorAll(".template-card"))
+const selectedTemplateText = document.getElementById("selectedTemplateText")
+const builderStatus = document.getElementById("builderStatus")
+const previewTemplateLabel = document.getElementById("previewTemplateLabel")
+const livePreviewImage = document.getElementById("livePreviewImage")
+const previewTopBtn = document.getElementById("previewTopBtn")
+const previewMenuBtn = document.getElementById("previewMenuBtn")
+const previewMenuDropdown = document.getElementById("previewMenuDropdown")
+const menuEditBtn = document.getElementById("menuEditBtn")
+const menuCopyBtn = document.getElementById("menuCopyBtn")
+const menuOpenBtn = document.getElementById("menuOpenBtn")
+const menuPublicBtn = document.getElementById("menuPublicBtn")
+const builderFormSection = document.getElementById("builderFormSection")
+const saveFeedback = document.getElementById("saveFeedback")
+
+const publishToggleBtn = document.getElementById("publishToggleBtn")
+const publishStatusText = document.getElementById("publishStatusText")
+
+const siteNameInput = document.getElementById("siteName")
+const siteTaglineInput = document.getElementById("siteTagline")
+const siteAboutInput = document.getElementById("siteAbout")
+const sitePhoneInput = document.getElementById("sitePhone")
+const siteInstagramInput = document.getElementById("siteInstagram")
+const siteCityInput = document.getElementById("siteCity")
+const siteSlugInput = document.getElementById("siteSlug")
+const saveWebsiteBtn = document.getElementById("saveWebsiteBtn")
+
+const purchaseModalBackdrop = document.getElementById("purchaseModalBackdrop")
+const purchaseTemplateName = document.getElementById("purchaseTemplateName")
+const purchaseTemplatePrice = document.getElementById("purchaseTemplatePrice")
+const purchasePricingSummary = document.getElementById("purchasePricingSummary")
+const purchaseModalFeedback = document.getElementById("purchaseModalFeedback")
+const purchaseCancelBtn = document.getElementById("purchaseCancelBtn")
+const purchaseBuyNowBtn = document.getElementById("purchaseBuyNowBtn")
+
+let selectedTemplateId = 1
+let existingWebsiteRowId = null
+let currentWebsiteData = null
+let currentPurchasedTemplates = []
+let websiteRowsByTemplate = new Map()
+let pendingLockedAction = null
+let pendingTemplateCheckout = null
+let purchaseFlowInProgress = false
+setPublishToggleState(false)
+
+
+// =============================
+// TEMPLATE CONFIG
+// =============================
+
+const TEMPLATE_META = {
+1: {
+label: "Template 1",
+name: "Minimal Portfolio",
+price: 0,
+paid: false,
+previewPath: "template-1.html"
+},
+2: {
+label: "Template 2",
+name: "Luxury Wedding",
+price: 1099,
+paid: true,
+previewPath: "template-2.html"
+},
+3: {
+label: "Template 3",
+name: "Dark Cinematic",
+price: 1599,
+paid: true,
+previewPath: "template-3.html"
+},
+4: {
+label: "Template 4",
+name: "Modern Studio",
+price: 1499,
+paid: true,
+previewPath: "template-4.html"
+},
+5: {
+label: "Template 5",
+name: "Instagram Style",
+price: 1499,
+paid: true,
+previewPath: "template-5.html"
+},
+6: {
+label: "Template 6",
+name: "Premium Agency",
+price: 1099,
+paid: true,
+previewPath: "template-6.html"
+}
+}
+
+const TEMPLATE_THUMBNAIL_BASE_PATH = "assets/template-thumbnails"
+
+
+// =============================
+// HELPERS
+// =============================
+
+function setSaveFeedback(type, message){
+
+saveFeedback.className = "save-feedback show"
+
+if(type === "success"){
+saveFeedback.classList.add("success")
+}else if(type === "error"){
+saveFeedback.classList.add("error")
+}else{
+saveFeedback.classList.add("info")
+}
+
+saveFeedback.innerText = message
+
+}
+
+function setPurchaseModalFeedback(type, message){
+purchaseModalFeedback.className = "purchase-modal-feedback show"
+
+if(type === "error"){
+purchaseModalFeedback.classList.add("error")
+}else{
+purchaseModalFeedback.classList.add("info")
+}
+
+purchaseModalFeedback.innerText = message
+}
+
+function clearPurchaseModalFeedback(){
+purchaseModalFeedback.className = "purchase-modal-feedback info"
+purchaseModalFeedback.innerText = ""
+}
+
+function normalizeInstagram(value){
+return String(value || "").trim()
+}
+
+function isPlainObject(value){
+return Boolean(value && typeof value === "object" && !Array.isArray(value))
+}
+
+function safeObject(value){
+return isPlainObject(value) ? value : {}
+}
+
+function getNormalizedTemplateId(templateId){
+const numericTemplateId = Number(templateId)
+return Number.isInteger(numericTemplateId) && numericTemplateId >= 1 && numericTemplateId <= 6 ? numericTemplateId : 1
+}
+
+function getTemplateRow(templateId = selectedTemplateId){
+return websiteRowsByTemplate.get(getNormalizedTemplateId(templateId)) || null
+}
+
+function setTemplateRow(row){
+if(!row) return
+const templateId = getNormalizedTemplateId(row.template_id || selectedTemplateId)
+websiteRowsByTemplate.set(templateId, row)
+}
+
+function mergePurchasedTemplatesFromRows(rows = []){
+const purchasedSet = new Set()
+
+for(const row of rows){
+normalizePurchasedTemplates(row?.purchased_templates).forEach(templateId => purchasedSet.add(templateId))
+}
+
+return Array.from(purchasedSet).sort((a,b)=>a-b)
+}
+
+function getCurrentSelectedTemplateRowOrDraft(){
+const selectedRow = getTemplateRow(selectedTemplateId)
+if(selectedRow) return selectedRow
+
+return {
+...(currentWebsiteData || {}),
+id: null,
+template_id: selectedTemplateId,
+template_images: {},
+template_image_keys: {},
+template_content: {},
+theme_settings: {},
+is_published: false
+}
+}
+
+function bindCurrentTemplateRow(){
+const selectedRow = getTemplateRow(selectedTemplateId)
+
+if(selectedRow){
+existingWebsiteRowId = selectedRow.id || null
+currentWebsiteData = selectedRow
+currentPurchasedTemplates = normalizePurchasedTemplates(selectedRow.purchased_templates || currentPurchasedTemplates)
+return
+}
+
+existingWebsiteRowId = null
+
+if(currentWebsiteData){
+currentWebsiteData = {
+...currentWebsiteData,
+id: null,
+template_id: selectedTemplateId,
+template_images: {},
+template_image_keys: {},
+template_content: {},
+theme_settings: {},
+is_published: false
+}
+}
+}
+
+function slugify(value){
+
+return String(value || "")
+.toLowerCase()
+.trim()
+.replace(/[^a-z0-9\s-]/g, "")
+.replace(/\s+/g, "-")
+.replace(/-+/g, "-")
+.replace(/^-|-$/g, "")
+
+}
+
+function formatPriceINR(value){
+const numericValue = Number(value || 0)
+return `\u20B9${numericValue.toLocaleString("en-IN")}`
+}
+
+function formatCurrencyINR(value){
+const numericValue = Number(value || 0)
+
+if(!Number.isFinite(numericValue)){
+return "\u20B90"
+}
+
+return new Intl.NumberFormat("en-IN", {
+style: "currency",
+currency: "INR",
+minimumFractionDigits: numericValue % 1 === 0 ? 0 : 2,
+maximumFractionDigits: 2
+}).format(numericValue)
+}
+
+function clearPurchasePricingSummary(){
+if(!purchasePricingSummary) return
+purchasePricingSummary.className = "purchase-pricing-summary"
+purchasePricingSummary.innerHTML = ""
+}
+
+function renderPurchasePricingSummary(pricing){
+if(!purchasePricingSummary) return
+
+const safePricing = pricing || {}
+const baseAmount = Number(safePricing.base_amount_rupees || 0)
+const gstRate = Number(safePricing.gst_rate || 0.18)
+const gstAmount = Number(safePricing.gst_amount_rupees || 0)
+const totalAmount = Number(safePricing.total_amount_rupees || 0)
+
+purchasePricingSummary.innerHTML = `
+  <div class="purchase-pricing-row">
+    <span>Template amount</span>
+    <strong>${formatCurrencyINR(baseAmount)}</strong>
+  </div>
+  <div class="purchase-pricing-row">
+    <span>GST (${Math.round(gstRate * 100)}%)</span>
+    <strong>${formatCurrencyINR(gstAmount)}</strong>
+  </div>
+  <div class="purchase-pricing-row total">
+    <span>Payable today</span>
+    <strong>${formatCurrencyINR(totalAmount)}</strong>
+  </div>
+`
+
+purchasePricingSummary.className = "purchase-pricing-summary show"
+}
+
+function clearPendingTemplateCheckout(){
+pendingTemplateCheckout = null
+purchaseBuyNowBtn.innerText = "Buy Now"
+clearPurchasePricingSummary()
+}
+
+function getTemplateMeta(templateId){
+return TEMPLATE_META[Number(templateId)] || TEMPLATE_META[1]
+}
+
+function getTemplateLabel(templateId){
+return getTemplateMeta(templateId).label || `Template ${templateId}`
+}
+
+function getTemplateEyebrow(templateId){
+return getTemplateMeta(templateId).name || "Template Preview"
+}
+
+function getTemplatePreviewPath(templateId){
+return getTemplateMeta(templateId).previewPath || ""
+}
+
+function getTemplateThumbnailPath(templateId){
+return `${TEMPLATE_THUMBNAIL_BASE_PATH}/template-${Number(templateId) || 1}.png`
+}
+
+function normalizePurchasedTemplates(value){
+if(Array.isArray(value)){
+return Array.from(
+new Set(
+value
+.map(item => Number(item))
+.filter(item => Number.isInteger(item) && item >= 2 && item <= 6)
+)
+).sort((a,b)=>a-b)
+}
+return []
+}
+
+function isTemplatePurchased(templateId){
+const numericTemplateId = Number(templateId)
+
+if(numericTemplateId === 1){
+return true
+}
+
+return currentPurchasedTemplates.includes(numericTemplateId)
+}
+
+function canPublishSelectedTemplate(templateId = selectedTemplateId){
+return isTemplatePurchased(templateId)
+}
+
+function getTemplatePublishMessage(templateId = selectedTemplateId){
+const templateMeta = getTemplateMeta(templateId)
+if(Number(templateId) === 1){
+return ""
+}
+return `${templateMeta.name} ko publish aur public actions ke liye one-time purchase required hai.`
+}
+
+function setPublishToggleState(isPublished){
+const published = Boolean(isPublished)
+publishToggleBtn.classList.toggle("active", published)
+publishToggleBtn.setAttribute("aria-pressed", String(published))
+publishStatusText.innerText = published ? "Published" : "Draft"
+publishStatusText.classList.toggle("live", published)
+}
+
+function updatePublishUiFromCurrentState(){
+if(!canPublishSelectedTemplate(selectedTemplateId)){
+setPublishToggleState(false)
+publishStatusText.innerText = "Locked"
+publishStatusText.classList.remove("live")
+return
+}
+
+setPublishToggleState(Boolean(currentWebsiteData?.is_published))
+}
+
+function closePreviewMenu(){
+previewMenuDropdown.classList.add("hidden")
+previewMenuBtn.setAttribute("aria-expanded", "false")
+}
+
+function togglePreviewMenu(){
+const isHidden = previewMenuDropdown.classList.contains("hidden")
+previewMenuDropdown.classList.toggle("hidden", !isHidden)
+previewMenuBtn.setAttribute("aria-expanded", String(isHidden))
+}
+
+function openPurchaseModal(templateId = selectedTemplateId){
+const templateMeta = getTemplateMeta(templateId)
+purchaseTemplateName.innerText = templateMeta.name
+purchaseTemplatePrice.innerText = `${formatPriceINR(templateMeta.price)}`
+clearPendingTemplateCheckout()
+clearPurchaseModalFeedback()
+purchaseModalBackdrop.classList.remove("hidden")
+purchaseModalBackdrop.setAttribute("aria-hidden", "false")
+document.body.style.overflow = "hidden"
+}
+
+function closePurchaseModal(){
+if(purchaseFlowInProgress){
+return
+}
+purchaseModalBackdrop.classList.add("hidden")
+purchaseModalBackdrop.setAttribute("aria-hidden", "true")
+document.body.style.overflow = ""
+clearPendingTemplateCheckout()
+clearPurchaseModalFeedback()
+}
+
+function setPurchaseButtonsDisabled(disabled){
+purchaseCancelBtn.disabled = disabled
+purchaseBuyNowBtn.disabled = disabled
+}
+
+function clearPendingLockedAction(){
+pendingLockedAction = null
+}
+
+async function runPendingLockedAction(){
+if(typeof pendingLockedAction !== "function"){
+return
+}
+const actionToRun = pendingLockedAction
+clearPendingLockedAction()
+await actionToRun()
+}
+
+async function requireTemplatePurchaseForAction(actionCallback){
+if(canPublishSelectedTemplate(selectedTemplateId)){
+await actionCallback()
+return true
+}
+
+pendingLockedAction = actionCallback
+openPurchaseModal(selectedTemplateId)
+return false
+}
+
+function isStudioOSNativeBuilderApp(){
+try{
+const protocol = String(window.location.protocol || "").toLowerCase()
+
+if(
+window.Capacitor &&
+typeof window.Capacitor.isNativePlatform === "function" &&
+window.Capacitor.isNativePlatform()
+){
+return true
+}
+
+return protocol === "capacitor:" || protocol === "ionic:" || protocol === "file:"
+}catch(error){
+return false
+}
+}
+
+function getStudioOSPublicBaseUrl(){
+return "https://app.chitrabookai.in"
+}
+
+function getWebsiteUrl({ publicView = false } = {}){
+
+const slug = currentWebsiteData?.site_slug
+if(!slug) return ""
+
+const previewPath = getTemplatePreviewPath(selectedTemplateId)
+if(!previewPath) return ""
+
+const normalizedPreviewPath = String(previewPath).replace(/^\/+/, "")
+
+// Public website actions must always share/open the real web URL.
+// Never share capacitor://localhost, file://, or a local Android WebView URL.
+if(publicView){
+const url = new URL(`${getStudioOSPublicBaseUrl()}/${normalizedPreviewPath}`)
+url.searchParams.set("slug", slug)
+return url.toString()
+}
+
+// Edit preview can stay inside the app/browser because it is an internal owner preview.
+const path = window.location.pathname || ""
+const basePath = path.substring(0, path.lastIndexOf("/") + 1) || "/"
+const url = new URL(`${basePath}${normalizedPreviewPath}`, window.location.origin)
+
+url.searchParams.set("slug", slug)
+url.searchParams.set("edit", "true")
+
+return url.toString()
+}
+
+function updateStaticPreview(){
+if(!livePreviewImage) return
+livePreviewImage.src = getTemplateThumbnailPath(selectedTemplateId)
+livePreviewImage.alt = `${getTemplateLabel(selectedTemplateId)} preview`
+}
+
+
+
+// =============================
+// GET CURRENT USER
+// =============================
+
+async function getCurrentUser(){
+
+const supabase = await window.getSupabase()
+
+const { data:{ user } } =
+await supabase.auth.getUser()
+
+return user
+
+}
+
+
+// =============================
+// TEMPLATE SELECTION
+// =============================
+
+function setSelectedTemplate(templateId){
+
+selectedTemplateId = getNormalizedTemplateId(templateId)
+
+templateCards.forEach(card=>{
+card.classList.toggle("active", Number(card.dataset.template) === selectedTemplateId)
+})
+
+selectedTemplateText.innerText = `Selected: Template ${selectedTemplateId}`
+previewTemplateLabel.innerText = getTemplateLabel(selectedTemplateId)
+
+bindCurrentTemplateRow()
+updatePublishUiFromCurrentState()
+updateStaticPreview()
+
+}
+
+templateCards.forEach(card=>{
+
+card.addEventListener("click", ()=>{
+setSelectedTemplate(card.dataset.template)
+syncLivePreview()
+})
+
+})
+
+
+// =============================
+// LIVE PREVIEW
+// =============================
+
+function syncLivePreview(){
+updateStaticPreview()
+}
+
+
+siteNameInput.addEventListener("input", syncLivePreview)
+siteTaglineInput.addEventListener("input", syncLivePreview)
+siteAboutInput.addEventListener("input", syncLivePreview)
+sitePhoneInput.addEventListener("input", syncLivePreview)
+siteCityInput.addEventListener("input", syncLivePreview)
+
+siteNameInput.addEventListener("input", ()=>{
+
+if(!siteSlugInput.dataset.userEdited){
+siteSlugInput.value = slugify(siteNameInput.value)
+}
+
+})
+
+siteSlugInput.addEventListener("input", ()=>{
+siteSlugInput.dataset.userEdited = "true"
+siteSlugInput.value = slugify(siteSlugInput.value)
+})
+
+
+// =============================
+// LOAD WEBSITE BUILDER DATA
+// =============================
+
+async function loadWebsiteBuilder({ preserveSelectedTemplate = false } = {}){
+
+const supabase = await window.getSupabase()
+const user = await getCurrentUser()
+
+if(!user) return null
+
+const activeTemplateBeforeLoad = selectedTemplateId
+
+const { data, error } =
+await supabase
+.from("user_websites")
+.select("*")
+.eq("user_id", user.id)
+.order("updated_at", { ascending:false })
+
+if(error){
+console.error("Website builder load failed:", error)
+builderStatus.innerText = "Load failed"
+setSaveFeedback("error", "Unable to load saved website details.")
+return null
+}
+
+const websiteRows = Array.isArray(data) ? data : []
+websiteRowsByTemplate = new Map()
+
+websiteRows.forEach(row=>{
+const templateId = getNormalizedTemplateId(row?.template_id)
+if(!websiteRowsByTemplate.has(templateId)){
+websiteRowsByTemplate.set(templateId, row)
+}
+})
+
+if(!websiteRows.length){
+existingWebsiteRowId = null
+currentWebsiteData = null
+currentPurchasedTemplates = []
+websiteRowsByTemplate = new Map()
+setPublishToggleState(false)
+builderStatus.innerText = "New website setup"
+setSaveFeedback("info", "Fill in your details and save your website builder.")
+syncLivePreview()
+return null
+}
+
+currentPurchasedTemplates = mergePurchasedTemplatesFromRows(websiteRows)
+
+const latestWebsiteRow = websiteRows[0]
+const selectedRowForLoad = preserveSelectedTemplate
+? (getTemplateRow(activeTemplateBeforeLoad) || latestWebsiteRow)
+: latestWebsiteRow
+
+currentWebsiteData = selectedRowForLoad || null
+existingWebsiteRowId = selectedRowForLoad?.id || null
+
+siteNameInput.value = selectedRowForLoad?.name || ""
+siteTaglineInput.value = selectedRowForLoad?.tagline || ""
+siteAboutInput.value = selectedRowForLoad?.about || ""
+sitePhoneInput.value = selectedRowForLoad?.phone || ""
+siteInstagramInput.value = selectedRowForLoad?.instagram || ""
+siteCityInput.value = selectedRowForLoad?.city || ""
+siteSlugInput.value = selectedRowForLoad?.site_slug || ""
+siteSlugInput.dataset.userEdited = selectedRowForLoad?.site_slug ? "true" : ""
+
+const nextTemplateId = preserveSelectedTemplate
+? activeTemplateBeforeLoad
+: getNormalizedTemplateId(selectedRowForLoad?.template_id || 1)
+
+setSelectedTemplate(nextTemplateId)
+syncLivePreview()
+
+builderStatus.innerText = "Existing website loaded"
+setSaveFeedback("success", "Saved website details loaded successfully.")
+
+return currentWebsiteData
+
+}
+
+await loadWebsiteBuilder()
+updateStaticPreview()
+
+
+// =============================
+// SAVE WEBSITE BUILDER DATA
+// =============================
+
+async function saveWebsiteBuilder({
+suppressSuccessMessage = false,
+suppressLoadingStatus = false,
+suppressButtonLoading = false
+} = {}){
+
+const supabase = await window.getSupabase()
+const user = await getCurrentUser()
+
+if(!user){
+setSaveFeedback("error", "User session not found. Please login again.")
+return { ok:false }
+}
+
+const selectedTemplateRow = getTemplateRow(selectedTemplateId)
+const rowSource = selectedTemplateRow || getCurrentSelectedTemplateRowOrDraft()
+
+const payload = {
+user_id: user.id,
+template_id: selectedTemplateId,
+site_slug: slugify(siteSlugInput.value || siteNameInput.value),
+name: siteNameInput.value.trim(),
+tagline: siteTaglineInput.value.trim(),
+about: siteAboutInput.value.trim(),
+phone: sitePhoneInput.value.trim(),
+instagram: normalizeInstagram(siteInstagramInput.value),
+city: siteCityInput.value.trim(),
+email: rowSource?.email || currentWebsiteData?.email || null,
+youtube: rowSource?.youtube || currentWebsiteData?.youtube || null,
+whatsapp: rowSource?.whatsapp || currentWebsiteData?.whatsapp || null,
+template_content: safeObject(rowSource?.template_content),
+template_images: safeObject(rowSource?.template_images),
+template_image_keys: safeObject(rowSource?.template_image_keys),
+theme_settings: safeObject(rowSource?.theme_settings),
+purchased_templates: currentPurchasedTemplates,
+is_published: canPublishSelectedTemplate(selectedTemplateId) ? Boolean(rowSource?.is_published) : false
+}
+
+if(!payload.name){
+setSaveFeedback("error", "Website / Studio Name is required.")
+siteNameInput.focus()
+return { ok:false }
+}
+
+if(!payload.site_slug){
+setSaveFeedback("error", "Site slug is required.")
+siteSlugInput.focus()
+return { ok:false }
+}
+
+try{
+
+if(!suppressButtonLoading){
+saveWebsiteBtn.disabled = true
+previewTopBtn.disabled = true
+saveWebsiteBtn.innerText = "Saving..."
+previewTopBtn.innerText = "Preparing Preview..."
+}
+
+if(!suppressLoadingStatus){
+builderStatus.innerText = "Saving..."
+setSaveFeedback("info", "Saving website builder details...")
+}
+
+let query
+
+if(selectedTemplateRow?.id){
+query = supabase
+.from("user_websites")
+.update(payload)
+.eq("id", selectedTemplateRow.id)
+.eq("user_id", user.id)
+.select("*")
+.single()
+}else{
+query = supabase
+.from("user_websites")
+.insert(payload)
+.select("*")
+.single()
+}
+
+const { data, error } = await query
+
+if(!suppressButtonLoading){
+saveWebsiteBtn.disabled = false
+previewTopBtn.disabled = false
+saveWebsiteBtn.innerText = "Save Website Builder"
+previewTopBtn.innerText = "Preview Selected Template"
+}
+
+if(error){
+console.error("Website builder save failed:", error)
+builderStatus.innerText = "Save failed"
+
+if(String(error.message || "").toLowerCase().includes("duplicate")){
+setSaveFeedback("error", "This site slug is already in use. Please choose another slug.")
+}else{
+setSaveFeedback("error", "Unable to save website builder details right now.")
+}
+
+return { ok:false }
+}
+
+existingWebsiteRowId = data?.id || existingWebsiteRowId
+currentWebsiteData = data || currentWebsiteData
+setTemplateRow(currentWebsiteData)
+currentPurchasedTemplates = normalizePurchasedTemplates(currentWebsiteData?.purchased_templates || currentPurchasedTemplates)
+updatePublishUiFromCurrentState()
+
+builderStatus.innerText = "Saved successfully"
+
+if(!suppressSuccessMessage){
+setSaveFeedback("success", "Website Builder saved successfully.")
+}
+
+updateStaticPreview()
+
+return {
+ok:true,
+data
+}
+
+}
+catch(error){
+console.error("Website builder unexpected save failed:", error)
+if(!suppressButtonLoading){
+saveWebsiteBtn.disabled = false
+previewTopBtn.disabled = false
+saveWebsiteBtn.innerText = "Save Website Builder"
+previewTopBtn.innerText = "Preview Selected Template"
+}
+builderStatus.innerText = "Save failed"
+setSaveFeedback("error", "Unexpected error while saving website builder.")
+return { ok:false }
+}
+
+}
+
+async function invokeEdgeFunction(functionName, body){
+const supabase = await window.getSupabase()
+const { data, error } = await supabase.functions.invoke(functionName, {
+body
+})
+
+if(error){
+console.error(`${functionName} invoke failed:`, error)
+throw new Error(error.message || `Unable to call ${functionName}`)
+}
+
+return data
+}
+
+async function refreshWebsiteAfterPurchase(){
+
+const latestData = await loadWebsiteBuilder({ preserveSelectedTemplate: true })
+
+if(latestData?.purchased_templates){
+currentPurchasedTemplates = normalizePurchasedTemplates(latestData.purchased_templates)
+}
+
+// force full UI rebind so purchased state reflects immediately
+setSelectedTemplate(selectedTemplateId)
+syncLivePreview()
+updatePublishUiFromCurrentState()
+updateStaticPreview()
+
+}
+
+async function openTemplateRazorpayCheckout({
+orderResponse,
+templateId,
+templateMeta
+}){
+await new Promise((resolve, reject)=>{
+let paymentHandled = false
+
+const razorpayInstance = new window.Razorpay({
+key: orderResponse?.razorpay_key_id,
+amount: orderResponse?.amount,
+currency: orderResponse?.currency || "INR",
+name: "ChitraBook AI",
+description: `${templateMeta.name} template unlock`,
+order_id: orderResponse?.order?.id,
+handler: async function (paymentResponse) {
+paymentHandled = true
+try{
+setPurchaseModalFeedback("info", "Verifying payment and unlocking template...")
+
+const verifyResponse = await invokeEdgeFunction("verify-template-payment", {
+template_id: templateId,
+razorpay_order_id: paymentResponse.razorpay_order_id,
+razorpay_payment_id: paymentResponse.razorpay_payment_id,
+razorpay_signature: paymentResponse.razorpay_signature
+})
+
+if(!verifyResponse?.ok){
+throw new Error(verifyResponse?.error || "Payment verification failed.")
+}
+
+currentPurchasedTemplates = normalizePurchasedTemplates(verifyResponse?.purchased_templates || [...currentPurchasedTemplates, templateId])
+await refreshWebsiteAfterPurchase()
+
+await new Promise(resolveDelay => setTimeout(resolveDelay, 150))
+
+setSaveFeedback("success", `${templateMeta.name} unlocked successfully.`)
+resolve(true)
+}catch(error){
+reject(error)
+}
+},
+modal: {
+escape: true,
+ondismiss: function(){
+if(!paymentHandled){
+reject(new Error("Payment cancelled. Template is still locked."))
+}
+}
+},
+prefill: {
+name: siteNameInput.value.trim() || undefined,
+contact: sitePhoneInput.value.trim() || undefined
+},
+notes: {
+purchase_type: "template",
+template_id: String(templateId),
+template_name: templateMeta.name
+},
+theme: {
+color: "#4f46e5"
+}
+})
+
+razorpayInstance.on("payment.failed", function(response){
+const description = response?.error?.description || "Payment failed. Please try again."
+reject(new Error(description))
+})
+
+razorpayInstance.open()
+})
+}
+
+async function continuePendingTemplateCheckout(){
+if(!pendingTemplateCheckout){
+return
+}
+
+const checkoutPayload = pendingTemplateCheckout
+pendingTemplateCheckout = null
+
+try{
+purchaseFlowInProgress = true
+setPurchaseButtonsDisabled(true)
+purchaseBuyNowBtn.innerText = "Processing..."
+setPurchaseModalFeedback("info", "Opening secure Razorpay checkout...")
+
+await openTemplateRazorpayCheckout(checkoutPayload)
+
+purchaseFlowInProgress = false
+setPurchaseButtonsDisabled(false)
+clearPendingTemplateCheckout()
+
+await new Promise(resolveDelay => setTimeout(resolveDelay, 100))
+
+closePurchaseModal()
+await runPendingLockedAction()
+}catch(error){
+console.error("Template payment failed:", error)
+purchaseFlowInProgress = false
+setPurchaseButtonsDisabled(false)
+purchaseBuyNowBtn.innerText = "Continue to Payment"
+pendingTemplateCheckout = checkoutPayload
+setPurchaseModalFeedback("error", error instanceof Error ? error.message : "Unable to complete template payment right now.")
+}
+}
+
+async function startTemplatePurchaseFlow(){
+const templateId = selectedTemplateId
+const templateMeta = getTemplateMeta(templateId)
+
+if(!templateMeta.paid){
+closePurchaseModal()
+await runPendingLockedAction()
+return
+}
+
+try{
+purchaseFlowInProgress = true
+setPurchaseButtonsDisabled(true)
+setPurchaseModalFeedback("info", "Preparing secure payment order...")
+
+const saveResult = await saveWebsiteBuilder({
+suppressSuccessMessage: true,
+suppressLoadingStatus: true,
+suppressButtonLoading: true
+})
+
+if(!saveResult.ok){
+throw new Error("Please save valid website details before purchasing this template.")
+}
+
+const orderResponse = await invokeEdgeFunction("create-template-order", {
+template_id: templateId
+})
+
+if(!orderResponse?.ok){
+throw new Error(orderResponse?.error || "Unable to create template purchase order.")
+}
+
+if(orderResponse?.already_purchased){
+currentPurchasedTemplates = normalizePurchasedTemplates([...(currentPurchasedTemplates || []), templateId])
+await refreshWebsiteAfterPurchase()
+purchaseFlowInProgress = false
+setPurchaseButtonsDisabled(false)
+closePurchaseModal()
+setSaveFeedback("success", `${templateMeta.name} is already unlocked.`)
+await runPendingLockedAction()
+return
+}
+
+if(typeof window.Razorpay !== "function"){
+throw new Error("Razorpay checkout script failed to load.")
+}
+
+renderPurchasePricingSummary(orderResponse?.pricing)
+
+pendingTemplateCheckout = {
+orderResponse,
+templateId,
+templateMeta
+}
+
+purchaseFlowInProgress = false
+setPurchaseButtonsDisabled(false)
+purchaseBuyNowBtn.innerText = "Continue to Payment"
+setPurchaseModalFeedback("info", "Review the final payable amount before continuing to secure payment.")
+return
+}
+catch(error){
+console.error("Template purchase flow failed:", error)
+purchaseFlowInProgress = false
+setPurchaseButtonsDisabled(false)
+setPurchaseModalFeedback("error", error instanceof Error ? error.message : "Unable to complete template purchase right now.")
+}
+}
+
+
+// FIX: Save button direct handler
+saveWebsiteBtn.addEventListener("click", async ()=>{
+  await saveWebsiteBuilder()
+})
+
+publishToggleBtn.addEventListener("click", async ()=>{
+
+const user = await getCurrentUser()
+
+if(!user){
+setSaveFeedback("error", "User session not found. Please login again.")
+return
+}
+
+const unlocked = await requireTemplatePurchaseForAction(async ()=>{
+const nextPublished = !(currentWebsiteData?.is_published || false)
+
+if(!existingWebsiteRowId){
+currentWebsiteData = {
+...(currentWebsiteData || {}),
+is_published: nextPublished
+}
+setPublishToggleState(nextPublished)
+setSaveFeedback("info", `Website status set to ${nextPublished ? "Published" : "Draft"}. Save builder to apply it.`)
+return
+}
+
+try{
+publishToggleBtn.disabled = true
+builderStatus.innerText = "Updating publish status..."
+
+const supabase = await window.getSupabase()
+
+const { data, error } = await supabase
+.from("user_websites")
+.update({ is_published: nextPublished })
+.eq("id", existingWebsiteRowId)
+.eq("user_id", user.id)
+.select("*")
+.single()
+
+publishToggleBtn.disabled = false
+
+if(error){
+console.error("Publish toggle update failed:", error)
+builderStatus.innerText = "Update failed"
+setSaveFeedback("error", "Unable to update publish status right now.")
+return
+}
+
+currentWebsiteData = data || currentWebsiteData
+updatePublishUiFromCurrentState()
+builderStatus.innerText = nextPublished ? "Website published" : "Website draft"
+setSaveFeedback("success", `Website ${nextPublished ? "published" : "saved as draft"} successfully.`)
+}
+catch(error){
+console.error("Publish toggle unexpected update failed:", error)
+publishToggleBtn.disabled = false
+builderStatus.innerText = "Update failed"
+setSaveFeedback("error", "Unexpected error while updating publish status.")
+}
+})
+
+if(!unlocked){
+setPublishToggleState(false)
+publishStatusText.innerText = "Locked"
+publishStatusText.classList.remove("live")
+builderStatus.innerText = "Publish locked"
+}
+
+})
+
+
+previewMenuBtn.addEventListener("click", (event)=>{
+event.stopPropagation()
+togglePreviewMenu()
+})
+
+document.addEventListener("click", (event)=>{
+if(!previewMenuDropdown.contains(event.target) && event.target !== previewMenuBtn){
+closePreviewMenu()
+}
+
+if(event.target === purchaseModalBackdrop){
+closePurchaseModal()
+}
+})
+
+menuEditBtn.addEventListener("click", ()=>{
+closePreviewMenu()
+builderFormSection.scrollIntoView({
+behavior:"smooth",
+block:"start"
+})
+})
+
+menuCopyBtn.addEventListener("click", async ()=>{
+closePreviewMenu()
+
+await requireTemplatePurchaseForAction(async ()=>{
+if(!currentWebsiteData?.site_slug){
+setSaveFeedback("error", "Save website first to copy the share link.")
+return
+}
+
+const shareUrl = getWebsiteUrl({ publicView: true })
+
+if(!shareUrl){
+setSaveFeedback("error", "This template share link is not available yet.")
+return
+}
+
+try{
+if(isStudioOSNativeBuilderApp() && navigator.share){
+await navigator.share({
+title: "My ChitraBook AI Website",
+text: "View my photography website",
+url: shareUrl
+})
+setSaveFeedback("success", "Website link share sheet opened.")
+return
+}
+
+await navigator.clipboard.writeText(shareUrl)
+setSaveFeedback("success", "Website link copied successfully.")
+}
+catch(error){
+console.error("Copy/share link failed:", error)
+
+try{
+await navigator.clipboard.writeText(shareUrl)
+setSaveFeedback("success", "Website link copied successfully.")
+}catch(_clipboardError){
+setSaveFeedback("error", "Unable to copy website link right now.")
+}
+}
+})
+})
+
+menuOpenBtn.addEventListener("click", async ()=>{
+closePreviewMenu()
+
+await requireTemplatePurchaseForAction(async ()=>{
+if(!currentWebsiteData?.site_slug){
+setSaveFeedback("error", "Save website first to open preview.")
+return
+}
+
+const editUrl = getWebsiteUrl({ publicView: false })
+
+if(!editUrl){
+setSaveFeedback("error", "This template preview is not available yet.")
+return
+}
+
+window.open(editUrl, "_blank", "noopener,noreferrer")
+})
+})
+
+menuPublicBtn.addEventListener("click", async ()=>{
+closePreviewMenu()
+
+await requireTemplatePurchaseForAction(async ()=>{
+if(!currentWebsiteData?.site_slug){
+setSaveFeedback("error", "Save website first to view public page.")
+return
+}
+
+const publicUrl = getWebsiteUrl({ publicView: true })
+
+if(!publicUrl){
+setSaveFeedback("error", "This public website link is not available yet.")
+return
+}
+
+if(isStudioOSNativeBuilderApp()){
+window.location.href = publicUrl
+return
+}
+
+window.open(publicUrl, "_blank", "noopener,noreferrer")
+})
+})
+
+purchaseCancelBtn.addEventListener("click", ()=>{
+clearPendingLockedAction()
+closePurchaseModal()
+})
+
+purchaseBuyNowBtn.addEventListener("click", async ()=>{
+if(pendingTemplateCheckout){
+await continuePendingTemplateCheckout()
+return
+}
+
+await startTemplatePurchaseFlow()
+})
+
+document.addEventListener("keydown", (event)=>{
+if(event.key === "Escape" && !purchaseFlowInProgress && !purchaseModalBackdrop.classList.contains("hidden")){
+clearPendingLockedAction()
+closePurchaseModal()
+}
+})
+
+
+// =============================
+// PREVIEW CONNECTION
+// =============================
+
+previewTopBtn.addEventListener("click", async ()=>{
+
+const previewPath = getTemplatePreviewPath(selectedTemplateId)
+
+if(!previewPath){
+setSaveFeedback("info", `${getTemplateLabel(selectedTemplateId)} preview file is not available yet.`)
+return
+}
+
+const saveResult = await saveWebsiteBuilder()
+
+if(!saveResult.ok || !saveResult.data){
+return
+}
+
+const slug = saveResult.data.site_slug
+
+if(!slug){
+setSaveFeedback("error", "Preview open karne ke liye valid site slug required hai.")
+siteSlugInput.focus()
+return
+}
+
+window.location.href = `${previewPath}?slug=${encodeURIComponent(slug)}&edit=true`
+
+})
+
+</script>
+
+<script src="js/app-bottom-nav.js"></script>
+
+</body>
+</html>
+
