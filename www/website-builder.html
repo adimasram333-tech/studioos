@@ -1162,6 +1162,74 @@ padding:0.56rem;
 }
 }
 
+
+/* Android purchase modal visibility fix */
+.purchase-modal-backdrop{
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+
+.purchase-modal{
+  max-height:calc(100vh - 2rem);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.purchase-modal-actions{
+  position:sticky;
+  bottom:0;
+  z-index:3;
+  padding-top:1rem;
+  background:linear-gradient(180deg, rgba(15,23,42,0), rgba(15,23,42,0.96) 28%);
+}
+
+@supports (height: 100dvh){
+  .purchase-modal{
+    max-height:calc(100dvh - 2rem);
+  }
+}
+
+@media (max-width: 480px){
+  .purchase-modal-backdrop{
+    align-items:flex-start;
+    padding:0.75rem;
+    padding-top:max(0.75rem, env(safe-area-inset-top));
+    padding-bottom:calc(5.75rem + env(safe-area-inset-bottom));
+  }
+
+  .purchase-modal{
+    width:100%;
+    max-height:calc(100vh - 6.5rem);
+    padding:1rem;
+  }
+
+  @supports (height: 100dvh){
+    .purchase-modal{
+      max-height:calc(100dvh - 6.5rem);
+    }
+  }
+
+  .purchase-modal-actions{
+    flex-direction:row;
+    gap:0.65rem;
+    margin-top:0.9rem;
+    padding-top:0.85rem;
+  }
+
+  .purchase-modal-btn{
+    min-height:48px;
+    padding:0.78rem 0.72rem;
+    font-size:0.8rem;
+    line-height:1.2;
+    white-space:normal;
+  }
+
+  .purchase-modal-btn.primary{
+    flex:1.25;
+  }
+}
+
 </style>
 
 </head>
