@@ -11,12 +11,21 @@ matchedImages: new Set()
 }
 
 const GALLERY_RENDER_BATCH_SIZE = 80
+const GALLERY_GUEST_RENDER_BATCH_SIZE = 36
+const GALLERY_MOBILE_RENDER_BATCH_SIZE = 44
+const GALLERY_GUEST_MOBILE_RENDER_BATCH_SIZE = 24
 const GALLERY_RENDER_IDLE_DELAY = 16
 const GALLERY_PRIORITY_IMAGE_COUNT = 12
+const GALLERY_GUEST_PRIORITY_IMAGE_COUNT = 6
+const GALLERY_MOBILE_PRIORITY_IMAGE_COUNT = 8
+const GALLERY_GUEST_MOBILE_PRIORITY_IMAGE_COUNT = 4
 const GALLERY_PRELOAD_AHEAD_COUNT = 18
-const GALLERY_IMAGE_OBSERVER_ROOT_MARGIN = "900px 0px"
+const GALLERY_GUEST_PRELOAD_AHEAD_COUNT = 8
+const GALLERY_MOBILE_PRELOAD_AHEAD_COUNT = 10
+const GALLERY_GUEST_MOBILE_PRELOAD_AHEAD_COUNT = 4
+const GALLERY_IMAGE_OBSERVER_ROOT_MARGIN = "600px 0px"
 const MODAL_PRELOAD_RANGE = 2
-const IMAGE_PRELOAD_CACHE_LIMIT = 300
+const IMAGE_PRELOAD_CACHE_LIMIT = 220
 
 const galleryPreviewPreloadCache = new Map()
 const modalImagePreloadCache = new Map()
@@ -2025,23 +2034,100 @@ return normalizeImageUrl(window.buildMediaUrl(photo.thumbnail_key))
 return getPhotoPreviewUrl(photo)
 }
 
+// Guest face preview performance fix: cache normalized matched-image tokens once per scan result.
+const MATCHED_IMAGE_LOOKUP_CACHE = new WeakMap()
+
+function addImageMatchTokensToSet(targetSet, value){
+if(!targetSet) return
+
+const cleanValue = normalizeImageUrl(value)
+if(!cleanValue) return
+
+const candidates = new Set()
+
+candidates.add(cleanValue)
+
+const pathOnly = cleanValue
+  .replace(/^https?:\/\/[^/]+\//i, "")
+  .replace(/^\/+/, "")
+
+if(pathOnly){
+candidates.add(pathOnly)
+
+try{
+candidates.add(decodeURIComponent(pathOnly))
+}catch(_decodeError){}
+
+const parts = pathOnly.split("/").filter(Boolean)
+const fileName = parts[parts.length - 1] || ""
+
+if(fileName){
+candidates.add(fileName)
+try{
+candidates.add(decodeURIComponent(fileName))
+}catch(_decodeFileError){}
+}
+
+if(parts.length >= 2){
+candidates.add(parts.slice(-2).join("/"))
+}
+
+if(parts.length >= 3){
+candidates.add(parts.slice(-3).join("/"))
+}
+}
+
+candidates.forEach(token=>{
+const safeToken = String(token || "").trim()
+if(safeToken){
+targetSet.add(safeToken)
+}
+})
+}
+
+function getMatchedImageLookup(matchedImages){
+if(!matchedImages || matchedImages.size === 0){
+return null
+}
+
+if(MATCHED_IMAGE_LOOKUP_CACHE.has(matchedImages)){
+return MATCHED_IMAGE_LOOKUP_CACHE.get(matchedImages)
+}
+
+const tokens = new Set()
+
+matchedImages.forEach(value=>{
+addImageMatchTokensToSet(tokens, value)
+})
+
+const lookup = { tokens }
+MATCHED_IMAGE_LOOKUP_CACHE.set(matchedImages, lookup)
+return lookup
+}
+
+function imageValueMatchesLookup(value, lookup){
+if(!lookup || !lookup.tokens || lookup.tokens.size === 0){
+return false
+}
+
+const candidateTokens = new Set()
+addImageMatchTokensToSet(candidateTokens, value)
+
+for(const token of candidateTokens){
+if(lookup.tokens.has(token)){
+return true
+}
+}
+
+return false
+}
+
 function isMatchedImage(imgUrl, matchedImages){
 
 if(!matchedImages || matchedImages.size === 0) return false
 
-const cleanUrl = normalizeImageUrl(imgUrl)
-const cleanPath = cleanUrl
-  .replace(/^https?:\/\/[^/]+\//i, "")
-  .replace(/^\/+/, "")
-
-for(const m of matchedImages){
-const cleanMatch = normalizeImageUrl(m)
-const cleanMatchPath = cleanMatch
-  .replace(/^https?:\/\/[^/]+\//i, "")
-  .replace(/^\/+/, "")
-
-if(cleanMatch === cleanUrl || cleanMatchPath === cleanPath){
-return true
+const lookup = getMatchedImageLookup(matchedImages)
+return imageValueMatchesLookup(imgUrl, lookup)
 }
 
 if(cleanPath && cleanMatchPath && (cleanUrl.endsWith(cleanMatchPath) || cleanMatch.endsWith(cleanPath))){
@@ -2440,6 +2526,81 @@ setTimeout(resolve, GALLERY_RENDER_IDLE_DELAY)
 })
 }
 
+function isGalleryMobileViewport(){
+try{
+return window.innerWidth < 768 || /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent || "")
+}catch(_error){
+return false
+}
+}
+
+function getAdaptiveGalleryRenderBatchSize(role){
+const safeRole = String(role || "").trim().toLowerCase()
+const isMobile = isGalleryMobileViewport()
+
+if(safeRole === "guest" && isMobile){
+return GALLERY_GUEST_MOBILE_RENDER_BATCH_SIZE
+}
+
+if(safeRole === "guest"){
+return GALLERY_GUEST_RENDER_BATCH_SIZE
+}
+
+if(isMobile){
+return GALLERY_MOBILE_RENDER_BATCH_SIZE
+}
+
+return GALLERY_RENDER_BATCH_SIZE
+}
+
+function getAdaptiveGalleryPriorityImageCount(role){
+const safeRole = String(role || "").trim().toLowerCase()
+const isMobile = isGalleryMobileViewport()
+
+if(safeRole === "guest" && isMobile){
+return GALLERY_GUEST_MOBILE_PRIORITY_IMAGE_COUNT
+}
+
+if(safeRole === "guest"){
+return GALLERY_GUEST_PRIORITY_IMAGE_COUNT
+}
+
+if(isMobile){
+return GALLERY_MOBILE_PRIORITY_IMAGE_COUNT
+}
+
+return GALLERY_PRIORITY_IMAGE_COUNT
+}
+
+function getAdaptiveGalleryPreloadAheadCount(role){
+const safeRole = String(role || "").trim().toLowerCase()
+const isMobile = isGalleryMobileViewport()
+
+if(safeRole === "guest" && isMobile){
+return GALLERY_GUEST_MOBILE_PRELOAD_AHEAD_COUNT
+}
+
+if(safeRole === "guest"){
+return GALLERY_GUEST_PRELOAD_AHEAD_COUNT
+}
+
+if(isMobile){
+return GALLERY_MOBILE_PRELOAD_AHEAD_COUNT
+}
+
+return GALLERY_PRELOAD_AHEAD_COUNT
+}
+
+function hasLightweightGalleryImageCandidate(photo){
+return !!(
+photo?.thumbnail_key ||
+photo?.preview_key ||
+photo?.thumbnail_url ||
+photo?.thumb_url ||
+photo?.preview_url
+)
+}
+
 function getTransparentImagePlaceholder(){
 return "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%3E%3Crect%20width='16'%20height='16'%20fill='%23111827'/%3E%3C/svg%3E"
 }
@@ -2540,13 +2701,15 @@ for(let i = startIndex; i < endIndex; i++){
 const photo = photos[i]
 if(!photo) continue
 
-let url = getPhotoThumbnailUrl(photo)
+let url = ""
 
-if(!photo.thumbnail_key){
-url = getPhotoPreviewUrl(photo) || getDisplayImageUrl(photo, effectiveRole, guestFreeDownload)
+if(photo.thumbnail_key || photo.thumbnail_url || photo.thumb_url){
+url = getPhotoThumbnailUrl(photo)
+}else if(photo.preview_key || photo.preview_url){
+url = getPhotoPreviewUrl(photo)
 }
 
-if(url){
+if(url && hasLightweightGalleryImageCandidate(photo)){
 preloadImageUrl(url, galleryPreviewPreloadCache)
 }
 }
@@ -3580,8 +3743,10 @@ const div = document.createElement("div")
 
 div.className =
 "glass rounded-xl overflow-hidden cursor-pointer"
+div.style.contentVisibility = "auto"
+div.style.containIntrinsicSize = "160px 160px"
 
-const shouldPrioritize = index < GALLERY_PRIORITY_IMAGE_COUNT
+const shouldPrioritize = index < getAdaptiveGalleryPriorityImageCount(effectiveRole)
 
 const initialImageSrc = shouldPrioritize ? thumbnailUrl : getTransparentImagePlaceholder()
 const lazyImageSrc = shouldPrioritize ? "" : thumbnailUrl
@@ -3630,7 +3795,8 @@ function renderPhotoBatch(){
 removeLoadMoreButton()
 
 const fragment = document.createDocumentFragment()
-const nextLimit = Math.min(renderedPhotoCount + GALLERY_RENDER_BATCH_SIZE, visiblePhotos.length)
+const renderBatchSize = getAdaptiveGalleryRenderBatchSize(effectiveRole)
+const nextLimit = Math.min(renderedPhotoCount + renderBatchSize, visiblePhotos.length)
 
 for(let i = renderedPhotoCount; i < nextLimit; i++){
 const card = createGalleryPhotoCard(visiblePhotos[i], i)
@@ -3643,7 +3809,7 @@ grid.appendChild(fragment)
 warmGalleryPreviewImages(
 visiblePhotos,
 nextLimit,
-GALLERY_PRELOAD_AHEAD_COUNT,
+getAdaptiveGalleryPreloadAheadCount(effectiveRole),
 effectiveRole,
 guestFreeDownload
 )
