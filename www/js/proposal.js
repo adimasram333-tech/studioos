@@ -1869,16 +1869,10 @@ let data = null
 
 
 // ======================
-// GET CURRENT USER (SAFE)
+// PUBLIC PROPOSAL SPEED FIX
 // ======================
-
-let user = null
-try{
-const res = await supabase.auth.getUser()
-user = res?.data?.user || null
-}catch(e){
-console.log("User fetch error", e)
-}
+// Public proposal rendering does not use the authenticated user object.
+// Skipping supabase.auth.getUser() here avoids one extra network round-trip before rendering.
 
 
 // ======================
@@ -2148,7 +2142,28 @@ showProposalUnavailable("Something went wrong while loading this proposal.")
 
 }
 
-window.addEventListener("load", function(){
+// ======================
+// FAST START INIT
+// ======================
+// Start proposal data loading as soon as the DOM is ready.
+// Do not wait for cover images, Google fonts, or other page assets.
+let studioOSProposalInitStarted = false
+
+function startStudioOSProposalFastInit(){
+if(studioOSProposalInitStarted){
+return
+}
+
+studioOSProposalInitStarted = true
 ensureStudioOSProposalBackButton()
 loadProposal()
-})
+}
+
+if(document.readyState === "loading"){
+document.addEventListener("DOMContentLoaded", startStudioOSProposalFastInit, { once:true })
+}else{
+startStudioOSProposalFastInit()
+}
+
+// Safety fallback only. The guard above prevents duplicate loading.
+window.addEventListener("load", startStudioOSProposalFastInit, { once:true })
