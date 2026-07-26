@@ -2034,6 +2034,7 @@ return normalizeImageUrl(window.buildMediaUrl(photo.thumbnail_key))
 return getPhotoPreviewUrl(photo)
 }
 
+
 // Guest face preview performance fix: cache normalized matched-image tokens once per scan result.
 const MATCHED_IMAGE_LOOKUP_CACHE = new WeakMap()
 
@@ -2044,7 +2045,6 @@ const cleanValue = normalizeImageUrl(value)
 if(!cleanValue) return
 
 const candidates = new Set()
-
 candidates.add(cleanValue)
 
 const pathOnly = cleanValue
@@ -2095,7 +2095,6 @@ return MATCHED_IMAGE_LOOKUP_CACHE.get(matchedImages)
 }
 
 const tokens = new Set()
-
 matchedImages.forEach(value=>{
 addImageMatchTokensToSet(tokens, value)
 })
@@ -2123,19 +2122,10 @@ return false
 }
 
 function isMatchedImage(imgUrl, matchedImages){
-
 if(!matchedImages || matchedImages.size === 0) return false
 
 const lookup = getMatchedImageLookup(matchedImages)
 return imageValueMatchesLookup(imgUrl, lookup)
-}
-
-if(cleanPath && cleanMatchPath && (cleanUrl.endsWith(cleanMatchPath) || cleanMatch.endsWith(cleanPath))){
-return true
-}
-}
-
-return false
 }
 
 function getSafeFileName(url, fallback = "photo.jpg"){
@@ -2600,6 +2590,7 @@ photo?.thumb_url ||
 photo?.preview_url
 )
 }
+
 
 function getTransparentImagePlaceholder(){
 return "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%3E%3Crect%20width='16'%20height='16'%20fill='%23111827'/%3E%3C/svg%3E"
