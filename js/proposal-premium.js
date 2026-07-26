@@ -1030,4 +1030,27 @@ setPremiumPdfButtonState(false)
 
 }
 
-window.addEventListener("load", loadPremiumProposal)
+// ======================
+// FAST START INIT
+// ======================
+// Start proposal data loading as soon as the DOM is ready.
+// Do not wait for cover images, Google fonts, or other page assets.
+let studioOSPremiumProposalInitStarted = false
+
+function startStudioOSPremiumProposalFastInit(){
+if(studioOSPremiumProposalInitStarted){
+return
+}
+
+studioOSPremiumProposalInitStarted = true
+loadPremiumProposal()
+}
+
+if(document.readyState === "loading"){
+document.addEventListener("DOMContentLoaded", startStudioOSPremiumProposalFastInit, { once:true })
+}else{
+startStudioOSPremiumProposalFastInit()
+}
+
+// Safety fallback only. The guard above prevents duplicate loading.
+window.addEventListener("load", startStudioOSPremiumProposalFastInit, { once:true })
