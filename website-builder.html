@@ -2481,38 +2481,7 @@ reject(new Error(description))
 
 razorpayInstance.open()
 })
-},
-modal: {
-escape: true,
-ondismiss: function(){
-if(!paymentHandled){
-reject(new Error("Payment cancelled. Template is still locked."))
 }
-}
-},
-prefill: {
-name: siteNameInput.value.trim() || undefined,
-contact: sitePhoneInput.value.trim() || undefined
-},
-notes: {
-purchase_type: "template",
-template_id: String(templateId),
-template_name: templateMeta.name
-},
-theme: {
-color: "#4f46e5"
-}
-})
-
-razorpayInstance.on("payment.failed", function(response){
-const description = response?.error?.description || "Payment failed. Please try again."
-reject(new Error(description))
-})
-
-razorpayInstance.open()
-})
-}
-
 async function continuePendingTemplateCheckout(){
 if(!pendingTemplateCheckout){
 return
